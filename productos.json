@@ -1,0 +1,3579 @@
+[
+  {
+    "codigo": "N0247",
+    "nombre_corto": "LLAVERO SILICONA CRYBABY",
+    "descripcion_larga": "Llavero de silicona con dise�o de personaje \"Crybaby\".",
+    "precio": 1992.2,
+    "categoria": "Accesorios / Juguetes"
+  },
+  {
+    "codigo": "N0248",
+    "nombre_corto": "LLAVERO SILICONA LABUBU",
+    "descripcion_larga": "Llavero de silicona con dise�o de personaje \"Labubu\".",
+    "precio": 2100.0,
+    "categoria": "Accesorios / Juguetes"
+  },
+  {
+    "codigo": "N0249",
+    "nombre_corto": "LLLAVERO SILICONA CAPYBARA",
+    "descripcion_larga": "Llavero de silicona con dise�o de capibara (Capybara).",
+    "precio": 2100.0,
+    "categoria": "Accesorios / Juguetes"
+  },
+  {
+    "codigo": "N0278",
+    "nombre_corto": "MOCHILA BANDOLERA",
+    "descripcion_larga": "Mochila de un solo hombro (bandolera o cruzada). Compacta y con m�ltiples bolsillos.",
+    "precio": 4676.0,
+    "categoria": "Accesorios / Mochilas"
+  },
+  {
+    "codigo": "N0279",
+    "nombre_corto": "MOCHILA CAMUFLADA",
+    "descripcion_larga": "Mochila de tama�o medio con dise�o de camuflaje. Ideal para uso diario o actividades al aire libre.",
+    "precio": 19854.8,
+    "categoria": "Accesorios / Mochilas"
+  },
+  {
+    "codigo": "N0280",
+    "nombre_corto": "MOCHILA IMPERMEABLE",
+    "descripcion_larga": "Mochila con material resistente al agua (impermeable). Protege el contenido de la lluvia.",
+    "precio": 13988.8,
+    "categoria": "Accesorios / Mochilas"
+  },
+  {
+    "codigo": "N0281",
+    "nombre_corto": "MOCHILA REFORZADA",
+    "descripcion_larga": "Mochila de gran capacidad con costuras y tiras reforzadas. Ideal para transportar mucho peso (ej. notebooks).",
+    "precio": 17502.8,
+    "categoria": "Accesorios / Mochilas"
+  },
+  {
+    "codigo": "N0246",
+    "nombre_corto": "LLAVERO GANCHO PERILLA",
+    "descripcion_larga": "Llavero con gancho tipo perilla o mosquet�n. Pr�ctico para colgar llaves.",
+    "precio": 407.4,
+    "categoria": "Accesorios / Varios"
+  },
+  {
+    "codigo": "N0047",
+    "nombre_corto": "BOLSO DE MANO",
+    "descripcion_larga": "Bolso de mano o cartera de dise�o moderno. Ideal para uso diario, con compartimentos amplios y cierre de seguridad.",
+    "precio": 8619.8,
+    "categoria": "Accesorios / Viajes"
+  },
+  {
+    "codigo": "N0457",
+    "nombre_corto": "STEREO FRENTE FIJO",
+    "descripcion_larga": "Est�reo o radio para auto con frente no extra�ble (fijo). Con USB, Bluetooth y radio FM.",
+    "precio": 21177.8,
+    "categoria": "Accesorios Vehiculares / Audio"
+  },
+  {
+    "codigo": "N0489",
+    "nombre_corto": "TRANSMISOR PARA AUTO",
+    "descripcion_larga": "Transmisor FM con Bluetooth que se conecta al encendedor. Permite reproducir m�sica del celular en la radio del auto y funciona como cargador USB/manos libres.",
+    "precio": 3467.8,
+    "categoria": "Accesorios Vehiculares / Audio"
+  },
+  {
+    "codigo": "N0097",
+    "nombre_corto": "CARGADOR AUTO SMART OUTPUT 3.1A CAR53005",
+    "descripcion_larga": "Cargador para auto con doble puerto USB y tecnolog�a Smart Output que distribuye la carga �ptima. Salida total de 3.1 Amperios.",
+    "precio": 6220.2,
+    "categoria": "Accesorios Vehiculares / Carga"
+  },
+  {
+    "codigo": "N0098",
+    "nombre_corto": "CARGADOR AUTO USB + TIPO C",
+    "descripcion_larga": "Cargador de coche con puerto USB est�ndar y puerto Tipo C. Ideal para cargar diferentes dispositivos en el veh�culo.",
+    "precio": 4544.4,
+    "categoria": "Accesorios Vehiculares / Carga"
+  },
+  {
+    "codigo": "N0237",
+    "nombre_corto": "LINGA DE REMOLQUE TIRAR 4X4,3 PULGADAS POR 5 M",
+    "descripcion_larga": "Linga o correa de remolque para veh�culos 4x4. Resistencia alta, 3 pulgadas de ancho por 5 metros de largo.",
+    "precio": 15927.8,
+    "categoria": "Accesorios Vehiculares / Cargas"
+  },
+  {
+    "codigo": "N0187",
+    "nombre_corto": "HOLDER REJILLA REFORZADO",
+    "descripcion_larga": "Soporte para celular de auto que se engancha en la rejilla de ventilaci�n. Modelo reforzado y de agarre fuerte.",
+    "precio": 2416.4,
+    "categoria": "Accesorios Vehiculares / Coche"
+  },
+  {
+    "codigo": "N0061",
+    "nombre_corto": "CABLE PASACORRIENTE 500 AMPERES",
+    "descripcion_larga": "Cable pasacorriente (puente) para bater�a de auto, con capacidad de 500 Amperes. Ideal para veh�culos grandes o di�sel.",
+    "precio": 6892.2,
+    "categoria": "Accesorios Vehiculares / Electricidad"
+  },
+  {
+    "codigo": "N0122",
+    "nombre_corto": "COMPRESOR DE AIRE GOODYEAR 12 V REFORZADO CON LUZ",
+    "descripcion_larga": "Compresor de aire port�til de 12V para veh�culos, marca GOODYEAR. Modelo reforzado con man�metro e incluye linterna.",
+    "precio": 37493.4,
+    "categoria": "Accesorios Vehiculares / Herramientas"
+  },
+  {
+    "codigo": "N0069",
+    "nombre_corto": "CADENA PARA MOTO",
+    "descripcion_larga": "Cadena de seguridad de acero reforzado para motocicletas. Larga y resistente, para asegurar la moto a un punto fijo.",
+    "precio": 9738.4,
+    "categoria": "Accesorios Vehiculares / Moto"
+  },
+  {
+    "codigo": "N0088",
+    "nombre_corto": "CANDADO FRENO DE DISCO CON ALARMA",
+    "descripcion_larga": "Candado espec�fico para freno de disco de motocicletas o bicicletas, con sensor de movimiento y alarma integrada.",
+    "precio": 15216.6,
+    "categoria": "Accesorios Vehiculares / Moto"
+  },
+  {
+    "codigo": "N0173",
+    "nombre_corto": "GUANTE CORTO GIANT",
+    "descripcion_larga": "Guantes de moto o bicicleta, modelo corto, de la marca GIANT. Acolchados y con buen agarre.",
+    "precio": 4362.4,
+    "categoria": "Accesorios Vehiculares / Moto"
+  },
+  {
+    "codigo": "N0174",
+    "nombre_corto": "GUANTE IMPERMEABLE",
+    "descripcion_larga": "Guantes con material exterior impermeable, ideales para d�as de lluvia o trabajo en ambientes h�medos.",
+    "precio": 7712.6,
+    "categoria": "Accesorios Vehiculares / Moto"
+  },
+  {
+    "codigo": "N0175",
+    "nombre_corto": "GUANTE LARGO GIGANT",
+    "descripcion_larga": "Guantes de moto o bicicleta, modelo largo (cubren la mu�eca), de la marca GIGANT.",
+    "precio": 6168.4,
+    "categoria": "Accesorios Vehiculares / Moto"
+  },
+  {
+    "codigo": "N0176",
+    "nombre_corto": "GUANTE PARA MOTO",
+    "descripcion_larga": "Guantes de protecci�n para motociclista. Reforzados en nudillos y palma para mayor seguridad.",
+    "precio": 7382.2,
+    "categoria": "Accesorios Vehiculares / Moto"
+  },
+  {
+    "codigo": "N0177",
+    "nombre_corto": "GUANTE PARA MOTO REFORZADO",
+    "descripcion_larga": "Guantes de motociclismo de alta calidad y muy reforzados. Con protecciones r�gidas para mayor seguridad.",
+    "precio": 7757.4,
+    "categoria": "Accesorios Vehiculares / Moto"
+  },
+  {
+    "codigo": "N0186",
+    "nombre_corto": "HOLDER PARA MOTO",
+    "descripcion_larga": "Soporte o \"holder\" para celular dise�ado para montarse en el manubrio de la motocicleta. Ajuste firme y seguro.",
+    "precio": 4817.4,
+    "categoria": "Accesorios Vehiculares / Moto"
+  },
+  {
+    "codigo": "N0349",
+    "nombre_corto": "PISTOLA DE PINTURA",
+    "descripcion_larga": "Pistola el�ctrica o neum�tica para pulverizar pintura. Ideal para trabajos de bricolaje.",
+    "precio": 28252.0,
+    "categoria": "Accesorios Vehiculares / Soporte"
+  },
+  {
+    "codigo": "N0453",
+    "nombre_corto": "SOPORTE CELULAR MAGN�TICO PARA AUTO HD71050",
+    "descripcion_larga": "Soporte magn�tico para celular, dise�ado para auto. Modelo HD71050.",
+    "precio": 2133.6,
+    "categoria": "Accesorios Vehiculares / Soporte"
+  },
+  {
+    "codigo": "N0208",
+    "nombre_corto": "KIT INFLADOR 5 PICOS",
+    "descripcion_larga": "Kit de 5 picos o adaptadores para infladores, compatible con pelotas, colchones, bicicletas, etc.",
+    "precio": 715.4,
+    "categoria": "Accesorios Vehiculares / Varios"
+  },
+  {
+    "codigo": "N0335",
+    "nombre_corto": "PERCHAS MET�LICAS X 10 UNIDADES",
+    "descripcion_larga": "Pack de 10 perchas de metal resistentes. Ahorran espacio.",
+    "precio": 3327.8,
+    "categoria": "Accesorios Vehiculares / Varios"
+  },
+  {
+    "codigo": "N0090",
+    "nombre_corto": "CANILLA FLEXIBLE 302A ORYX",
+    "descripcion_larga": "Grifo o canilla monocomando de cocina de la marca ORYX. Dise�o flexible (cuello de cisne) y modelo 302A.",
+    "precio": 21928.2,
+    "categoria": "Ba�o y Cocina / Grifer�a"
+  },
+  {
+    "codigo": "N0091",
+    "nombre_corto": "CANILLA FLEXIBLE DAROS Y RORY",
+    "descripcion_larga": "Grifo o canilla monocomando de cocina, modelo de cuello flexible. Marca DAROS y RORY.",
+    "precio": 28000.0,
+    "categoria": "Ba�o y Cocina / Grifer�a"
+  },
+  {
+    "codigo": "N0092",
+    "nombre_corto": "CANILLA FLEXIBLE RORY",
+    "descripcion_larga": "Grifo o canilla monocomando de cocina con pico flexible de la marca RORY. Permite orientar el chorro de agua f�cilmente.",
+    "precio": 19574.8,
+    "categoria": "Ba�o y Cocina / Grifer�a"
+  },
+  {
+    "codigo": "N0093",
+    "nombre_corto": "CANILLA GRIFO FLEXIBLE RORY",
+    "descripcion_larga": "Grifo de cocina con doble funci�n (chorro/ducha) y cuello flexible de la marca RORY. Mezcladora monocomando.",
+    "precio": 23654.4,
+    "categoria": "Ba�o y Cocina / Grifer�a"
+  },
+  {
+    "codigo": "N0094",
+    "nombre_corto": "CANILLA MONOCOMANDO BA�O 260A ORYX",
+    "descripcion_larga": "Grifo monocomando para ba�o (lavatorio) de la marca ORYX. Modelo 260A, con dise�o cromado y elegante.",
+    "precio": 16429.0,
+    "categoria": "Ba�o y Cocina / Grifer�a"
+  },
+  {
+    "codigo": "N0095",
+    "nombre_corto": "CANILLA MONOCOMANDO COCINA 289 A",
+    "descripcion_larga": "Grifo monocomando para bacha de cocina. Modelo 289A, con pico alto y giratorio.",
+    "precio": 14071.4,
+    "categoria": "Ba�o y Cocina / Grifer�a"
+  },
+  {
+    "codigo": "N0096",
+    "nombre_corto": "CANILLA MONOCOMANDO CUADRADA GRIS 264A",
+    "descripcion_larga": "Grifo monocomando de dise�o moderno y cuadrado, color gris/negro. Modelo 264A, para lavatorio o cocina.",
+    "precio": 20043.8,
+    "categoria": "Ba�o y Cocina / Grifer�a"
+  },
+  {
+    "codigo": "N0145",
+    "nombre_corto": "DUCHA CUADRADA",
+    "descripcion_larga": "Cabezal de ducha de dise�o cuadrado. Proporciona una ca�da de agua amplia y moderna.",
+    "precio": 5103.0,
+    "categoria": "Ba�o y Cocina / Grifer�a"
+  },
+  {
+    "codigo": "N0146",
+    "nombre_corto": "DUCHA REDONDA",
+    "descripcion_larga": "Cabezal de ducha de dise�o redondo cl�sico. Flujo de agua uniforme y f�cil de instalar.",
+    "precio": 4951.8,
+    "categoria": "Ba�o y Cocina / Grifer�a"
+  },
+  {
+    "codigo": "N0148",
+    "nombre_corto": "ENCENDEDOR LINTERNA",
+    "descripcion_larga": "Encendedor de gas o recargable que tambi�n incorpora una peque�a linterna LED.",
+    "precio": 4403.0,
+    "categoria": "Camping / Iluminaci�n"
+  },
+  {
+    "codigo": "N0238",
+    "nombre_corto": "LINTERNA CAMPING",
+    "descripcion_larga": "Linterna de mano o farol con dise�o espec�fico para camping. Proporciona luz ambiental y es resistente.",
+    "precio": 9987.6,
+    "categoria": "Camping / Iluminaci�n"
+  },
+  {
+    "codigo": "N0239",
+    "nombre_corto": "LINTERNA MINERA 5 LED",
+    "descripcion_larga": "Linterna de cabeza (minera) con 5 focos LED. Ajustable y recargable, ideal para trabajos o actividades nocturnas.",
+    "precio": 3084.2,
+    "categoria": "Camping / Iluminaci�n"
+  },
+  {
+    "codigo": "N0240",
+    "nombre_corto": "LINTERNA MINERA CON SENSOR",
+    "descripcion_larga": "Linterna frontal (minera) con sensor de movimiento. Se enciende y apaga con un gesto de la mano.",
+    "precio": 5486.6,
+    "categoria": "Camping / Iluminaci�n"
+  },
+  {
+    "codigo": "N0241",
+    "nombre_corto": "LINTERNA MINERA HIGH POWER",
+    "descripcion_larga": "Linterna de cabeza (minera) de alta potencia (High Power) y gran alcance. Recargable por USB.",
+    "precio": 3078.6,
+    "categoria": "Camping / Iluminaci�n"
+  },
+  {
+    "codigo": "N0242",
+    "nombre_corto": "LINTERNA MINI CAMUFLADA METAL",
+    "descripcion_larga": "Linterna de mano compacta, cuerpo de metal y dise�o camuflado. Peque�a y resistente.",
+    "precio": 3991.4,
+    "categoria": "Camping / Iluminaci�n"
+  },
+  {
+    "codigo": "N0243",
+    "nombre_corto": "LINTERNA MINI LLAVERO",
+    "descripcion_larga": "Linterna muy peque�a que se puede usar como llavero. Luz LED b�sica.",
+    "precio": 2431.8,
+    "categoria": "Camping / Iluminaci�n"
+  },
+  {
+    "codigo": "N0244",
+    "nombre_corto": "LINTERNA MINI NEGRA PLASTICO",
+    "descripcion_larga": "Linterna compacta de pl�stico color negro. Ideal para llevar en el bolsillo o cartera.",
+    "precio": 2994.6,
+    "categoria": "Camping / Iluminaci�n"
+  },
+  {
+    "codigo": "N0472",
+    "nombre_corto": "TERMO Y TAZAS CAMPING",
+    "descripcion_larga": "Set de termo y tazas de camping, con aislamiento al vac�o (doble pared) para mantener bebidas fr�as o calientes por largo tiempo. Ideal para exteriores.",
+    "precio": 12832.4,
+    "categoria": "Camping / Utensilios"
+  },
+  {
+    "codigo": "N0150",
+    "nombre_corto": "ENCENDEDOR RECARGABLE PARA COCINA",
+    "descripcion_larga": "Encendedor de cocina largo y recargable por USB o gas. Ideal para encender hornallas o velas.",
+    "precio": 5786.2,
+    "categoria": "Cocina / Accesorios"
+  },
+  {
+    "codigo": "N0272",
+    "nombre_corto": "MATE CLASICO",
+    "descripcion_larga": "Mate tradicional (ej. de calabaza forrada o de pl�stico resistente).",
+    "precio": 5980.8,
+    "categoria": "Cocina / Bazar"
+  },
+  {
+    "codigo": "N0418",
+    "nombre_corto": "SET COCINA 7 PCS",
+    "descripcion_larga": "Set de 7 piezas de utensilios de cocina (ej. cucharas, esp�tulas) o de ollas y sartenes.",
+    "precio": 2307.2,
+    "categoria": "Cocina / Bazar"
+  },
+  {
+    "codigo": "N0420",
+    "nombre_corto": "SET CUBIERTO X3",
+    "descripcion_larga": "Set de 3 cubiertos (cuchillo, tenedor y cuchara) port�tiles o de viaje.",
+    "precio": 0.0,
+    "categoria": "Cocina / Bazar"
+  },
+  {
+    "codigo": "N0468",
+    "nombre_corto": "TERMO BALA TRILLIUM",
+    "descripcion_larga": "Termo de acero inoxidable con forma de bala, marca TRILLIUM. Conserva temperatura por horas.",
+    "precio": 13049.4,
+    "categoria": "Cocina / Bazar"
+  },
+  {
+    "codigo": "N0469",
+    "nombre_corto": "TERMO CON TERMOMETRO DIGITAL",
+    "descripcion_larga": "Termo de acero inoxidable con tapa que incluye una pantalla LED con term�metro digital.",
+    "precio": 8836.8,
+    "categoria": "Cocina / Bazar"
+  },
+  {
+    "codigo": "N0470",
+    "nombre_corto": "TERMO PATRICK 1 LITRO",
+    "descripcion_larga": "Termo de acero inoxidable de 1 litro de la marca PATRICK.",
+    "precio": 14355.6,
+    "categoria": "Cocina / Bazar"
+  },
+  {
+    "codigo": "N0471",
+    "nombre_corto": "TERMO TRAVELER 800 ML",
+    "descripcion_larga": "Termo de viaje (Traveler) de 800 ml. Dise�o ligero y tapa antiderrame.",
+    "precio": 14383.6,
+    "categoria": "Cocina / Bazar"
+  },
+  {
+    "codigo": "N0474",
+    "nombre_corto": "TERMOS Y TAZAS",
+    "descripcion_larga": "Set de termo aislante y tazas para conservar la temperatura de las bebidas en casa o la oficina. Alternativa ecol�gica y duradera.",
+    "precio": 14140.0,
+    "categoria": "Cocina / Bazar"
+  },
+  {
+    "codigo": "N0497",
+    "nombre_corto": "VASO 3 PCS",
+    "descripcion_larga": "Set de tres vasos de diferentes tama�os o colores. Dise�o moderno, aptos para bebidas fr�as y calientes.",
+    "precio": 10068.8,
+    "categoria": "Cocina / Bazar"
+  },
+  {
+    "codigo": "N0499",
+    "nombre_corto": "VASO TERMICO 1.2 LITROS",
+    "descripcion_larga": "Vaso de gran capacidad (1.2 litros) con aislamiento t�rmico para mantener bebidas fr�as o calientes por largo tiempo.",
+    "precio": 19709.2,
+    "categoria": "Cocina / Bazar"
+  },
+  {
+    "codigo": "N0050",
+    "nombre_corto": "BOTELLA 3 PCS",
+    "descripcion_larga": "Set de 3 botellas reutilizables de diferentes tama�os. Ideal para hidrataci�n diaria, deportes o llevar bebidas.",
+    "precio": 11512.2,
+    "categoria": "Cocina / Botellas"
+  },
+  {
+    "codigo": "N0033",
+    "nombre_corto": "BALANZA DE PRESICION 500 GRAMOS",
+    "descripcion_larga": "Balanza digital de precisi�n para joyer�a, reposter�a o laboratorio. Pesa hasta 500 gramos con alta exactitud (0.01g).",
+    "precio": 6708.8,
+    "categoria": "Cocina / Medici�n"
+  },
+  {
+    "codigo": "N0328",
+    "nombre_corto": "PELOTA DE VOLEY BONGHUA",
+    "descripcion_larga": "Pelota de voley de la marca BONGHUA. Cosida a m�quina o vulcanizada.",
+    "precio": 5397.0,
+    "categoria": "Cocina / Medici�n"
+  },
+  {
+    "codigo": "N0329",
+    "nombre_corto": "PELOTA NUMERO 5",
+    "descripcion_larga": "Pelota de f�tbol o voley de tama�o N� 5 (gen�rica).",
+    "precio": 6704.6,
+    "categoria": "Cocina / Medici�n"
+  },
+  {
+    "codigo": "N0345",
+    "nombre_corto": "PILOTO PARA LLUVIA",
+    "descripcion_larga": "Piloto o impermeable de PVC o poli�ster para protecci�n contra la lluvia.",
+    "precio": 13547.8,
+    "categoria": "Cocina / Medici�n"
+  },
+  {
+    "codigo": "N0287",
+    "nombre_corto": "ORGANIZADOR DE CUBIERTOS",
+    "descripcion_larga": "Bandeja o divisor de caj�n para organizar cubiertos (cuchillos, tenedores, cucharas).",
+    "precio": 10291.4,
+    "categoria": "Cocina / Organizaci�n"
+  },
+  {
+    "codigo": "N0006",
+    "nombre_corto": "AFILADOR DE CUCHILLOS",
+    "descripcion_larga": "Afilador Manual esencial para la Hogar/Cocina. Dise�ado con m�ltiples etapas de afilado (grueso y fino) para restaurar el filo de cualquier cuchillo de cocina de forma segura y profesional en segundos.",
+    "precio": 1960.0,
+    "categoria": "Cocina / Utensilios"
+  },
+  {
+    "codigo": "N0032",
+    "nombre_corto": "BALANZA CON BOWL",
+    "descripcion_larga": "Balanza de cocina digital con bowl extra�ble, perfecta para pesar ingredientes s�lidos y l�quidos. Funci�n TARA y alta precisi�n.",
+    "precio": 5623.8,
+    "categoria": "Cocina / Utensilios"
+  },
+  {
+    "codigo": "N0040",
+    "nombre_corto": "BATERIA 3 PCS",
+    "descripcion_larga": "Set de 3 piezas de bater�a de cocina de aluminio o acero (cacerolas/sartenes). Ideal para equipar una cocina b�sica.",
+    "precio": 61212.2,
+    "categoria": "Cocina / Utensilios"
+  },
+  {
+    "codigo": "N0041",
+    "nombre_corto": "BATERIA 4 PCS",
+    "descripcion_larga": "Set de 4 piezas de bater�a de cocina de alta calidad (cacerolas, ollas o sartenes). Incluye tapas y mangos resistentes.",
+    "precio": 81788.0,
+    "categoria": "Cocina / Utensilios"
+  },
+  {
+    "codigo": "N0138",
+    "nombre_corto": "DESTAPADOR 3 EN 1",
+    "descripcion_larga": "Herramienta multifunci�n 3 en 1: destapador de botellas, abrelatas y/o sacacorchos.",
+    "precio": 1101.8,
+    "categoria": "Cocina / Utensilios"
+  },
+  {
+    "codigo": "N0152",
+    "nombre_corto": "ESCURRIDOR DE PLATOS",
+    "descripcion_larga": "Escurridor de platos de mesa de pl�stico o metal. Capacidad para platos, vasos y cubiertos.",
+    "precio": 6798.4,
+    "categoria": "Cocina / Utensilios"
+  },
+  {
+    "codigo": "N0257",
+    "nombre_corto": "MANDOLINA RALLADOR Y PICADOR",
+    "descripcion_larga": "Set de mandolina de cocina con accesorios intercambiables para rallar, picar y cortar verduras en diferentes formas.",
+    "precio": 16856.0,
+    "categoria": "Cocina / Utensilios"
+  },
+  {
+    "codigo": "N0444",
+    "nombre_corto": "SET SARTENES TRES PIEZAS",
+    "descripcion_larga": "Set de 3 sartenes de diferentes tama�os. Superficie antiadherente.",
+    "precio": 37553.6,
+    "categoria": "Cocina / Utensilios"
+  },
+  {
+    "codigo": "N0505",
+    "nombre_corto": "SET ASADOR CUCHILLO+TENEDOR",
+    "descripcion_larga": "Set de dos piezas esenciales para el asado: cuchillo de chef o parrillero y tenedor trinchante. Acero inoxidable de calidad.",
+    "precio": 5976.6,
+    "categoria": "Cocina / Utensilios"
+  },
+  {
+    "codigo": "N0108",
+    "nombre_corto": "CEPILLO ENGOMADO 7X24X4CM",
+    "descripcion_larga": "Cepillo de pelo engomado de tama�o 7x24x4cm. P�as flexibles para desenredar sin tirones.",
+    "precio": 2354.8,
+    "categoria": "Cuidado Personal / Accesorios"
+  },
+  {
+    "codigo": "N0109",
+    "nombre_corto": "CEPILLO ENGOMADO CON ESPEJO IG2012",
+    "descripcion_larga": "Cepillo de pelo engomado que incluye un espejo en la parte posterior. Modelo IG2012, pr�ctico para llevar.",
+    "precio": 2823.8,
+    "categoria": "Cuidado Personal / Accesorios"
+  },
+  {
+    "codigo": "N0153",
+    "nombre_corto": "ESPEJO 7 PULGADAS COM�N",
+    "descripcion_larga": "Espejo de aumento de mesa de 7 pulgadas de di�metro. Sin iluminaci�n, con base para soporte.",
+    "precio": 2345.0,
+    "categoria": "Cuidado Personal / Espejos"
+  },
+  {
+    "codigo": "N0154",
+    "nombre_corto": "ESPEJO LED GRANDE REDONDO ESP91048",
+    "descripcion_larga": "Espejo de maquillaje de mesa, grande y redondo, con iluminaci�n LED regulable. Modelo ESP91048.",
+    "precio": 23774.8,
+    "categoria": "Cuidado Personal / Espejos"
+  },
+  {
+    "codigo": "N0155",
+    "nombre_corto": "ESPEJO RECTANGULAR CHICO CON LED",
+    "descripcion_larga": "Espejo de maquillaje rectangular, compacto, con luz LED integrada. Ideal para viaje o tocador.",
+    "precio": 6493.2,
+    "categoria": "Cuidado Personal / Espejos"
+  },
+  {
+    "codigo": "N0156",
+    "nombre_corto": "ESPEJO RECTANGULAR CON LUZ",
+    "descripcion_larga": "Espejo de mesa rectangular con iluminaci�n LED alrededor. Perfecto para aplicar maquillaje con precisi�n.",
+    "precio": 10060.4,
+    "categoria": "Cuidado Personal / Espejos"
+  },
+  {
+    "codigo": "N0157",
+    "nombre_corto": "ESPEJO RECTANGULAR LED CON ZOOM ESP-91049",
+    "descripcion_larga": "Espejo de mesa rectangular con luz LED y funci�n de aumento (zoom). Modelo ESP-91049.",
+    "precio": 15484.0,
+    "categoria": "Cuidado Personal / Espejos"
+  },
+  {
+    "codigo": "N0158",
+    "nombre_corto": "ESPEJO REDONDO CON LUZ",
+    "descripcion_larga": "Espejo de mesa redondo con iluminaci�n LED. Funciona a pilas o USB.",
+    "precio": 6574.4,
+    "categoria": "Cuidado Personal / Espejos"
+  },
+  {
+    "codigo": "N0159",
+    "nombre_corto": "ESPEJO REDONDO CON LUZ Y ZOOM",
+    "descripcion_larga": "Espejo de mesa redondo con luz LED y aumento (zoom) de un lado. Ideal para detalles.",
+    "precio": 9016.0,
+    "categoria": "Cuidado Personal / Espejos"
+  },
+  {
+    "codigo": "N0160",
+    "nombre_corto": "ESPEJO REDONDO CON LUZ Y ZOOM SUONO",
+    "descripcion_larga": "Espejo de maquillaje redondo de la marca SUONO. Incluye luz LED y funci�n de aumento (zoom).",
+    "precio": 8307.6,
+    "categoria": "Cuidado Personal / Espejos"
+  },
+  {
+    "codigo": "N0161",
+    "nombre_corto": "ESPEJO REDONDO LIGHTED",
+    "descripcion_larga": "Espejo de mesa con luz LED (Lighted) de dise�o moderno y elegante.",
+    "precio": 7334.6,
+    "categoria": "Cuidado Personal / Espejos"
+  },
+  {
+    "codigo": "N0364",
+    "nombre_corto": "PLANCHITA DE PELO TITANIUM",
+    "descripcion_larga": "Planchita alisadora de pelo con placas de Titanio. Calentamiento r�pido y alto rendimiento profesional.",
+    "precio": 16438.8,
+    "categoria": "Cuidado Personal / Estilismo"
+  },
+  {
+    "codigo": "N0005",
+    "nombre_corto": "AFEITADORA OGAAN",
+    "descripcion_larga": "Afeitadora El�ctrica de la marca OGAAN para un Cuidado Personal superior. Su sistema de corte avanzado proporciona un afeitado c�modo y al ras. Es Recargable, ofreciendo total libertad de movimiento sin depender de cables.",
+    "precio": 14809.2,
+    "categoria": "Cuidado Personal / Estilismo"
+  },
+  {
+    "codigo": "N0111",
+    "nombre_corto": "CEPILLO SECADOR",
+    "descripcion_larga": "Cepillo el�ctrico 2 en 1 que seca y moldea el cabello al mismo tiempo. Combina la potencia de un secador con el volumen de un cepillo.",
+    "precio": 17959.2,
+    "categoria": "Cuidado Personal / Estilismo"
+  },
+  {
+    "codigo": "N0133",
+    "nombre_corto": "CORTADORA DE PELO STARDOM",
+    "descripcion_larga": "M�quina cortadora de pelo y barba de la marca STARDOM. Recargable, ideal para uso dom�stico o semi-profesional.",
+    "precio": 19814.2,
+    "categoria": "Cuidado Personal / Estilismo"
+  },
+  {
+    "codigo": "N0134",
+    "nombre_corto": "CORTADORA DE PELO T9 CON VISOR",
+    "descripcion_larga": "M�quina de corte de pelo T9 con pantalla digital (visor) para indicar la bater�a. Uso profesional (trimmer).",
+    "precio": 9454.2,
+    "categoria": "Cuidado Personal / Estilismo"
+  },
+  {
+    "codigo": "N0135",
+    "nombre_corto": "CORTADORA VINTAGE T9",
+    "descripcion_larga": "M�quina de corte de pelo tipo 'trimmer' profesional T9 de dise�o vintage (met�lico). Cuchillas de precisi�n.",
+    "precio": 5758.2,
+    "categoria": "Cuidado Personal / Estilismo"
+  },
+  {
+    "codigo": "N0342",
+    "nombre_corto": "PILA AAA ORYX X 4 UNIDADES",
+    "descripcion_larga": "Pack de 4 pilas alcalinas AAA de la marca ORYX.",
+    "precio": 740.6,
+    "categoria": "Cuidado Personal / Estilismo"
+  },
+  {
+    "codigo": "N0343",
+    "nombre_corto": "PILA RECARGABLE AA+",
+    "descripcion_larga": "Pila recargable AA de alta capacidad (etiqueta \"+\").",
+    "precio": 6330.8,
+    "categoria": "Cuidado Personal / Estilismo"
+  },
+  {
+    "codigo": "N0446",
+    "nombre_corto": "SET TINTURA 2 PCS",
+    "descripcion_larga": "Set de 2 piezas para te�ir el cabello (ej. bol y pincel).",
+    "precio": 1395.8,
+    "categoria": "Cuidado Personal / Estilismo"
+  },
+  {
+    "codigo": "N0165",
+    "nombre_corto": "FAJA REDUCTORA MUSCULOSA",
+    "descripcion_larga": "Faja de compresi�n tipo musculosa o chaleco. Ayuda a sudar y moldear la figura durante el ejercicio.",
+    "precio": 4236.4,
+    "categoria": "Cuidado Personal / Indumentaria"
+  },
+  {
+    "codigo": "N0057",
+    "nombre_corto": "CABINA DE U�AS 186 WATTS",
+    "descripcion_larga": "L�mpara de u�as profesional de alta potencia (186 Watts) con tecnolog�a UV/LED. Secado r�pido para esmaltes semipermanentes y gel.",
+    "precio": 23835.0,
+    "categoria": "Cuidado Personal / Manicura"
+  },
+  {
+    "codigo": "N0058",
+    "nombre_corto": "CABINA DE U�AS 36 WATTS",
+    "descripcion_larga": "L�mpara de u�as UV/LED de 36 Watts, ideal para uso dom�stico o principiantes. Curado eficiente de esmaltes.",
+    "precio": 8811.6,
+    "categoria": "Cuidado Personal / Manicura"
+  },
+  {
+    "codigo": "N0059",
+    "nombre_corto": "CABINA DE U�AS 54 WATTS",
+    "descripcion_larga": "L�mpara de u�as UV/LED de 54 Watts. Potencia media, sensor autom�tico y temporizador para manicura y pedicura.",
+    "precio": 23249.8,
+    "categoria": "Cuidado Personal / Manicura"
+  },
+  {
+    "codigo": "N0484",
+    "nombre_corto": "TORNO ELECTRICO",
+    "descripcion_larga": "Mini torno el�ctrico con fresas para manicur�a, pedicur�a y podolog�a. Velocidad regulable y dise�o liviano para uso personal o inicial.",
+    "precio": 9427.6,
+    "categoria": "Cuidado Personal / Manicura"
+  },
+  {
+    "codigo": "N0485",
+    "nombre_corto": "TORNO ELECTRICO PROFESIONAL",
+    "descripcion_larga": "Torno de alta potencia y bajo ruido para uso profesional en est�tica de u�as. Alto rango de RPM para trabajos continuos y de precisi�n.",
+    "precio": 22262.8,
+    "categoria": "Cuidado Personal / Manicura"
+  },
+  {
+    "codigo": "N0268",
+    "nombre_corto": "MASAJEADOR CERVICAL KANJI",
+    "descripcion_larga": "Masajeador el�ctrico cervical de la marca KANJI. Dise�o ergon�mico para cuello y hombros.",
+    "precio": 36331.4,
+    "categoria": "Cuidado Personal / Masaje"
+  },
+  {
+    "codigo": "N0269",
+    "nombre_corto": "MASAJEADOR CERVICAL SUONO",
+    "descripcion_larga": "Masajeador el�ctrico cervical de la marca SUONO. Con funci�n de calor y diferentes modos de masaje.",
+    "precio": 0.0,
+    "categoria": "Cuidado Personal / Masaje"
+  },
+  {
+    "codigo": "N0270",
+    "nombre_corto": "MASAJEADOR MUSCULAR",
+    "descripcion_larga": "Pistola de masaje de percusi�n para alivio muscular. Incluye varios cabezales y niveles de intensidad.",
+    "precio": 6599.6,
+    "categoria": "Cuidado Personal / Masaje"
+  },
+  {
+    "codigo": "N0034",
+    "nombre_corto": "BALANZA PERSONAL 180 KG S/M",
+    "descripcion_larga": "Balanza de ba�o digital personal con capacidad de hasta 180 kg. Plataforma de vidrio templado, encendido/apagado autom�tico.",
+    "precio": 11363.8,
+    "categoria": "Cuidado Personal / Salud"
+  },
+  {
+    "codigo": "N0035",
+    "nombre_corto": "BALANZA PERSONAL 180KG",
+    "descripcion_larga": "Balanza digital de peso corporal con plataforma de vidrio templado, mide hasta 180 kg. Incluye medidor de temperatura ambiente.",
+    "precio": 9713.2,
+    "categoria": "Cuidado Personal / Salud"
+  },
+  {
+    "codigo": "N0036",
+    "nombre_corto": "BALANZA PERSONAL BT",
+    "descripcion_larga": "Balanza inteligente de ba�o con conectividad Bluetooth. Permite sincronizar y rastrear datos de peso y composici�n corporal (IMC) en una APP.",
+    "precio": 14572.6,
+    "categoria": "Cuidado Personal / Salud"
+  },
+  {
+    "codigo": "N0037",
+    "nombre_corto": "BALANZA PERSONAL ORYX",
+    "descripcion_larga": "Balanza de ba�o personal de la marca ORYX. Dise�o moderno con plataforma de vidrio, gran pantalla LCD para f�cil lectura, hasta 180 kg.",
+    "precio": 9660.0,
+    "categoria": "Cuidado Personal / Salud"
+  },
+  {
+    "codigo": "N0285",
+    "nombre_corto": "NEBULIZADOR PORTATIL",
+    "descripcion_larga": "Nebulizador ultras�nico port�til y de mano. Silencioso, ideal para viajes o uso fuera de casa.",
+    "precio": 24662.4,
+    "categoria": "Cuidado Personal / Salud"
+  },
+  {
+    "codigo": "N0330",
+    "nombre_corto": "PELOTA PLASTISOL NEON",
+    "descripcion_larga": "Pelota peque�a de plastisol (pl�stico blando) con colores fl�or o ne�n.",
+    "precio": 704.2,
+    "categoria": "Cuidado Personal / Salud"
+  },
+  {
+    "codigo": "N0331",
+    "nombre_corto": "PELOTA SINCE NUMERO 5",
+    "descripcion_larga": "Pelota de f�tbol o voley de la marca SINCE, tama�o N� 5.",
+    "precio": 8101.8,
+    "categoria": "Cuidado Personal / Salud"
+  },
+  {
+    "codigo": "N0332",
+    "nombre_corto": "PELUCHE CAPYBARA",
+    "descripcion_larga": "Juguete de peluche con forma de capibara (Capybara). Suave y de tama�o mediano.",
+    "precio": 8695.4,
+    "categoria": "Cuidado Personal / Salud"
+  },
+  {
+    "codigo": "N0333",
+    "nombre_corto": "PENDRIVE 64GB KINGSTON",
+    "descripcion_larga": "Pendrive o memoria USB de 64 Gigabytes de la marca Kingston. Alta velocidad de lectura y escritura.",
+    "precio": 9567.6,
+    "categoria": "Cuidado Personal / Salud"
+  },
+  {
+    "codigo": "N0473",
+    "nombre_corto": "TERMOMETRO BEBE",
+    "descripcion_larga": "Term�metro digital de alta precisi�n para beb�s. Ofrece medici�n r�pida, segura y con pantalla retroiluminada para uso nocturno.",
+    "precio": 1925.0,
+    "categoria": "Cuidado Personal / Salud"
+  },
+  {
+    "codigo": "N0038",
+    "nombre_corto": "BANDERA ARGENTINA 90X60",
+    "descripcion_larga": "Bandera de Argentina de 90x60 cm, ideal para decoraci�n, eventos deportivos o conmemoraciones. Material resistente.",
+    "precio": 1629.6,
+    "categoria": "Decoraci�n / Varios"
+  },
+  {
+    "codigo": "N0112",
+    "nombre_corto": "CHALECO FLOTADOR 60 CM",
+    "descripcion_larga": "Chaleco flotador inflable de 60 cm para ni�os. Proporciona seguridad y ayuda en el aprendizaje de la nataci�n.",
+    "precio": 4516.4,
+    "categoria": "Deportes / Acu�ticos"
+  },
+  {
+    "codigo": "N0104",
+    "nombre_corto": "CARPA PARA CUATRO PERSONAS",
+    "descripcion_larga": "Carpa de camping con capacidad para cuatro personas. F�cil de armar, resistente al agua y con buena ventilaci�n.",
+    "precio": 30387.0,
+    "categoria": "Deportes / Camping"
+  },
+  {
+    "codigo": "N0068",
+    "nombre_corto": "CADENA PARA BICI NEGRA",
+    "descripcion_larga": "Cadena de seguridad con forro textil color negro para bicicletas. Protege contra robos con un buen nivel de seguridad.",
+    "precio": 3319.4,
+    "categoria": "Deportes / Ciclismo"
+  },
+  {
+    "codigo": "N0184",
+    "nombre_corto": "HOLDER FUNDA PARA BICI",
+    "descripcion_larga": "Soporte o funda protectora para celular que se monta en el manubrio de la bicicleta. Impermeable y con pantalla t�ctil.",
+    "precio": 6360.2,
+    "categoria": "Deportes / Ciclismo"
+  },
+  {
+    "codigo": "N0193",
+    "nombre_corto": "INFLADOR MULTICOLOR PARA BICI",
+    "descripcion_larga": "Inflador de aire port�til para bicicletas, disponible en varios colores. Con picos para diferentes v�lvulas.",
+    "precio": 3712.8,
+    "categoria": "Deportes / Ciclismo"
+  },
+  {
+    "codigo": "N0194",
+    "nombre_corto": "INFLADOR PARA BICI",
+    "descripcion_larga": "Inflador de aire port�til o de pie para bicicleta. Cuerpo de metal o pl�stico resistente.",
+    "precio": 3714.2,
+    "categoria": "Deportes / Ciclismo"
+  },
+  {
+    "codigo": "N0250",
+    "nombre_corto": "LUZ DE BICI CON BOCINA",
+    "descripcion_larga": "Luz frontal para bicicleta que tambi�n incluye una bocina el�ctrica o sirena. Recargable por USB.",
+    "precio": 6008.8,
+    "categoria": "Deportes / Ciclismo"
+  },
+  {
+    "codigo": "N0251",
+    "nombre_corto": "LUZ DE BICI RECARGABLE",
+    "descripcion_larga": "Luz trasera o frontal para bicicleta, recargable por USB. Aumenta la visibilidad.",
+    "precio": 2223.2,
+    "categoria": "Deportes / Ciclismo"
+  },
+  {
+    "codigo": "N0375",
+    "nombre_corto": "PROYECTOR GALAXIA",
+    "descripcion_larga": "Proyector de luz LED que crea un efecto de nebulosa o galaxia en el ambiente.",
+    "precio": 19031.6,
+    "categoria": "Deportes / Ciclismo"
+  },
+  {
+    "codigo": "N0051",
+    "nombre_corto": "BOTELLA SPORT 750 ML",
+    "descripcion_larga": "Botella deportiva de 750 ml, con material resistente y tapa antiderrame. Perfecta para gimnasio, bicicleta o actividades al aire libre.",
+    "precio": 13914.6,
+    "categoria": "Deportes / Hidrataci�n"
+  },
+  {
+    "codigo": "N0419",
+    "nombre_corto": "SET CONSTRUCCION 5 PCS",
+    "descripcion_larga": "Set de 5 herramientas de construcci�n de juguete para ni�os (ej. martillo, destornillador).",
+    "precio": 2562.0,
+    "categoria": "Deportes / Hidrataci�n"
+  },
+  {
+    "codigo": "N0282",
+    "nombre_corto": "MONOPATIN GRAFFITI 40 KG",
+    "descripcion_larga": "Monopat�n plegable con dise�o estilo graffiti. Capacidad de carga de hasta 40 kg.",
+    "precio": 34519.8,
+    "categoria": "Deportes / Movilidad"
+  },
+  {
+    "codigo": "N0319",
+    "nombre_corto": "PATINETA (MIINI LONGBOARD)",
+    "descripcion_larga": "Patineta corta (mini longboard o cruiser). Ideal para transporte urbano y maniobras.",
+    "precio": 29229.2,
+    "categoria": "Deportes / Movilidad"
+  },
+  {
+    "codigo": "N0209",
+    "nombre_corto": "KIT PROTECCION 6 PIEZAS",
+    "descripcion_larga": "Kit de protecci�n para deportes (ej. skate, bici) que incluye 6 piezas: rodilleras, coderas y mu�equeras.",
+    "precio": 2833.6,
+    "categoria": "Deportes / Protecci�n"
+  },
+  {
+    "codigo": "N0055",
+    "nombre_corto": "CABEZAL ADAPTADOR ENCHUFE",
+    "descripcion_larga": "Adaptador de enchufe universal para viajes o conversor de tomas. Permite conectar dispositivos con diferentes tipos de clavijas.",
+    "precio": 581.0,
+    "categoria": "Electricidad / Adaptadores"
+  },
+  {
+    "codigo": "N0412",
+    "nombre_corto": "SECADOR DE PELO HT 2026",
+    "descripcion_larga": "Secador de pelo, modelo HT 2026. Dise�o compacto para viaje.",
+    "precio": 15246.0,
+    "categoria": "Electricidad / Componentes"
+  },
+  {
+    "codigo": "N0413",
+    "nombre_corto": "SECADOR DE PELO HT 9007",
+    "descripcion_larga": "Secador de pelo, modelo HT 9007. Tecnolog�a de iones o turmalina.",
+    "precio": 15246.0,
+    "categoria": "Electricidad / Componentes"
+  },
+  {
+    "codigo": "N0414",
+    "nombre_corto": "SECADOR DE PELO MINI ONICA",
+    "descripcion_larga": "Secador de pelo plegable y de tama�o mini de la marca ONICA. Ideal para viaje.",
+    "precio": 8729.0,
+    "categoria": "Electricidad / Componentes"
+  },
+  {
+    "codigo": "N0415",
+    "nombre_corto": "SELLADOR DE BOLSA",
+    "descripcion_larga": "Sellador t�rmico port�til para bolsas de pl�stico. Cierra herm�ticamente alimentos o productos.",
+    "precio": 28393.4,
+    "categoria": "Electricidad / Componentes"
+  },
+  {
+    "codigo": "N0416",
+    "nombre_corto": "SEPARADORES ADHESIVO NE�N",
+    "descripcion_larga": "Set de separadores o notas adhesivas de colores fl�or o ne�n. Para marcar p�ginas o clasificar documentos.",
+    "precio": 487.2,
+    "categoria": "Electricidad / Componentes"
+  },
+  {
+    "codigo": "N0417",
+    "nombre_corto": "SET BUCEO",
+    "descripcion_larga": "Set de buceo o snorkel que incluye m�scara/antiparras y tubo.",
+    "precio": 3551.8,
+    "categoria": "Electricidad / Componentes"
+  },
+  {
+    "codigo": "N0423",
+    "nombre_corto": "SET DE DUCHA COMPLETO P499 GRIS",
+    "descripcion_larga": "Set de ducha completo con flor, soporte y flexible. Modelo P499, color gris o negro mate.",
+    "precio": 24285.8,
+    "categoria": "Electricidad / Componentes"
+  },
+  {
+    "codigo": "N0425",
+    "nombre_corto": "SET DE LLAVES 12 PCS",
+    "descripcion_larga": "Set de 12 llaves fijas o combinadas.",
+    "precio": 17998.4,
+    "categoria": "Electricidad / Componentes"
+  },
+  {
+    "codigo": "N0426",
+    "nombre_corto": "SET DE LLAVES 216 PCS",
+    "descripcion_larga": "Malet�n completo de herramientas con 216 piezas, incluyendo llaves de tubo (tubos), puntas, y accesorios. Uso profesional.",
+    "precio": 159712.0,
+    "categoria": "Electricidad / Componentes"
+  },
+  {
+    "codigo": "N0427",
+    "nombre_corto": "SET DE MANICURA 12 PCS",
+    "descripcion_larga": "Set de manicura y pedicura con 12 piezas (corta��as, limas, tijeras, etc.) en estuche.",
+    "precio": 5336.8,
+    "categoria": "Electricidad / Componentes"
+  },
+  {
+    "codigo": "N0428",
+    "nombre_corto": "SET DE MINIPIMER HYTOSHY",
+    "descripcion_larga": "Set de minipimer (batidora de mano/inmersi�n) de la marca HYTOSHY. Incluye vaso medidor, batidor y picador.",
+    "precio": 52536.4,
+    "categoria": "Electricidad / Componentes"
+  },
+  {
+    "codigo": "N0442",
+    "nombre_corto": "SET PLACARD X3 DE LUZ C/ CONTROL BLANCO",
+    "descripcion_larga": "Pack de 3 luces LED para placard con control remoto. Color de luz blanco.",
+    "precio": 7723.8,
+    "categoria": "Electricidad / Conectividad"
+  },
+  {
+    "codigo": "N0443",
+    "nombre_corto": "SET PULSERAS PARA ARMAR",
+    "descripcion_larga": "Set de cuentas y accesorios para que los ni�os armen sus propias pulseras.",
+    "precio": 1694.0,
+    "categoria": "Electricidad / Conectividad"
+  },
+  {
+    "codigo": "N0508",
+    "nombre_corto": "ALARGUE ZAPATILLA SICILIA 1,5M",
+    "descripcion_larga": "Alargue o zapatilla el�ctrica con m�ltiples tomas de corriente y un cable de 1.5 metros de longitud. Modelo \"SICILIA\".",
+    "precio": 3470.6,
+    "categoria": "Electricidad / Conectividad"
+  },
+  {
+    "codigo": "N0166",
+    "nombre_corto": "FOCO GALPONERO 50 WATTS",
+    "descripcion_larga": "Foco LED de alta potencia (50 Watts) tipo galponero o industrial. Gran iluminaci�n para espacios amplios.",
+    "precio": 9503.2,
+    "categoria": "Electricidad / Iluminaci�n"
+  },
+  {
+    "codigo": "N0168",
+    "nombre_corto": "FOCO LED 30 WATTS GALPONERO",
+    "descripcion_larga": "Foco LED de 30 Watts tipo galponero, con alto flujo lum�nico.",
+    "precio": 5014.8,
+    "categoria": "Electricidad / Iluminaci�n"
+  },
+  {
+    "codigo": "N0170",
+    "nombre_corto": "FOCO X3 9 WATTS",
+    "descripcion_larga": "Pack de 3 focos LED individuales de 9 Watts. Rosca E27 o E14.",
+    "precio": 3560.2,
+    "categoria": "Electricidad / Iluminaci�n"
+  },
+  {
+    "codigo": "N0394",
+    "nombre_corto": "RELOJ PROYECTOR LABUBU",
+    "descripcion_larga": "Reloj digital de pulsera para ni�os que proyecta im�genes de Labubu.",
+    "precio": 6916.0,
+    "categoria": "Electricidad / Iluminaci�n"
+  },
+  {
+    "codigo": "N0011",
+    "nombre_corto": "ANAFE 2 HORNALLAS STAR VISI�N",
+    "descripcion_larga": "Electrodom�stico port�til de la marca STAR VISI�N. Posee 2 Hornallas de calor regulable, ideal para espacios reducidos, cocinas auxiliares o camping, ofreciendo cocci�n r�pida y eficiente.",
+    "precio": 29237.6,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0012",
+    "nombre_corto": "ANAFE UNA HORNALLA ORYX",
+    "descripcion_larga": "Anafe el�ctrico compacto de Electrodom�sticos de la marca ORYX. Con 1 Hornalla potente, es la soluci�n de cocci�n port�til perfecta para viajes o como soporte en la cocina diaria.",
+    "precio": 16035.6,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0042",
+    "nombre_corto": "BATIDOR DE CAF�",
+    "descripcion_larga": "Batidor espumador de leche y caf� port�til a pilas. Crea espuma cremosa para capuchinos, lattes y m�s en segundos.",
+    "precio": 0.0,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0043",
+    "nombre_corto": "BATIDORA 7 VELOCIDADES",
+    "descripcion_larga": "Batidora de mano el�ctrica con 7 niveles de velocidad. Incluye ganchos amasadores y batidores de alambre. Ideal para reposter�a.",
+    "precio": 14243.6,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0044",
+    "nombre_corto": "BATIDORA DE MANO",
+    "descripcion_larga": "Batidora de mano el�ctrica compacta y potente. Dise�ada para mezclas r�pidas y ligeras, con varios accesorios.",
+    "precio": 16280.6,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0070",
+    "nombre_corto": "CAFETERA 600ML SUONO",
+    "descripcion_larga": "Cafetera de goteo o filtro de la marca SUONO con capacidad de 600 ml (aproximadamente 4-6 tazas). Jarra de vidrio y filtro permanente.",
+    "precio": 24479.0,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0071",
+    "nombre_corto": "CAFETERA ORYX",
+    "descripcion_larga": "Cafetera el�ctrica de la marca ORYX. Modelo con jarra t�rmica y funciones programables, ideal para mantener el caf� caliente por m�s tiempo.",
+    "precio": 38575.6,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0164",
+    "nombre_corto": "EXPRIMIDOR ELECTRICO",
+    "descripcion_larga": "Exprimidor el�ctrico para c�tricos (naranjas, limones). F�cil de usar y limpiar, con jarra medidora.",
+    "precio": 17957.8,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0235",
+    "nombre_corto": "LICUADORA DEPORTIVA",
+    "descripcion_larga": "Licuadora personal o \"deportiva\" con vaso port�til. Prepara batidos y licuados directamente en el vaso para llevar.",
+    "precio": 51987.6,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0236",
+    "nombre_corto": "LICUADORA KANJI 600 W",
+    "descripcion_larga": "Licuadora de vaso tradicional de la marca KANJI con motor de 600 Watts. Jarra de vidrio o pl�stico resistente.",
+    "precio": 43338.4,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0264",
+    "nombre_corto": "M�QUINA DE DONAS",
+    "descripcion_larga": "M�quina el�ctrica para hacer donas (donuts) en casa de forma r�pida y sencilla.",
+    "precio": 42413.0,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0265",
+    "nombre_corto": "M�QUINA DE DONAS HYTOSHY",
+    "descripcion_larga": "M�quina el�ctrica para hacer donas de la marca HYTOSHY. Superficie antiadherente.",
+    "precio": 38557.4,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0284",
+    "nombre_corto": "MULTIPROCESADORA Y LICUADORA",
+    "descripcion_larga": "Electrodom�stico 2 en 1 que combina las funciones de multiprocesadora (picar, rallar) y licuadora.",
+    "precio": 94910.2,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0292",
+    "nombre_corto": "PANQUEQUERA ELECTRICA",
+    "descripcion_larga": "M�quina el�ctrica para hacer panqueques o crepes. Superficie antiadherente y control de temperatura.",
+    "precio": 25019.4,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0320",
+    "nombre_corto": "PAVA ELECTRICA COMUN KANJI",
+    "descripcion_larga": "Pava o hervidora el�ctrica tradicional de la marca KANJI. Modelo b�sico, r�pido y eficiente.",
+    "precio": 19481.0,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0321",
+    "nombre_corto": "PAVA EL�CTRICA CON CORTE",
+    "descripcion_larga": "Pava o hervidora el�ctrica con sistema de corte autom�tico al alcanzar el punto de ebullici�n.",
+    "precio": 22043.0,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0322",
+    "nombre_corto": "PAVA ELECTRICA CON CORTE STAR VISION",
+    "descripcion_larga": "Pava el�ctrica con corte autom�tico de la marca STAR VISION.",
+    "precio": 24890.6,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0323",
+    "nombre_corto": "PAVA ELECTRICA HYTOSHY",
+    "descripcion_larga": "Pava el�ctrica de la marca HYTOSHY. Modelo con indicador de temperatura o de nivel de agua.",
+    "precio": 17823.4,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0324",
+    "nombre_corto": "PAVA ELECTRICA ORYX",
+    "descripcion_larga": "Pava el�ctrica de la marca ORYX. Modelo con dise�o de acero inoxidable o pl�stico de alta resistencia.",
+    "precio": 15983.8,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0363",
+    "nombre_corto": "PLANCHITA DE PELO OSR",
+    "descripcion_larga": "Planchita alisadora de pelo de la marca OSR.",
+    "precio": 12609.8,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0433",
+    "nombre_corto": "SET DE TENEDORES TRAMONTINA",
+    "descripcion_larga": "Set de tenedores de mesa de la marca TRAMONTINA. Acero inoxidable.",
+    "precio": 5096.0,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0440",
+    "nombre_corto": "SET LLAVE CRIQUET",
+    "descripcion_larga": "Set de herramientas que incluye una llave crique (carraca) y varios tubos o puntas.",
+    "precio": 21149.8,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0441",
+    "nombre_corto": "SET PLACARD X3",
+    "descripcion_larga": "Pack de 3 luces LED para placard o armario. Se activan por contacto o sensor.",
+    "precio": 9686.6,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0487",
+    "nombre_corto": "TOSTADORA ORYX",
+    "descripcion_larga": "Tostadora el�ctrica autom�tica de la marca ORYX. Cuenta con m�ltiples niveles de tostado y funci�n de expulsi�n autom�tica del pan.",
+    "precio": 21999.6,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0501",
+    "nombre_corto": "WAFLERA ANTIADHERENTE",
+    "descripcion_larga": "Waflera el�ctrica con placas antiadherentes de f�cil limpieza. Prepara waffles crujientes de forma r�pida.",
+    "precio": 20868.4,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0502",
+    "nombre_corto": "WAFLERA OM",
+    "descripcion_larga": "Waflera el�ctrica de la marca OM. Dise�o compacto para preparar waffles individuales o de tama�o est�ndar.",
+    "precio": 24379.6,
+    "categoria": "Electrodom�sticos / Cocina"
+  },
+  {
+    "codigo": "N0340",
+    "nombre_corto": "PIEDRA DEPILADORA",
+    "descripcion_larga": "Piedra o cristal con superficie microabrasiva para remover el vello corporal sin dolor.",
+    "precio": 2097.2,
+    "categoria": "Electrodom�sticos / Hogar"
+  },
+  {
+    "codigo": "N0341",
+    "nombre_corto": "PILA AA OM X 4 UNIDADES",
+    "descripcion_larga": "Pack de 4 pilas alcalinas AA de la marca OM.",
+    "precio": 704.2,
+    "categoria": "Electrodom�sticos / Hogar"
+  },
+  {
+    "codigo": "N0171",
+    "nombre_corto": "FUNDA SUMERGIBLE PARA CELULAR",
+    "descripcion_larga": "Funda protectora impermeable y sumergible para celular. Ideal para usar en playa, piscina o bajo la lluvia.",
+    "precio": 806.4,
+    "categoria": "Electr�nica / Accesorios"
+  },
+  {
+    "codigo": "N0361",
+    "nombre_corto": "PLANCHA Y ONDULADOR MINI",
+    "descripcion_larga": "Planchita y onduladora de pelo port�til y de tama�o mini. Ideal para viaje o retoques.",
+    "precio": 9303.0,
+    "categoria": "Electr�nica / Accesorios"
+  },
+  {
+    "codigo": "N0274",
+    "nombre_corto": "MEMORIA 128 GB",
+    "descripcion_larga": "Tarjeta de memoria microSD o pendrive con capacidad de 128 Gigabytes. Para almacenamiento de datos.",
+    "precio": 17934.0,
+    "categoria": "Electr�nica / Almacenamiento"
+  },
+  {
+    "codigo": "N0275",
+    "nombre_corto": "MEMORIA 64 GB",
+    "descripcion_larga": "Tarjeta de memoria microSD o pendrive con capacidad de 64 Gigabytes.",
+    "precio": 9884.0,
+    "categoria": "Electr�nica / Almacenamiento"
+  },
+  {
+    "codigo": "N0325",
+    "nombre_corto": "PELOTA COLOR NUMERO 5",
+    "descripcion_larga": "Pelota de f�tbol o voley de tama�o reglamentario N� 5, de colores variados.",
+    "precio": 7648.2,
+    "categoria": "Electr�nica / Almacenamiento"
+  },
+  {
+    "codigo": "N0326",
+    "nombre_corto": "PELOTA DE BASQUET NUMERO 7",
+    "descripcion_larga": "Pelota de baloncesto (b�squet) de tama�o reglamentario N� 7. Material de goma o cuero sint�tico.",
+    "precio": 6129.2,
+    "categoria": "Electr�nica / Almacenamiento"
+  },
+  {
+    "codigo": "N0399",
+    "nombre_corto": "RI�ONERA DEPORTIVA",
+    "descripcion_larga": "Ri�onera o fanny pack de material deportivo. Ajustable y con compartimento para celular.",
+    "precio": 2135.0,
+    "categoria": "Electr�nica / Almacenamiento"
+  },
+  {
+    "codigo": "N0400",
+    "nombre_corto": "RODILLO ESPONJA 4 PULGADAS",
+    "descripcion_larga": "Rodillo de pintura de esponja de 4 pulgadas. Ideal para superficies lisas y acabados.",
+    "precio": 1509.2,
+    "categoria": "Electr�nica / Almacenamiento"
+  },
+  {
+    "codigo": "N0016",
+    "nombre_corto": "AURICULAR AKG",
+    "descripcion_larga": "Auriculares de alta calidad de sonido, dise�ados a menudo como in-ear o de estudio. Frecuentemente utilizados como manos libres con conector USB-C o 3.5mm.",
+    "precio": 1815.8,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0017",
+    "nombre_corto": "AURICULAR AU11011",
+    "descripcion_larga": "Auriculares econ�micos con cable (3.5 mm) y dise�o in-ear ergon�mico. Incluyen micr�fono HD y bot�n para contestar llamadas. Ideal para uso diario y reventa.",
+    "precio": 1173.2,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0018",
+    "nombre_corto": "AURICULAR AU11013",
+    "descripcion_larga": "Auricular manos libres con cable de la l�nea Audio, con micr�fono incorporado. Dise�o ultraligero y c�modo para llamadas y m�sica.",
+    "precio": 1033.2,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0019",
+    "nombre_corto": "AURICULAR AU16004",
+    "descripcion_larga": "Auricular inal�mbrico de alta fidelidad con conectividad Bluetooth 5.0. Ofrece sonido est�reo y bater�a de larga duraci�n.",
+    "precio": 8603.0,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0021",
+    "nombre_corto": "AURICULAR GATITO",
+    "descripcion_larga": "Auriculares de diadema inal�mbricos con orejas de gato luminosas (LED RGB). Ideales para ni�os o uso tem�tico, con sonido de calidad y micr�fono.",
+    "precio": 6167.0,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0022",
+    "nombre_corto": "AURICULAR I12",
+    "descripcion_larga": "Auriculares in-ear TWS (True Wireless Stereo) modelo I12. Conexi�n Bluetooth r�pida, estuche de carga compacto y control t�ctil.",
+    "precio": 6301.4,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0023",
+    "nombre_corto": "AURICULAR INAL�MBRICO A6S",
+    "descripcion_larga": "Auriculares in-ear inal�mbricos A6S, compactos y deportivos. Ideales para hacer ejercicio, con resistencia al sudor y estuche de carga LED.",
+    "precio": 5712.0,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0024",
+    "nombre_corto": "AURICULAR INALAMBRICO CON PANTALLA (APP)",
+    "descripcion_larga": "Auriculares TWS con estuche de carga avanzado que incluye una pantalla digital para monitorear la bater�a y control por aplicaci�n m�vil (APP).",
+    "precio": 16332.4,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0025",
+    "nombre_corto": "AURICULAR INALAMBRICO OREJA GATO",
+    "descripcion_larga": "Auriculares tipo vincha, inal�mbricos y plegables, con dise�o de orejas de gato y luces LED. Conexi�n Bluetooth y ranura para tarjeta SD.",
+    "precio": 5553.8,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0026",
+    "nombre_corto": "AURICULAR INALAMBRICO TWS F9",
+    "descripcion_larga": "Auriculares TWS F9 de alta autonom�a con power bank integrado en el estuche. Ideal para uso prolongado y carga de emergencia del m�vil.",
+    "precio": 6227.2,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0027",
+    "nombre_corto": "AURICULAR JS18",
+    "descripcion_larga": "Auricular TWS (True Wireless Stereo) de dise�o ergon�mico, ofrece un sonido claro y estable. Estuche de carga con dise�o moderno.",
+    "precio": 8708.0,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0028",
+    "nombre_corto": "AURICULAR NOGA VINCHA",
+    "descripcion_larga": "Auriculares de vincha de la marca NOGA. Dise�o c�modo y ajustable, con sonido est�reo para m�sica y multimedia.",
+    "precio": 5028.8,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0029",
+    "nombre_corto": "AURICULAR P47",
+    "descripcion_larga": "Auriculares de diadema inal�mbricos plegables modelo P47. Conectividad Bluetooth, radio FM, ranura SD y opci�n de cable auxiliar.",
+    "precio": 5164.6,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0030",
+    "nombre_corto": "AURICULAR P47 SUONO",
+    "descripcion_larga": "Auriculares de diadema plegables P47, versi�n SUONO. Ofrecen un audio n�tido, conexi�n inal�mbrica (Bluetooth) y dise�o ligero.",
+    "precio": 5234.6,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0273",
+    "nombre_corto": "MEGAFONO",
+    "descripcion_larga": "Meg�fono port�til con funci�n de sirena y grabaci�n. Ideal para eventos, manifestaciones o anuncios.",
+    "precio": 21056.0,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0276",
+    "nombre_corto": "MICROFONO INALAMBRICO",
+    "descripcion_larga": "Micr�fono inal�mbrico (de mano o solapa) con receptor. Ideal para karaoke, discursos o presentaciones.",
+    "precio": 15580.6,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0277",
+    "nombre_corto": "MICROFONO KARAOKE",
+    "descripcion_larga": "Micr�fono con parlante Bluetooth integrado. Permite cantar y reproducir m�sica al mismo tiempo (Karaoke).",
+    "precio": 7775.6,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0294",
+    "nombre_corto": "PARLANTE 1202",
+    "descripcion_larga": "Parlante o altavoz Bluetooth, modelo 1202. Port�til y recargable.",
+    "precio": 5850.6,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0295",
+    "nombre_corto": "PARLANTE 2 PULGADAS GTS 1468",
+    "descripcion_larga": "Parlante port�til con woofer de 2 pulgadas, modelo GTS 1468. Conexi�n Bluetooth.",
+    "precio": 6266.4,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0296",
+    "nombre_corto": "PARLANTE 2 PULGADAS GTS 1732",
+    "descripcion_larga": "Parlante port�til con woofer de 2 pulgadas, modelo GTS 1732. Con iluminaci�n LED.",
+    "precio": 6109.6,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0297",
+    "nombre_corto": "PARLANTE 2 PULGADAS KTS-1680",
+    "descripcion_larga": "Parlante port�til KTS-1680 con woofer de 2 pulgadas. Sonido claro y buena autonom�a.",
+    "precio": 9051.0,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0298",
+    "nombre_corto": "PARLANTE 3 PULGADAS 1210",
+    "descripcion_larga": "Parlante port�til con woofer de 3 pulgadas, modelo 1210. M�s potencia de audio.",
+    "precio": 8216.6,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0299",
+    "nombre_corto": "PARLANTE 3 PULGADAS 1346",
+    "descripcion_larga": "Parlante port�til con woofer de 3 pulgadas, modelo 1346.",
+    "precio": 6161.4,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0300",
+    "nombre_corto": "PARLANTE 3 PULGADAS 1942",
+    "descripcion_larga": "Parlante port�til con woofer de 3 pulgadas, modelo 1942.",
+    "precio": 7043.4,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0301",
+    "nombre_corto": "PARLANTE 3 PULGADAS 1945",
+    "descripcion_larga": "Parlante port�til con woofer de 3 pulgadas, modelo 1945.",
+    "precio": 7614.6,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0302",
+    "nombre_corto": "PARLANTE 3 PULGADAS GTS 1941",
+    "descripcion_larga": "Parlante port�til GTS 1941 con woofer de 3 pulgadas.",
+    "precio": 9520.0,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0303",
+    "nombre_corto": "PARLANTE 3 PULGADAS KTS-2006",
+    "descripcion_larga": "Parlante port�til KTS-2006 con woofer de 3 pulgadas.",
+    "precio": 6139.0,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0304",
+    "nombre_corto": "PARLANTE 3 PULGADAS KTX 1998",
+    "descripcion_larga": "Parlante port�til KTX 1998 con woofer de 3 pulgadas.",
+    "precio": 7191.8,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0305",
+    "nombre_corto": "PARLANTE 4 PULGADAS GTS 1922",
+    "descripcion_larga": "Parlante port�til con woofer de 4 pulgadas, modelo GTS 1922. Mayor volumen y graves.",
+    "precio": 8883.0,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0306",
+    "nombre_corto": "PARLANTE 4 PULGADAS GTS 2009 CON 2 MICROFONOS",
+    "descripcion_larga": "Parlante port�til con woofer de 4 pulgadas, modelo GTS 2009. Incluye 2 micr�fonos inal�mbricos para karaoke.",
+    "precio": 17432.8,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0307",
+    "nombre_corto": "PARLANTE 4 PULGADAS KTS 1338",
+    "descripcion_larga": "Parlante port�til KTS 1338 con woofer de 4 pulgadas.",
+    "precio": 8380.4,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0308",
+    "nombre_corto": "PARLANTE 4 PULGADAS KTS-1916",
+    "descripcion_larga": "Parlante port�til KTS-1916 con woofer de 4 pulgadas.",
+    "precio": 13479.2,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0309",
+    "nombre_corto": "PARLANTE 4X2",
+    "descripcion_larga": "Parlante vertical o tipo columna con dos woofers de 4 pulgadas. Mayor potencia y efectos de luz.",
+    "precio": 21161.0,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0310",
+    "nombre_corto": "PARLANTE 8 PULGADAS 1248",
+    "descripcion_larga": "Parlante tipo torre o bafle port�til con woofer de 8 pulgadas, modelo 1248. Potencia para fiestas.",
+    "precio": 35459.2,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0311",
+    "nombre_corto": "PARLANTE 8 PULGADAS 1520",
+    "descripcion_larga": "Parlante tipo torre o bafle port�til con woofer de 8 pulgadas, modelo 1520.",
+    "precio": 25033.4,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0312",
+    "nombre_corto": "PARLANTE 8 PULGADAS CANCUN",
+    "descripcion_larga": "Parlante tipo torre o bafle port�til de 8 pulgadas, modelo CANCUN.",
+    "precio": 39804.8,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0313",
+    "nombre_corto": "PARLANTE G",
+    "descripcion_larga": "Parlante con dise�o de letra G (parlante velador G63). Incluye luz LED, cargador inal�mbrico y alarma.",
+    "precio": 20021.4,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0314",
+    "nombre_corto": "PARLANTE MINI RGB PARA COLGAR",
+    "descripcion_larga": "Parlante Bluetooth mini, con iluminaci�n RGB y gancho para colgar. Ultraport�til.",
+    "precio": 6203.4,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0315",
+    "nombre_corto": "PARLANTE NG 675",
+    "descripcion_larga": "Parlante port�til de la marca NOGA, modelo NG 675.",
+    "precio": 148692.6,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0316",
+    "nombre_corto": "PARLANTE NOGA 673",
+    "descripcion_larga": "Parlante port�til de la marca NOGA, modelo 673.",
+    "precio": 44451.4,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0317",
+    "nombre_corto": "PARLANTE VELADOR G 63",
+    "descripcion_larga": "Parlante Bluetooth que funciona como velador (luz LED) y cargador inal�mbrico (similar al N0221).",
+    "precio": 16284.8,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0318",
+    "nombre_corto": "PARLANTES 6.5 PULGADAS GTS 1203",
+    "descripcion_larga": "Parlante port�til con woofer de 6.5 pulgadas, modelo GTS 1203. Equilibrio entre potencia y portabilidad.",
+    "precio": 25320.4,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0362",
+    "nombre_corto": "PLANCHITA DE PELO OM",
+    "descripcion_larga": "Planchita alisadora de pelo de la marca OM. Placas de cer�mica o turmalina.",
+    "precio": 12446.0,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0498",
+    "nombre_corto": "VASO PARLANTE STANLEY",
+    "descripcion_larga": "Vaso t�rmico que incorpora un parlante Bluetooth de alta calidad en su base. Ideal para llevar tu m�sica y bebida a todos lados.",
+    "precio": 19804.4,
+    "categoria": "Electr�nica / Audio"
+  },
+  {
+    "codigo": "N0079",
+    "nombre_corto": "C�MARA GOPRO",
+    "descripcion_larga": "C�mara de acci�n tipo \"GoPro\". Compacta, resistente y sumergible, ideal para deportes extremos y captura de video de alta definici�n.",
+    "precio": 16984.8,
+    "categoria": "Electr�nica / C�maras"
+  },
+  {
+    "codigo": "N0003",
+    "nombre_corto": "ADAPTADOR CON 2 USB",
+    "descripcion_larga": "Cargador de pared compacto de Electr�nica/Carga. Cuenta con 2 Puertos USB para alimentar dos dispositivos al mismo tiempo (m�viles, tabletas, etc.). Su dise�o lo hace perfecto para Uso en Pared o en Viajes.",
+    "precio": 4930.8,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0054",
+    "nombre_corto": "CABEZAL 1AMP",
+    "descripcion_larga": "Cargador de pared (cabezal) USB con una salida de 1 Amperio. Ideal para la carga b�sica y segura de tel�fonos.",
+    "precio": 1142.4,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0056",
+    "nombre_corto": "CABEZAL USB + TIPO C 20 WATTS",
+    "descripcion_larga": "Cargador de pared r�pido con doble puerto: 1 USB est�ndar y 1 Tipo C, con potencia total de 20 Watts (carga r�pida PD/QC).",
+    "precio": 3186.4,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0062",
+    "nombre_corto": "CABLE UISB TIPO C TIME 3.1 (BOLSA)",
+    "descripcion_larga": "Cable de datos y carga USB Tipo C de la marca TIME. Versi�n 3.1, para transferencia r�pida de datos y carga. Se presenta en bolsa.",
+    "precio": 1029.0,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0063",
+    "nombre_corto": "CABLE USB IPHONE PUNTA METAL",
+    "descripcion_larga": "Cable de carga y datos USB para dispositivos iPhone (Lightning), con conector de punta met�lica reforzada.",
+    "precio": 1351.0,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0064",
+    "nombre_corto": "CABLE USB IPHONE TYME",
+    "descripcion_larga": "Cable de carga y datos Lightning (iPhone) de la marca TYME. Dise�o resistente para uso diario.",
+    "precio": 1621.2,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0065",
+    "nombre_corto": "CABLE USB V8 3.1 TYME BOLSA",
+    "descripcion_larga": "Cable de carga y datos USB V8 (Micro USB) de la marca TYME. Versi�n 3.1, se presenta en bolsa.",
+    "precio": 1017.8,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0099",
+    "nombre_corto": "CARGADOR DE PILAS AA - AAA",
+    "descripcion_larga": "Cargador el�ctrico para pilas recargables, compatible con formatos AA y AAA. Indicador LED de carga.",
+    "precio": 5374.6,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0100",
+    "nombre_corto": "CARGADOR INALAMBRICO 160W",
+    "descripcion_larga": "Base de carga inal�mbrica de alta potencia (160 Watts). Permite cargar r�pidamente varios dispositivos (tel�fonos, relojes) compatibles.",
+    "precio": 30983.4,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0101",
+    "nombre_corto": "CARGADOR POWER BANK 6000 MAH",
+    "descripcion_larga": "Bater�a externa port�til (Power Bank) con capacidad de 6000 mAh. Ideal para una o dos cargas completas de smartphone.",
+    "precio": 16821.0,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0102",
+    "nombre_corto": "CARGADOR TIPO C 3.1 ORYX",
+    "descripcion_larga": "Cargador completo (cabezal + cable) USB Tipo C de la marca ORYX. Versi�n 3.1.",
+    "precio": 1976.8,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0103",
+    "nombre_corto": "CARGADOR TIPO C TMCC-818",
+    "descripcion_larga": "Cargador completo (cabezal + cable) USB Tipo C, modelo TMCC-818.",
+    "precio": 2885.4,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0163",
+    "nombre_corto": "ESTACION DE CARGA 65W USB TIPO C",
+    "descripcion_larga": "Estaci�n de carga de escritorio con m�ltiples puertos (USB y Tipo C) y una potencia total de 65W. Compatible con carga r�pida PD.",
+    "precio": 21712.6,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0373",
+    "nombre_corto": "PROYECTOR ESTRELLA Y LUNA",
+    "descripcion_larga": "L�mpara o proyector que proyecta estrellas y la luna en la pared o el techo. Ideal como luz de noche.",
+    "precio": 6307.0,
+    "categoria": "Electr�nica / Carga"
+  },
+  {
+    "codigo": "N0060",
+    "nombre_corto": "CABLE AUXILIAR REFORZADO",
+    "descripcion_larga": "Cable auxiliar de audio (3.5mm a 3.5mm) con recubrimiento trenzado o reforzado. Dise�ado para mayor durabilidad y evitar roturas.",
+    "precio": 842.8,
+    "categoria": "Electr�nica / Conectividad"
+  },
+  {
+    "codigo": "N0014",
+    "nombre_corto": "ARO DE LUZ 10 PULGADAS COM�N",
+    "descripcion_larga": "Aro de Iluminaci�n LED profesional con 10 Pulgadas de di�metro. Herramienta esencial de Electr�nica/Fotograf�a para streamers, maquilladores y creadores de contenido, asegurando luz uniforme y sin sombras.",
+    "precio": 7305.2,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0162",
+    "nombre_corto": "ESTABILIZADOR PARA CELULAR CON MICR�FONO",
+    "descripcion_larga": "Estabilizador o Gimbal para smartphone, con micr�fono incorporado. Ideal para grabar videos fluidos y con audio de calidad.",
+    "precio": 9521.4,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0291",
+    "nombre_corto": "PALO SELFIE",
+    "descripcion_larga": "Palo extensible para tomar \"selfies\" o fotos grupales. Con conexi�n Bluetooth o cable.",
+    "precio": 1939.0,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0386",
+    "nombre_corto": "RELOJ GT5",
+    "descripcion_larga": "Smartwatch o reloj inteligente modelo GT5. Con funciones de salud, deporte y notificaciones.",
+    "precio": 22353.8,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0387",
+    "nombre_corto": "RELOJ INTELIGENTE D20",
+    "descripcion_larga": "Smartwatch o reloj inteligente modelo D20. Dise�o deportivo y funciones b�sicas de monitoreo.",
+    "precio": 5957.0,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0388",
+    "nombre_corto": "RELOJ INTELIGENTE SMART WATCH NGSW17",
+    "descripcion_larga": "Smartwatch de la marca NOGA, modelo NGSW17. Compatible con Android/iOS.",
+    "precio": 29946.0,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0430",
+    "nombre_corto": "SET DE PINZAS X5",
+    "descripcion_larga": "Set de 5 pinzas de mano de diferentes tipos y tama�os.",
+    "precio": 10472.0,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0431",
+    "nombre_corto": "SET DE PRECISI�N 32 EN 1",
+    "descripcion_larga": "Set de herramientas de precisi�n con 32 puntas y mango. Para electr�nica.",
+    "precio": 3220.0,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0491",
+    "nombre_corto": "TRIPODE 2 M",
+    "descripcion_larga": "Tr�pode profesional extensible de hasta 2 metros de altura. Base estable, ideal para c�maras, luces o celulares que requieren tomas elevadas.",
+    "precio": 6343.4,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0492",
+    "nombre_corto": "TRIPODE CHICO",
+    "descripcion_larga": "Tr�pode compacto y port�til, ideal para celulares o c�maras peque�as. Perfecto para grabar videos en escritorios, viajes o superficies planas.",
+    "precio": 1155.0,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0493",
+    "nombre_corto": "TRIPODE CON FLASH",
+    "descripcion_larga": "Tr�pode compacto y port�til con luz de flash incorporada. Ideal para mejorar la iluminaci�n en fotograf�a y video.",
+    "precio": 3319.4,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0494",
+    "nombre_corto": "TRIPODE PARA CAMARA Y CELULAR",
+    "descripcion_larga": "Soporte de tr�pode universal con cabezal ajustable, compatible con c�maras fotogr�ficas y smartphones. Perfecto para tomas estables.",
+    "precio": 5534.2,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0495",
+    "nombre_corto": "TRIPODE CON LUZ LED Y MICROFONO",
+    "descripcion_larga": "Kit de tr�pode para creadores de contenido, incluye aro de luz LED y micr�fono para mejorar la calidad de audio y video.",
+    "precio": 9315.6,
+    "categoria": "Electr�nica / Fotograf�a y Video"
+  },
+  {
+    "codigo": "N0020",
+    "nombre_corto": "AURICULAR GAMER RGB",
+    "descripcion_larga": "Auriculares over-ear dise�ados para gaming, con iluminaci�n RGB din�mica y micr�fono flexible con cancelaci�n de ruido. Proporciona audio envolvente.",
+    "precio": 21186.2,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0126",
+    "nombre_corto": "CONSOLA STICK",
+    "descripcion_larga": "Consola de videojuegos retro en formato \"stick\" HDMI. Se conecta directamente a la TV y trae cientos de juegos cl�sicos preinstalados.",
+    "precio": 46047.4,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0127",
+    "nombre_corto": "CONSOLA WIRELESS 2.4 BLANCA",
+    "descripcion_larga": "Consola de videojuegos inal�mbrica (2.4 GHz) con mandos blancos. Ofrece juegos retro en un formato compacto.",
+    "precio": 53916.8,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0195",
+    "nombre_corto": "JOYSTICK PS3 S/M",
+    "descripcion_larga": "Mando o joystick inal�mbrico compatible con consola PlayStation 3 (PS3). Gen�rico (S/M - Sin Marca).",
+    "precio": 11964.4,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0196",
+    "nombre_corto": "JOYSTICK PS4 AFA EDICI�N LIMITADA",
+    "descripcion_larga": "Mando inal�mbrico para PlayStation 4 (PS4) con dise�o de la Asociaci�n del F�tbol Argentino (AFA) - Edici�n Limitada.",
+    "precio": 28183.4,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0197",
+    "nombre_corto": "JOYSTICK PS4 MIAMI MESSI",
+    "descripcion_larga": "Mando inal�mbrico para PlayStation 4 (PS4) con dise�o tem�tico de Lionel Messi en el Inter Miami.",
+    "precio": 30182.6,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0198",
+    "nombre_corto": "JOYSTICK PS4 SONY",
+    "descripcion_larga": "Mando DualShock 4 original de la marca SONY para PlayStation 4 (PS4). Alta precisi�n y calidad.",
+    "precio": 35191.8,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0234",
+    "nombre_corto": "LENTE DE REALIDAD VIRTUAL",
+    "descripcion_larga": "Lentes o gafas de realidad virtual (VR) para smartphone. Permite disfrutar de contenido 3D y 360�.",
+    "precio": 8386.0,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0346",
+    "nombre_corto": "PINZA 6 PULGADAS",
+    "descripcion_larga": "Pinza universal o de electricista de 6 pulgadas (aproximadamente 15 cm).",
+    "precio": 3180.8,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0347",
+    "nombre_corto": "PINZA DE PUNTA 6 PULGADAS",
+    "descripcion_larga": "Pinza de punta larga y fina de 6 pulgadas. Ideal para electr�nica y trabajos de precisi�n.",
+    "precio": 3376.8,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0392",
+    "nombre_corto": "RELOJ INTELIGENTE ULTRA 9 7 MALLAS",
+    "descripcion_larga": "Smartwatch de alta gama, modelo ULTRA 9, que incluye 7 mallas intercambiables y funciones avanzadas.",
+    "precio": 13889.4,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0402",
+    "nombre_corto": "ROMPECABEZAS 3D CASTILLO",
+    "descripcion_larga": "Rompecabezas tridimensional (3D) para armar un modelo de castillo.",
+    "precio": 1762.6,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0403",
+    "nombre_corto": "ROMPECABEZAS ENCASTRABLE 10PCS",
+    "descripcion_larga": "Set de 10 rompecabezas de encastre o piezas grandes, ideal para ni�os peque�os.",
+    "precio": 1716.4,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0404",
+    "nombre_corto": "ROUTER Y REPETIDOR WI-FI",
+    "descripcion_larga": "Dispositivo que funciona como router y repetidor de se�al Wi-Fi. Amplifica la cobertura.",
+    "precio": 16178.4,
+    "categoria": "Electr�nica / Gaming"
+  },
+  {
+    "codigo": "N0384",
+    "nombre_corto": "RELOJ DESPERTADOR CUBO RGB",
+    "descripcion_larga": "Reloj despertador digital con forma de cubo y funci�n de luz RGB (cambio de colores).",
+    "precio": 3544.8,
+    "categoria": "Electr�nica / Hogar"
+  },
+  {
+    "codigo": "N0385",
+    "nombre_corto": "RELOJ DIGITAL SUONO",
+    "descripcion_larga": "Reloj de mesa o escritorio digital de la marca SUONO. Muestra hora, fecha y temperatura.",
+    "precio": 25463.2,
+    "categoria": "Electr�nica / Hogar"
+  },
+  {
+    "codigo": "N0421",
+    "nombre_corto": "SET CUBIERTO X4",
+    "descripcion_larga": "Set de 4 cubiertos.",
+    "precio": 3459.4,
+    "categoria": "Electr�nica / Medici�n"
+  },
+  {
+    "codigo": "N0422",
+    "nombre_corto": "SET CUCHILLO TRAMONTINA",
+    "descripcion_larga": "Set de cuchillos de cocina de la marca TRAMONTINA. Variedad de tama�os para diferentes usos.",
+    "precio": 5096.0,
+    "categoria": "Electr�nica / Medici�n"
+  },
+  {
+    "codigo": "N0475",
+    "nombre_corto": "TESTER CHICO",
+    "descripcion_larga": "Mult�metro digital compacto de bolsillo para medir voltaje (AC/DC) y resistencia. Herramienta esencial para electr�nica b�sica y diagn�sticos r�pidos.",
+    "precio": 4320.4,
+    "categoria": "Electr�nica / Medici�n"
+  },
+  {
+    "codigo": "N0476",
+    "nombre_corto": "TESTER DIGITAL C/BUZZER NOGA DT-830D",
+    "descripcion_larga": "Mult�metro digital NOGA DT-830D. Mide Tensi�n, Corriente, Resistencia y tiene funci�n de buzzer para prueba de continuidad. Preciso y confiable.",
+    "precio": 5240.2,
+    "categoria": "Electr�nica / Medici�n"
+  },
+  {
+    "codigo": "N0477",
+    "nombre_corto": "TESTER GRANDE",
+    "descripcion_larga": "Mult�metro digital profesional, de gran formato, para mediciones avanzadas y uso intensivo. Mayor precisi�n y m�s funciones que los modelos est�ndar.",
+    "precio": 12100.2,
+    "categoria": "Electr�nica / Medici�n"
+  },
+  {
+    "codigo": "N0283",
+    "nombre_corto": "MOUSE INALAMBRICO APRO/TYME",
+    "descripcion_larga": "Mouse de ordenador inal�mbrico (2.4 GHz) de las marcas APRO o TYME. Dise�o ergon�mico.",
+    "precio": 4369.4,
+    "categoria": "Electr�nica / Perif�ricos"
+  },
+  {
+    "codigo": "N0289",
+    "nombre_corto": "PAD MOUSE",
+    "descripcion_larga": "Alfombrilla o \"pad\" para mouse. Superficie lisa para un deslizamiento preciso.",
+    "precio": 3736.6,
+    "categoria": "Electr�nica / Perif�ricos"
+  },
+  {
+    "codigo": "N0401",
+    "nombre_corto": "ROMPECABEZAS 3D AVION",
+    "descripcion_larga": "Rompecabezas tridimensional (3D) para armar un modelo de avi�n.",
+    "precio": 1762.6,
+    "categoria": "Electr�nica / Perif�ricos"
+  },
+  {
+    "codigo": "N0405",
+    "nombre_corto": "SACA PELUSA",
+    "descripcion_larga": "Quitapelusas el�ctrico o manual. Elimina pelusas y bolitas de la ropa.",
+    "precio": 5542.6,
+    "categoria": "Electr�nica / Perif�ricos"
+  },
+  {
+    "codigo": "N0406",
+    "nombre_corto": "SACA PELUSA MASCOTA",
+    "descripcion_larga": "Rodillo o cepillo especial para remover pelos de mascotas de la ropa y muebles.",
+    "precio": 6168.4,
+    "categoria": "Electr�nica / Perif�ricos"
+  },
+  {
+    "codigo": "N0407",
+    "nombre_corto": "SALVAVIDAS FLOTADOR",
+    "descripcion_larga": "Salvavidas o aro inflable cl�sico. Proporciona seguridad en el agua.",
+    "precio": 1780.8,
+    "categoria": "Electr�nica / Perif�ricos"
+  },
+  {
+    "codigo": "N0408",
+    "nombre_corto": "SANDWICHERA HYTOSHY",
+    "descripcion_larga": "Sandwichera o tostadora el�ctrica de la marca HYTOSHY. Placas antiadherentes con corte triangular.",
+    "precio": 21982.8,
+    "categoria": "Electr�nica / Perif�ricos"
+  },
+  {
+    "codigo": "N0409",
+    "nombre_corto": "SECADOR DE PELO 1800W OM",
+    "descripcion_larga": "Secador de pelo de la marca OM con potencia de 1800 Watts. Flujo de aire fuerte y varias temperaturas.",
+    "precio": 14008.4,
+    "categoria": "Electr�nica / Perif�ricos"
+  },
+  {
+    "codigo": "N0463",
+    "nombre_corto": "TECLADO MINI KEYBOARD",
+    "descripcion_larga": "Teclado compacto e inal�mbrico (Mini Keyboard). Ideal para Smart TV, tablets o gaming.",
+    "precio": 7247.8,
+    "categoria": "Electr�nica / Perif�ricos"
+  },
+  {
+    "codigo": "N0365",
+    "nombre_corto": "PLANCHITA Y ONDULADORA 2 EN 1",
+    "descripcion_larga": "Planchita de pelo que tambi�n permite crear ondas o rizos. Herramienta 2 en 1.",
+    "precio": 14023.8,
+    "categoria": "Electr�nica / Smartwatch"
+  },
+  {
+    "codigo": "N0366",
+    "nombre_corto": "POCHOCLERA ORYX",
+    "descripcion_larga": "M�quina para hacer pochoclos (palomitas de ma�z) de la marca ORYX. Funcionamiento por aire caliente o aceite.",
+    "precio": 29785.0,
+    "categoria": "Electr�nica / Smartwatch"
+  },
+  {
+    "codigo": "N0367",
+    "nombre_corto": "POCHOCLERA ORYX CARRITO",
+    "descripcion_larga": "M�quina para hacer pochoclos con dise�o de carrito retro de la marca ORYX.",
+    "precio": 36362.2,
+    "categoria": "Electr�nica / Smartwatch"
+  },
+  {
+    "codigo": "N0368",
+    "nombre_corto": "POP IT ELECTR�NICO",
+    "descripcion_larga": "Juguete sensorial Pop It en versi�n electr�nica. Con luces y sonidos, desaf�a la velocidad y memoria.",
+    "precio": 5563.6,
+    "categoria": "Electr�nica / Smartwatch"
+  },
+  {
+    "codigo": "N0369",
+    "nombre_corto": "PROTECTOR DE CABLE",
+    "descripcion_larga": "Set de protectores de silicona o pl�stico para evitar que los cables de carga (ej. celular) se rompan en los extremos.",
+    "precio": 0.0,
+    "categoria": "Electr�nica / Smartwatch"
+  },
+  {
+    "codigo": "N0370",
+    "nombre_corto": "PROTON 36 LED RGB",
+    "descripcion_larga": "Foco o luminaria tipo proyector de escenario (Par LED) con 36 LEDs y color RGB (varios colores).",
+    "precio": 19964.0,
+    "categoria": "Electr�nica / Smartwatch"
+  },
+  {
+    "codigo": "N0185",
+    "nombre_corto": "HOLDER MAGN�TICO",
+    "descripcion_larga": "Soporte para celular con base magn�tica. Ideal para auto (rejilla de ventilaci�n) o escritorio.",
+    "precio": 1517.6,
+    "categoria": "Electr�nica / Soporte"
+  },
+  {
+    "codigo": "N0350",
+    "nombre_corto": "PISTOLA DE RIEGO",
+    "descripcion_larga": "Pistola o boquilla de riego con diferentes patrones de pulverizaci�n. Ajustable para jard�n.",
+    "precio": 3285.8,
+    "categoria": "Electr�nica / Soporte"
+  },
+  {
+    "codigo": "N0389",
+    "nombre_corto": "RELOJ INTELIGENTE SMART WATCH NGSW23",
+    "descripcion_larga": "Smartwatch de la marca NOGA, modelo NGSW23.",
+    "precio": 52164.0,
+    "categoria": "Electr�nica / Soporte"
+  },
+  {
+    "codigo": "N0454",
+    "nombre_corto": "SOPORTE CELULAR TRANSPARENTE",
+    "descripcion_larga": "Soporte de escritorio o mesa para celular, de acr�lico transparente.",
+    "precio": 2311.4,
+    "categoria": "Electr�nica / Soporte"
+  },
+  {
+    "codigo": "N0455",
+    "nombre_corto": "SOPORTE VIP",
+    "descripcion_larga": "Soporte de celular premium o de dise�o exclusivo (\"VIP\").",
+    "precio": 753.2,
+    "categoria": "Electr�nica / Soporte"
+  },
+  {
+    "codigo": "N0129",
+    "nombre_corto": "CONVERTIDOR SMART NOGA ULTRA 2",
+    "descripcion_larga": "Dispositivo convertidor que transforma un televisor com�n en Smart TV. Marca NOGA, modelo ULTRA 2 (Android TV Box).",
+    "precio": 46118.8,
+    "categoria": "Electr�nica / Streaming"
+  },
+  {
+    "codigo": "N0130",
+    "nombre_corto": "CONVERTIDOR SMART TYME 48017",
+    "descripcion_larga": "Dispositivo TV Box o convertidor Smart TV de la marca TYME, modelo 48017. Permite el acceso a streaming y aplicaciones.",
+    "precio": 37206.4,
+    "categoria": "Electr�nica / Streaming"
+  },
+  {
+    "codigo": "N0374",
+    "nombre_corto": "PROYECTOR FULL HD",
+    "descripcion_larga": "Proyector de video multimedia con resoluci�n Full HD (1080p). Ideal para cine en casa o presentaciones.",
+    "precio": 116209.8,
+    "categoria": "Electr�nica / Video"
+  },
+  {
+    "codigo": "N0354",
+    "nombre_corto": "PIZARRA DISE�O INFANTIL 9 PULGADAS",
+    "descripcion_larga": "Pizarra m�gica o tablet de escritura LCD de 9 pulgadas, con dise�o especial para ni�os.",
+    "precio": 4666.2,
+    "categoria": "Electr�nica / Video"
+  },
+  {
+    "codigo": "N0355",
+    "nombre_corto": "PIZARRA M�GICA 10 PULGADAS",
+    "descripcion_larga": "Pizarra o tablet de escritura LCD de 10 pulgadas. Borrado con un bot�n.",
+    "precio": 4082.4,
+    "categoria": "Electr�nica / Video"
+  },
+  {
+    "codigo": "N0356",
+    "nombre_corto": "PIZARRA M�GICA 12 PULGADAS",
+    "descripcion_larga": "Pizarra o tablet de escritura LCD de 12 pulgadas. Mayor �rea para dibujar o escribir.",
+    "precio": 4768.4,
+    "categoria": "Electr�nica / Video"
+  },
+  {
+    "codigo": "N0046",
+    "nombre_corto": "BOLSA GRANDE HOLAGRAMADA",
+    "descripcion_larga": "Bolsa de regalo grande con dise�o hologr�fico o iridiscente. Perfecta para envolver obsequios grandes o voluminosos.",
+    "precio": 894.6,
+    "categoria": "Embalaje / Papeler�a"
+  },
+  {
+    "codigo": "N0004",
+    "nombre_corto": "ADHESIVO INSTANTANEO GEL",
+    "descripcion_larga": "Pegamento de alta resistencia de Ferreter�a. Su Formato Gel evita escurrimientos, siendo ideal para aplicaciones verticales o materiales porosos. Ofrece una fijaci�n duradera con un Secado Instant�neo.",
+    "precio": 824.6,
+    "categoria": "Ferreter�a / Adhesivos"
+  },
+  {
+    "codigo": "N0115",
+    "nombre_corto": "CINTA BIFAZ",
+    "descripcion_larga": "Rollo de cinta adhesiva doble faz (bifaz). Ideal para fijaciones invisibles, manualidades o montaje ligero.",
+    "precio": 803.6,
+    "categoria": "Ferreter�a / Adhesivos"
+  },
+  {
+    "codigo": "N0210",
+    "nombre_corto": "KIT X4 CINTA DE AMARRE T/CRIQUET 1 PULGADA POR 5 M",
+    "descripcion_larga": "Kit de 4 cintas de amarre con mecanismo crique o trinquete. 1 pulgada de ancho por 5 metros de largo. Para asegurar cargas.",
+    "precio": 29250.2,
+    "categoria": "Ferreter�a / Cargas"
+  },
+  {
+    "codigo": "N0466",
+    "nombre_corto": "TENSOR GRUESO 1,5 M",
+    "descripcion_larga": "Tensor o soga el�stica de goma gruesa de 1.5 metros. Con ganchos para sujetar objetos.",
+    "precio": 1219.4,
+    "categoria": "Ferreter�a / Cargas"
+  },
+  {
+    "codigo": "N0467",
+    "nombre_corto": "TENSOR PACK X3",
+    "descripcion_larga": "Pack de 3 tensores el�sticos de diferentes tama�os.",
+    "precio": 1744.4,
+    "categoria": "Ferreter�a / Cargas"
+  },
+  {
+    "codigo": "N0114",
+    "nombre_corto": "CINTA AISLADORA",
+    "descripcion_larga": "Rollo de cinta aisladora de PVC, esencial para trabajos el�ctricos. Alta resistencia y adhesi�n.",
+    "precio": 406.0,
+    "categoria": "Ferreter�a / Electricidad"
+  },
+  {
+    "codigo": "N0231",
+    "nombre_corto": "LAPIZ TESTER CON LUZ",
+    "descripcion_larga": "L�piz o probador de tensi�n (tester) que indica la presencia de corriente el�ctrica con una luz.",
+    "precio": 2797.2,
+    "categoria": "Ferreter�a / Electricidad"
+  },
+  {
+    "codigo": "N0232",
+    "nombre_corto": "LAPIZ TESTER DE VOLTAJE",
+    "descripcion_larga": "L�piz probador de voltaje (tester) sin contacto. Mide y alerta sobre la presencia de tensi�n el�ctrica.",
+    "precio": 2914.8,
+    "categoria": "Ferreter�a / Electricidad"
+  },
+  {
+    "codigo": "N0136",
+    "nombre_corto": "CUTTER 18MM",
+    "descripcion_larga": "Cutter o c�ter profesional con hoja retr�ctil de 18 mm. Ideal para cortar cart�n, alfombras y materiales gruesos.",
+    "precio": 525.0,
+    "categoria": "Ferreter�a / Herramientas"
+  },
+  {
+    "codigo": "N0137",
+    "nombre_corto": "CUTTER CON REPUESTO",
+    "descripcion_larga": "Cutter profesional que incluye un compartimento con hojas de repuesto. Mayor vida �til y practicidad.",
+    "precio": 1251.6,
+    "categoria": "Ferreter�a / Herramientas"
+  },
+  {
+    "codigo": "N0267",
+    "nombre_corto": "MARTILLO CHICO",
+    "descripcion_larga": "Martillo peque�o o de carpintero (ej. de u�a) de tama�o compacto.",
+    "precio": 4232.2,
+    "categoria": "Ferreter�a / Herramientas"
+  },
+  {
+    "codigo": "N0338",
+    "nombre_corto": "PERFORADORA DE PAPEL",
+    "descripcion_larga": "Perforadora de papel de escritorio, capacidad para 2 o m�s agujeros.",
+    "precio": 3473.4,
+    "categoria": "Ferreter�a / Herramientas"
+  },
+  {
+    "codigo": "N0339",
+    "nombre_corto": "PICOLORO",
+    "descripcion_larga": "Juguete o figura de pajarito (picoloro) que repite lo que escucha.",
+    "precio": 5896.8,
+    "categoria": "Ferreter�a / Herramientas"
+  },
+  {
+    "codigo": "N0376",
+    "nombre_corto": "PULSERA POP IT",
+    "descripcion_larga": "Pulsera de silicona con burbujas tipo Pop It (juguete sensorial).",
+    "precio": 546.0,
+    "categoria": "Ferreter�a / Materiales"
+  },
+  {
+    "codigo": "N0377",
+    "nombre_corto": "RALLADOR DE VERDURAS",
+    "descripcion_larga": "Rallador de cocina manual con varias caras o accesorios para rallar diferentes tipos de verduras.",
+    "precio": 13424.6,
+    "categoria": "Ferreter�a / Materiales"
+  },
+  {
+    "codigo": "N0378",
+    "nombre_corto": "RECEPTOR BLUETOOTH CAJA",
+    "descripcion_larga": "Receptor de audio Bluetooth en formato de caja o adaptador. Convierte equipos de m�sica (ej. est�reo) en inal�mbricos.",
+    "precio": 2368.8,
+    "categoria": "Ferreter�a / Materiales"
+  },
+  {
+    "codigo": "N0116",
+    "nombre_corto": "CINTA M�TRICA 5 M",
+    "descripcion_larga": "Cinta m�trica enrollable de 5 metros de longitud. Carcasa resistente, bloqueo de cinta y gancho.",
+    "precio": 2641.8,
+    "categoria": "Ferreter�a / Medici�n"
+  },
+  {
+    "codigo": "N0117",
+    "nombre_corto": "CINTA METRICA 5M LAN KAY NA004",
+    "descripcion_larga": "Cinta m�trica enrollable de 5 metros de la marca LAN KAY, modelo NA004.",
+    "precio": 1967.0,
+    "categoria": "Ferreter�a / Medici�n"
+  },
+  {
+    "codigo": "N0118",
+    "nombre_corto": "CINTA M�TRICA 7.5 M",
+    "descripcion_larga": "Cinta m�trica enrollable de 7.5 metros de longitud, ideal para mediciones m�s largas.",
+    "precio": 4274.2,
+    "categoria": "Ferreter�a / Medici�n"
+  },
+  {
+    "codigo": "N0119",
+    "nombre_corto": "CINTA M�TRICA DE 3 M",
+    "descripcion_larga": "Cinta m�trica enrollable de 3 metros de longitud. Compacta y pr�ctica para trabajos peque�os.",
+    "precio": 2154.6,
+    "categoria": "Ferreter�a / Medici�n"
+  },
+  {
+    "codigo": "N0120",
+    "nombre_corto": "CINTA TEFLON 10M",
+    "descripcion_larga": "Rollo de cinta de tefl�n (PTFE) de 10 metros para sellar roscas en tuber�as. Evita fugas de agua y gas.",
+    "precio": 1170.4,
+    "categoria": "Ferreter�a / Plomer�a"
+  },
+  {
+    "codigo": "N0379",
+    "nombre_corto": "REFLECTOR 50 WATTS EXTERIOR",
+    "descripcion_larga": "Reflector o proyector LED de 50 Watts para iluminaci�n exterior. Carcasa resistente al agua (IP65).",
+    "precio": 7663.6,
+    "categoria": "Ferreter�a / Plomer�a"
+  },
+  {
+    "codigo": "N0178",
+    "nombre_corto": "GUANTES TRABAJO",
+    "descripcion_larga": "Guantes de trabajo (ej. jardiner�a, construcci�n o mec�nica). Material resistente y buen agarre.",
+    "precio": 1465.8,
+    "categoria": "Ferreter�a / Seguridad"
+  },
+  {
+    "codigo": "N0230",
+    "nombre_corto": "L�PIZ SOLDADOR",
+    "descripcion_larga": "Soldador el�ctrico de esta�o tipo l�piz. Potencia est�ndar para trabajos de electr�nica y reparaciones.",
+    "precio": 2046.8,
+    "categoria": "Ferreter�a / Soldadura"
+  },
+  {
+    "codigo": "N0192",
+    "nombre_corto": "INFLADOR DE GLOBOS",
+    "descripcion_larga": "M�quina el�ctrica para inflar globos de l�tex o mylar. Ideal para decoraci�n de eventos y fiestas.",
+    "precio": 21525.0,
+    "categoria": "Fiestas / Accesorios"
+  },
+  {
+    "codigo": "N0172",
+    "nombre_corto": "GLOBO BURBUJA LUMINOSO",
+    "descripcion_larga": "Globo inflable transparente tipo burbuja con luces LED. Requiere inflado.",
+    "precio": 1022.0,
+    "categoria": "Fiestas / Decoraci�n"
+  },
+  {
+    "codigo": "N0045",
+    "nombre_corto": "BOLA MEDIA ESFERA",
+    "descripcion_larga": "Luz LED tipo bola de discoteca que proyecta un efecto de media esfera giratoria con m�ltiples colores. Ideal para fiestas.",
+    "precio": 15449.0,
+    "categoria": "Fiestas / Iluminaci�n"
+  },
+  {
+    "codigo": "N0167",
+    "nombre_corto": "FOCO GIRATORIO COLORES",
+    "descripcion_larga": "Foco LED con motor giratorio que proyecta patrones de colores. Ideal para crear un ambiente de fiesta (tipo bola de discoteca).",
+    "precio": 2079.0,
+    "categoria": "Fiestas / Iluminaci�n"
+  },
+  {
+    "codigo": "N0380",
+    "nombre_corto": "REFLECTOR SOLAR 20 LED",
+    "descripcion_larga": "Reflector de exterior con panel solar y 20 LEDs. Se carga durante el d�a y se enciende con sensor de movimiento.",
+    "precio": 3997.0,
+    "categoria": "Fitness / Ejercicio"
+  },
+  {
+    "codigo": "N0450",
+    "nombre_corto": "SOGA DE SALTAR CON CONTADOR",
+    "descripcion_larga": "Soga o cuerda de saltar con mango que incluye un contador digital de saltos.",
+    "precio": 2017.4,
+    "categoria": "Fitness / Ejercicio"
+  },
+  {
+    "codigo": "N0260",
+    "nombre_corto": "M�QUINA DE BOXEO INTERACTIVA MACHINE MULTICOLOR",
+    "descripcion_larga": "M�quina de boxeo de pared interactiva con luces y sonidos. Ayuda a mejorar la velocidad y coordinaci�n.",
+    "precio": 36173.2,
+    "categoria": "Fitness / Juegos"
+  },
+  {
+    "codigo": "N0261",
+    "nombre_corto": "MAQUINA DE BOXEO TARGET",
+    "descripcion_larga": "M�quina o panel de boxeo con \"targets\" (objetivos) de golpeo. Ideal para entrenamiento en casa.",
+    "precio": 36173.2,
+    "categoria": "Fitness / Juegos"
+  },
+  {
+    "codigo": "N0121",
+    "nombre_corto": "COMPRESOR CON MANGUERA ESPIRALADA QKL AI55",
+    "descripcion_larga": "Compresor de aire con manguera espiralada. Modelo QKL AI55. Ideal para inflado de neum�ticos y herramientas de aire.",
+    "precio": 56450.8,
+    "categoria": "Herramientas / Aire"
+  },
+  {
+    "codigo": "N0123",
+    "nombre_corto": "COMPRESOR EL�CTRICO",
+    "descripcion_larga": "Compresor de aire el�ctrico para inflado de neum�ticos, pelotas y otros inflables. Funciona a 220V.",
+    "precio": 56991.2,
+    "categoria": "Herramientas / Aire"
+  },
+  {
+    "codigo": "N0124",
+    "nombre_corto": "COMPRESOR ELECTRICO MK323",
+    "descripcion_larga": "Compresor de aire el�ctrico port�til, modelo MK323. Dise�o compacto y f�cil de transportar.",
+    "precio": 28252.0,
+    "categoria": "Herramientas / Aire"
+  },
+  {
+    "codigo": "N0125",
+    "nombre_corto": "COMPRESOR INAL�MBRICO USB 12V QKL AI49",
+    "descripcion_larga": "Compresor de aire inal�mbrico recargable por USB, que tambi�n puede funcionar a 12V. Modelo QKL AI49, con pantalla digital.",
+    "precio": 52382.4,
+    "categoria": "Herramientas / Aire"
+  },
+  {
+    "codigo": "N0207",
+    "nombre_corto": "KIT COMPRESOR DE AIRE",
+    "descripcion_larga": "Kit completo de compresor de aire port�til con varios accesorios (manguera, picos, man�metro).",
+    "precio": 47076.4,
+    "categoria": "Herramientas / Aire"
+  },
+  {
+    "codigo": "N0397",
+    "nombre_corto": "REMOVEDOR DE PUNTOS NEGROS",
+    "descripcion_larga": "Succionador o limpiador facial el�ctrico para remover puntos negros y limpiar poros.",
+    "precio": 8451.8,
+    "categoria": "Herramientas / El�ctricas"
+  },
+  {
+    "codigo": "N0447",
+    "nombre_corto": "SIERRA CALADORA ORYX",
+    "descripcion_larga": "Sierra caladora el�ctrica de la marca ORYX. Ideal para cortar madera, pl�stico y metal.",
+    "precio": 56306.6,
+    "categoria": "Herramientas / El�ctricas"
+  },
+  {
+    "codigo": "N0459",
+    "nombre_corto": "TALADRO INAL�MBRICO",
+    "descripcion_larga": "Taladro atornillador inal�mbrico con bater�a recargable. Ideal para trabajos dom�sticos.",
+    "precio": 79020.2,
+    "categoria": "Herramientas / El�ctricas"
+  },
+  {
+    "codigo": "N0460",
+    "nombre_corto": "TALADRO INAL�MBRICO HYTOSHY",
+    "descripcion_larga": "Taladro atornillador inal�mbrico de la marca HYTOSHY.",
+    "precio": 71692.6,
+    "categoria": "Herramientas / El�ctricas"
+  },
+  {
+    "codigo": "N0461",
+    "nombre_corto": "TALADRO ROTOMARTILLO",
+    "descripcion_larga": "Taladro percutor o rotomartillo el�ctrico. Potente para perforar mamposter�a y concreto.",
+    "precio": 92897.0,
+    "categoria": "Herramientas / El�ctricas"
+  },
+  {
+    "codigo": "N0462",
+    "nombre_corto": "TALADRO Y AMOLADORA ANGULAR",
+    "descripcion_larga": "Set de herramientas que incluye un taladro el�ctrico y una amoladora angular (o un accesorio que permite la funci�n).",
+    "precio": 94910.2,
+    "categoria": "Herramientas / El�ctricas"
+  },
+  {
+    "codigo": "N0451",
+    "nombre_corto": "SOPLADORA 3 EN 1",
+    "descripcion_larga": "M�quina sopladora de aire que tambi�n funciona como aspiradora y trituradora (3 en 1). Para jard�n u hojas.",
+    "precio": 72772.0,
+    "categoria": "Herramientas / Jard�n"
+  },
+  {
+    "codigo": "N0452",
+    "nombre_corto": "SOPLADORA INALAMBRICA",
+    "descripcion_larga": "Sopladora de aire port�til e inal�mbrica. Recargable, ideal para limpiar equipos o espacios.",
+    "precio": 58685.2,
+    "categoria": "Herramientas / Jard�n"
+  },
+  {
+    "codigo": "N0478",
+    "nombre_corto": "TIJERA DE PODAR 10 PULGADAS",
+    "descripcion_larga": "Tijera de podar robusta con cuchillas de acero de 10 pulgadas. Ideal para cortes limpios y precisos en ramas de grosor medio a grande.",
+    "precio": 3084.2,
+    "categoria": "Herramientas / Jard�n"
+  },
+  {
+    "codigo": "N0139",
+    "nombre_corto": "DESTORNILLADOR 115 PCS",
+    "descripcion_larga": "Set completo de destornilladores y puntas de precisi�n con 115 piezas. Ideal para reparaci�n de electr�nica, m�viles y ordenadores.",
+    "precio": 11065.6,
+    "categoria": "Herramientas / Kits"
+  },
+  {
+    "codigo": "N0140",
+    "nombre_corto": "DESTORNILLADOR 32 EN 1",
+    "descripcion_larga": "Set de destornilladores y puntas de precisi�n que incluye 32 piezas. Compacto y �til para trabajos peque�os.",
+    "precio": 2037.0,
+    "categoria": "Herramientas / Kits"
+  },
+  {
+    "codigo": "N0180",
+    "nombre_corto": "HIDROLAVADORA INALAMBRICA ORYX",
+    "descripcion_larga": "Hidrolavadora de alta presi�n inal�mbrica de la marca ORYX. Recargable, ideal para lavar autos, patios o herramientas sin depender de un enchufe.",
+    "precio": 55577.2,
+    "categoria": "Herramientas / Limpieza"
+  },
+  {
+    "codigo": "N0009",
+    "nombre_corto": "ALICATE 6 PULGADAS",
+    "descripcion_larga": "Herramienta Universal con Medida de 6 Pulgadas, indispensable en cualquier taller o kit de Ferreter�a. Ideal para cortar alambres, sujetar y realizar torsiones con su agarre firme y mangos antideslizantes.",
+    "precio": 1897.0,
+    "categoria": "Herramientas / Manuales"
+  },
+  {
+    "codigo": "N0141",
+    "nombre_corto": "DESTORNILLADOR 6 PCS",
+    "descripcion_larga": "Set de 6 destornilladores (planos y Phillips) de diferentes tama�os. Mangos ergon�micos y puntas imantadas.",
+    "precio": 5216.4,
+    "categoria": "Herramientas / Manuales"
+  },
+  {
+    "codigo": "N0142",
+    "nombre_corto": "DESTORNILLADOR 6 PCS AMARILLO",
+    "descripcion_larga": "Set de 6 destornilladores con mangos de color amarillo. Uso b�sico para el hogar.",
+    "precio": 3960.6,
+    "categoria": "Herramientas / Manuales"
+  },
+  {
+    "codigo": "N0143",
+    "nombre_corto": "DESTORNILLADOR 8 EN 1",
+    "descripcion_larga": "Destornillador multifunci�n que incluye 8 puntas intercambiables en el mango. Compacto y f�cil de usar.",
+    "precio": 3406.2,
+    "categoria": "Herramientas / Manuales"
+  },
+  {
+    "codigo": "N0245",
+    "nombre_corto": "LLAVE CRIQUET 1/2 PULGADAS SOLO",
+    "descripcion_larga": "Llave crique o carraca de 1/2 pulgada (cabeza). Herramienta manual para ajustar tuercas.",
+    "precio": 5237.4,
+    "categoria": "Herramientas / Manuales"
+  },
+  {
+    "codigo": "N0411",
+    "nombre_corto": "SECADOR DE PELO 2200W OM",
+    "descripcion_larga": "Secador de pelo de alta potencia de la marca OM con 2200 Watts. Secado ultra r�pido.",
+    "precio": 15229.2,
+    "categoria": "Herramientas / Manuales"
+  },
+  {
+    "codigo": "N0464",
+    "nombre_corto": "TENAZA 12 PULGADAS MEDIO CORTE",
+    "descripcion_larga": "Tenaza o alicate de corte diagonal de 12 pulgadas. Para cortar alambres gruesos o cables.",
+    "precio": 7856.8,
+    "categoria": "Herramientas / Manuales"
+  },
+  {
+    "codigo": "N0507",
+    "nombre_corto": "SET HERRAMIENTAS 104 PCS",
+    "descripcion_larga": "Completo malet�n de herramientas con 104 piezas, incluyendo destornilladores, llaves, pinzas y m�s. Esencial para el hogar o taller.",
+    "precio": 44115.4,
+    "categoria": "Herramientas / Manuales"
+  },
+  {
+    "codigo": "N0398",
+    "nombre_corto": "REPOSERA FLOTANTE",
+    "descripcion_larga": "Reposera o sill�n inflable para flotar y relajarse en la piscina.",
+    "precio": 5539.8,
+    "categoria": "Hogar / Almacenamiento"
+  },
+  {
+    "codigo": "N0424",
+    "nombre_corto": "SET DE LLAVE T 24 PIEZAS",
+    "descripcion_larga": "Set de 24 piezas de llaves de tubo o allen con mango en T. Para mec�nica o bicicleta.",
+    "precio": 3570.0,
+    "categoria": "Hogar / Ba�o"
+  },
+  {
+    "codigo": "N0077",
+    "nombre_corto": "CALOVENTOR 2000W OM",
+    "descripcion_larga": "Caloventor el�ctrico de la marca OM con potencia de 2000 Watts. Opci�n de aire caliente y fr�o, con termostato ajustable.",
+    "precio": 20132.0,
+    "categoria": "Hogar / Calefacci�n"
+  },
+  {
+    "codigo": "N0188",
+    "nombre_corto": "HUMIDIFICADOR CON CARGA USB",
+    "descripcion_larga": "Humidificador de ambiente compacto, recargable o alimentado por USB. Ayuda a mejorar la calidad del aire.",
+    "precio": 10899.0,
+    "categoria": "Hogar / Climatizaci�n"
+  },
+  {
+    "codigo": "N0189",
+    "nombre_corto": "HUMIFICADOR LUNAR",
+    "descripcion_larga": "Humidificador con dise�o de luna (l�mpara lunar) que emite vapor. Crea un ambiente relajante y decorativo.",
+    "precio": 9982.0,
+    "categoria": "Hogar / Climatizaci�n"
+  },
+  {
+    "codigo": "N0190",
+    "nombre_corto": "HUMIFICADOR LUNAR RGB",
+    "descripcion_larga": "Humidificador y l�mpara con forma de luna 3D, que incluye luces RGB de colores.",
+    "precio": 9611.0,
+    "categoria": "Hogar / Climatizaci�n"
+  },
+  {
+    "codigo": "N0191",
+    "nombre_corto": "HUMIFICADOR RGB",
+    "descripcion_larga": "Humidificador de ambiente con luz LED RGB (cambio de colores). Dise�o moderno para aromaterapia.",
+    "precio": 6302.8,
+    "categoria": "Hogar / Climatizaci�n"
+  },
+  {
+    "codigo": "N0434",
+    "nombre_corto": "SET DE TUBOS 108 PCS",
+    "descripcion_larga": "Malet�n de llaves de tubo o dados con 108 piezas. Incluye criquets y extensiones.",
+    "precio": 78085.0,
+    "categoria": "Hogar / Climatizaci�n"
+  },
+  {
+    "codigo": "N0435",
+    "nombre_corto": "SET DE TUBOS 40 PCS",
+    "descripcion_larga": "Set de llaves de tubo o dados con 40 piezas. Uso b�sico.",
+    "precio": 9045.4,
+    "categoria": "Hogar / Climatizaci�n"
+  },
+  {
+    "codigo": "N0436",
+    "nombre_corto": "SET DE TUBOS 46 PCS",
+    "descripcion_larga": "Set de llaves de tubo o dados con 46 piezas.",
+    "precio": 17281.6,
+    "categoria": "Hogar / Climatizaci�n"
+  },
+  {
+    "codigo": "N0437",
+    "nombre_corto": "SET DESTORNILLADOR GOLPE",
+    "descripcion_larga": "Set de destornilladores con cabeza reforzada para usar con golpes de martillo (destornillador de impacto manual).",
+    "precio": 5877.2,
+    "categoria": "Hogar / Climatizaci�n"
+  },
+  {
+    "codigo": "N0438",
+    "nombre_corto": "SET DOCTOR 9 PCS EN BLISTER",
+    "descripcion_larga": "Set de juguete de doctor con 9 piezas (ej. estetoscopio, jeringa). Presentado en bl�ster.",
+    "precio": 2398.2,
+    "categoria": "Hogar / Climatizaci�n"
+  },
+  {
+    "codigo": "N0439",
+    "nombre_corto": "SET DOCTOR 9 PCS EN BOLSA",
+    "descripcion_larga": "Set de juguete de doctor con 9 piezas. Presentado en bolsa.",
+    "precio": 3399.2,
+    "categoria": "Hogar / Climatizaci�n"
+  },
+  {
+    "codigo": "N0500",
+    "nombre_corto": "VENTILADOR MINI PORT�TIL MAX POWER",
+    "descripcion_larga": "Ventilador de mano o escritorio, compacto y recargable, con alta potencia (\"MAX POWER\") para un flujo de aire intenso.",
+    "precio": 5215.0,
+    "categoria": "Hogar / Climatizaci�n"
+  },
+  {
+    "codigo": "N0169",
+    "nombre_corto": "FOCO MATA MOSQUITOS",
+    "descripcion_larga": "Foco LED con luz ultravioleta que atrae y mata mosquitos e insectos. Doble funci�n: iluminaci�n y control de plagas.",
+    "precio": 4852.4,
+    "categoria": "Hogar / Control de Plagas"
+  },
+  {
+    "codigo": "N0262",
+    "nombre_corto": "M�QUINA DE COSER MINI SUONO",
+    "descripcion_larga": "M�quina de coser port�til y compacta (mini) de la marca SUONO. Ideal para reparaciones y trabajos b�sicos.",
+    "precio": 21214.2,
+    "categoria": "Hogar / Costura"
+  },
+  {
+    "codigo": "N0263",
+    "nombre_corto": "M�QUINA DE COSER MULTIFUNCIONAL",
+    "descripcion_larga": "M�quina de coser el�ctrica con m�ltiples funciones de costura, puntadas y accesorios. Para uso avanzado.",
+    "precio": 55461.0,
+    "categoria": "Hogar / Costura"
+  },
+  {
+    "codigo": "N0105",
+    "nombre_corto": "CARTEL LUMINOSO CON LETRAS",
+    "descripcion_larga": "Cartel tipo caja de luz (lightbox) con juego de letras y s�mbolos intercambiables. Ideal para decoraci�n o mensajes.",
+    "precio": 10794.0,
+    "categoria": "Hogar / Decoraci�n"
+  },
+  {
+    "codigo": "N0371",
+    "nombre_corto": "PROTON 54 LED",
+    "descripcion_larga": "Foco o luminaria tipo proyector de escenario (Par LED) con 54 LEDs. Mayor potencia lum�nica.",
+    "precio": 26615.4,
+    "categoria": "Hogar / Decoraci�n"
+  },
+  {
+    "codigo": "N0381",
+    "nombre_corto": "REFLECTOR SOLAR 4 LED",
+    "descripcion_larga": "Reflector de exterior compacto con panel solar y 4 LEDs.",
+    "precio": 8211.0,
+    "categoria": "Hogar / Decoraci�n"
+  },
+  {
+    "codigo": "N0382",
+    "nombre_corto": "REFLECTOR SOLAR BK-100",
+    "descripcion_larga": "Reflector solar de alta potencia con sensor de movimiento, modelo BK-100. Iluminaci�n aut�noma.",
+    "precio": 5110.0,
+    "categoria": "Hogar / Decoraci�n"
+  },
+  {
+    "codigo": "N0048",
+    "nombre_corto": "BOMBA DISPENSER",
+    "descripcion_larga": "Bomba el�ctrica universal para bidones de agua de 20 litros. F�cil de instalar y usar, recargable por USB.",
+    "precio": 5926.2,
+    "categoria": "Hogar / Dispensadores"
+  },
+  {
+    "codigo": "N0258",
+    "nombre_corto": "MANIJA PICAPORTE ACERO INOXIDABLE",
+    "descripcion_larga": "Manija o picaporte para puerta, fabricado en acero inoxidable. Dise�o moderno y resistente.",
+    "precio": 10383.8,
+    "categoria": "Hogar / Ferreter�a"
+  },
+  {
+    "codigo": "N0465",
+    "nombre_corto": "TENDER 3 NIVELES",
+    "descripcion_larga": "Tendedero de ropa vertical con 3 niveles o pisos de varillas. Plegable y ahorra espacio.",
+    "precio": 38558.8,
+    "categoria": "Hogar / Lavado y Secado"
+  },
+  {
+    "codigo": "N0383",
+    "nombre_corto": "REJILLA FILTRO PARA COCINA/BA�O X2",
+    "descripcion_larga": "Pack de 2 rejillas o filtros de silicona para desag�e de cocina o ba�o. Atrapa pelos y restos de comida.",
+    "precio": 397.6,
+    "categoria": "Hogar / Limpieza"
+  },
+  {
+    "codigo": "N0002",
+    "nombre_corto": "ACCESORIO PARA SECAR VIDRIOS IMANTADO",
+    "descripcion_larga": "Herramienta de Hogar/Limpieza que revoluciona el lavado de ventanas. Su Tipo Imantado permite la Funci�n Doble Cara para limpiar el interior y el exterior simult�neamente, ofreciendo seguridad y eficiencia en ventanas de dif�cil acceso.",
+    "precio": 6350.4,
+    "categoria": "Hogar / Limpieza"
+  },
+  {
+    "codigo": "N0015",
+    "nombre_corto": "ASPIRADORA 3 EN 1 RECARGABLE",
+    "descripcion_larga": "Aspiradora Recargable esencial para Accesorios de Veh�culo. Su Funci�n 3 en 1 permite aspirar s�lidos, l�quidos e incluso soplado, ofreciendo una limpieza profunda sin la molestia de los cables.",
+    "precio": 8540.0,
+    "categoria": "Hogar / Limpieza"
+  },
+  {
+    "codigo": "N0110",
+    "nombre_corto": "CEPILLO PLASTICO LIMPIA ZAPATILLAS",
+    "descripcion_larga": "Cepillo de pl�stico con cerdas duras, dise�ado espec�ficamente para limpiar zapatillas y calzado deportivo.",
+    "precio": 1155.0,
+    "categoria": "Hogar / Limpieza"
+  },
+  {
+    "codigo": "N0359",
+    "nombre_corto": "PLAFON PARA APLIQUE",
+    "descripcion_larga": "Plaf�n o base para aplique de luz de techo o pared. Dise�o simple para montar focos LED.",
+    "precio": 5474.0,
+    "categoria": "Hogar / Limpieza"
+  },
+  {
+    "codigo": "N0360",
+    "nombre_corto": "PLAFON PARA EMBUTIR",
+    "descripcion_larga": "Plaf�n o foco LED dise�ado para ser embutido o encastrado en techos falsos.",
+    "precio": 4839.8,
+    "categoria": "Hogar / Limpieza"
+  },
+  {
+    "codigo": "N0506",
+    "nombre_corto": "MOPA CON BALDE",
+    "descripcion_larga": "Sistema de limpieza con mopa giratoria y balde que incluye mecanismo de centrifugado para escurrir.",
+    "precio": 17904.6,
+    "categoria": "Hogar / Limpieza"
+  },
+  {
+    "codigo": "N0031",
+    "nombre_corto": "BALANZA ANALOGA 100 KILOS",
+    "descripcion_larga": "Balanza de ba�o anal�gica tradicional, con capacidad m�xima de 100 kg. Dise�o robusto y f�cil de leer, sin necesidad de pilas.",
+    "precio": 17551.8,
+    "categoria": "Hogar / Medici�n"
+  },
+  {
+    "codigo": "N0448",
+    "nombre_corto": "SILLON PUFF",
+    "descripcion_larga": "Sill�n o asiento tipo puff. Relleno suave, ideal para salas de estar.",
+    "precio": 31683.4,
+    "categoria": "Hogar / Muebles"
+  },
+  {
+    "codigo": "N0449",
+    "nombre_corto": "SILLON PUFF CON REPOSAPIES",
+    "descripcion_larga": "Sill�n puff grande que incluye un reposapi�s (ottoman) a juego.",
+    "precio": 32442.2,
+    "categoria": "Hogar / Muebles"
+  },
+  {
+    "codigo": "N0334",
+    "nombre_corto": "PERCHA DE COLORES X 10 UNIDADES",
+    "descripcion_larga": "Pack de 10 perchas de pl�stico o metal en colores surtidos.",
+    "precio": 4562.6,
+    "categoria": "Hogar / Organizaci�n"
+  },
+  {
+    "codigo": "N0286",
+    "nombre_corto": "ORGANIZADOR DE COSMETICOS",
+    "descripcion_larga": "Caja o estante organizador de acr�lico o pl�stico para guardar maquillaje, cremas y cosm�ticos.",
+    "precio": 16686.6,
+    "categoria": "Hogar / Organizaci�n"
+  },
+  {
+    "codigo": "N0503",
+    "nombre_corto": "ZAPATERO 4 NIVELES",
+    "descripcion_larga": "Organizador de zapatos vertical con estructura de 4 niveles. Ayuda a maximizar el espacio y mantener el orden.",
+    "precio": 9494.8,
+    "categoria": "Hogar / Organizaci�n"
+  },
+  {
+    "codigo": "N0395",
+    "nombre_corto": "RELOJ X10 MAX",
+    "descripcion_larga": "Smartwatch o reloj inteligente modelo X10 MAX. Pantalla grande y bater�a duradera.",
+    "precio": 13643.0,
+    "categoria": "Hogar / Plomer�a"
+  },
+  {
+    "codigo": "N0072",
+    "nombre_corto": "CAJA DE SEGURIDAD MINI",
+    "descripcion_larga": "Caja de seguridad compacta con cerradura de llave o combinaci�n. Ideal para guardar objetos de valor peque�os en el hogar o la oficina.",
+    "precio": 4813.2,
+    "categoria": "Hogar / Seguridad"
+  },
+  {
+    "codigo": "N0479",
+    "nombre_corto": "TIMBRE INAL�MBRICO",
+    "descripcion_larga": "Sistema de timbre sin cables con pulsador resistente al agua. F�cil instalaci�n, gran alcance y m�ltiples melod�as a elegir.",
+    "precio": 6249.6,
+    "categoria": "Hogar / Seguridad"
+  },
+  {
+    "codigo": "N0393",
+    "nombre_corto": "RELOJ PROYECTOR CAPYBARA",
+    "descripcion_larga": "Reloj digital de pulsera para ni�os que proyecta im�genes de capibara (Capybara).",
+    "precio": 6916.0,
+    "categoria": "Hogar / Soportes"
+  },
+  {
+    "codigo": "N0259",
+    "nombre_corto": "MANTA TERMICA",
+    "descripcion_larga": "Manta el�ctrica o t�rmica para uso corporal. Proporciona calor terap�utico y confort.",
+    "precio": 31669.4,
+    "categoria": "Hogar / Textiles"
+  },
+  {
+    "codigo": "N0293",
+    "nombre_corto": "PANTUMEDIA ABRIGADA",
+    "descripcion_larga": "Par de pantu-medias o medias gruesas y abrigadas para usar en casa (antideslizantes o de lana).",
+    "precio": 4361.0,
+    "categoria": "Hogar / Textiles"
+  },
+  {
+    "codigo": "N0147",
+    "nombre_corto": "ENCENDEDOR CANDELA",
+    "descripcion_larga": "Encendedor tipo candela o recargable USB (el�ctrico/plasma). Dise�o delgado y elegante, sin llama.",
+    "precio": 450.8,
+    "categoria": "Hogar / Varios"
+  },
+  {
+    "codigo": "N0149",
+    "nombre_corto": "ENCENDEDOR RECARGABLE",
+    "descripcion_larga": "Encendedor el�ctrico recargable por USB. Ecol�gico y resistente al viento (tipo plasma o resistencia).",
+    "precio": 6711.6,
+    "categoria": "Hogar / Varios"
+  },
+  {
+    "codigo": "N0007",
+    "nombre_corto": "ALAMBRE LED",
+    "descripcion_larga": "Tira flexible de Alambre LED perfecta para Iluminaci�n Decorativa. El delgado alambre de cobre puede moldearse para crear ambientes �nicos en eventos o el hogar. Su alimentaci�n a Pilas garantiza portabilidad total.",
+    "precio": 1030.4,
+    "categoria": "Iluminaci�n / Decoraci�n"
+  },
+  {
+    "codigo": "N0357",
+    "nombre_corto": "PIZARRA MAGICA 16 PULGADAS",
+    "descripcion_larga": "Pizarra o tablet de escritura LCD de 16 pulgadas. Tama�o grande.",
+    "precio": 7107.8,
+    "categoria": "Iluminaci�n / Decoraci�n"
+  },
+  {
+    "codigo": "N0358",
+    "nombre_corto": "PIZARRA M�GICA 8.5 PULGADAS",
+    "descripcion_larga": "Pizarra o tablet de escritura LCD de 8.5 pulgadas. La m�s compacta.",
+    "precio": 2424.8,
+    "categoria": "Iluminaci�n / Decoraci�n"
+  },
+  {
+    "codigo": "N0432",
+    "nombre_corto": "SET DE TENEDOR X3",
+    "descripcion_larga": "Pack de 3 tenedores de mesa.",
+    "precio": 1689.8,
+    "categoria": "Iluminaci�n / Decoraci�n"
+  },
+  {
+    "codigo": "N0480",
+    "nombre_corto": "TIRA DE LED 3 M",
+    "descripcion_larga": "Tira de luces LED flexible y autoadhesiva, de 3 metros. Perfecta para iluminaci�n decorativa o de acento en espacios peque�os (ej. TV o estantes).",
+    "precio": 5195.4,
+    "categoria": "Iluminaci�n / Decoraci�n"
+  },
+  {
+    "codigo": "N0481",
+    "nombre_corto": "TIRA DE LED 5 M 2835",
+    "descripcion_larga": "Tira de luces LED de 5 metros con chip SMD 2835. Ofrece alta eficiencia lum�nica y bajo consumo, ideal para iluminaci�n ambiental de interiores.",
+    "precio": 6032.6,
+    "categoria": "Iluminaci�n / Decoraci�n"
+  },
+  {
+    "codigo": "N0482",
+    "nombre_corto": "TIRA DE LED 5050 5 M",
+    "descripcion_larga": "Tira de luces LED de 5 metros con chip SMD 5050. Proporciona mayor potencia y brillo que el modelo 2835. Ideal para ambientes que requieren luz intensa.",
+    "precio": 9249.8,
+    "categoria": "Iluminaci�n / Decoraci�n"
+  },
+  {
+    "codigo": "N0483",
+    "nombre_corto": "TIRA NEON RGB",
+    "descripcion_larga": "Tira flexible de LED Neon Flex que simula el ne�n tradicional. Permite crear formas con luz continua y cambiar a m�ltiples colores (RGB). Apta para exteriores (IP65).",
+    "precio": 11421.2,
+    "categoria": "Iluminaci�n / Decoraci�n"
+  },
+  {
+    "codigo": "N0509",
+    "nombre_corto": "GUIRNALDA 5 MTS (5 PORTAFOCO)",
+    "descripcion_larga": "Guirnalda de luces decorativa de 5 metros de largo, con 5 portal�mparas. Ideal para ambientar jardines o terrazas.",
+    "precio": 5896.8,
+    "categoria": "Iluminaci�n / Decoraci�n"
+  },
+  {
+    "codigo": "N0511",
+    "nombre_corto": "GUIRNALDA 20 MTS (20 PORTAFOCO)",
+    "descripcion_larga": "Guirnalda de luces LED para exterior de 20 metros, con 20 portal�mparas. Perfecta para grandes decoraciones.",
+    "precio": 20995.8,
+    "categoria": "Iluminaci�n / Decoraci�n"
+  },
+  {
+    "codigo": "N0252",
+    "nombre_corto": "LUZ DE EMERGENCIA 30 LED",
+    "descripcion_larga": "L�mpara de luz de emergencia con 30 luces LED. Se enciende autom�ticamente al cortar la luz.",
+    "precio": 5618.2,
+    "categoria": "Iluminaci�n / Emergencia"
+  },
+  {
+    "codigo": "N0253",
+    "nombre_corto": "LUZ DE EMERGENCIA 30 LED HYTOSHY",
+    "descripcion_larga": "L�mpara de emergencia de 30 LED de la marca HYTOSHY. Bater�a de larga duraci�n.",
+    "precio": 7387.8,
+    "categoria": "Iluminaci�n / Emergencia"
+  },
+  {
+    "codigo": "N0254",
+    "nombre_corto": "LUZ DE EMERGENCIA 60 LED",
+    "descripcion_larga": "L�mpara de luz de emergencia con 60 luces LED. Proporciona mayor iluminaci�n.",
+    "precio": 10963.4,
+    "categoria": "Iluminaci�n / Emergencia"
+  },
+  {
+    "codigo": "N0255",
+    "nombre_corto": "LUZ DE EMERGENCIA 60 LED ORYX",
+    "descripcion_larga": "L�mpara de emergencia de 60 LED de la marca ORYX. Ideal para cortes prolongados de energ�a.",
+    "precio": 10878.0,
+    "categoria": "Iluminaci�n / Emergencia"
+  },
+  {
+    "codigo": "N0256",
+    "nombre_corto": "LUZ DE EMERGENCIA 92 LED OM",
+    "descripcion_larga": "L�mpara de emergencia de alta potencia con 92 LEDs, marca OM.",
+    "precio": 13753.6,
+    "categoria": "Iluminaci�n / Emergencia"
+  },
+  {
+    "codigo": "N0218",
+    "nombre_corto": "LAMPARA SOLAR 2 LED",
+    "descripcion_larga": "L�mpara o foco solar de exterior con 2 potentes LEDs. Se carga con el sol y se enciende al anochecer.",
+    "precio": 7921.2,
+    "categoria": "Iluminaci�n / Exterior"
+  },
+  {
+    "codigo": "N0219",
+    "nombre_corto": "LAMPARA SOLAR 30 LED",
+    "descripcion_larga": "L�mpara solar de exterior con 30 LEDs. Sensor de movimiento y gran iluminaci�n para jardines o patios.",
+    "precio": 3796.8,
+    "categoria": "Iluminaci�n / Exterior"
+  },
+  {
+    "codigo": "N0220",
+    "nombre_corto": "LAMPARA SOLAR 4 LED",
+    "descripcion_larga": "L�mpara solar de exterior con 4 potentes LEDs. Ideal para caminos o entradas.",
+    "precio": 9982.0,
+    "categoria": "Iluminaci�n / Exterior"
+  },
+  {
+    "codigo": "N0486",
+    "nombre_corto": "TORTUGA REDONDA",
+    "descripcion_larga": "Luminaria o aplique de pared con forma redonda y carcasa protectora. Ideal para iluminaci�n exterior, garajes y pasillos por su resistencia al clima.",
+    "precio": 4678.8,
+    "categoria": "Iluminaci�n / Exterior"
+  },
+  {
+    "codigo": "N0216",
+    "nombre_corto": "LAMPARA LCD",
+    "descripcion_larga": "L�mpara de escritorio con pantalla LCD que muestra hora, fecha y temperatura. Luz LED regulable.",
+    "precio": 6847.4,
+    "categoria": "Iluminaci�n / Hogar"
+  },
+  {
+    "codigo": "N0221",
+    "nombre_corto": "LAMPARA VELADOR G63",
+    "descripcion_larga": "L�mpara velador con funciones adicionales como carga inal�mbrica y parlante Bluetooth. Modelo G63.",
+    "precio": 15166.2,
+    "categoria": "Iluminaci�n / Hogar"
+  },
+  {
+    "codigo": "N0222",
+    "nombre_corto": "LAMPARA VELADOR LED REDONDO",
+    "descripcion_larga": "L�mpara de mesa o velador con dise�o redondo y luz LED de bajo consumo.",
+    "precio": 6736.8,
+    "categoria": "Iluminaci�n / Hogar"
+  },
+  {
+    "codigo": "N0223",
+    "nombre_corto": "LAMPARA VELADOR MAGNETICA 20 LED",
+    "descripcion_larga": "L�mpara velador magn�tica con 20 LEDs. Se adhiere a superficies met�licas o a su base.",
+    "precio": 6167.0,
+    "categoria": "Iluminaci�n / Hogar"
+  },
+  {
+    "codigo": "N0224",
+    "nombre_corto": "LAMPARA VELADOR MAGNETICO",
+    "descripcion_larga": "L�mpara de mesa con sistema de fijaci�n magn�tica. Permite m�ltiples posiciones de luz.",
+    "precio": 5986.4,
+    "categoria": "Iluminaci�n / Hogar"
+  },
+  {
+    "codigo": "N0225",
+    "nombre_corto": "LAMPARA VELADOR TACTIL",
+    "descripcion_larga": "L�mpara de mesa o velador con control t�ctil para encendido, apagado y cambio de intensidad/color.",
+    "precio": 13738.2,
+    "categoria": "Iluminaci�n / Hogar"
+  },
+  {
+    "codigo": "N0226",
+    "nombre_corto": "LAMPARA VELADOR TIME VEL 81030",
+    "descripcion_larga": "L�mpara de mesa o velador de la marca TIME, modelo VEL 81030. Dise�o moderno.",
+    "precio": 9756.6,
+    "categoria": "Iluminaci�n / Hogar"
+  },
+  {
+    "codigo": "N0211",
+    "nombre_corto": "LAMPARA INFANTIL ASTRONAUTA AUTO",
+    "descripcion_larga": "L�mpara de mesa o velador infantil con dise�o de astronauta conduciendo un auto. Emite luz suave.",
+    "precio": 7116.2,
+    "categoria": "Iluminaci�n / Infantil"
+  },
+  {
+    "codigo": "N0212",
+    "nombre_corto": "LAMPARA INFANTIL AUTO",
+    "descripcion_larga": "L�mpara de mesa o velador infantil con dise�o de auto o veh�culo.",
+    "precio": 6906.2,
+    "categoria": "Iluminaci�n / Infantil"
+  },
+  {
+    "codigo": "N0213",
+    "nombre_corto": "LAMPARA INFANTIL CON OREJAS",
+    "descripcion_larga": "L�mpara de mesa infantil con dise�o que incluye orejas (ej. de gato, conejo). Recargable o a pilas.",
+    "precio": 5440.4,
+    "categoria": "Iluminaci�n / Infantil"
+  },
+  {
+    "codigo": "N0214",
+    "nombre_corto": "LAMPARA INFANTIL LCD",
+    "descripcion_larga": "L�mpara de escritorio o velador infantil con pantalla LCD (ej. reloj, temperatura).",
+    "precio": 6643.0,
+    "categoria": "Iluminaci�n / Infantil"
+  },
+  {
+    "codigo": "N0215",
+    "nombre_corto": "LAMPARA INFANTIL MAGN�TICA",
+    "descripcion_larga": "L�mpara de mesa o velador infantil con base magn�tica, permite ajustar el �ngulo f�cilmente.",
+    "precio": 6679.4,
+    "categoria": "Iluminaci�n / Infantil"
+  },
+  {
+    "codigo": "N0233",
+    "nombre_corto": "LASER CINCO PUNTOS",
+    "descripcion_larga": "Puntero l�ser que proyecta 5 puntos de luz. Utilizado en presentaciones o como juguete.",
+    "precio": 501.2,
+    "categoria": "Iluminaci�n / Varios"
+  },
+  {
+    "codigo": "N0206",
+    "nombre_corto": "JUGUETE PERRITO",
+    "descripcion_larga": "Juguete de peluche o pl�stico con forma de perrito. Con funciones de movimiento o sonido (a pilas).",
+    "precio": 3822.0,
+    "categoria": "Juguetes / Animales"
+  },
+  {
+    "codigo": "N0456",
+    "nombre_corto": "SQUISHI ARA�A",
+    "descripcion_larga": "Juguete antiestr�s tipo Squishi con forma de ara�a. Material blando y deformable.",
+    "precio": 1136.8,
+    "categoria": "Juguetes / Antiestr�s"
+  },
+  {
+    "codigo": "N0353",
+    "nombre_corto": "PISTOLA LANZA PELOTA CON ACCESORIOS",
+    "descripcion_larga": "Pistola de juguete que lanza pelotas peque�as. Incluye accesorios o municiones.",
+    "precio": 847.0,
+    "categoria": "Juguetes / Armas"
+  },
+  {
+    "codigo": "N0010",
+    "nombre_corto": "AMETRALLADORA HIDROGEL CON ACCESORIOS",
+    "descripcion_larga": "Juguete de Jugueter�a de acci�n que utiliza munici�n segura de Hidrogel. Este modelo incluye varios Accesorios para personalizar y mejorar la experiencia de juego de forma inmersiva y divertida.",
+    "precio": 29302.0,
+    "categoria": "Juguetes / Armas"
+  },
+  {
+    "codigo": "N0151",
+    "nombre_corto": "ESCOPETA CON ACCESORIO",
+    "descripcion_larga": "Juguete de escopeta con accesorios (ej. mira, dardos de goma). Para juego y recreaci�n infantil.",
+    "precio": 2690.8,
+    "categoria": "Juguetes / Armas"
+  },
+  {
+    "codigo": "N0008",
+    "nombre_corto": "ALFOMBRA PARA BEBE RECTANGULAR",
+    "descripcion_larga": "Alfombra Did�ctica de Jugueter�a en Forma Rectangular. Su acolchado seguro y dise�os coloridos estimulan el desarrollo temprano y proporcionan un espacio de juego c�modo y protegido para el beb�.",
+    "precio": 4008.2,
+    "categoria": "Juguetes / Beb�"
+  },
+  {
+    "codigo": "N0205",
+    "nombre_corto": "JUEGO SARTEN CON ACCESORIOS",
+    "descripcion_larga": "Set de juego de cocina que incluye una sart�n de juguete y varios accesorios (utensilios, alimentos de pl�stico).",
+    "precio": 1589.0,
+    "categoria": "Juguetes / Cocina"
+  },
+  {
+    "codigo": "N0082",
+    "nombre_corto": "CAMIONETA MONSTRUO CONTROL REMOTO",
+    "descripcion_larga": "Veh�culo de juguete tipo \"Monster Truck\" a control remoto. Ruedas grandes, alta suspensi�n y funciones de movimiento completo.",
+    "precio": 0.0,
+    "categoria": "Juguetes / Control Remoto"
+  },
+  {
+    "codigo": "N0144",
+    "nombre_corto": "DRONE E88 PRO",
+    "descripcion_larga": "Drone compacto plegable modelo E88 PRO con c�mara HD. Ideal para principiantes, con control de altura y funciones de vuelo b�sicas.",
+    "precio": 38759.0,
+    "categoria": "Juguetes / Control Remoto"
+  },
+  {
+    "codigo": "N0327",
+    "nombre_corto": "PELOTA DE GOMA",
+    "descripcion_larga": "Pelota de goma maciza o inflable. Ideal para juegos en la playa o piscina.",
+    "precio": 935.2,
+    "categoria": "Juguetes / Control Remoto"
+  },
+  {
+    "codigo": "N0013",
+    "nombre_corto": "ARO BASQUET CON PELOTA MINI",
+    "descripcion_larga": "Set de Jugueter�a/Deportes de Tama�o Mini ideal para interiores. Incluye Pelota y es f�cil de montar, fomentando la coordinaci�n y el juego activo de forma segura en casa.",
+    "precio": 3152.8,
+    "categoria": "Juguetes / Deportes"
+  },
+  {
+    "codigo": "N0039",
+    "nombre_corto": "BASQUET MINI DE MESA",
+    "descripcion_larga": "Juego de mini b�squet para escritorio o mesa. Incluye tablero, aro y pelota peque�a. Ideal para pausas en la oficina o ni�os.",
+    "precio": 1981.0,
+    "categoria": "Juguetes / Deportes"
+  },
+  {
+    "codigo": "N0183",
+    "nombre_corto": "HOCKEY MINI DE MESA",
+    "descripcion_larga": "Juego de mini hockey de mesa (Air Hockey). Versi�n compacta para jugar en cualquier superficie plana.",
+    "precio": 1981.0,
+    "categoria": "Juguetes / Deportes"
+  },
+  {
+    "codigo": "N0199",
+    "nombre_corto": "JUEGO BOWLING 6 PCS",
+    "descripcion_larga": "Set de juego de bowling para ni�os, incluye 6 pines y una pelota. Ideal para interior o exterior.",
+    "precio": 5401.2,
+    "categoria": "Juguetes / Deportes"
+  },
+  {
+    "codigo": "N0202",
+    "nombre_corto": "JUEGO DIDACTICO DE MEMORIA",
+    "descripcion_larga": "Juego de mesa o electr�nico did�ctico de memoria. Ayuda a desarrollar la concentraci�n en ni�os.",
+    "precio": 4620.0,
+    "categoria": "Juguetes / Did�cticos"
+  },
+  {
+    "codigo": "N0396",
+    "nombre_corto": "REMACHADORA",
+    "descripcion_larga": "Remachadora manual o de mano. Herramienta para fijar remaches en metal, cuero o tela.",
+    "precio": 4445.0,
+    "categoria": "Juguetes / Did�cticos"
+  },
+  {
+    "codigo": "N0066",
+    "nombre_corto": "CACTUS BAILAR�N",
+    "descripcion_larga": "Juguete interactivo de peluche con forma de cactus que canta, baila y repite sonidos. Recargable o a pilas.",
+    "precio": 8594.6,
+    "categoria": "Juguetes / Electr�nicos"
+  },
+  {
+    "codigo": "N0204",
+    "nombre_corto": "JUEGO INTERACTIVO MEMORIA",
+    "descripcion_larga": "Juego de mesa interactivo o electr�nico para ejercitar la memoria. Con luces y sonidos.",
+    "precio": 11687.2,
+    "categoria": "Juguetes / Electr�nicos"
+  },
+  {
+    "codigo": "N0271",
+    "nombre_corto": "MASCOTA VIRTUAL",
+    "descripcion_larga": "Juguete de mascota virtual (tipo Tamagotchi). Pantalla digital y funciones de cuidado.",
+    "precio": 3319.4,
+    "categoria": "Juguetes / Electr�nicos"
+  },
+  {
+    "codigo": "N0053",
+    "nombre_corto": "BURBUJERO PISTOLA GRANDE",
+    "descripcion_larga": "Pistola lanzadora de burbujas autom�tica de gran tama�o. Crea un torrente de burbujas con solo presionar el gatillo.",
+    "precio": 12072.2,
+    "categoria": "Juguetes / Exterior"
+  },
+  {
+    "codigo": "N0203",
+    "nombre_corto": "JUEGO FLECHAS",
+    "descripcion_larga": "Juego de dardos con punta de ventosa o magn�tica (no punzante). Incluye tablero y flechas.",
+    "precio": 4974.2,
+    "categoria": "Juguetes / Exterior"
+  },
+  {
+    "codigo": "N0290",
+    "nombre_corto": "PALETA PELOTA X2",
+    "descripcion_larga": "Juego de paletas de madera o pl�stico con una pelota. Para jugar en la playa o parque.",
+    "precio": 1919.4,
+    "categoria": "Juguetes / Exterior"
+  },
+  {
+    "codigo": "N0336",
+    "nombre_corto": "PERCHERO NEGRO 50KG",
+    "descripcion_larga": "Perchero de pie o pared de color negro, con capacidad de carga de hasta 50 kg.",
+    "precio": 35854.0,
+    "categoria": "Juguetes / Exterior"
+  },
+  {
+    "codigo": "N0337",
+    "nombre_corto": "PERFILADOR DE CEJAS",
+    "descripcion_larga": "Herramienta de precisi�n (ej. navaja o m�quina) para perfilar y dar forma a las cejas.",
+    "precio": 844.2,
+    "categoria": "Juguetes / Exterior"
+  },
+  {
+    "codigo": "N0488",
+    "nombre_corto": "TRAMPA RANITA",
+    "descripcion_larga": "Trampa de cebo adhesivo extra fuerte para la captura de roedores (ratones) e insectos rastreros. Soluci�n de control de plagas sin veneno.",
+    "precio": 3747.8,
+    "categoria": "Juguetes / Exterior"
+  },
+  {
+    "codigo": "N0445",
+    "nombre_corto": "SET SOLDADITOS 23 PCS",
+    "descripcion_larga": "Set de 23 piezas de soldados de juguete (figuras y accesorios).",
+    "precio": 2317.0,
+    "categoria": "Juguetes / Figuras y Sets"
+  },
+  {
+    "codigo": "N0372",
+    "nombre_corto": "PROYECTOR ASTRONAUTA CON PARLANTE",
+    "descripcion_larga": "Proyector de galaxias o estrellas con forma de astronauta. Incluye parlante Bluetooth para m�sica.",
+    "precio": 29174.6,
+    "categoria": "Juguetes / Iluminaci�n"
+  },
+  {
+    "codigo": "N0458",
+    "nombre_corto": "SUPER LUDO",
+    "descripcion_larga": "Juego de mesa Ludo de tama�o grande o edici�n especial (\"Super Ludo\").",
+    "precio": 2417.8,
+    "categoria": "Juguetes / Juegos de Mesa"
+  },
+  {
+    "codigo": "N0179",
+    "nombre_corto": "GUITARRA EN BLISTER",
+    "descripcion_larga": "Juguete de guitarra envasado en bl�ster. Ideal para ni�os que inician en la m�sica.",
+    "precio": 3301.2,
+    "categoria": "Juguetes / Musicales"
+  },
+  {
+    "codigo": "N0288",
+    "nombre_corto": "ORGANO A PILA",
+    "descripcion_larga": "�rgano o teclado musical electr�nico de juguete, funciona con pilas.",
+    "precio": 3775.8,
+    "categoria": "Juguetes / Musicales"
+  },
+  {
+    "codigo": "N0049",
+    "nombre_corto": "BOTECITO FLOTADOR CISNE",
+    "descripcion_larga": "Flotador inflable con forma de cisne peque�o, ideal para ni�os en la piscina. Dise�o llamativo y seguro.",
+    "precio": 3981.6,
+    "categoria": "Juguetes / Pileta"
+  },
+  {
+    "codigo": "N0052",
+    "nombre_corto": "BRACITO FLOTADOR",
+    "descripcion_larga": "Par de flotadores inflables para brazos (bracitos), ideales para ayudar a los ni�os a aprender a nadar.",
+    "precio": 1318.8,
+    "categoria": "Juguetes / Pileta"
+  },
+  {
+    "codigo": "N0200",
+    "nombre_corto": "JUEGO DE AGUA GAME",
+    "descripcion_larga": "Juego de agua de mano (Water Game) tipo arcade. Se debe presionar un bot�n para mover aros en el agua.",
+    "precio": 866.6,
+    "categoria": "Juguetes / Varios"
+  },
+  {
+    "codigo": "N0201",
+    "nombre_corto": "JUEGO DE PESCA",
+    "descripcion_larga": "Juego de pesca magn�tico para ni�os. Incluye ca�as y peces de pl�stico que se pescan con imanes.",
+    "precio": 1761.2,
+    "categoria": "Juguetes / Varios"
+  },
+  {
+    "codigo": "N0348",
+    "nombre_corto": "PINZA FUERZA",
+    "descripcion_larga": "Pinza de presi�n o \"pinza de fuerza\" con mecanismo de bloqueo. Para agarre firme.",
+    "precio": 5353.6,
+    "categoria": "Juguetes / Varios"
+  },
+  {
+    "codigo": "N0496",
+    "nombre_corto": "TROMPO LANZADOR DINO",
+    "descripcion_larga": "Juguete tipo trompo con lanzador con dise�o tem�tico de dinosaurio. Ideal para juegos de velocidad y habilidad.",
+    "precio": 3851.4,
+    "categoria": "Juguetes / Varios"
+  },
+  {
+    "codigo": "N0504",
+    "nombre_corto": "VARITA CAPYBARA LUZ Y SONIDO",
+    "descripcion_larga": "Juguete tipo varita m�gica con dise�o de capibara que emite luces LED y divertidos sonidos al activarse.",
+    "precio": 7558.6,
+    "categoria": "Juguetes / Varios"
+  },
+  {
+    "codigo": "N0081",
+    "nombre_corto": "CAMIONETA 4X4 FRICCION",
+    "descripcion_larga": "Juguete de camioneta 4x4 con sistema de propulsi�n por fricci�n. Dise�o robusto para ni�os.",
+    "precio": 1726.2,
+    "categoria": "Juguetes / Veh�culos"
+  },
+  {
+    "codigo": "N0266",
+    "nombre_corto": "MAQUINA VIAL DE FRICCION (NARANJA)",
+    "descripcion_larga": "Juguete de maquinaria vial (ej. excavadora, cargadora) de color naranja, con mecanismo de fricci�n.",
+    "precio": 3570.0,
+    "categoria": "Juguetes / Veh�culos"
+  },
+  {
+    "codigo": "N0429",
+    "nombre_corto": "SET DE PINZAS X3",
+    "descripcion_larga": "Set de 3 pinzas de mano (ej. universal, punta, corte).",
+    "precio": 8054.2,
+    "categoria": "Juguetes / Veh�culos"
+  },
+  {
+    "codigo": "N0490",
+    "nombre_corto": "TREN A PILA",
+    "descripcion_larga": "Juguete de tren con locomotora, vagones y set de v�as. Funciona a pilas y emite luces y sonidos al moverse.",
+    "precio": 3774.4,
+    "categoria": "Juguetes / Veh�culos"
+  },
+  {
+    "codigo": "N0229",
+    "nombre_corto": "LAPICES DE COLORES PASTEL X 12 UNIDADES",
+    "descripcion_larga": "Set de 12 l�pices de colores con tonos pastel. Ideal para dibujo y arte.",
+    "precio": 1934.8,
+    "categoria": "Librer�a / Art�stica"
+  },
+  {
+    "codigo": "N0344",
+    "nombre_corto": "PILA RECARGABLE AAA+",
+    "descripcion_larga": "Pila recargable AAA de alta capacidad (etiqueta \"+\").",
+    "precio": 3194.8,
+    "categoria": "Librer�a / Art�stica"
+  },
+  {
+    "codigo": "N0410",
+    "nombre_corto": "SECADOR DE PELO 2000 WATT ONICA",
+    "descripcion_larga": "Secador de pelo profesional de la marca ONICA con motor de 2000 Watts.",
+    "precio": 14249.2,
+    "categoria": "Librer�a / Art�stica"
+  },
+  {
+    "codigo": "N0106",
+    "nombre_corto": "CARTUCHERA DOS PISOS",
+    "descripcion_larga": "Cartuchera escolar de dos compartimentos (dos pisos) con cierre. Permite organizar l�pices y �tiles de forma separada.",
+    "precio": 8022.0,
+    "categoria": "Librer�a / Escolar"
+  },
+  {
+    "codigo": "N0107",
+    "nombre_corto": "CARTUCHERA TUBO",
+    "descripcion_larga": "Cartuchera de tela o lona con forma de tubo o cilindro. Dise�o simple y gran capacidad de guardado.",
+    "precio": 1846.6,
+    "categoria": "Librer�a / Escolar"
+  },
+  {
+    "codigo": "N0217",
+    "nombre_corto": "LAMPARA SACAPUNTA",
+    "descripcion_larga": "L�mpara de escritorio con luz LED que integra un sacapuntas en la base. Ideal para estudiantes.",
+    "precio": 5623.8,
+    "categoria": "Librer�a / Escritorio"
+  },
+  {
+    "codigo": "N0352",
+    "nombre_corto": "PISTOLA LANZA DARDO",
+    "descripcion_larga": "Pistola de juguete que lanza dardos de goma espuma o ventosa.",
+    "precio": 2115.4,
+    "categoria": "Librer�a / Escritorio"
+  },
+  {
+    "codigo": "N0227",
+    "nombre_corto": "LAPICERA ABC AZUL CAJA POR 50",
+    "descripcion_larga": "Caja de 50 lapiceras de tinta color azul, marca ABC. Ideal para oficina o escolar.",
+    "precio": 4599.0,
+    "categoria": "Librer�a / Escritura"
+  },
+  {
+    "codigo": "N0228",
+    "nombre_corto": "LAPICERA ABC NEGRO POR 50",
+    "descripcion_larga": "Caja de 50 lapiceras de tinta color negro, marca ABC.",
+    "precio": 4599.0,
+    "categoria": "Librer�a / Escritura"
+  },
+  {
+    "codigo": "N0001",
+    "nombre_corto": "ABROCHADORA BH 501",
+    "descripcion_larga": "Abrochadora de escritorio con dise�o robusto de la l�nea Librer�a/Oficina. Ideal para el uso diario gracias a su Capacidad para 20 Hojas. El Modelo BH 501 garantiza un abrochado suave y preciso con m�nima fatiga.",
+    "precio": 3113.6,
+    "categoria": "Librer�a / Oficina"
+  },
+  {
+    "codigo": "N0073",
+    "nombre_corto": "CALCULADORA 12 DIGITOR CON VISOR",
+    "descripcion_larga": "Calculadora de escritorio con 12 d�gitos y visor grande y ajustable. Ideal para contabilidad y uso profesional.",
+    "precio": 7494.2,
+    "categoria": "Librer�a / Oficina"
+  },
+  {
+    "codigo": "N0074",
+    "nombre_corto": "CALCULADORA CHICA",
+    "descripcion_larga": "Calculadora de bolsillo o mini calculadora de tama�o compacto. Funciones b�sicas y dise�o port�til.",
+    "precio": 3353.0,
+    "categoria": "Librer�a / Oficina"
+  },
+  {
+    "codigo": "N0075",
+    "nombre_corto": "CALCULADORA CIENT�FICA",
+    "descripcion_larga": "Calculadora cient�fica con m�ltiples funciones matem�ticas. Esencial para estudiantes de secundaria o universidad.",
+    "precio": 3725.4,
+    "categoria": "Librer�a / Oficina"
+  },
+  {
+    "codigo": "N0076",
+    "nombre_corto": "CALCULADORA CIENTIFICA (COLORES)",
+    "descripcion_larga": "Calculadora cient�fica disponible en varios colores. Ofrece las funciones matem�ticas avanzadas en un dise�o juvenil.",
+    "precio": 3283.0,
+    "categoria": "Librer�a / Oficina"
+  },
+  {
+    "codigo": "N0351",
+    "nombre_corto": "PISTOLA DE RIEGO CON ACCESORIOS X5 PIEZAS",
+    "descripcion_larga": "Kit de 5 piezas para riego que incluye pistola de agua, conectores y acoples de manguera.",
+    "precio": 5182.8,
+    "categoria": "Librer�a / Oficina"
+  },
+  {
+    "codigo": "N0181",
+    "nombre_corto": "HILO BLANCO Y NEGRO BOLSA X 10 UNIDADES",
+    "descripcion_larga": "Pack de 10 bobinas de hilo de coser, colores blanco y negro. Para uso dom�stico o costura b�sica.",
+    "precio": 877.8,
+    "categoria": "Manualidades / Costura"
+  },
+  {
+    "codigo": "N0182",
+    "nombre_corto": "HILO COLOR EN BOLSA X 10 UNIDADES",
+    "descripcion_larga": "Pack de 10 bobinas de hilo de coser en colores surtidos. Para uso dom�stico o costura b�sica.",
+    "precio": 877.8,
+    "categoria": "Manualidades / Costura"
+  },
+  {
+    "codigo": "N0132",
+    "nombre_corto": "CORTADORA DE MASCOTA",
+    "descripcion_larga": "M�quina cortadora de pelo profesional para mascotas (perros/gatos). Silenciosa y con varios cabezales ajustables.",
+    "precio": 15874.6,
+    "categoria": "Mascotas / Cuidado"
+  },
+  {
+    "codigo": "N0131",
+    "nombre_corto": "CORREA PARA PERROS",
+    "descripcion_larga": "Correa de paseo para perros, resistente y c�moda. Con gancho de seguridad.",
+    "precio": 7478.8,
+    "categoria": "Mascotas / Paseo"
+  },
+  {
+    "codigo": "N0390",
+    "nombre_corto": "RELOJ INTELIGENTE T500",
+    "descripcion_larga": "Smartwatch o reloj inteligente modelo T500. R�plica de dise�o, funciones b�sicas.",
+    "precio": 9735.6,
+    "categoria": "Oficina / Accesorios"
+  },
+  {
+    "codigo": "N0391",
+    "nombre_corto": "RELOJ INTELIGENTE T900 4 MALLAS",
+    "descripcion_larga": "Smartwatch o reloj inteligente modelo T900 que incluye 4 mallas intercambiables.",
+    "precio": 16100.0,
+    "categoria": "Oficina / Accesorios"
+  },
+  {
+    "codigo": "N0128",
+    "nombre_corto": "CONTADORA DE BILLETES BLACK",
+    "descripcion_larga": "M�quina contadora y detectora de billetes falsos de color negro. Alta velocidad y precisi�n para negocios.",
+    "precio": 0.0,
+    "categoria": "Oficina / Equipamiento"
+  },
+  {
+    "codigo": "N0510",
+    "nombre_corto": "SILLA GAMER",
+    "descripcion_larga": "Silla ergon�mica de dise�o deportivo (gamer), con soporte lumbar y reposacabezas, ideal para largas sesiones de juego o trabajo.",
+    "precio": 169180.2,
+    "categoria": "Oficina / Gaming"
+  },
+  {
+    "codigo": "N0078",
+    "nombre_corto": "CAMARA FOCO IP",
+    "descripcion_larga": "C�mara de seguridad IP con forma de foco de luz. Se enrosca en un portal�mparas E27, ofrece visi�n 360�, Wi-Fi y monitoreo remoto.",
+    "precio": 20535.2,
+    "categoria": "Seguridad / C�maras"
+  },
+  {
+    "codigo": "N0080",
+    "nombre_corto": "C�MARA WI-FI SMART TIME",
+    "descripcion_larga": "C�mara de seguridad Wi-Fi SMART de la marca TIME. Con visi�n nocturna, detecci�n de movimiento y control a trav�s de aplicaci�n m�vil.",
+    "precio": 28323.4,
+    "categoria": "Seguridad / C�maras"
+  },
+  {
+    "codigo": "N0067",
+    "nombre_corto": "CADENA CON CANDADO",
+    "descripcion_larga": "Cadena de seguridad gruesa con candado de alta resistencia. Ideal para motos, bicicletas o portones.",
+    "precio": 13826.4,
+    "categoria": "Seguridad / Ferreter�a"
+  },
+  {
+    "codigo": "N0083",
+    "nombre_corto": "CANDADO 50 MM EN CAJA",
+    "descripcion_larga": "Candado de hierro o lat�n de 50 mm, presentado en caja individual. Nivel de seguridad medio.",
+    "precio": 2233.0,
+    "categoria": "Seguridad / Ferreter�a"
+  },
+  {
+    "codigo": "N0084",
+    "nombre_corto": "CANDADO 63 MM",
+    "descripcion_larga": "Candado de alta seguridad de 63 mm. Cuerpo de acero para mayor resistencia al corte y a la manipulaci�n.",
+    "precio": 3319.4,
+    "categoria": "Seguridad / Ferreter�a"
+  },
+  {
+    "codigo": "N0085",
+    "nombre_corto": "CANDADO ALARMA",
+    "descripcion_larga": "Candado con sistema de alarma incorporado. Emite un sonido fuerte si detecta un intento de robo o manipulaci�n.",
+    "precio": 9070.6,
+    "categoria": "Seguridad / Ferreter�a"
+  },
+  {
+    "codigo": "N0086",
+    "nombre_corto": "CANDADO BLISTER X 12 UNIDADES",
+    "descripcion_larga": "Pack de 12 unidades de candados peque�os en bl�ster. Ideales para maletas, lockers o cajas de herramientas.",
+    "precio": 10045.0,
+    "categoria": "Seguridad / Ferreter�a"
+  },
+  {
+    "codigo": "N0087",
+    "nombre_corto": "CANDADO EN CAJA 32 MM",
+    "descripcion_larga": "Candado peque�o de 32 mm, presentado en caja. Uso para seguridad b�sica.",
+    "precio": 1139.6,
+    "categoria": "Seguridad / Ferreter�a"
+  },
+  {
+    "codigo": "N0113",
+    "nombre_corto": "CHALECO REFLECTIVO",
+    "descripcion_larga": "Chaleco de seguridad de alta visibilidad (reflectivo) con bandas fluorescentes. Ideal para trabajos, bicicleta o moto.",
+    "precio": 1387.4,
+    "categoria": "Seguridad / Vehicular"
+  },
+  {
+    "codigo": "N0089",
+    "nombre_corto": "CANDADO PARA VALIJA",
+    "descripcion_larga": "Candado de combinaci�n o llave, dise�ado para valijas o mochilas. Cumple con normas de seguridad para equipaje.",
+    "precio": 2009.0,
+    "categoria": "Viajes / Accesorios"
+  }
+]
