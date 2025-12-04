@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catálogo - Delivery Mayorista</title>
+  <link rel="stylesheet" href="css/estilos.css" />
+</head>
+<body>
+  <header class="header">
+    <div class="logo">DELIVERY MAYORISTA</div>
+    <nav>
+      <a href="index.html">Inicio</a>
+      <a href="catalogo.html" class="activo">Catálogo</a>
+    </nav>
+  </header>
+
+  <main class="contenedor">
+    <section class="filtros">
+      <input id="buscador" type="text" placeholder="Buscar por código o descripción..." />
+      <select id="categoria">
+        <option value="">Todas las categorías</option>
+      </select>
+    </section>
+
+    <section id="grid-productos" class="grid-productos">
+      <!-- Productos generados por JS -->
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>Delivery Mayorista · Catálogo demo</p>
+  </footer>
+
+  <script src="js/catalogo.js"></script>
+</body>
+</html>
