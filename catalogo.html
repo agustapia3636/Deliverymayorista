@@ -6,10 +6,11 @@
 <title>Delivery Mayorista | Catálogo</title>
 
 <style>
+    /* ======== BASE ======== */
     body {
         background:#0f0f1a;
         margin:0;
-        font-family: 'Segoe UI', sans-serif;
+        font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
         color:white;
     }
 
@@ -25,19 +26,23 @@
         gap:15px;
         padding:25px;
         justify-content:center;
+        align-items:center;
+        flex-wrap:wrap;
     }
 
-    .toolbar input, .toolbar select {
+    .toolbar input,
+    .toolbar select {
         padding:12px 18px;
         border-radius:30px;
         border:none;
         outline:none;
         font-size:15px;
+        min-width:230px;
     }
 
     .grid {
         display:grid;
-        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
         gap:25px;
         padding:25px;
     }
@@ -45,53 +50,125 @@
     .card {
         background:#0c0c17;
         border-radius:22px;
-        padding:18px;
+        padding:18px 16px 16px;
         text-align:center;
-        min-height:280px;
+        min-height:260px;
         display:flex;
         flex-direction:column;
         justify-content:flex-start;
+        box-shadow:0 0 0 1px rgba(0,0,0,0.25);
+        text-decoration:none;
+        color:inherit;
+        transition:transform .08s ease, box-shadow .08s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow:0 10px 24px rgba(0,0,0,0.55);
+    }
+
+    /* ======== MARCO DE IMAGEN ALINEADO ======== */
+    .card-imgbox {
+        width: 100%;
+        height: 160px;              /* MISMO alto para todas las fotos */
+        border-radius: 18px;
+        background: #0a0a12;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+        margin-bottom:10px;
     }
 
     .card img {
-        width:100%;
-        height:150px;
-        object-fit:cover;
-        border-radius:18px;
-        background:#0a0a12;
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;         /* no recorta, ajusta */
+        border-radius: 16px;
+        display: block;
+    }
+
+    .sin-imagen {
+        position: absolute;
+        inset: 0;
+        display: none;               /* se muestra solo si no hay imagen */
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        opacity: 0.8;
+        background: #111;
+        border-radius: 18px;
     }
 
     .card strong {
         display:block;
-        margin-top:10px;
+        margin-top:2px;
         font-size:15px;
-        line-height:1.1;
+        line-height:1.15;
     }
 
     .descripcion {
         opacity:0.80;
         font-size:13px;
         margin-top:6px;
-        line-height:1.15;
+        line-height:1.25;
+        min-height:36px;             /* para que las tarjetas queden parejas */
     }
 
     .precio {
         color:#ffa400;
         font-weight:700;
-        margin-top:8px;
+        margin-top:10px;
+        font-size:15px;
     }
 
-    .sin-imagen {
-        width:100%;
-        height:150px;
-        background:#111;
-        border-radius:18px;
-        display:flex;
-        align-items:center;
-        justify-content:center;
-        font-size:14px;
-        opacity:0.8;
-        display:none; /* solo se muestra si falla la imagen */
+    /* ======== MOBILE ======== */
+    @media (max-width: 768px) {
+        header {
+            text-align:center;
+            font-size:18px;
+        }
+
+        .toolbar {
+            padding:18px 12px 10px;
+            gap:10px;
+        }
+
+        .toolbar input,
+        .toolbar select {
+            width:100%;
+            max-width:420px;
+            font-size:14px;
+        }
+
+        .grid {
+            padding:16px 12px 28px;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap:18px;
+        }
+
+        .card {
+            padding:14px 12px 14px;
+            border-radius:18px;
+        }
+
+        .card-imgbox {
+            height:140px;
+        }
+
+        .card strong {
+            font-size:14px;
+        }
+
+        .descripcion {
+            font-size:12px;
+            min-height:32px;
+        }
+
+        .precio {
+            font-size:14px;
+        }
     }
 </style>
 </head>
@@ -179,7 +256,9 @@ function renderizar(lista){
         card.style.textDecoration = "none";
         card.style.color = "inherit";
 
+        // Contenedor de imagen alineada
         const contImg = document.createElement("div");
+        contImg.className = "card-imgbox";
 
         const img = document.createElement("img");
         img.alt = `${codigo} - ${nombreCorto}`;
