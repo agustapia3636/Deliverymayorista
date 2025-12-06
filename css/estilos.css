@@ -115,12 +115,6 @@ body {
   flex-direction: column;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
-  cursor: pointer;
-}
-
-.card-producto:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.6);
 }
 
 /* Contenedor de la imagen en la card */
@@ -392,32 +386,19 @@ body {
   }
 }
 
-/* ======================================= */
-/* CURSOR CLICKEABLE EN LAS CARDS — FINAL  */
-/* ======================================= */
+/* ============================= */
+/* CURSOR CLICKEABLE EN LAS CARDS — FINAL */
+/* ============================= */
 
-/* Card completa clickeable (por si usás cualquiera de los dos nombres) */
+/* Card completa clickeable */
 .card-producto,
 .producto-card {
   cursor: pointer;
 }
 
-/* Imagen dentro de la card: que muestre la mano */
-.card-producto .img-placeholder img,
-.producto-card .producto-imagen,
-.card-producto img {
-  cursor: pointer;
-}
-
-/* Si la card está envuelta en un <a>, que también muestre la mano */
-.card-producto a,
-.producto-card a {
-  cursor: pointer;
-}
-
-/* Título clickeable */
-.card-producto .card-body h2,
-.producto-card .producto-titulo {
+/* Cualquier elemento dentro de la card también muestra la mano */
+.card-producto *,
+.producto-card * {
   cursor: pointer;
 }
 
