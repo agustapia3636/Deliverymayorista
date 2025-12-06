@@ -23,12 +23,10 @@ let TODOS_LOS_PRODUCTOS = [];
 //  UTILIDADES GENERALES
 // ========================================
 
-// Devuelve un valor “seguro” (sin undefined)
 function safe(value, fallback = "") {
   return (value === undefined || value === null) ? fallback : value;
 }
 
-// Intenta cargar .jpg y .JPG. Si ninguna existe, muestra “Sin imagen”
 function setImagenProducto(imgElement, codigo) {
   if (!codigo) {
     imgElement.style.display = "none";
@@ -44,9 +42,7 @@ function setImagenProducto(imgElement, codigo) {
 
   const probar = () => {
     if (intento >= urls.length) {
-      // No hay imagen válida
       imgElement.style.display = "none";
-      // el texto "Sin imagen" lo dejamos en el HTML
       return;
     }
     imgElement.src = urls[intento];
@@ -57,7 +53,6 @@ function setImagenProducto(imgElement, codigo) {
   probar();
 }
 
-// Da formato de precio
 function formatearPrecio(valor) {
   const numero = Number(valor);
   if (isNaN(numero)) return "Consultar";
@@ -90,7 +85,6 @@ function guardarCarrito(carrito) {
   }
 }
 
-// Actualiza el globito del mini carrito
 function actualizarMiniCarrito() {
   const carrito = leerCarrito();
 
@@ -101,13 +95,13 @@ function actualizarMiniCarrito() {
   }, 0);
 
   if (miniCantidad) miniCantidad.textContent = totalProductos;
-  if (miniTotal)    miniTotal.textContent    = totalPrecio.toLocaleString("es-AR", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  });
+  if (miniTotal)
+    miniTotal.textContent = totalPrecio.toLocaleString("es-AR", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
 }
 
-// Agrega un producto al carrito (o suma cantidad si ya existe)
 function agregarAlCarritoDesdeCatalogo(productoBasico, boton) {
   let carrito = leerCarrito();
 
@@ -126,7 +120,6 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton) {
   guardarCarrito(carrito);
   actualizarMiniCarrito();
 
-  // Actualizar texto del botón
   const item = carrito.find(p => p.codigo === productoBasico.codigo);
   if (boton && item) {
     boton.textContent = `En carrito (${item.cantidad})`;
@@ -134,13 +127,12 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton) {
   }
 }
 
-// Navegar al carrito al tocar el mini-carrito
 function irAlCarrito() {
   window.location.href = "carrito.html";
 }
 
 // ========================================
-//  RENDER DE PRODUCTOS
+//  RENDER
 // ========================================
 
 function renderProductos(lista) {
@@ -154,7 +146,6 @@ function renderProductos(lista) {
   const carritoActual = leerCarrito();
 
   lista.forEach(prod => {
-    // Soportamos varios nombres de propiedades por si el JSON cambia
     const codigo      = safe(prod.codigo || prod.cod || prod.Code || prod.Codigo);
     const nombre      = safe(prod.nombre || prod.descripcion || prod.titulo || prod["Nombre Corto"], "Sin nombre");
     const categoria   = safe(prod.categoria || prod.rubro || prod.cat || prod["Categoria Princ"], "Sin categoría");
@@ -172,7 +163,6 @@ function renderProductos(lista) {
     const card = document.createElement("article");
     card.classList.add("producto-card");
 
-    // ¿ya está en el carrito?
     const itemCarrito = carritoActual.find(p => p.codigo === codigo);
     const textoBoton  = itemCarrito ? `En carrito (${itemCarrito.cantidad})` : "Agregar al carrito";
 
@@ -200,15 +190,14 @@ function renderProductos(lista) {
     const img = card.querySelector(".producto-imagen");
     setImagenProducto(img, codigo);
 
-    // Botón agregar al carrito
     const btn = card.querySelector(".btn-agregar-carrito");
 
     if (itemCarrito) {
       btn.classList.add("btn-agregar-carrito-activo");
     }
 
-    btn.addEventListener("click", (ev) => {
-      ev.preventDefault();   // que no navegue al producto
+    btn.addEventListener("click", ev => {
+      ev.preventDefault();
       ev.stopPropagation();
 
       const productoBasico = {
@@ -251,13 +240,8 @@ function aplicarFiltros() {
   renderProductos(filtrados);
 }
 
-if (buscador) {
-  buscador.addEventListener("input", aplicarFiltros);
-}
-
-if (filtroCategoria) {
-  filtroCategoria.addEventListener("change", aplicarFiltros);
-}
+if (buscador) buscador.addEventListener("input", aplicarFiltros);
+if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
 
 // ========================================
 //  CARGA INICIAL
@@ -265,19 +249,13 @@ if (filtroCategoria) {
 
 async function cargarProductos() {
   try {
-    // desde catalogo.html la ruta correcta es "./productos.json"
     const resp = await fetch("./productos.json");
 
-    if (!resp.ok) {
-      throw new Error("No se pudo cargar productos.json");
-    }
+    if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
     const data = await resp.json();
-
-    // puede venir como array directo o como { productos: [...] }
     TODOS_LOS_PRODUCTOS = Array.isArray(data) ? data : (data.productos || []);
 
-    // si existe un select de categorías lo llenamos
     if (filtroCategoria) {
       const categoriasUnicas = Array.from(
         new Set(
@@ -296,7 +274,7 @@ async function cargarProductos() {
     }
 
     renderProductos(TODOS_LOS_PRODUCTOS);
-    actualizarMiniCarrito();   // importante: mostrar estado si ya hay carrito
+    actualizarMiniCarrito();
 
   } catch (err) {
     console.error(err);
@@ -304,7 +282,6 @@ async function cargarProductos() {
   }
 }
 
-// Ejecutar al cargar la página
 document.addEventListener("DOMContentLoaded", () => {
   cargarProductos();
   actualizarMiniCarrito();
