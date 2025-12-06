@@ -9,8 +9,8 @@ const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayori
 const CLAVE_CARRITO = "dm_carrito";
 
 // Elementos del DOM
-const grid = document.getElementById("lista-productos");      // contenedor de tarjetas
-const buscador = document.getElementById("buscador");         // input de búsqueda
+const grid = document.getElementById("lista-productos");          // contenedor de tarjetas
+const buscador = document.getElementById("buscador");             // input de búsqueda
 const filtroCategoria = document.getElementById("filtro-categoria"); // select de categorías
 
 // Mini carrito (globito abajo a la derecha)
@@ -23,10 +23,40 @@ let TODOS_LOS_PRODUCTOS = [];
 //  UTILIDADES GENERALES
 // ========================================
 
+// valor seguro
 function safe(value, fallback = "") {
   return (value === undefined || value === null) ? fallback : value;
 }
 
+// convierte "19.585,8" -> 19585.8  / "1992,2" -> 1992.2
+function parsearPrecio(valor) {
+  if (typeof valor === "number") return valor;
+
+  if (typeof valor === "string") {
+    const limpio = valor
+      .toString()
+      .replace(/\./g, "")  // elimina separadores de miles
+      .replace(",", ".");  // cambia coma por punto decimal
+
+    const num = Number(limpio);
+    return Number.isFinite(num) ? num : null;
+  }
+
+  return null;
+}
+
+// devuelve texto listo para mostrar
+function formatearPrecio(valor) {
+  const numero = parsearPrecio(valor);
+  if (numero == null) return "Consultar";
+
+  return numero.toLocaleString("es-AR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+}
+
+// intenta cargar .jpg y .JPG
 function setImagenProducto(imgElement, codigo) {
   if (!codigo) {
     imgElement.style.display = "none";
@@ -53,14 +83,6 @@ function setImagenProducto(imgElement, codigo) {
   probar();
 }
 
-function formatearPrecio(valor) {
-  const numero = Number(valor);
-  if (isNaN(numero)) return "Consultar";
-  return numero.toLocaleString("es-AR", {
-    minimumFractionDigits: 0
-  });
-}
-
 // ========================================
 //  CARRITO (localStorage + mini carrito)
 // ========================================
@@ -85,6 +107,7 @@ function guardarCarrito(carrito) {
   }
 }
 
+// Actualiza el globito del mini carrito
 function actualizarMiniCarrito() {
   const carrito = leerCarrito();
 
@@ -95,13 +118,15 @@ function actualizarMiniCarrito() {
   }, 0);
 
   if (miniCantidad) miniCantidad.textContent = totalProductos;
-  if (miniTotal)
+  if (miniTotal) {
     miniTotal.textContent = totalPrecio.toLocaleString("es-AR", {
       minimumFractionDigits: 0,
       maximumFractionDigits: 0
     });
+  }
 }
 
+// Agrega un producto al carrito desde el catálogo
 function agregarAlCarritoDesdeCatalogo(productoBasico, boton) {
   let carrito = leerCarrito();
 
@@ -112,7 +137,7 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton) {
     carrito.push({
       codigo: productoBasico.codigo,
       nombre: productoBasico.nombre,
-      precio: productoBasico.precio,
+      precio: productoBasico.precio,   // ya es número
       cantidad: 1
     });
   }
@@ -132,7 +157,7 @@ function irAlCarrito() {
 }
 
 // ========================================
-//  RENDER
+//  RENDER DE PRODUCTOS
 // ========================================
 
 function renderProductos(lista) {
@@ -146,10 +171,10 @@ function renderProductos(lista) {
   const carritoActual = leerCarrito();
 
   lista.forEach(prod => {
-    const codigo      = safe(prod.codigo || prod.cod || prod.Code || prod.Codigo);
-    const nombre      = safe(prod.nombre || prod.descripcion || prod.titulo || prod["Nombre Corto"], "Sin nombre");
-    const categoria   = safe(prod.categoria || prod.rubro || prod.cat || prod["Categoria Princ"], "Sin categoría");
-    const descCorta   = safe(
+    const codigo    = safe(prod.codigo || prod.cod || prod.Code || prod.Codigo);
+    const nombre    = safe(prod.nombre || prod.descripcion || prod.titulo || prod["Nombre Corto"], "Sin nombre");
+    const categoria = safe(prod.categoria || prod.rubro || prod.cat || prod["Categoria Princ"], "Sin categoría");
+    const descCorta = safe(
       prod.descripcionCorta ||
       prod.descripcion_corta ||
       prod.descripcion ||
@@ -157,12 +182,23 @@ function renderProductos(lista) {
       "",
       ""
     );
-    const precioNum   = prod.precio ?? prod.precioMayorista ?? prod.precio_venta ?? prod.precioLista ?? prod["Precio Mayorista"];
-    const precioTexto = formatearPrecio(precioNum);
+
+    // tomamos cualquier campo de precio disponible
+    const brutoPrecio =
+      prod.precio ??
+      prod.precioMayorista ??
+      prod.precio_venta ??
+      prod.precioLista ??
+      prod["Precio Mayorista"] ??
+      prod["Precio Cliente"];
+
+    const precioNum   = parsearPrecio(brutoPrecio);
+    const precioTexto = formatearPrecio(brutoPrecio);
 
     const card = document.createElement("article");
     card.classList.add("producto-card");
 
+    // ¿ya está en el carrito?
     const itemCarrito = carritoActual.find(p => p.codigo === codigo);
     const textoBoton  = itemCarrito ? `En carrito (${itemCarrito.cantidad})` : "Agregar al carrito";
 
@@ -179,7 +215,6 @@ function renderProductos(lista) {
           <p class="producto-precio">$ ${precioTexto}</p>
         </div>
       </a>
-
       <div class="producto-acciones">
         <button type="button" class="btn-agregar-carrito">
           ${textoBoton}
@@ -191,7 +226,6 @@ function renderProductos(lista) {
     setImagenProducto(img, codigo);
 
     const btn = card.querySelector(".btn-agregar-carrito");
-
     if (itemCarrito) {
       btn.classList.add("btn-agregar-carrito-activo");
     }
@@ -203,7 +237,7 @@ function renderProductos(lista) {
       const productoBasico = {
         codigo,
         nombre,
-        precio: Number(precioNum) || 0
+        precio: precioNum || 0
       };
 
       agregarAlCarritoDesdeCatalogo(productoBasico, btn);
@@ -219,7 +253,7 @@ function renderProductos(lista) {
 
 function aplicarFiltros() {
   const texto = buscador.value.trim().toLowerCase();
-  const cat = filtroCategoria.value;
+  const cat   = filtroCategoria.value;
 
   const filtrados = TODOS_LOS_PRODUCTOS.filter(prod => {
     const codigo    = safe(prod.codigo || prod.cod || prod.Code || prod.Codigo, "").toString().toLowerCase();
@@ -240,7 +274,7 @@ function aplicarFiltros() {
   renderProductos(filtrados);
 }
 
-if (buscador) buscador.addEventListener("input", aplicarFiltros);
+if (buscador)       buscador.addEventListener("input",  aplicarFiltros);
 if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
 
 // ========================================
@@ -250,12 +284,12 @@ if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
 async function cargarProductos() {
   try {
     const resp = await fetch("./productos.json");
-
     if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
     const data = await resp.json();
     TODOS_LOS_PRODUCTOS = Array.isArray(data) ? data : (data.productos || []);
 
+    // llenar combo de categorías
     if (filtroCategoria) {
       const categoriasUnicas = Array.from(
         new Set(
@@ -264,6 +298,14 @@ async function cargarProductos() {
           ).filter(c => c !== "")
         )
       ).sort();
+
+      // primera opción: todas
+      if (!filtroCategoria.querySelector("option[value='todas']")) {
+        const optTodas = document.createElement("option");
+        optTodas.value = "todas";
+        optTodas.textContent = "Todas las categorías";
+        filtroCategoria.appendChild(optTodas);
+      }
 
       categoriasUnicas.forEach(cat => {
         const op = document.createElement("option");
