@@ -1,11 +1,11 @@
 // ========================================
-//  LÓGICA DE CARRITO (compartida catálogo + carrito)
+//  LÓGICA DE CARRITO (catálogo + carrito)
 // ========================================
 
 const CLAVE_CARRITO = "dm_carrito";
 
 // 👉 REEMPLAZAR por tu número en formato internacional SIN + ni 00
-// Ejemplo Argentina Mendoza: 549261XXXXXXX
+// Ejemplo Argentina: 549261XXXXXXX
 const TELEFONO_WHATSAPP = "5492610000000";
 
 // Claves detectadas dinámicamente a partir del primer item
@@ -59,7 +59,7 @@ function detectarClaves(item) {
   // Código
   KEY_CODIGO = encontrar(["codigo", "cod", "sku", "id"]);
   // Precio unitario
-  KEY_PRECIO = encontrar(["precio", "precioLista", "precio_lista", "price", "unitario", "punitario"]);
+  KEY_PRECIO = encontrar(["precio", "preciolista", "precio_lista", "price", "unitario", "punitario"]);
   // Cantidad
   KEY_CANTIDAD = encontrar(["cantidad", "qty", "cant"]);
   // Stock
@@ -100,9 +100,10 @@ function calcularTotales(carrito) {
 
 function actualizarMiniCarrito() {
   const carrito = leerCarrito();
+  const qtyEl = document.getElementById("mini-carrito-cantidad");
+  const totalEl = document.getElementById("mini-carrito-total");
+
   if (carrito.length === 0) {
-    const qtyEl = document.getElementById("mini-carrito-cantidad");
-    const totalEl = document.getElementById("mini-carrito-total");
     if (qtyEl) qtyEl.textContent = "0";
     if (totalEl) totalEl.textContent = "0";
     return;
@@ -112,8 +113,6 @@ function actualizarMiniCarrito() {
 
   const { totalItems, totalGeneral } = calcularTotales(carrito);
 
-  const qtyEl = document.getElementById("mini-carrito-cantidad");
-  const totalEl = document.getElementById("mini-carrito-total");
   if (qtyEl) qtyEl.textContent = totalItems;
   if (totalEl) totalEl.textContent = formatearNumero(totalGeneral);
 }
@@ -158,14 +157,25 @@ function renderCarritoPagina() {
     const stock = obtenerValor(item, KEY_STOCK, null);
     const precio = Number(obtenerValor(item, KEY_PRECIO, 0)) || 0;
     const subtotal = cant * precio;
+    const img = obtenerValor(item, KEY_IMG, null);
 
     html += `
       <div class="item-carrito" data-index="${index}">
-        <div class="item-carrito-descripcion">${desc}</div>
-        ${cod ? `<div class="item-carrito-codigo">Cod: ${cod}</div>` : ""}
-        ${stock !== null && stock !== undefined && stock !== "" ? `
-          <div class="item-carrito-stock">Stock disponible: ${stock}</div>
-        ` : ""}
+        <div class="item-carrito-top">
+          ${img ? `
+            <div class="item-carrito-img">
+              <img src="${img}" alt="${desc}">
+            </div>
+          ` : ""}
+
+          <div class="item-carrito-info">
+            <div class="item-carrito-descripcion">${desc}</div>
+            ${cod ? `<div class="item-carrito-codigo">Cod: ${cod}</div>` : ""}
+            ${stock !== null && stock !== undefined && stock !== "" ? `
+              <div class="item-carrito-stock">Stock disponible: ${stock}</div>
+            ` : ""}
+          </div>
+        </div>
 
         <div class="item-carrito-controles">
           <div class="item-carrito-cant">
@@ -194,7 +204,7 @@ function renderCarritoPagina() {
       Total (${totalItems} productos): 
       <span>$${formatearNumero(totalGeneral)}</span>
       <div class="total-carrito-nota">
-        Precios mayoristas estimados. El total final puede variar según stock y actualización de lista.
+        Total estimado sujeto a stock y últimas actualizaciones.
       </div>
     </div>
   `;
@@ -328,9 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // ----------------------------
-// (Opcional) Función para usar desde catálogo
-// Si en catalogo.html tenés un botón "Agregar al carrito" que pasa un objeto producto,
-// podés llamar a esta función:
+// (Opcional) desde catálogo
 // ----------------------------
 function agregarAlCarrito(producto) {
   const carrito = leerCarrito();
