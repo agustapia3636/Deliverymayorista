@@ -328,10 +328,11 @@
 
 /* SOLO EN CELULAR: subir el mini carrito para que no tape el botón de WhatsApp */
 @media (max-width: 768px) {
-  .mini-carrito {
-    bottom: 210px !important;   /* AJUSTÁ ESTE NÚMERO SI LO QUERÉS MÁS ARRIBA O MÁS ABAJO */
+  #mini-carrito {
+    bottom: calc(100px + env(safe-area-inset-bottom)) !important;
   }
 }
+
 </style>
 </head>
 
