@@ -1,26 +1,26 @@
 // ========================================
-//  CATÁLOGO + CARRITO (página catalogo.html)
+// CATÁLOGO + CARRITO (página catalogo.html)
 // ========================================
 
 // URL base de las imágenes en tu repo de GitHub
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
-// Clave del carrito en localStorage
+// Clave del carrito en localStorage (misma que usa carrito.html)
 const CLAVE_CARRITO = "dm_carrito";
 
 // Elementos del DOM
-const grid = document.getElementById("lista-productos");          // contenedor de tarjetas
-const buscador = document.getElementById("buscador");             // input de búsqueda
+const grid = document.getElementById("lista-productos");      // contenedor de tarjetas
+const buscador = document.getElementById("buscador");         // input de búsqueda
 const filtroCategoria = document.getElementById("filtro-categoria"); // select de categorías
 
 // Mini carrito (globito abajo a la derecha)
 const miniCantidad = document.getElementById("mini-carrito-cantidad");
-const miniTotal    = document.getElementById("mini-carrito-total");
+const miniTotal = document.getElementById("mini-carrito-total");
 
 let TODOS_LOS_PRODUCTOS = [];
 
 // ========================================
-//  UTILIDADES GENERALES
+// UTILIDADES GENERALES
 // ========================================
 
 // valor seguro
@@ -28,46 +28,44 @@ function safe(value, fallback = "") {
   return (value === undefined || value === null) ? fallback : value;
 }
 
-// convierte "19.585,8" -> 19585.8  / "1992,2" -> 1992.2
+// convierte "19.585,8" -> 19585.8 / "1992,2" -> 1992.2
 function parsearPrecio(valor) {
   if (typeof valor === "number") return valor;
 
   if (typeof valor === "string") {
     const limpio = valor
       .toString()
-      .replace(/\./g, "")  // elimina separadores de miles
-      .replace(",", ".");  // cambia coma por punto decimal
+      .replace(/\./g, "")   // elimina separadores de miles
+      .replace(",", ".");   // cambia coma por punto decimal
 
     const num = Number(limpio);
     return Number.isFinite(num) ? num : null;
   }
-
   return null;
 }
 
-// devuelve texto listo para mostrar
+// devuelve texto listo para mostrar (redondeado sin decimales)
 function formatearPrecio(valor) {
   const numero = parsearPrecio(valor);
   if (numero == null) return "Consultar";
 
   return numero.toLocaleString("es-AR", {
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   });
 }
 
-// intenta cargar .jpg y .JPG
+// Intenta cargar .jpg y .JPG y guarda la URL correcta en data-src-ok
 function setImagenProducto(imgElement, codigo) {
-  if (!codigo) {
-    imgElement.style.display = "none";
+  if (!imgElement || !codigo) {
+    if (imgElement) imgElement.style.display = "none";
     return;
   }
 
   const urls = [
     `${BASE_IMG}/${codigo}.jpg`,
-    `${BASE_IMG}/${codigo}.JPG`
+    `${BASE_IMG}/${codigo}.JPG`,
   ];
-
   let intento = 0;
 
   const probar = () => {
@@ -79,12 +77,18 @@ function setImagenProducto(imgElement, codigo) {
     intento++;
   };
 
+  imgElement.onload = () => {
+    // Guardamos la URL que realmente cargó bien
+    imgElement.dataset.srcOk = imgElement.src;
+  };
+
   imgElement.onerror = probar;
+
   probar();
 }
 
 // ========================================
-//  CARRITO (localStorage + mini carrito)
+// CARRITO (localStorage + mini carrito)
 // ========================================
 
 function leerCarrito() {
@@ -111,7 +115,11 @@ function guardarCarrito(carrito) {
 function actualizarMiniCarrito() {
   const carrito = leerCarrito();
 
-  const totalProductos = carrito.reduce((acc, p) => acc + (p.cantidad || 0), 0);
+  const totalProductos = carrito.reduce(
+    (acc, p) => acc + (p.cantidad || 0),
+    0
+  );
+
   const totalPrecio = carrito.reduce((acc, p) => {
     const precio = Number(p.precio) || 0;
     return acc + precio * (p.cantidad || 0);
@@ -121,30 +129,45 @@ function actualizarMiniCarrito() {
   if (miniTotal) {
     miniTotal.textContent = totalPrecio.toLocaleString("es-AR", {
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     });
   }
 }
 
 // Agrega un producto al carrito desde el catálogo
+// AHORA incluye imagen y stock
 function agregarAlCarritoDesdeCatalogo(productoBasico, boton) {
   let carrito = leerCarrito();
 
   const idx = carrito.findIndex(p => p.codigo === productoBasico.codigo);
+
   if (idx >= 0) {
-    carrito[idx].cantidad += 1;
+    // Ya existe: sumamos 1 (respetando stock si viene)
+    const item = carrito[idx];
+    const stock = Number(item.stock ?? productoBasico.stock ?? 0) || 0;
+
+    if (!stock || item.cantidad < stock) {
+      item.cantidad += 1;
+    } else {
+      alert("No hay más stock disponible de este producto.");
+      return;
+    }
+
   } else {
     carrito.push({
       codigo: productoBasico.codigo,
       nombre: productoBasico.nombre,
       precio: productoBasico.precio,   // ya es número
-      cantidad: 1
+      cantidad: 1,
+      img: productoBasico.img || null, // 👈 CLAVE: guardamos URL de imagen
+      stock: productoBasico.stock ?? null,
     });
   }
 
   guardarCarrito(carrito);
   actualizarMiniCarrito();
 
+  // Actualizar texto del botón
   const item = carrito.find(p => p.codigo === productoBasico.codigo);
   if (boton && item) {
     boton.textContent = `En carrito (${item.cantidad})`;
@@ -157,23 +180,39 @@ function irAlCarrito() {
 }
 
 // ========================================
-//  RENDER DE PRODUCTOS
+// RENDER DE PRODUCTOS
 // ========================================
 
 function renderProductos(lista) {
   grid.innerHTML = "";
 
   if (!lista || lista.length === 0) {
-    grid.innerHTML = `<p style="color:white; padding:1rem;">No se encontraron productos.</p>`;
+    grid.innerHTML = `
+      <p>No se encontraron productos.</p>
+    `;
     return;
   }
 
   const carritoActual = leerCarrito();
 
   lista.forEach(prod => {
-    const codigo    = safe(prod.codigo || prod.cod || prod.Code || prod.Codigo);
-    const nombre    = safe(prod.nombre || prod.descripcion || prod.titulo || prod["Nombre Corto"], "Sin nombre");
-    const categoria = safe(prod.categoria || prod.rubro || prod.cat || prod["Categoria Princ"], "Sin categoría");
+    const codigo = safe(
+      prod.codigo || prod.cod || prod.Code || prod.Codigo
+    );
+    const nombre = safe(
+      prod.nombre ||
+      prod.descripcion ||
+      prod.titulo ||
+      prod["Nombre Corto"],
+      "Sin nombre"
+    );
+    const categoria = safe(
+      prod.categoria ||
+      prod.rubro ||
+      prod.cat ||
+      prod["Categoria Princ"],
+      "Sin categoría"
+    );
     const descCorta = safe(
       prod.descripcionCorta ||
       prod.descripcion_corta ||
@@ -192,7 +231,7 @@ function renderProductos(lista) {
       prod["Precio Mayorista"] ??
       prod["Precio Cliente"];
 
-    const precioNum   = parsearPrecio(brutoPrecio);
+    const precioNum = parsearPrecio(brutoPrecio) || 0;
     const precioTexto = formatearPrecio(brutoPrecio);
 
     const card = document.createElement("article");
@@ -200,23 +239,26 @@ function renderProductos(lista) {
 
     // ¿ya está en el carrito?
     const itemCarrito = carritoActual.find(p => p.codigo === codigo);
-    const textoBoton  = itemCarrito ? `En carrito (${itemCarrito.cantidad})` : "Agregar al carrito";
+    const textoBoton = itemCarrito
+      ? `En carrito (${itemCarrito.cantidad})`
+      : "Agregar al carrito";
 
     card.innerHTML = `
-      <a class="producto-link" href="producto.html?codigo=${encodeURIComponent(codigo)}">
-        <div class="producto-imagen-wrapper">
-          <img class="producto-imagen" alt="${codigo} - ${nombre}">
-          <span class="sin-imagen-texto">Sin imagen</span>
+      <div class="producto-img-wrapper">
+        <img class="producto-imagen" alt="${nombre}">
+      </div>
+
+      <div class="producto-info">
+        <h3 class="producto-titulo">${nombre}</h3>
+        <p class="producto-codigo">Cod: ${codigo}</p>
+        <p class="producto-descripcion">${descCorta}</p>
+        <p class="producto-categoria">${categoria}</p>
+
+        <div class="producto-precio-row">
+          <span class="producto-precio">$ ${precioTexto}</span>
         </div>
-        <div class="producto-info">
-          <h3 class="producto-titulo">${codigo} - ${nombre}</h3>
-          <p class="producto-descripcion">${descCorta}</p>
-          <p class="producto-categoria">${categoria}</p>
-          <p class="producto-precio">$ ${precioTexto}</p>
-        </div>
-      </a>
-      <div class="producto-acciones">
-        <button type="button" class="btn-agregar-carrito">
+
+        <button class="btn-agregar-carrito">
           ${textoBoton}
         </button>
       </div>
@@ -230,6 +272,7 @@ function renderProductos(lista) {
       btn.classList.add("btn-agregar-carrito-activo");
     }
 
+    // CLICK en Agregar al carrito
     btn.addEventListener("click", ev => {
       ev.preventDefault();
       ev.stopPropagation();
@@ -237,7 +280,10 @@ function renderProductos(lista) {
       const productoBasico = {
         codigo,
         nombre,
-        precio: precioNum || 0
+        precio: precioNum,
+        // 👇 guardamos exactamente la imagen que se cargó bien
+        img: (img && (img.dataset.srcOk || img.src)) || null,
+        stock: safe(prod.Stock ?? prod.stock, null),
       };
 
       agregarAlCarritoDesdeCatalogo(productoBasico, btn);
@@ -248,22 +294,33 @@ function renderProductos(lista) {
 }
 
 // ========================================
-//  FILTROS
+// FILTROS
 // ========================================
 
 function aplicarFiltros() {
   const texto = buscador.value.trim().toLowerCase();
-  const cat   = filtroCategoria.value;
+  const cat = filtroCategoria.value;
 
   const filtrados = TODOS_LOS_PRODUCTOS.filter(prod => {
-    const codigo    = safe(prod.codigo || prod.cod || prod.Code || prod.Codigo, "").toString().toLowerCase();
-    const nombre    = safe(prod.nombre || prod.descripcion || prod.titulo || prod["Nombre Corto"], "").toLowerCase();
-    const categoria = safe(prod.categoria || prod.rubro || prod.cat || prod["Categoria Princ"], "").toLowerCase();
+    const codigo = safe(
+      prod.codigo || prod.cod || prod.Code || prod.Codigo,
+      ""
+    )
+      .toString()
+      .toLowerCase();
+
+    const nombre = safe(
+      prod.nombre || prod.descripcion || prod.titulo || prod["Nombre Corto"],
+      ""
+    ).toLowerCase();
+
+    const categoria = safe(
+      prod.categoria || prod.rubro || prod.cat || prod["Categoria Princ"],
+      ""
+    ).toLowerCase();
 
     const pasaTexto =
-      !texto ||
-      codigo.includes(texto) ||
-      nombre.includes(texto);
+      !texto || codigo.includes(texto) || nombre.includes(texto);
 
     const pasaCategoria =
       !cat || cat === "todas" || categoria === cat.toLowerCase();
@@ -274,11 +331,11 @@ function aplicarFiltros() {
   renderProductos(filtrados);
 }
 
-if (buscador)       buscador.addEventListener("input",  aplicarFiltros);
+if (buscador) buscador.addEventListener("input", aplicarFiltros);
 if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
 
 // ========================================
-//  CARGA INICIAL
+// CARGA INICIAL
 // ========================================
 
 async function cargarProductos() {
@@ -287,14 +344,19 @@ async function cargarProductos() {
     if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
     const data = await resp.json();
-    TODOS_LOS_PRODUCTOS = Array.isArray(data) ? data : (data.productos || []);
+    TODOS_LOS_PRODUCTOS = Array.isArray(data)
+      ? data
+      : (data.productos || []);
 
     // llenar combo de categorías
     if (filtroCategoria) {
       const categoriasUnicas = Array.from(
         new Set(
           TODOS_LOS_PRODUCTOS.map(p =>
-            safe(p.categoria || p.rubro || p.cat || p["Categoria Princ"], "").toString()
+            safe(
+              p.categoria || p.rubro || p.cat || p["Categoria Princ"],
+              ""
+            ).toString()
           ).filter(c => c !== "")
         )
       ).sort();
@@ -317,10 +379,11 @@ async function cargarProductos() {
 
     renderProductos(TODOS_LOS_PRODUCTOS);
     actualizarMiniCarrito();
-
   } catch (err) {
     console.error(err);
-    grid.innerHTML = `<p style="color:white; padding:1rem;">Error cargando productos.</p>`;
+    grid.innerHTML = `
+      <p>Error cargando productos.</p>
+    `;
   }
 }
 
