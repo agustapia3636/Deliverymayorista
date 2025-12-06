@@ -403,19 +403,20 @@ body {
     bottom: 210px !important;   /* ← AJUSTÁ ESTE NÚMERO SI QUERÉS */
   }
 }
-/* ======================================= */
-/* CURSOR CLICKEABLE EN LAS CARDS          */
-/* ======================================= */
+/* ============================= */
+/* CURSOR CLICKEABLE EN LAS CARDS */
+/* ============================= */
 
-/* Card completa clickeable (ambos nombres de clase) */
+/* Card completa clickeable (por si usás cualquiera de los dos nombres) */
 .card-producto,
 .producto-card {
   cursor: pointer;
 }
 
-/* Imagen dentro de la card clickeable */
+/* Imagen dentro de la card: que muestre la mano */
 .card-producto .img-placeholder img,
-.producto-card .producto-imagen {
+.producto-card .producto-imagen,
+.card-producto img {
   cursor: pointer;
 }
 
