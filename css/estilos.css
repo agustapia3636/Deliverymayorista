@@ -355,3 +355,11 @@ body {
   height: 100%;
   object-fit: cover;
 }
+.producto-info,
+.producto-nav,
+.miniaturas {
+  min-height: 30px;      /* para que se vea la estructura sin romper */
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
