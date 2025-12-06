@@ -47,92 +47,112 @@
   // Mismo repo de imágenes que en el catálogo
   const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
+  // Convierte "2276,8" -> número 2276.8
+  function parsearPrecio(valor) {
+    if (typeof valor === "number") return valor;
+    if (typeof valor === "string") {
+      const limpio = valor.replace(/\./g, "").replace(",", ".");
+      const num = Number(limpio);
+      return isNaN(num) ? null : num;
+    }
+    return null;
+  }
+
+  function obtenerCodigoDeURL() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("codigo");
+  }
+
   async function cargarProducto() {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const codigo = params.get("codigo");
-      console.log("Código en URL:", codigo);
+    const codigoURL = obtenerCodigoDeURL();
+    const infoDiv = document.getElementById("producto-info");
 
-      const infoDiv = document.getElementById("producto-info");
-
-      // Si no viene código en la URL
-      if (!codigo) {
-        if (infoDiv) {
-          infoDiv.innerHTML =
-            "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
-        }
-        return;
+    if (!codigoURL) {
+      if (infoDiv) {
+        infoDiv.innerHTML = "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
       }
+      return;
+    }
 
-      // productos.json está en la raíz del repo
+    try {
       const resp = await fetch("productos.json");
       if (!resp.ok) {
         throw new Error("No se pudo cargar productos.json: " + resp.status);
       }
 
-      const productos = await resp.json();
-      console.log("Productos cargados:", productos.length);
+      const data = await resp.json();
+      const productos = Array.isArray(data) ? data : (data.productos || []);
 
-      const index = productos.findIndex(p => p.codigo === codigo);
-      console.log("Índice encontrado:", index);
+      // ATENCIÓN: en tu JSON la clave es "Codigo"
+      const index = productos.findIndex(p => p["Codigo"] === codigoURL);
 
       if (index === -1) {
         if (infoDiv) {
-          infoDiv.innerHTML =
-            "<h2>Producto no encontrado</h2><p>Verificá el código.</p>";
+          infoDiv.innerHTML = "<h2>Producto no encontrado</h2><p>Verificá el código.</p>";
         }
         return;
       }
 
       const prod = productos[index];
 
+      const codigo       = prod["Codigo"] || "";
+      const nombreCorto  = prod["Nombre Corto"] || "";
+      const categoria    = prod["Categoria Princ"] || "";
+      const descLarga    = prod["Descripción Larga"] || "";
+      const precioMayor  = parsearPrecio(prod["Precio Mayorista"]);
+      const precioCliente= parsearPrecio(prod["Precio Cliente"]);
+      const precioUsado  = precioMayor ?? precioCliente;
+      const stock        = prod["Stock"];
+
       // ==========================
       //   IMAGEN PRINCIPAL
       // ==========================
       const imgPrincipal = document.getElementById("imagen-principal");
       if (imgPrincipal) {
-        imgPrincipal.src = `${BASE_IMG}/${prod.codigo}.JPG`;
-        imgPrincipal.alt = prod.nombre_corto || prod.codigo;
-        imgPrincipal.loading = "lazy";
-        imgPrincipal.onerror = () => {
-          imgPrincipal.src = `${BASE_IMG}/${prod.codigo}.jpg`;
+        const urls = [
+          `${BASE_IMG}/${codigo}.jpg`,
+          `${BASE_IMG}/${codigo}.JPG`
+        ];
+        let intento = 0;
+
+        const probar = () => {
+          if (intento >= urls.length) return;
+          imgPrincipal.src = urls[intento];
+          intento++;
         };
+
+        imgPrincipal.alt = nombreCorto || codigo;
+        imgPrincipal.loading = "lazy";
+        imgPrincipal.onerror = probar;
+
+        probar();
       }
 
-      // (Por ahora no generamos miniaturas, pero el contenedor #miniaturas ya está listo)
+      // Miniaturas (por ahora vacío, pero listo para futuro)
       const miniaturasDiv = document.getElementById("miniaturas");
       if (miniaturasDiv) {
-        miniaturasDiv.innerHTML = ""; // quedará vacío hasta que armemos la galería
+        miniaturasDiv.innerHTML = "";
       }
 
       // ==========================
       //   INFO DEL PRODUCTO
       // ==========================
       if (infoDiv) {
-        const precioFormateado = prod.precio
-          ? `$ ${Number(prod.precio).toLocaleString("es-AR", {
-              minimumFractionDigits: 2,
-            })}`
+        const precioTexto = precioUsado != null
+          ? `$ ${precioUsado.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
+          : "";
+
+        const stockTexto = stock != null
+          ? `Stock: ${stock} unidades`
           : "";
 
         infoDiv.innerHTML = `
-          <p class="producto-codigo">${prod.codigo}</p>
-          <h1 class="producto-titulo">${prod.nombre_corto}</h1>
-          ${
-            prod.categoria
-              ? `<p class="producto-categoria">${prod.categoria}</p>`
-              : ""
-          }
-          ${
-            prod.descripcion_larga
-              ? `<p class="producto-descripcion">${prod.descripcion_larga}</p>`
-              : ""
-          }
-          ${
-            precioFormateado
-              ? `<p class="producto-precio">${precioFormateado}</p>`
-              : ""
-          }
+          <p class="producto-codigo">${codigo}</p>
+          <h1 class="producto-titulo">${nombreCorto}</h1>
+          ${categoria ? `<p class="producto-categoria">${categoria}</p>` : ""}
+          ${descLarga ? `<p class="producto-descripcion">${descLarga}</p>` : ""}
+          ${precioTexto ? `<p class="producto-precio">${precioTexto}</p>` : ""}
+          ${stockTexto ? `<p class="producto-stock">${stockTexto}</p>` : ""}
           <div class="producto-acciones">
             <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
             <a href="${armarLinkWhatsApp(prod)}" target="_blank" class="btn-whatsapp">
@@ -150,46 +170,50 @@
         const anterior = productos[(index - 1 + productos.length) % productos.length];
         const siguiente = productos[(index + 1) % productos.length];
 
+        const codAnt = anterior["Codigo"] || "";
+        const codSig = siguiente["Codigo"] || "";
+
         nav.innerHTML = `
-          <button class="btn-nav" onclick="irAProducto('${anterior.codigo}')">
-            ← ${anterior.codigo}
+          <button class="btn-nav" onclick="irAProducto('${codAnt}')">
+            ← ${codAnt}
           </button>
           <button class="btn-nav" onclick="window.location.href='catalogo.html'">
             Volver al listado
           </button>
-          <button class="btn-nav" onclick="irAProducto('${siguiente.codigo}')">
-            ${siguiente.codigo} →
+          <button class="btn-nav" onclick="irAProducto('${codSig}')">
+            ${codSig} →
           </button>
         `;
       }
+
     } catch (error) {
       console.error("Error en cargarProducto:", error);
-      const infoDiv = document.getElementById("producto-info");
       if (infoDiv) {
         infoDiv.innerHTML = "<h2>Error</h2><p>No se pudo cargar el producto.</p>";
       }
     }
   }
 
-  // Arma el link de WhatsApp con datos del producto
+  // Arma el link de WhatsApp con datos del producto (usando claves de tu JSON)
   function armarLinkWhatsApp(prod) {
-    const precio = prod.precio
-      ? `$ ${Number(prod.precio).toLocaleString("es-AR", {
-          minimumFractionDigits: 2,
-        })}`
-      : "—";
+    const codigo      = prod["Codigo"] || "";
+    const nombreCorto = prod["Nombre Corto"] || "";
+    const precioMayor = parsearPrecio(prod["Precio Mayorista"]);
+    const precioTxt   = precioMayor != null
+      ? `$ ${precioMayor.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
+      : "Consultar";
 
     const mensaje = [
       "Hola! Me interesa este producto:",
       "",
-      `Código: ${prod.codigo}`,
-      `Producto: ${prod.nombre_corto}`,
-      `Precio mayorista: ${precio}`,
+      `Código: ${codigo}`,
+      `Producto: ${nombreCorto}`,
+      `Precio mayorista: ${precioTxt}`,
       "",
       "¿Me pasás disponibilidad y cantidades mínimas?"
     ].join("\n");
 
-    // Si después querés poner tu número: reemplazar ?text= por /TU_NUMERO?text=
+    // Si después querés tu número fijo, cambiás esta URL a: https://wa.me/TUNUMERO?text=...
     return `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
   }
 
