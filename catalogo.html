@@ -159,6 +159,25 @@
         opacity:0.65;
     }
 
+    /* BOTÓN AGREGAR A LISTA */
+    .btn-seleccionar {
+        margin-top:8px;
+        align-self:center;
+        padding:6px 12px;
+        border-radius:999px;
+        border:none;
+        font-size:12px;
+        cursor:pointer;
+        background:#202432;
+        color:#fff;
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+    }
+    .btn-seleccionar.activo {
+        background:#1ebe57;
+    }
+
     @media (max-width: 768px) {
         header {
             text-align:center;
@@ -248,6 +267,7 @@
         text-decoration:none;
         box-shadow:0 10px 24px rgba(0,0,0,.45);
         z-index:999;
+        transition:transform .08s ease, filter .08s ease;
     }
     .btn-wa-flotante:hover {
         filter:brightness(1.06);
@@ -275,10 +295,11 @@
 
 <div id="grid" class="grid"></div>
 
-<!-- Botón flotante de WhatsApp general -->
+<!-- Botón flotante de WhatsApp (se completa por JS) -->
 <a
-  href="https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista."
+  id="wa-flotante"
   class="btn-wa-flotante"
+  href="#"
   target="_blank"
 >
   WhatsApp Mayorista
@@ -292,6 +313,11 @@ let productos = [];
 let categorias = new Set();
 let observer = null;
 
+// lista seleccionada para enviar por WhatsApp
+let seleccionados = [];
+
+/* ========== UTILIDADES ========== */
+
 // "1992,2" -> 1992.2
 function parsearPrecio(valor) {
   if (typeof valor === "number") return valor;
@@ -302,6 +328,87 @@ function parsearPrecio(valor) {
   }
   return null;
 }
+
+function cargarSeleccionados() {
+  try {
+    const raw = localStorage.getItem("dm_sel");
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) seleccionados = arr;
+    }
+  } catch (e) {
+    seleccionados = [];
+  }
+}
+
+function guardarSeleccionados() {
+  try {
+    localStorage.setItem("dm_sel", JSON.stringify(seleccionados));
+  } catch (e) {
+    // ignorar
+  }
+}
+
+function estaSeleccionado(codigo) {
+  return seleccionados.some((p) => p.codigo === codigo);
+}
+
+function toggleSeleccion(prod) {
+  const codigo = prod["Codigo"];
+  const nombre = prod["Nombre Corto"] || "";
+  const precioMayor = parsearPrecio(prod["Precio Mayorista"]);
+  const precioCliente = parsearPrecio(prod["Precio Cliente"]);
+  const precioUsado = precioMayor ?? precioCliente ?? null;
+
+  const idx = seleccionados.findIndex((p) => p.codigo === codigo);
+  if (idx >= 0) {
+    seleccionados.splice(idx, 1);
+  } else {
+    seleccionados.push({
+      codigo,
+      nombre,
+      precio: precioUsado,
+    });
+  }
+  guardarSeleccionados();
+}
+
+function actualizarBotonWhatsapp() {
+  const btn = document.getElementById("wa-flotante");
+  if (!btn) return;
+
+  if (!seleccionados.length) {
+    btn.textContent = "WhatsApp Mayorista";
+    btn.href =
+      "https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista.";
+    return;
+  }
+
+  btn.textContent = `Enviar lista (${seleccionados.length})`;
+
+  const lineas = [
+    "Hola! Te paso una lista de productos que me interesan:",
+    "",
+  ];
+
+  seleccionados.forEach((p) => {
+    let precioTxt = "Precio: Consultar";
+    if (p.precio != null) {
+      precioTxt = `$ ${p.precio.toLocaleString("es-AR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      })}`;
+    }
+    lineas.push(`• ${p.codigo} - ${p.nombre} (${precioTxt})`);
+  });
+
+  lineas.push("", "¿Me pasás disponibilidad y cantidades mínimas?");
+
+  const mensaje = lineas.join("\n");
+  btn.href = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
+}
+
+/* ========== CARGA DE PRODUCTOS ========== */
 
 async function cargarProductos() {
   try {
@@ -331,7 +438,6 @@ function cargarCategorias() {
 function prepararAnimaciones() {
   const cards = document.querySelectorAll(".card");
 
-  // Si el navegador no soporta IntersectionObserver, mostramos todo de una
   if (!("IntersectionObserver" in window)) {
     cards.forEach((c) => c.classList.add("visible"));
     return;
@@ -358,7 +464,7 @@ function renderizar(lista) {
   const grid = document.getElementById("grid");
   grid.innerHTML = "";
 
-  lista.forEach((p, idx) => {
+  lista.forEach((p) => {
     const codigo = p["Codigo"] || "";
     const nombreCorto = p["Nombre Corto"] || "";
     const descripcionL = p["Descripción Larga"] || "";
@@ -448,11 +554,43 @@ function renderizar(lista) {
     card.appendChild(desc);
     card.appendChild(precioDiv);
 
+    // Botón agregar / quitar de lista
+    const btnSel = document.createElement("button");
+    btnSel.type = "button";
+    btnSel.className = "btn-seleccionar";
+    if (estaSeleccionado(codigo)) {
+      btnSel.classList.add("activo");
+      btnSel.textContent = "Quitar de la lista";
+    } else {
+      btnSel.textContent = "Agregar a lista";
+    }
+
+    btnSel.addEventListener("click", (ev) => {
+      ev.preventDefault();   // que no navegue al producto
+      ev.stopPropagation();
+
+      toggleSeleccion(p);
+
+      if (estaSeleccionado(codigo)) {
+        btnSel.classList.add("activo");
+        btnSel.textContent = "Quitar de la lista";
+      } else {
+        btnSel.classList.remove("activo");
+        btnSel.textContent = "Agregar a lista";
+      }
+
+      actualizarBotonWhatsapp();
+    });
+
+    card.appendChild(btnSel);
+
     grid.appendChild(card);
   });
 
   prepararAnimaciones();
 }
+
+/* ========== FILTROS ========== */
 
 document.getElementById("busqueda").addEventListener("input", (e) => {
   const val = e.target.value.toLowerCase();
@@ -480,6 +618,10 @@ function filtrar(texto, categoria) {
   renderizar(filtrados);
 }
 
+/* ========== INICIO ========== */
+
+cargarSeleccionados();
+actualizarBotonWhatsapp();
 cargarProductos();
 </script>
 
