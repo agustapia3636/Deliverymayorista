@@ -74,8 +74,14 @@ function renderizarProductos(lista) {
 
   grid.innerHTML = '';
   lista.forEach(p => {
-    const card = document.createElement('article');
-    card.className = 'card-producto';
+  const card = document.createElement('article');
+card.className = 'card-producto';
+card.style.cursor = 'pointer';
+
+card.addEventListener('click', () => {
+  window.location.href = `producto.html?codigo=${encodeURIComponent(p.codigo)}`;
+});
+
 
     const imgWrapper = crearImagenProducto(p);
 
