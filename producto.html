@@ -101,6 +101,27 @@
         width: 100%;
       }
 
+      /* 🔥 Forzamos que todo el texto vaya en una columna */
+      .producto-info {
+        display: block !important;
+      }
+
+      .producto-info .producto-codigo,
+      .producto-info .producto-titulo,
+      .producto-info .producto-categoria,
+      .producto-info .producto-descripcion,
+      .producto-info .producto-precio,
+      .producto-info .producto-stock {
+        display: block !important;
+        text-align: left;
+        float: none;
+      }
+
+      .producto-info .producto-precio,
+      .producto-info .producto-stock {
+        margin-top: 8px;
+      }
+
       .producto-acciones {
         flex-direction: column;
         width: 100%;
