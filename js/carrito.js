@@ -1,197 +1,366 @@
 // ========================================
-//  LÓGICA DE CARRITO (página carrito.html)
-//  Usa el mismo localStorage que el catálogo
+//  LÓGICA DE CARRITO (compartida catálogo + carrito)
 // ========================================
 
 const CLAVE_CARRITO = "dm_carrito";
 
+// 👉 REEMPLAZAR por tu número en formato internacional SIN + ni 00
+// Ejemplo Argentina Mendoza: 549261XXXXXXX
+const TELEFONO_WHATSAPP = "5492610000000";
+
+// Claves detectadas dinámicamente a partir del primer item
+let KEY_DESC = null;
+let KEY_CODIGO = null;
+let KEY_PRECIO = null;
+let KEY_CANTIDAD = null;
+let KEY_STOCK = null;
+let KEY_IMG = null;
+
+// ----------------------------
+// Utilidades generales
+// ----------------------------
 function leerCarrito() {
   try {
-    const raw = localStorage.getItem(CLAVE_CARRITO);
-    if (!raw) return [];
-    const arr = JSON.parse(raw);
+    const data = localStorage.getItem(CLAVE_CARRITO);
+    if (!data) return [];
+    const arr = JSON.parse(data);
     return Array.isArray(arr) ? arr : [];
   } catch (e) {
-    console.error("Error leyendo carrito", e);
+    console.error("Error leyendo carrito:", e);
     return [];
   }
 }
 
 function guardarCarrito(carrito) {
-  try {
-    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
-  } catch (e) {
-    console.error("Error guardando carrito", e);
-  }
+  localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
+  actualizarMiniCarrito();
 }
 
-// Mini carrito (globito)
+function formatearNumero(n) {
+  if (!Number.isFinite(n)) n = 0;
+  return Math.round(n).toLocaleString("es-AR");
+}
+
+function detectarClaves(item) {
+  if (!item || typeof item !== "object") return;
+
+  const keys = Object.keys(item).map(k => k.toLowerCase());
+
+  function encontrar(candidatos) {
+    for (const c of candidatos) {
+      const idx = keys.indexOf(c.toLowerCase());
+      if (idx !== -1) return Object.keys(item)[idx];
+    }
+    return null;
+  }
+
+  // Descripción
+  KEY_DESC = encontrar(["descripcion", "descripcion_larga", "nombre", "titulo", "desc"]) || "descripcion";
+  // Código
+  KEY_CODIGO = encontrar(["codigo", "cod", "sku", "id"]);
+  // Precio unitario
+  KEY_PRECIO = encontrar(["precio", "precioLista", "precio_lista", "price", "unitario", "punitario"]);
+  // Cantidad
+  KEY_CANTIDAD = encontrar(["cantidad", "qty", "cant"]);
+  // Stock
+  KEY_STOCK = encontrar(["stock", "existencia", "disponible"]);
+  // Imagen
+  KEY_IMG = encontrar(["imagen", "img", "foto"]);
+}
+
+function obtenerValor(item, key, def) {
+  if (!key || !(key in item)) return def;
+  return item[key] ?? def;
+}
+
+function setCantidad(item, nuevaCant) {
+  if (!KEY_CANTIDAD) {
+    // si no existía, la creamos como "cantidad"
+    KEY_CANTIDAD = "cantidad";
+  }
+  item[KEY_CANTIDAD] = nuevaCant;
+}
+
+// ----------------------------
+// Mini carrito (icono flotante)
+// ----------------------------
+function calcularTotales(carrito) {
+  let totalItems = 0;
+  let totalGeneral = 0;
+
+  carrito.forEach(it => {
+    const cant = Number(obtenerValor(it, KEY_CANTIDAD, 1)) || 1;
+    const precio = Number(obtenerValor(it, KEY_PRECIO, 0)) || 0;
+    totalItems += cant;
+    totalGeneral += cant * precio;
+  });
+
+  return { totalItems, totalGeneral };
+}
+
 function actualizarMiniCarrito() {
   const carrito = leerCarrito();
-  const miniCantidad = document.getElementById("mini-carrito-cantidad");
-  const miniTotal    = document.getElementById("mini-carrito-total");
+  if (carrito.length === 0) {
+    const qtyEl = document.getElementById("mini-carrito-cantidad");
+    const totalEl = document.getElementById("mini-carrito-total");
+    if (qtyEl) qtyEl.textContent = "0";
+    if (totalEl) totalEl.textContent = "0";
+    return;
+  }
 
-  const totalProductos = carrito.reduce((acc, p) => acc + (p.cantidad || 0), 0);
-  const totalPrecio = carrito.reduce((acc, p) => {
-    const precio = Number(p.precio) || 0;
-    return acc + precio * (p.cantidad || 0);
-  }, 0);
+  if (!KEY_DESC) detectarClaves(carrito[0]);
 
-  if (miniCantidad) miniCantidad.textContent = totalProductos;
-  if (miniTotal)    miniTotal.textContent    = totalPrecio.toLocaleString("es-AR", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0
-  });
+  const { totalItems, totalGeneral } = calcularTotales(carrito);
+
+  const qtyEl = document.getElementById("mini-carrito-cantidad");
+  const totalEl = document.getElementById("mini-carrito-total");
+  if (qtyEl) qtyEl.textContent = totalItems;
+  if (totalEl) totalEl.textContent = formatearNumero(totalGeneral);
 }
 
 function irAlCarrito() {
-  // ya estamos en carrito, pero por si se usa desde otro lado:
   window.location.href = "carrito.html";
 }
 
-// Pintar la lista en carrito.html
-function cargarCarritoPagina() {
+// ----------------------------
+// Pintar página de carrito
+// ----------------------------
+function renderCarritoPagina() {
   const contenedor = document.getElementById("carrito");
-  const carrito = leerCarrito();
+  if (!contenedor) return; // No estamos en carrito.html
 
-  if (!contenedor) return;
+  const carrito = leerCarrito();
 
   if (carrito.length === 0) {
     contenedor.innerHTML = `
       <div class="carrito-vacio">
-        <p>Tu carrito está vacío.</p>
-        <a href="catalogo.html" class="btn-volver">← Ver catálogo</a>
+        Tu carrito está vacío.<br>
+        Agregá productos desde el catálogo para verlos acá.
       </div>
     `;
     actualizarMiniCarrito();
     return;
   }
 
-  let total = 0;
-  let totalItems = 0;
+  // Detectar claves según primer item
+  if (!KEY_DESC || !KEY_PRECIO) {
+    detectarClaves(carrito[0]);
+  }
 
-  const htmlItems = carrito.map(item => {
-    const precio = Number(item.precio) || 0;
-    const subtotal = precio * (item.cantidad || 0);
-    total += subtotal;
-    totalItems += item.cantidad || 0;
+  const { totalItems, totalGeneral } = calcularTotales(carrito);
 
-    const precioTxt   = precio ? `$ ${precio.toLocaleString("es-AR", { minimumFractionDigits: 0 })}` : "Consultar";
-    const subtotalTxt = subtotal ? `$ ${subtotal.toLocaleString("es-AR", { minimumFractionDigits: 0 })}` : "—";
+  let html = `<div class="carrito-lista">`;
 
-    return `
-      <div class="item-carrito">
-        <div class="item-carrito-descripcion">
-          <div><strong>${item.codigo}</strong> - ${item.nombre || ""}</div>
-          <div class="item-carrito-stock">${precioTxt}</div>
-        </div>
+  carrito.forEach((item, index) => {
+    const desc = String(obtenerValor(item, KEY_DESC, "Producto sin descripción"));
+    const cod = obtenerValor(item, KEY_CODIGO, "") || "";
+    const cant = Number(obtenerValor(item, KEY_CANTIDAD, 1)) || 1;
+    const stock = obtenerValor(item, KEY_STOCK, null);
+    const precio = Number(obtenerValor(item, KEY_PRECIO, 0)) || 0;
+    const subtotal = cant * precio;
+
+    html += `
+      <div class="item-carrito" data-index="${index}">
+        <div class="item-carrito-descripcion">${desc}</div>
+        ${cod ? `<div class="item-carrito-codigo">Cod: ${cod}</div>` : ""}
+        ${stock !== null && stock !== undefined && stock !== "" ? `
+          <div class="item-carrito-stock">Stock disponible: ${stock}</div>
+        ` : ""}
+
         <div class="item-carrito-controles">
           <div class="item-carrito-cant">
-            <button type="button" onclick="restarCantidad('${item.codigo}')">−</button>
-            <span>${item.cantidad}</span>
-            <button type="button" onclick="sumarCantidad('${item.codigo}')">+</button>
+            <button type="button" class="btn-restar" data-index="${index}">-</button>
+            <span class="item-carrito-cant-valor" id="cant-${index}">${cant}</span>
+            <button type="button" class="btn-sumar" data-index="${index}">+</button>
           </div>
+
           <div class="item-carrito-precios">
-            <span>Subtotal: ${subtotalTxt}</span>
+            <span>Unitario: $${formatearNumero(precio)}</span>
+            <span><strong>Subtotal: $${formatearNumero(subtotal)}</strong></span>
           </div>
-          <button type="button" class="btn-eliminar" onclick="eliminarDelCarrito('${item.codigo}')">
+
+          <button type="button" class="btn-eliminar" data-index="${index}">
             Eliminar
           </button>
         </div>
       </div>
     `;
-  }).join("");
+  });
 
-  contenedor.innerHTML = `
-    <div class="carrito-lista">
-      ${htmlItems}
-    </div>
+  html += `</div>`; // cierre carrito-lista
+
+  html += `
     <div class="total-carrito">
-      <strong>Total (${totalItems} productos):</strong>
-      <div>$ ${total.toLocaleString("es-AR", { minimumFractionDigits: 0 })}</div>
+      Total (${totalItems} productos): 
+      <span>$${formatearNumero(totalGeneral)}</span>
+      <div class="total-carrito-nota">
+        Precios mayoristas estimados. El total final puede variar según stock y actualización de lista.
+      </div>
     </div>
   `;
 
+  contenedor.innerHTML = html;
+
+  // Eventos botones + / - / eliminar
+  contenedor.querySelectorAll(".btn-sumar").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const index = Number(btn.dataset.index);
+      cambiarCantidad(index, +1);
+    });
+  });
+
+  contenedor.querySelectorAll(".btn-restar").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const index = Number(btn.dataset.index);
+      cambiarCantidad(index, -1);
+    });
+  });
+
+  contenedor.querySelectorAll(".btn-eliminar").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const index = Number(btn.dataset.index);
+      eliminarItem(index);
+    });
+  });
+
   actualizarMiniCarrito();
 }
 
-// Operaciones sobre cantidades
-function sumarCantidad(codigo) {
-  let carrito = leerCarrito();
-  const idx = carrito.findIndex(p => p.codigo === codigo);
-  if (idx >= 0) {
-    carrito[idx].cantidad += 1;
-    guardarCarrito(carrito);
-    cargarCarritoPagina();
-  }
-}
+// ----------------------------
+// Acciones sobre ítems
+// ----------------------------
+function cambiarCantidad(index, delta) {
+  const carrito = leerCarrito();
+  if (!carrito[index]) return;
 
-function restarCantidad(codigo) {
-  let carrito = leerCarrito();
-  const idx = carrito.findIndex(p => p.codigo === codigo);
-  if (idx >= 0) {
-    if (carrito[idx].cantidad > 1) {
-      carrito[idx].cantidad -= 1;
-    } else {
-      carrito.splice(idx, 1);
+  if (!KEY_DESC || !KEY_PRECIO) detectarClaves(carrito[0]);
+
+  const item = carrito[index];
+  let cantActual = Number(obtenerValor(item, KEY_CANTIDAD, 1)) || 1;
+  let nuevaCant = cantActual + delta;
+
+  if (nuevaCant < 1) nuevaCant = 1;
+
+  const stock = obtenerValor(item, KEY_STOCK, null);
+  if (stock !== null && stock !== undefined && stock !== "") {
+    const stockNum = Number(stock);
+    if (Number.isFinite(stockNum) && nuevaCant > stockNum) {
+      nuevaCant = stockNum;
     }
-    guardarCarrito(carrito);
-    cargarCarritoPagina();
   }
-}
 
-function eliminarDelCarrito(codigo) {
-  let carrito = leerCarrito();
-  carrito = carrito.filter(p => p.codigo !== codigo);
+  setCantidad(item, nuevaCant);
   guardarCarrito(carrito);
-  cargarCarritoPagina();
+  renderCarritoPagina();
 }
 
-// Enviar el pedido por WhatsApp
+function eliminarItem(index) {
+  const carrito = leerCarrito();
+  if (!carrito[index]) return;
+  carrito.splice(index, 1);
+  guardarCarrito(carrito);
+  renderCarritoPagina();
+}
+
+function vaciarCarrito() {
+  if (!confirm("¿Vaciar todo el carrito?")) return;
+  localStorage.removeItem(CLAVE_CARRITO);
+  renderCarritoPagina();
+  actualizarMiniCarrito();
+}
+
+// ----------------------------
+// WhatsApp
+// ----------------------------
 function enviarCarritoWhatsApp() {
   const carrito = leerCarrito();
-  if (!carrito.length) {
-    alert("Tu carrito está vacío");
+  if (carrito.length === 0) {
+    alert("Tu carrito está vacío. Agregá productos desde el catálogo.");
     return;
   }
 
-  const lineas = [
-    "Hola! Te paso mi pedido mayorista:",
-    ""
-  ];
+  if (!KEY_DESC || !KEY_PRECIO) detectarClaves(carrito[0]);
+  const { totalItems, totalGeneral } = calcularTotales(carrito);
+
+  const lineas = [];
+  lineas.push("Hola! Quiero hacer este pedido mayorista desde la web Delivery Mayorista:");
+  lineas.push("");
 
   carrito.forEach(item => {
-    const precio = Number(item.precio) || 0;
-    const subtotal = precio * (item.cantidad || 0);
-    const subtotalTxt = subtotal
-      ? `$ ${subtotal.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
-      : "Consultar";
+    const desc = String(obtenerValor(item, KEY_DESC, "Producto sin descripción"));
+    const cod = obtenerValor(item, KEY_CODIGO, "");
+    const cant = Number(obtenerValor(item, KEY_CANTIDAD, 1)) || 1;
+    const precio = Number(obtenerValor(item, KEY_PRECIO, 0)) || 0;
+    const subtotal = cant * precio;
 
-    lineas.push(
-      `• ${item.codigo} - ${item.nombre || ""} x ${item.cantidad} (${subtotalTxt})`
-    );
+    let linea = `• ${cant} x ${desc}`;
+    if (cod) linea += ` (Cod: ${cod})`;
+    linea += ` - $${formatearNumero(subtotal)}`;
+
+    lineas.push(linea);
   });
 
-  const total = carrito.reduce((acc, p) => {
-    const precio = Number(p.precio) || 0;
-    return acc + precio * (p.cantidad || 0);
-  }, 0);
-
-  if (total) {
-    lineas.push("", `Total aprox: $ ${total.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`);
-  }
-
-  lineas.push("", "¿Me confirmás disponibilidad y cantidades mínimas?");
+  lineas.push("");
+  lineas.push(`Total estimado (${totalItems} productos): $${formatearNumero(totalGeneral)}`);
+  lineas.push("");
+  lineas.push("Datos del cliente:");
+  lineas.push("- Nombre / Comercio:");
+  lineas.push("- Localidad / Zona:");
+  lineas.push("- Forma de entrega / retiro:");
 
   const mensaje = encodeURIComponent(lineas.join("\n"));
 
-  // Cambiá el número por el tuyo
-  const url = `https://wa.me/54911XXXXXXXX?text=${mensaje}`;
+  if (!TELEFONO_WHATSAPP || TELEFONO_WHATSAPP === "5492610000000") {
+    alert("⚠️ Falta configurar el número de WhatsApp en carrito.js (const TELEFONO_WHATSAPP).");
+    return;
+  }
+
+  const url = `https://wa.me/${TELEFONO_WHATSAPP}?text=${mensaje}`;
   window.open(url, "_blank");
 }
 
-// Inicialización en carrito.html
+// ----------------------------
+// Inicio
+// ----------------------------
 document.addEventListener("DOMContentLoaded", () => {
-  cargarCarritoPagina();
+  renderCarritoPagina();
   actualizarMiniCarrito();
 });
+
+// ----------------------------
+// (Opcional) Función para usar desde catálogo
+// Si en catalogo.html tenés un botón "Agregar al carrito" que pasa un objeto producto,
+// podés llamar a esta función:
+// ----------------------------
+function agregarAlCarrito(producto) {
+  const carrito = leerCarrito();
+
+  // Detectar claves si hace falta
+  if (!KEY_DESC && producto) {
+    detectarClaves(producto);
+  }
+
+  const cod = producto && KEY_CODIGO ? producto[KEY_CODIGO] : null;
+
+  if (cod !== null && cod !== undefined) {
+    const idx = carrito.findIndex(it => KEY_CODIGO && it[KEY_CODIGO] === cod);
+    if (idx !== -1) {
+      // Ya existe, sumamos 1
+      const item = carrito[idx];
+      const cantActual = Number(obtenerValor(item, KEY_CANTIDAD, 1)) || 1;
+      setCantidad(item, cantActual + 1);
+      guardarCarrito(carrito);
+      actualizarMiniCarrito();
+      return;
+    }
+  }
+
+  // Si no existía, lo agregamos con cantidad 1
+  const nuevo = { ...producto };
+  if (!KEY_CANTIDAD) KEY_CANTIDAD = "cantidad";
+  nuevo[KEY_CANTIDAD] = 1;
+
+  carrito.push(nuevo);
+  guardarCarrito(carrito);
+  actualizarMiniCarrito();
+}
