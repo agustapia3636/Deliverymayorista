@@ -403,3 +403,27 @@ body {
     bottom: 210px !important;   /* ← AJUSTÁ ESTE NÚMERO SI QUERÉS */
   }
 }
+/* ======================================= */
+/* CURSOR CLICKEABLE EN CATÁLOGO (REAL)    */
+/* ======================================= */
+
+/* Card completa clickeable */
+.card-producto {
+  cursor: pointer;
+}
+
+/* Imagen dentro de la card clickeable */
+.card-producto .img-placeholder img {
+  cursor: pointer;
+}
+
+/* Título clickeable (si lo tenés dentro de card-body h2) */
+.card-producto .card-body h2 {
+  cursor: pointer;
+}
+
+/* Hover premium (opcional, pero hermoso) */
+.card-producto:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 35px rgba(0, 0, 0, 0.6);
+}
