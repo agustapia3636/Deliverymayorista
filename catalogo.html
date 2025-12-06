@@ -46,28 +46,25 @@
       padding:25px;
     }
 
-    /* Tarjetas de producto (nuevo JS) */
-    .producto-card {
-      position:relative;
-      background:#0c0c17;
-      border-radius:22px;
-      padding:18px 16px 16px;
-      text-align:center;
-      min-height:260px;
-      display:flex;
-      flex-direction:column;
-      justify-content:flex-start;
-      box-shadow:0 0 0 1px rgba(0,0,0,0.25);
-      text-decoration:none;
-      color:inherit;
-      transition:
-        transform .12s ease,
-        box-shadow .12s ease,
-        opacity .35s ease,
-        translate .35s ease;
-      opacity:0;
-      translate:0 10px;
-    }
+.producto-card {
+  position:relative;
+  background:#0c0c17;
+  border-radius:22px;
+  padding:18px 16px 16px;
+  text-align:center;
+  min-height:260px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+  box-shadow:0 0 0 1px rgba(0,0,0,0.25);
+  text-decoration:none;
+  color:inherit;
+
+  /* SIEMPRE VISIBLES */
+  opacity:1;
+  translate:0;
+}
+
 
     .producto-card.visible {
       opacity:1;
