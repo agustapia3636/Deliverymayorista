@@ -1,75 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Mayorista | Catálogo</title>
+
+<style>
+    body {
+        background:#0f0f1a;
+        margin:0;
+        font-family: 'Segoe UI', sans-serif;
+        color:white;
+    }
+
+    header {
+        background: linear-gradient(90deg,#ff005d,#ffa400);
+        padding:15px 25px;
+        font-size:20px;
+        font-weight:700;
+    }
+
+    .toolbar {
+        display:flex;
+        gap:15px;
+        padding:25px;
+        justify-content:center;
+    }
+
+    .toolbar input, .toolbar select {
+        padding:12px 18px;
+        border-radius:30px;
+        border:none;
+        outline:none;
+        font-size:15px;
+    }
+
+    .grid {
+        display:grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap:25px;
+        padding:25px;
+    }
+
+    .card {
+        background:#0c0c17;
+        border-radius:22px;
+        padding:18px;
+        text-align:center;
+        min-height:280px;
+        display:flex;
+        flex-direction:column;
+        justify-content:flex-start;
+    }
+
+    .card img {
+        width:100%;
+        height:150px;
+        object-fit:cover;
+        border-radius:18px;
+        background:#0a0a12;
+    }
+
+    .card strong {
+        display:block;
+        margin-top:10px;
+        font-size:15px;
+        line-height:1.1;
+    }
+
+    .descripcion {
+        opacity:0.80;
+        font-size:13px;
+        margin-top:6px;
+        line-height:1.15;
+    }
+
+    .precio {
+        color:#ffa400;
+        font-weight:700;
+        margin-top:8px;
+    }
+
+    .sin-imagen {
+        width:100%;
+        height:150px;
+        background:#111;
+        border-radius:18px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:14px;
+        opacity:0.8;
+        display:none; /* solo se muestra si falla la imagen */
+    }
+</style>
+</head>
+
+<body>
+
+<header>DELIVERY MAYORISTA</header>
+
+<div class="toolbar">
+    <input id="busqueda" type="text" placeholder="Buscar por código o descripción">
+    <select id="categorias"></select>
+</div>
+
+<div id="grid" class="grid"></div>
+
 <script>
+// Base de imágenes en tu repo
+const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
-function renderizar(lista){
-    const grid = document.getElementById("grid");
-    grid.innerHTML = "";
+let productos = [];
+let categorias = new Set();
 
-    lista.forEach(p => {
-        const codigo       = p["Codigo"] || "";
-        const nombreCorto  = p["Nombre Corto"] || "";
-        const descripcionL = p["Descripción Larga"] || "";
-        const categoria    = p["Categoria Princ"] || "";
-        const precioMayor  = parsearPrecio(p["Precio Mayorista"]);
-        const precioCliente= parsearPrecio(p["Precio Cliente"]);
-        const precioUsado  = precioMayor ?? precioCliente;
-
-        let descCorta = descripcionL.trim();
-        if (descCorta.length > 80) descCorta = descCorta.substring(0, 80) + "...";
-
-        const urlLower = `${BASE_IMG}/${codigo}.jpg`;
-        const urlUpper = `${BASE_IMG}/${codigo}.JPG`;
-
-        const card = document.createElement("a");
-        card.className = "card";
-        card.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
-        card.style.textDecoration = "none";
-        card.style.color = "inherit";
-
-        const contImg = document.createElement("div");
-
-        const img = document.createElement("img");
-        img.alt = `${codigo} - ${nombreCorto}`;
-        img.src = urlLower;
-
-        const placeholder = document.createElement("div");
-        placeholder.className = "sin-imagen";
-        placeholder.textContent = "Sin imagen";
-
-        let intento = 0;
-        img.onerror = () => {
-            if (intento === 0) {
-                img.src = urlUpper;
-                intento++;
-            } else {
-                img.style.display = "none";
-                placeholder.style.display = "flex";
-            }
-        };
-
-        contImg.appendChild(img);
-        contImg.appendChild(placeholder);
-
-        const titulo = document.createElement("strong");
-        titulo.textContent = `${codigo} - ${nombreCorto}`;
-
-        const desc = document.createElement("div");
-        desc.className = "descripcion";
-        desc.textContent = descCorta;
-
-        const precio = document.createElement("div");
-        precio.className = "precio";
-        precio.textContent = precioUsado != null
-            ? `$ ${precioUsado.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
-            : "$ Consultar";
-
-        card.appendChild(contImg);
-        card.appendChild(titulo);
-        card.appendChild(desc);
-        card.appendChild(precio);
-
-        grid.appendChild(card);
-    });
-}
-
-</script>
-
+// Convierte "2276,8" => número
+function parsearPrecio(valor) {
+    if (typeof valor === "number") return valor;
+    if (typeof valor === "string") {
+        const limpio = valor.replace(/\./g, "").replace(",", ".");
+        const num = Number(limpio);
