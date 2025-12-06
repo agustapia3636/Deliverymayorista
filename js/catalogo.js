@@ -199,17 +199,10 @@ function renderProductos(lista) {
       prod["Nombre Corto"],
       "Sin nombre"
     );
-    // Como antes: "N0247 - LLAVERO ..."
-    const nombre = `${codigo} - ${nombreBase}`;
+    // Título como en tu screenshot: N0247 - LLAVERO...
+    const titulo = `${codigo} - ${nombreBase}`;
 
-    const categoria = safe(
-      prod.categoria ||
-      prod.rubro ||
-      prod.cat ||
-      prod["Categoria Princ"],
-      "Sin categoría"
-    );
-    const descCorta = safe(
+    const descLarga = safe(
       prod.descripcionCorta ||
       prod.descripcion_corta ||
       prod.descripcion ||
@@ -229,6 +222,13 @@ function renderProductos(lista) {
     const precioNum = parsearPrecio(brutoPrecio) || 0;
     const precioTexto = formatearPrecio(brutoPrecio);
 
+    // Stock (para mostrar y para carrito)
+    const stockBruto = safe(prod.Stock ?? prod.stock, "");
+    const stockNum = Number(stockBruto) || 0;
+    const stockTexto = stockNum
+      ? `Stock: ${stockNum} unidades`
+      : (stockBruto ? `Stock: ${stockBruto}` : "");
+
     const card = document.createElement("article");
     card.classList.add("producto-card");
 
@@ -237,20 +237,20 @@ function renderProductos(lista) {
       ? `En carrito (${itemCarrito.cantidad})`
       : "Agregar al carrito";
 
-    // 👉 ESTRUCTURA COMO LA QUE TENÍAS ANTES
     card.innerHTML = `
       <div class="producto-img-wrapper">
         <img class="producto-imagen" alt="${nombreBase}">
       </div>
 
       <div class="producto-info">
-        <h3 class="producto-titulo">${nombre}</h3>
-        <p class="producto-descripcion">${descCorta}</p>
-        <p class="producto-categoria">${categoria}</p>
+        <h3 class="producto-titulo">${titulo}</h3>
+        <p class="producto-descripcion">${descLarga}</p>
 
         <div class="producto-precio-row">
           <span class="producto-precio">$ ${precioTexto}</span>
         </div>
+
+        ${stockTexto ? `<p class="producto-stock">${stockTexto}</p>` : ""}
 
         <button class="btn-agregar-carrito">
           ${textoBoton}
@@ -280,10 +280,10 @@ function renderProductos(lista) {
 
       const productoBasico = {
         codigo,
-        nombre: nombreBase,
+        nombre: nombreBase,                 // solo el nombre, sin código
         precio: precioNum,
         img: (img && (img.dataset.srcOk || img.src)) || null,
-        stock: safe(prod.Stock ?? prod.stock, null),
+        stock: stockNum || stockBruto || null,
       };
 
       agregarAlCarritoDesdeCatalogo(productoBasico, btn);
