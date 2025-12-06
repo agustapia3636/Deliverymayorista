@@ -738,17 +738,7 @@ function filtrar(texto, categoria) {
   renderizar(filtrados);
 }
 
-/* ========== INICIO ========== */
-
-cargarSeleccionados();
-actualizarBotonWhatsapp();
-cargarProductos();
-</script>
-
-<!-- CARRITO GLOBAL -->
-<script src="js/carrito.js"></script>
-
-<!-- MINI CARRITO FLOTANTE (CARRITO GLOBAL) -->
+<!-- MINI CARRITO GLOBAL -->
 <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
   <div class="mini-carrito-icono">🛒</div>
   <div class="mini-carrito-texto">
@@ -761,5 +751,7 @@ cargarProductos();
   </div>
 </div>
 
+<!-- SCRIPT DEL CATÁLOGO + CARRITO NUEVO -->
+<script src="js/catalogo.js?v=1"></script>
 </body>
 </html>
