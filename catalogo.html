@@ -1,339 +1,319 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Delivery Mayorista | Catálogo</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Delivery Mayorista | Catálogo</title>
 
-<style>
+  <style>
     body {
-        background:#0f0f1a;
-        margin:0;
-        font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-        color:white;
+      background:#0f0f1a;
+      margin:0;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color:white;
     }
 
     header {
-        background: linear-gradient(90deg,#ff005d,#ffa400);
-        padding:15px 25px;
-        font-size:20px;
-        font-weight:700;
+      background: linear-gradient(90deg,#ff005d,#ffa400);
+      padding:15px 25px;
+      font-size:20px;
+      font-weight:700;
     }
 
     .toolbar {
-        display:flex;
-        gap:15px;
-        padding:25px;
-        justify-content:center;
-        align-items:center;
-        flex-wrap:wrap;
+      display:flex;
+      gap:15px;
+      padding:25px;
+      justify-content:center;
+      align-items:center;
+      flex-wrap:wrap;
     }
 
     .toolbar input,
     .toolbar select {
-        padding:12px 18px;
-        border-radius:30px;
-        border:none;
-        outline:none;
-        font-size:15px;
-        min-width:230px;
+      padding:12px 18px;
+      border-radius:30px;
+      border:none;
+      outline:none;
+      font-size:15px;
+      min-width:230px;
     }
 
     .grid {
-        display:grid;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap:25px;
-        padding:25px;
+      display:grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap:25px;
+      padding:25px;
     }
 
-    .card {
-        position:relative;
-        background:#0c0c17;
-        border-radius:22px;
-        padding:18px 16px 16px;
-        text-align:center;
-        min-height:260px;
-        display:flex;
-        flex-direction:column;
-        justify-content:flex-start;
-        box-shadow:0 0 0 1px rgba(0,0,0,0.25);
-        text-decoration:none;
-        color:inherit;
-        transition:
-          transform .12s ease,
-          box-shadow .12s ease,
-          opacity .35s ease,
-          translate .35s ease;
-        opacity:0;
-        translate:0 10px;
+    /* Tarjetas de producto (nuevo JS) */
+    .producto-card {
+      position:relative;
+      background:#0c0c17;
+      border-radius:22px;
+      padding:18px 16px 16px;
+      text-align:center;
+      min-height:260px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+      box-shadow:0 0 0 1px rgba(0,0,0,0.25);
+      text-decoration:none;
+      color:inherit;
+      transition:
+        transform .12s ease,
+        box-shadow .12s ease,
+        opacity .35s ease,
+        translate .35s ease;
+      opacity:0;
+      translate:0 10px;
     }
 
-    .card.visible {
-        opacity:1;
-        translate:0 0;
+    .producto-card.visible {
+      opacity:1;
+      translate:0 0;
     }
 
-    .card:hover {
-        transform: translateY(-2px);
-        box-shadow:0 10px 24px rgba(0,0,0,0.55);
+    .producto-card:hover {
+      transform: translateY(-2px);
+      box-shadow:0 10px 24px rgba(0,0,0,0.55);
     }
 
-    .card-imgbox {
-        width: 100%;
-        height: 160px;
-        border-radius: 18px;
-        background: #0a0a12;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        position: relative;
-        margin-bottom:10px;
+    .producto-link {
+      text-decoration:none;
+      color:inherit;
+      display:block;
+      flex:1;
     }
 
-    .card img {
-        max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-        border-radius: 16px;
-        display: block;
+    .producto-imagen-wrapper {
+      width: 100%;
+      height: 160px;
+      border-radius: 18px;
+      background: #0a0a12;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      position: relative;
+      margin-bottom:10px;
     }
 
-    .sin-imagen {
-        position: absolute;
-        inset: 0;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        font-size: 14px;
-        opacity: 0.8;
-        background: #111;
-        border-radius: 18px;
+    .producto-imagen {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 16px;
+      display: block;
     }
 
-    .card strong {
-        display:block;
-        margin-top:2px;
-        font-size:15px;
-        line-height:1.15;
+    .sin-imagen-texto {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      opacity: 0.8;
+      background: #111;
+      border-radius: 18px;
     }
 
-    .descripcion {
-        opacity:0.80;
-        font-size:13px;
-        margin-top:6px;
-        line-height:1.25;
-        min-height:36px;
+    .producto-titulo {
+      margin-top:2px;
+      font-size:15px;
+      line-height:1.15;
     }
 
-    .precio {
-        color:#ffa400;
-        font-weight:700;
-        margin-top:10px;
-        font-size:15px;
+    .producto-descripcion {
+      opacity:0.80;
+      font-size:13px;
+      margin-top:6px;
+      line-height:1.25;
+      min-height:36px;
     }
 
-    .stock-line {
-        margin-top:4px;
-        font-size:12px;
-        opacity:0.85;
+    .producto-categoria {
+      opacity:0.75;
+      font-size:12px;
+      margin-top:4px;
     }
 
-    /* BADGE DE STOCK */
-    .badge-stock {
-        position:absolute;
-        top:10px;
-        left:10px;
-        padding:4px 8px;
-        border-radius:12px;
-        font-size:11px;
-        font-weight:600;
-        text-transform:uppercase;
-        letter-spacing:.02em;
-        background:#22263a;
-    }
-    .badge-stock.sin {
-        background:#4a1015;
-        color:#ff9b9f;
-    }
-    .badge-stock.pocas {
-        background:#4a3b10;
-        color:#ffe58f;
+    .producto-precio {
+      color:#ffa400;
+      font-weight:700;
+      margin-top:10px;
+      font-size:15px;
     }
 
-    .card.sin-stock {
-        opacity:0.65;
+    .producto-acciones {
+      margin-top:8px;
+      display:flex;
+      justify-content:center;
     }
 
-    /* BOTÓN AGREGAR A CARRITO */
-    .btn-seleccionar {
-        margin-top:8px;
-        align-self:center;
-        padding:6px 12px;
-        border-radius:999px;
-        border:none;
-        font-size:12px;
-        cursor:pointer;
-        background:#202432;
-        color:#fff;
-        display:inline-flex;
-        align-items:center;
-        gap:6px;
+    /* Botón agregar a carrito (usado por catalogo.js) */
+    .btn-agregar-carrito {
+      padding:6px 12px;
+      border-radius:999px;
+      border:none;
+      font-size:12px;
+      cursor:pointer;
+      background:#202432;
+      color:#fff;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
     }
-    .btn-seleccionar.activo {
-        background:#1ebe57;
-    }
-    .btn-seleccionar:disabled {
-        opacity:0.5;
-        cursor:default;
+
+    .btn-agregar-carrito-activo {
+      background:#1ebe57;
     }
 
     @media (max-width: 768px) {
-        header {
-            text-align:center;
-            font-size:18px;
-        }
+      header {
+        text-align:center;
+        font-size:18px;
+      }
 
-        .toolbar {
-            padding:18px 12px 10px;
-            gap:10px;
-        }
+      .toolbar {
+        padding:18px 12px 10px;
+        gap:10px;
+      }
 
-        .toolbar input,
-        .toolbar select {
-            width:100%;
-            max-width:420px;
-            font-size:14px;
-        }
+      .toolbar input,
+      .toolbar select {
+        width:100%;
+        max-width:420px;
+        font-size:14px;
+      }
 
-        .grid {
-            padding:16px 12px 28px;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap:18px;
-        }
+      .grid {
+        padding:16px 12px 28px;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap:18px;
+      }
 
-        .card {
-            padding:14px 12px 14px;
-            border-radius:18px;
-        }
+      .producto-card {
+        padding:14px 12px 14px;
+        border-radius:18px;
+      }
 
-        .card-imgbox {
-            height:150px;
-        }
+      .producto-imagen-wrapper {
+        height:150px;
+      }
 
-        .card strong {
-            font-size:14px;
-        }
+      .producto-titulo {
+        font-size:14px;
+      }
 
-        .descripcion {
-            font-size:12px;
-            min-height:32px;
-        }
+      .producto-descripcion {
+        font-size:12px;
+        min-height:32px;
+      }
 
-        .precio {
-            font-size:14px;
-        }
+      .producto-precio {
+        font-size:14px;
+      }
     }
 
     @media (max-width: 480px) {
-        .grid {
-            grid-template-columns: 1fr;
-            gap:22px;
-        }
+      .grid {
+        grid-template-columns: 1fr;
+        gap:22px;
+      }
 
-        .card {
-            padding:16px 14px 16px;
-        }
+      .producto-card {
+        padding:16px 14px 16px;
+      }
 
-        .card-imgbox {
-            height:150px;
-        }
+      .producto-imagen-wrapper {
+        height:150px;
+      }
 
-        .card strong {
-            font-size:16px;
-        }
+      .producto-titulo {
+        font-size:16px;
+      }
 
-        .descripcion {
-            font-size:13px;
-            min-height:38px;
-        }
+      .producto-descripcion {
+        font-size:13px;
+        min-height:38px;
+      }
 
-        .precio {
-            font-size:16px;
-        }
+      .producto-precio {
+        font-size:16px;
+      }
     }
 
-    /* BOTÓN FLOTANTE WHATSAPP EN CATÁLOGO */
+    /* BOTÓN FLOTANTE WHATSAPP EN CATÁLOGO (simple, link fijo) */
     .btn-wa-flotante {
-        position:fixed;
-        right:18px;
-        bottom:18px;
-        background:#25D366;
-        color:#fff;
-        padding:10px 16px;
-        border-radius:24px;
-        font-weight:600;
-        font-size:14px;
-        text-decoration:none;
-        box-shadow:0 10px 24px rgba(0,0,0,.45);
-        z-index:999;
-        transition:transform .08s ease, filter .08s ease;
+      position:fixed;
+      right:18px;
+      bottom:18px;
+      background:#25D366;
+      color:#fff;
+      padding:10px 16px;
+      border-radius:24px;
+      font-weight:600;
+      font-size:14px;
+      text-decoration:none;
+      box-shadow:0 10px 24px rgba(0,0,0,.45);
+      z-index:999;
+      transition:transform .08s ease, filter .08s ease;
     }
     .btn-wa-flotante:hover {
-        filter:brightness(1.06);
-        transform:translateY(-1px);
+      filter:brightness(1.06);
+      transform:translateY(-1px);
     }
     @media (max-width:768px){
-        .btn-wa-flotante{
-            bottom:80px;
-            right:12px;
-            font-size:13px;
-            padding:9px 14px;
-        }
-/* ---------------------------
-   MINI CARRITO FLOTANTE
---------------------------- */
+      .btn-wa-flotante{
+        bottom:80px;
+        right:12px;
+        font-size:13px;
+        padding:9px 14px;
+      }
+    }
 
-.mini-carrito {
-  position: fixed;
-  right: 16px;
-  bottom: 100px;            /* POSICIÓN EN ESCRITORIO */
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #ffffff;
-  padding: 8px 12px;
-  border-radius: 999px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-  cursor: pointer;
-  z-index: 9999;
-  font-size: 13px;
-  color: #000;
-}
+    /* MINI CARRITO FLOTANTE (usa mini-carrito-cantidad / total) */
+    .mini-carrito {
+      position: fixed;
+      right: 16px;
+      bottom: 100px;            /* POSICIÓN EN ESCRITORIO */
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      padding: 8px 12px;
+      border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      cursor: pointer;
+      z-index: 9999;
+      font-size: 13px;
+      color: #000;
+    }
 
-.mini-carrito-icono {
-  font-size: 18px;
-}
+    .mini-carrito-icono {
+      font-size: 18px;
+    }
 
-.mini-carrito-texto {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
+    .mini-carrito-texto {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
 
-.mini-carrito-linea {
-  white-space: nowrap;
-  font-weight: 500;
-}
+    .mini-carrito-linea {
+      white-space: nowrap;
+      font-weight: 500;
+    }
 
-/* SOLO EN CELULAR: subir el mini carrito para que no tape el botón de WhatsApp */
-@media (max-width: 768px) {
-  #mini-carrito {
-    bottom: 150px !important;  /* probá 150px, si lo querés más arriba subí a 160/170 */
-  }
-}
-
-</style>
+    /* SOLO EN CELULAR: subir un poco el mini carrito para que no tape el botón de WhatsApp */
+    @media (max-width: 768px) {
+      #mini-carrito {
+        bottom: 150px !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -351,396 +331,15 @@
 
 <div id="lista-productos" class="grid"></div>
 
-<!-- Botón flotante de WhatsApp (se completa por JS) -->
+<!-- Botón flotante de WhatsApp (mensaje simple genérico) -->
 <a
   id="wa-flotante"
   class="btn-wa-flotante"
-  href="#"
+  href="https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista."
   target="_blank"
 >
   WhatsApp Mayorista
 </a>
-
-<script>
-const BASE_IMG =
-  "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
-
-let productos = [];
-let categorias = new Set();
-let observer = null;
-
-// lista seleccionada para enviar por WhatsApp
-// {codigo, nombre, precio, cantidad}
-let seleccionados = [];
-
-/* ========== UTILIDADES ========== */
-
-// "1992,2" -> 1992.2
-function parsearPrecio(valor) {
-  if (typeof valor === "number") return valor;
-  if (typeof valor === "string") {
-    const limpio = valor.replace(/\./g, "").replace(",", ".");
-    const num = Number(limpio);
-    return isNaN(num) ? null : num;
-  }
-  return null;
-}
-
-function cargarSeleccionados() {
-  try {
-    const raw = localStorage.getItem("dm_sel");
-    if (raw) {
-      const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) {
-        seleccionados = arr
-          .map((o) => {
-            if (!o || typeof o !== "object") return null;
-            return {
-              codigo: o.codigo,
-              nombre: o.nombre || "",
-              precio: typeof o.precio === "number" ? o.precio : null,
-              cantidad:
-                typeof o.cantidad === "number" && o.cantidad > 0
-                  ? o.cantidad
-                  : 1,
-            };
-          })
-          .filter(Boolean);
-      }
-    }
-  } catch (e) {
-    seleccionados = [];
-  }
-}
-
-function guardarSeleccionados() {
-  try {
-    localStorage.setItem("dm_sel", JSON.stringify(seleccionados));
-  } catch (e) {
-    // ignorar
-  }
-}
-
-function estaSeleccionado(codigo) {
-  return seleccionados.some((p) => p.codigo === codigo);
-}
-
-function getSeleccion(codigo) {
-  return seleccionados.find((p) => p.codigo === codigo) || null;
-}
-
-function setSeleccion(prod, cantidad) {
-  const codigo = prod["Codigo"];
-  const nombre = prod["Nombre Corto"] || "";
-  const precioMayor = parsearPrecio(prod["Precio Mayorista"]);
-  const precioCliente = parsearPrecio(prod["Precio Cliente"]);
-  const precioUsado = precioMayor ?? precioCliente ?? null;
-
-  const idx = seleccionados.findIndex((p) => p.codigo === codigo);
-  const obj = { codigo, nombre, precio: precioUsado, cantidad };
-
-  if (idx >= 0) seleccionados[idx] = obj;
-  else seleccionados.push(obj);
-
-  guardarSeleccionados();
-}
-
-function quitarSeleccion(codigo) {
-  const idx = seleccionados.findIndex((p) => p.codigo === codigo);
-  if (idx >= 0) {
-    seleccionados.splice(idx, 1);
-    guardarSeleccionados();
-  }
-}
-
-function actualizarBotonWhatsapp() {
-  const btn = document.getElementById("wa-flotante");
-  if (!btn) return;
-
-  if (!seleccionados.length) {
-    btn.textContent = "WhatsApp Mayorista";
-    btn.href =
-      "https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista.";
-    return;
-  }
-
-  btn.textContent = `Enviar lista (${seleccionados.length})`;
-
-  const lineas = [
-    "Hola! Te paso una lista de productos que me interesan:",
-    "",
-  ];
-
-  seleccionados.forEach((p) => {
-    const cantTxt = p.cantidad ? ` x ${p.cantidad}` : "";
-    let precioTxt = "Precio: Consultar";
-    if (p.precio != null) {
-      precioTxt = `$ ${p.precio.toLocaleString("es-AR", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      })}`;
-    }
-    lineas.push(`• ${p.codigo} - ${p.nombre}${cantTxt} (${precioTxt})`);
-  });
-
-  lineas.push("", "¿Me pasás disponibilidad y cantidades mínimas?");
-
-  const mensaje = lineas.join("\n");
-  btn.href = `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-}
-
-/* ========== CARGA DE PRODUCTOS ========== */
-
-async function cargarProductos() {
-  try {
-    const res = await fetch("./productos.json");
-    const data = await res.json();
-    productos = Array.isArray(data) ? data : data.productos || [];
-
-    productos.forEach((p) => {
-      if (p["Categoria Princ"]) categorias.add(p["Categoria Princ"]);
-    });
-
-    cargarCategorias();
-    renderizar(productos);
-  } catch (e) {
-    console.error("Error cargando productos.json", e);
-  }
-}
-
-function cargarCategorias() {
-  const select = document.getElementById("categorias");
-  select.innerHTML = `<option value="todos">Todas las categorías</option>`;
-  categorias.forEach((c) => {
-    select.innerHTML += `<option value="${c}">${c}</option>`;
-  });
-}
-
-function prepararAnimaciones() {
-  const cards = document.querySelectorAll(".card");
-
-  if (!("IntersectionObserver" in window)) {
-    cards.forEach((c) => c.classList.add("visible"));
-    return;
-  }
-
-  if (observer) observer.disconnect();
-
-  observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("visible");
-          observer.unobserve(entry.target);
-        }
-      });
-    },
-    { threshold: 0.15 }
-  );
-
-  cards.forEach((c) => observer.observe(c));
-}
-
-function renderizar(lista) {
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "";
-
-  lista.forEach((p) => {
-    const codigo = p["Codigo"] || "";
-    const nombreCorto = p["Nombre Corto"] || "";
-    const descripcionL = p["Descripción Larga"] || "";
-    const precioMayor = parsearPrecio(p["Precio Mayorista"]);
-    const precioCliente = parsearPrecio(p["Precio Cliente"]);
-    const precioUsado = precioMayor ?? precioCliente;
-    const stockRaw = p["Stock"];
-    const stockNum = Number(stockRaw);
-
-    let descCorta = (descripcionL || "").trim();
-    if (descCorta.length > 80) descCorta = descCorta.substring(0, 80) + "...";
-
-    const urlLower = `${BASE_IMG}/${codigo}.jpg`;
-    const urlUpper = `${BASE_IMG}/${codigo}.JPG`;
-
-    const card = document.createElement("a");
-    card.className = "card";
-    card.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
-    card.style.textDecoration = "none";
-    card.style.color = "inherit";
-
-    const contImg = document.createElement("div");
-    contImg.className = "card-imgbox";
-
-    const img = document.createElement("img");
-    img.alt = `${codigo} - ${nombreCorto}`;
-    img.src = urlLower;
-
-    const placeholder = document.createElement("div");
-    placeholder.className = "sin-imagen";
-    placeholder.textContent = "Sin imagen";
-
-    let intento = 0;
-    img.onerror = () => {
-      if (intento === 0) {
-        img.src = urlUpper;
-        intento++;
-      } else {
-        img.style.display = "none";
-        placeholder.style.display = "flex";
-      }
-    };
-
-    contImg.appendChild(img);
-    contImg.appendChild(placeholder);
-
-    const titulo = document.createElement("strong");
-    titulo.textContent = `${codigo} - ${nombreCorto}`;
-
-    const desc = document.createElement("div");
-    desc.className = "descripcion";
-    desc.textContent = descCorta;
-
-    const precioDiv = document.createElement("div");
-    precioDiv.className = "precio";
-    precioDiv.textContent =
-      precioUsado != null
-        ? `$ ${precioUsado.toLocaleString("es-AR", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          })}`
-        : "$ Consultar";
-
-    // línea de stock
-    const stockDiv = document.createElement("div");
-    stockDiv.className = "stock-line";
-    if (!isNaN(stockNum)) {
-      if (stockNum === 0) stockDiv.textContent = "Sin stock";
-      else stockDiv.textContent = `Stock: ${stockNum} unidades`;
-    } else {
-      stockDiv.textContent = "";
-    }
-
-    // Badge de stock (sin y pocas unidades)
-    let badgeText = "";
-    let badgeClass = "";
-    if (!isNaN(stockNum)) {
-      if (stockNum === 0) {
-        badgeText = "Sin stock";
-        badgeClass = "sin";
-        card.classList.add("sin-stock");
-      } else if (stockNum > 0 && stockNum <= 5) {
-        badgeText = "Pocas unidades";
-        badgeClass = "pocas";
-      }
-    }
-
-    if (badgeText) {
-      const badge = document.createElement("div");
-      badge.className = `badge-stock ${badgeClass}`;
-      badge.textContent = badgeText;
-      card.appendChild(badge);
-    }
-
-    card.appendChild(contImg);
-    card.appendChild(titulo);
-    card.appendChild(desc);
-    card.appendChild(precioDiv);
-    card.appendChild(stockDiv);
-
-    // Botón agregar / actualizar carrito (lista de WhatsApp)
-    const btnSel = document.createElement("button");
-    btnSel.type = "button";
-    btnSel.className = "btn-seleccionar";
-
-    const seleccion = getSeleccion(codigo);
-    if (seleccion) {
-      btnSel.classList.add("activo");
-      btnSel.textContent = `En carrito (${seleccion.cantidad})`;
-    } else {
-      btnSel.textContent = "Agregar al carrito";
-    }
-
-    // Si no hay stock numérico o es 0, deshabilitar botón
-    if (!isNaN(stockNum) && stockNum === 0) {
-      btnSel.disabled = true;
-      btnSel.textContent = "Sin stock";
-    }
-
-    btnSel.addEventListener("click", (ev) => {
-      ev.preventDefault();   // que no navegue al producto
-      ev.stopPropagation();
-
-      if (!isNaN(stockNum) && stockNum === 0) {
-        return;
-      }
-
-      const selActual = getSeleccion(codigo);
-      const maxTxt = !isNaN(stockNum) && stockNum > 0 ? ` (máx ${stockNum})` : "";
-      const valorDefault = selActual ? String(selActual.cantidad) : "1";
-
-      const respuesta = prompt(
-        `¿Cuántas unidades querés?${maxTxt}`,
-        valorDefault
-      );
-
-      if (respuesta === null) {
-        return; // canceló
-      }
-
-      let cant = Number(respuesta.replace(",", "."));
-      if (!Number.isFinite(cant) || cant <= 0) {
-        // si pone 0 o algo inválido → quitar del carrito
-        quitarSeleccion(codigo);
-        btnSel.classList.remove("activo");
-        btnSel.textContent = "Agregar al carrito";
-        actualizarBotonWhatsapp();
-        return;
-      }
-
-      if (!isNaN(stockNum) && stockNum > 0 && cant > stockNum) {
-        cant = stockNum;
-      }
-
-      setSeleccion(p, cant);
-      btnSel.classList.add("activo");
-      btnSel.textContent = `En carrito (${cant})`;
-      actualizarBotonWhatsapp();
-    });
-
-    card.appendChild(btnSel);
-
-    grid.appendChild(card);
-  });
-
-  prepararAnimaciones();
-}
-
-/* ========== FILTROS ========== */
-
-document.getElementById("busqueda").addEventListener("input", (e) => {
-  const val = e.target.value.toLowerCase();
-  filtrar(val, document.getElementById("categorias").value);
-});
-
-document.getElementById("categorias").addEventListener("change", (e) => {
-  filtrar(document.getElementById("busqueda").value.toLowerCase(), e.target.value);
-});
-
-function filtrar(texto, categoria) {
-  let filtrados = productos.filter((p) => {
-    const codigo = (p["Codigo"] || "").toString().toLowerCase();
-    const nombreCorto = (p["Nombre Corto"] || "").toLowerCase();
-    const cat = p["Categoria Princ"] || "";
-
-    const pasaTexto =
-      !texto || codigo.includes(texto) || nombreCorto.includes(texto);
-
-    const pasaCat = categoria === "todos" || cat === categoria;
-
-    return pasaTexto && pasaCat;
-  });
-
-  renderizar(filtrados);
-}
 
 <!-- MINI CARRITO GLOBAL -->
 <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
