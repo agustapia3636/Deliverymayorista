@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Carrito | Delivery Mayorista</title>
+  <link rel="stylesheet" href="css/estilos.css">
+
+  <style>
+    /* Ajustes visuales para la página del carrito */
+    body {
+      background:#0f0f1a;
+      margin:0;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color:white;
+    }
+
+    header.topbar {
+      background: linear-gradient(90deg,#ff005d,#ffa400);
+      padding:15px 25px;
+    }
+    .topbar-inner {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      max-width:1100px;
+      margin:0 auto;
+    }
+    .logo-link {
+      color:#fff;
+      font-weight:700;
+      font-size:20px;
+      text-decoration:none;
+    }
+    .topbar-link {
+      color:#fff;
+      text-decoration:none;
+      font-size:14px;
+      font-weight:500;
+    }
+
+    main.carrito-pagina {
+      max-width: 1100px;
+      margin: 90px auto 40px;
+      padding: 0 16px;
+    }
+
+    .carrito-pagina h1 {
+      font-size: 24px;
+      margin-bottom: 16px;
+    }
+
+    .carrito-vacio {
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .carrito-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item-carrito {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #141420;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    }
+
+    .item-carrito-descripcion {
+      font-size: 14px;
+    }
+
+    .item-carrito-codigo,
+    .item-carrito-stock {
+      font-size: 12px;
+      color: #aaa;
+    }
+
+    .item-carrito-controles {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .item-carrito-cant {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .item-carrito-cant button {
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: #f1f1f1;
+      cursor: pointer;
+    }
+
+    .item-carrito-precios {
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+      text-align: right;
+    }
+
+    .btn-eliminar {
+      border: none;
+      padding: 6px 10px;
+      border-radius: 4px;
+      background: #ffdddd;
+      color: #990000;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .total-carrito {
+      margin-top: 16px;
+      text-align: right;
+    }
+
+    .carrito-acciones {
+      margin-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-volver {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      color:#fff;
+    }
+
+    .btn-whatsapp-carrito {
+      border: none;
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      background: #25D366;
+      color: #ffffff;
+      cursor: pointer;
+    }
+
+    @media (max-width: 600px) {
+      .carrito-acciones {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn-whatsapp-carrito,
+      .btn-volver {
+        width: 100%;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="logo-link">Delivery Mayorista</a>
+    <a href="catalogo.html" class="topbar-link">Ver catálogo</a>
+  </div>
+</header>
+
+<main class="carrito-pagina">
+  <h1>Tu carrito</h1>
+
+  <div id="carrito"></div>
+
+  <div class="carrito-acciones">
+    <a href="catalogo.html" class="btn-volver">← Seguir comprando</a>
+    <button type="button" class="btn-whatsapp-carrito" onclick="enviarCarritoWhatsApp()">
+      Enviar pedido por WhatsApp
+    </button>
+  </div>
+</main>
+
+<!-- Mini carrito también acá para consistencia -->
+<div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
+  <div class="mini-carrito-icono">🛒</div>
+  <div class="mini-carrito-texto">
+    <span class="mini-carrito-linea">
+      <span id="mini-carrito-cantidad">0</span> productos
+    </span>
+    <span class="mini-carrito-linea">
+      $<span id="mini-carrito-total">0</span>
+    </span>
+  </div>
+</div>
+
+<script src="js/carrito.js"></script>
+</body>
+</html>
