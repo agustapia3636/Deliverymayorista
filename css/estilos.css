@@ -403,39 +403,3 @@ body {
     bottom: 210px !important;   /* ← AJUSTÁ ESTE NÚMERO SI QUERÉS */
   }
 }
-/* === CLICK INVISIBLE EN CATALOGO === */
-
-/* Quita estilo de link del título */
-.producto-titulo-link {
-  text-decoration: none !important;
-  color: white !important;
-  cursor: pointer;
-}
-
-/* Imagen clickeable sin borde ni subrayado */
-.producto-link {
-  text-decoration: none !important;
-  cursor: pointer;
-}
-
-/* Evitar efecto al pasar el mouse */
-.producto-link:hover,
-.producto-titulo-link:hover {
-  text-decoration: none !important;
-  color: white !important;
-}
-
-/* Mantiene el diseño anterior en tarjetas */
-.producto-card {
-  border-radius: 18px;
-  background: #141420;
-  padding: 18px;
-  box-shadow: 0 5px 14px rgba(0,0,0,.35);
-}
-
-.producto-imagen {
-  display: block;
-  width: 100%;
-  object-fit: cover;
-  border-radius: 14px;
-}
