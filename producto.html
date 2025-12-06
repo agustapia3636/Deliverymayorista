@@ -19,6 +19,14 @@
       align-items: flex-start;
       justify-content: center;
       gap: 48px;
+
+      opacity:0;
+      transform:translateY(10px);
+      transition:opacity .35s ease, transform .35s ease;
+    }
+    main.producto-pagina .producto-wrapper.visible {
+      opacity:1;
+      transform:translateY(0);
     }
 
     .producto-imagen {
@@ -84,6 +92,19 @@
       flex-wrap: wrap;
     }
 
+    /* COLORES DE STOCK */
+    .producto-stock {
+      margin-top:6px;
+    }
+    .producto-stock.stock-sin {
+      color:#ff4d4f;
+      font-weight:600;
+    }
+    .producto-stock.stock-bajo {
+      color:#ffd666;
+      font-weight:600;
+    }
+
     /* ====== MOBILE / TABLET ====== */
     @media (max-width: 900px) {
       main.producto-pagina {
@@ -101,7 +122,6 @@
         width: 100%;
       }
 
-      /* 🔥 Forzamos que todo el texto vaya en una columna */
       .producto-info {
         display: block !important;
       }
@@ -223,6 +243,7 @@
         const precioCliente = parsearPrecio(prod["Precio Cliente"]);
         const precioUsado = precioMayor ?? precioCliente;
         const stock = prod["Stock"];
+        const stockNum = Number(stock);
 
         /* ========== IMAGEN ========== */
         const imgPrincipal = document.getElementById("imagen-principal");
@@ -255,8 +276,16 @@
               })}`
             : "";
 
-        const stockTexto =
-          stock != null ? `Stock: ${stock} unidades` : "";
+        // stock con clase según cantidad
+        let stockHtml = "";
+        if (stock != null && stock !== "") {
+          let cls = "producto-stock";
+          if (!isNaN(stockNum)) {
+            if (stockNum === 0) cls += " stock-sin";
+            else if (stockNum > 0 && stockNum <= 5) cls += " stock-bajo";
+          }
+          stockHtml = `<p class="${cls}">Stock: ${stock} unidades</p>`;
+        }
 
         infoDiv.innerHTML = `
           <p class="producto-codigo">${codigo}</p>
@@ -268,7 +297,7 @@
               : ""
           }
           ${precioTexto ? `<p class="producto-precio">${precioTexto}</p>` : ""}
-          ${stockTexto ? `<p class="producto-stock">${stockTexto}</p>` : ""}
+          ${stockHtml}
           <div class="producto-acciones">
             <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
             <a href="${armarLinkWhatsApp(prod)}" target="_blank" class="btn-whatsapp">
@@ -293,6 +322,10 @@
             <button class="btn-nav" onclick="irAProducto('${codSig}')">${codSig} →</button>
           `;
         }
+
+        // mostrar animación wrapper
+        const wrapper = document.querySelector(".producto-wrapper");
+        if (wrapper) wrapper.classList.add("visible");
       } catch (err) {
         console.error("Error en cargarProducto:", err);
         const infoDiv = document.getElementById("producto-info");
