@@ -133,6 +133,12 @@
         font-size:15px;
     }
 
+    .stock-line {
+        margin-top:4px;
+        font-size:12px;
+        opacity:0.85;
+    }
+
     /* BADGE DE STOCK */
     .badge-stock {
         position:absolute;
@@ -159,7 +165,7 @@
         opacity:0.65;
     }
 
-    /* BOTÓN AGREGAR A LISTA */
+    /* BOTÓN AGREGAR A CARRITO */
     .btn-seleccionar {
         margin-top:8px;
         align-self:center;
@@ -176,6 +182,10 @@
     }
     .btn-seleccionar.activo {
         background:#1ebe57;
+    }
+    .btn-seleccionar:disabled {
+        opacity:0.5;
+        cursor:default;
     }
 
     @media (max-width: 768px) {
@@ -314,6 +324,7 @@ let categorias = new Set();
 let observer = null;
 
 // lista seleccionada para enviar por WhatsApp
+// {codigo, nombre, precio, cantidad}
 let seleccionados = [];
 
 /* ========== UTILIDADES ========== */
@@ -334,7 +345,18 @@ function cargarSeleccionados() {
     const raw = localStorage.getItem("dm_sel");
     if (raw) {
       const arr = JSON.parse(raw);
-      if (Array.isArray(arr)) seleccionados = arr;
+      if (Array.isArray(arr)) {
+        seleccionados = arr.map((o) => {
+          if (!o || typeof o !== "object") return null;
+          return {
+            codigo: o.codigo,
+            nombre: o.nombre || "",
+            precio: typeof o.precio === "number" ? o.precio : null,
+            cantidad:
+              typeof o.cantidad === "number" && o.cantidad > 0 ? o.cantidad : 1,
+          };
+        }).filter(Boolean);
+      }
     }
   } catch (e) {
     seleccionados = [];
@@ -353,7 +375,11 @@ function estaSeleccionado(codigo) {
   return seleccionados.some((p) => p.codigo === codigo);
 }
 
-function toggleSeleccion(prod) {
+function getSeleccion(codigo) {
+  return seleccionados.find((p) => p.codigo === codigo) || null;
+}
+
+function setSeleccion(prod, cantidad) {
   const codigo = prod["Codigo"];
   const nombre = prod["Nombre Corto"] || "";
   const precioMayor = parsearPrecio(prod["Precio Mayorista"]);
@@ -361,16 +387,20 @@ function toggleSeleccion(prod) {
   const precioUsado = precioMayor ?? precioCliente ?? null;
 
   const idx = seleccionados.findIndex((p) => p.codigo === codigo);
+  const obj = { codigo, nombre, precio: precioUsado, cantidad };
+
+  if (idx >= 0) seleccionados[idx] = obj;
+  else seleccionados.push(obj);
+
+  guardarSeleccionados();
+}
+
+function quitarSeleccion(codigo) {
+  const idx = seleccionados.findIndex((p) => p.codigo === codigo);
   if (idx >= 0) {
     seleccionados.splice(idx, 1);
-  } else {
-    seleccionados.push({
-      codigo,
-      nombre,
-      precio: precioUsado,
-    });
+    guardarSeleccionados();
   }
-  guardarSeleccionados();
 }
 
 function actualizarBotonWhatsapp() {
@@ -392,6 +422,7 @@ function actualizarBotonWhatsapp() {
   ];
 
   seleccionados.forEach((p) => {
+    const cantTxt = p.cantidad ? ` x ${p.cantidad}` : "";
     let precioTxt = "Precio: Consultar";
     if (p.precio != null) {
       precioTxt = `$ ${p.precio.toLocaleString("es-AR", {
@@ -399,7 +430,7 @@ function actualizarBotonWhatsapp() {
         maximumFractionDigits: 0,
       })}`;
     }
-    lineas.push(`• ${p.codigo} - ${p.nombre} (${precioTxt})`);
+    lineas.push(`• ${p.codigo} - ${p.nombre}${cantTxt} (${precioTxt})`);
   });
 
   lineas.push("", "¿Me pasás disponibilidad y cantidades mínimas?");
@@ -474,7 +505,7 @@ function renderizar(lista) {
     const stockRaw = p["Stock"];
     const stockNum = Number(stockRaw);
 
-    let descCorta = descripcionL.trim();
+    let descCorta = (descripcionL || "").trim();
     if (descCorta.length > 80) descCorta = descCorta.substring(0, 80) + "...";
 
     const urlLower = `${BASE_IMG}/${codigo}.jpg`;
@@ -528,7 +559,17 @@ function renderizar(lista) {
           })}`
         : "$ Consultar";
 
-    // Badge de stock
+    // línea de stock
+    const stockDiv = document.createElement("div");
+    stockDiv.className = "stock-line";
+    if (!isNaN(stockNum)) {
+      if (stockNum === 0) stockDiv.textContent = "Sin stock";
+      else stockDiv.textContent = `Stock: ${stockNum} unidades`;
+    } else {
+      stockDiv.textContent = "";
+    }
+
+    // Badge de stock (sin y pocas unidades)
     let badgeText = "";
     let badgeClass = "";
     if (!isNaN(stockNum)) {
@@ -553,32 +594,65 @@ function renderizar(lista) {
     card.appendChild(titulo);
     card.appendChild(desc);
     card.appendChild(precioDiv);
+    card.appendChild(stockDiv);
 
-    // Botón agregar / quitar de lista
+    // Botón agregar / actualizar carrito
     const btnSel = document.createElement("button");
     btnSel.type = "button";
     btnSel.className = "btn-seleccionar";
-    if (estaSeleccionado(codigo)) {
+
+    const seleccion = getSeleccion(codigo);
+    if (seleccion) {
       btnSel.classList.add("activo");
-      btnSel.textContent = "Quitar de la lista";
+      btnSel.textContent = `En carrito (${seleccion.cantidad})`;
     } else {
-      btnSel.textContent = "Agregar a lista";
+      btnSel.textContent = "Agregar al carrito";
+    }
+
+    // Si no hay stock numérico o es 0, deshabilitar botón
+    if (!isNaN(stockNum) && stockNum === 0) {
+      btnSel.disabled = true;
+      btnSel.textContent = "Sin stock";
     }
 
     btnSel.addEventListener("click", (ev) => {
       ev.preventDefault();   // que no navegue al producto
       ev.stopPropagation();
 
-      toggleSeleccion(p);
-
-      if (estaSeleccionado(codigo)) {
-        btnSel.classList.add("activo");
-        btnSel.textContent = "Quitar de la lista";
-      } else {
-        btnSel.classList.remove("activo");
-        btnSel.textContent = "Agregar a lista";
+      if (!isNaN(stockNum) && stockNum === 0) {
+        return;
       }
 
+      const selActual = getSeleccion(codigo);
+      const maxTxt = !isNaN(stockNum) && stockNum > 0 ? ` (máx ${stockNum})` : "";
+      const valorDefault = selActual ? String(selActual.cantidad) : "1";
+
+      const respuesta = prompt(
+        `¿Cuántas unidades querés?${maxTxt}`,
+        valorDefault
+      );
+
+      if (respuesta === null) {
+        return; // canceló
+      }
+
+      let cant = Number(respuesta.replace(",", "."));
+      if (!Number.isFinite(cant) || cant <= 0) {
+        // si pone 0 o algo inválido → quitar del carrito
+        quitarSeleccion(codigo);
+        btnSel.classList.remove("activo");
+        btnSel.textContent = "Agregar al carrito";
+        actualizarBotonWhatsapp();
+        return;
+      }
+
+      if (!isNaN(stockNum) && stockNum > 0 && cant > stockNum) {
+        cant = stockNum;
+      }
+
+      setSeleccion(p, cant);
+      btnSel.classList.add("activo");
+      btnSel.textContent = `En carrito (${cant})`;
       actualizarBotonWhatsapp();
     });
 
