@@ -1,8 +1,10 @@
-// Mismo repo de imágenes que en el catálogo
-const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
+// URL base de imágenes (la misma que usás en el catálogo)
+const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main/";
 
+// Carga de la ficha de producto
 async function cargarProducto() {
   try {
+    // 1) Leer código desde la URL ?codigo=N0247
     const params = new URLSearchParams(window.location.search);
     const codigo = params.get("codigo");
     console.log("Código en URL:", codigo);
@@ -13,7 +15,7 @@ async function cargarProducto() {
       return;
     }
 
-    // IMPORTANTE: productos.json está en la RAÍZ del repo
+    // 2) Cargar productos.json (el que generaste desde el CSV)
     const resp = await fetch("productos.json");
     if (!resp.ok) {
       throw new Error("No se pudo cargar productos.json: " + resp.status);
@@ -22,7 +24,8 @@ async function cargarProducto() {
     const productos = await resp.json();
     console.log("Productos cargados:", productos.length);
 
-    const index = productos.findIndex(p => p.codigo === codigo);
+    // 3) Buscar el producto por Codigo
+    const index = productos.findIndex(p => p["Codigo"] === codigo);
     console.log("Índice encontrado:", index);
 
     if (index === -1) {
@@ -33,101 +36,97 @@ async function cargarProducto() {
 
     const prod = productos[index];
 
-    // Imagen grande
-    const imgContainer = document.getElementById("producto-imagen");
-    imgContainer.innerHTML = "";
-    const img = document.createElement("img");
-    img.src = `${BASE_IMG}/${prod.codigo}.JPG`;
-    img.alt = prod.nombre_corto || prod.codigo;
-    img.loading = "lazy";
-    img.onerror = () => {
-      img.src = `${BASE_IMG}/${prod.codigo}.jpg`;
-    };
-    imgContainer.appendChild(img);
+    // =====================
+    // IMAGEN PRINCIPAL
+    // =====================
+    const imgPrincipal = document.getElementById("imagen-principal");
+    // Suponiendo que la imagen se llama igual que el código, ej: N0247.jpg
+    imgPrincipal.src = BASE_IMG + prod["Codigo"] + ".jpg";
+    imgPrincipal.alt = prod["Nombre Corto"];
 
-    // Info del producto
+    // Si después querés miniaturas, acá podríamos armar más rutas.
+
+    // =====================
+    // INFORMACIÓN DEL PRODUCTO
+    // =====================
+    const precioRaw = String(prod["Precio Mayorista"] || "").trim();
+    // Convertir "1992,2" en número 1992.2
+    const precioNumero = precioRaw
+      ? parseFloat(precioRaw.replace(".", "").replace(",", "."))
+      : 0;
+
+    const precioFormateado = precioNumero.toLocaleString("es-AR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
     const info = document.getElementById("producto-info");
-    const precioFormateado = prod.precio
-      ? `$ ${Number(prod.precio).toLocaleString("es-AR", {
-          minimumFractionDigits: 2,
-        })}`
-      : "";
-
     info.innerHTML = `
-      <p class="producto-codigo">${prod.codigo}</p>
-      <h1 class="producto-titulo">${prod.nombre_corto}</h1>
-      ${
-        prod.categoria
-          ? `<p class="producto-categoria">${prod.categoria}</p>`
-          : ""
-      }
-      ${
-        prod.descripcion_larga
-          ? `<p class="producto-descripcion">${prod.descripcion_larga}</p>`
-          : ""
-      }
-      ${
-        precioFormateado
-          ? `<p class="producto-precio">${precioFormateado}</p>`
-          : ""
-      }
+      <p class="producto-codigo">${prod["Codigo"]}</p>
+      <h1 class="producto-titulo">${prod["Nombre Corto"]}</h1>
+      <p class="producto-categoria">${prod["Categoria Princ"]}</p>
+      <p class="producto-descripcion">
+        ${prod["Descripción Larga"] || ""}
+      </p>
+      <p class="producto-precio">
+        <span class="moneda">$</span> ${precioFormateado}
+      </p>
+
       <div class="producto-acciones">
         <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
-        <a href="${armarLinkWhatsApp(prod)}" target="_blank" class="btn-whatsapp">
+        <a
+          href="https://wa.me/54XXXXXXXXXX?text=Hola,%20quiero%20consultar%20por%20el%20producto%20${encodeURIComponent(
+            prod["Codigo"] + " - " + prod["Nombre Corto"]
+          )}"
+          target="_blank"
+          class="btn-whatsapp"
+        >
           Consultar por WhatsApp
         </a>
       </div>
     `;
 
-    // Navegación anterior / siguiente
+    // =====================
+    // NAVEGACIÓN ANTERIOR / SIGUIENTE
+    // =====================
     const nav = document.getElementById("producto-nav");
-    const anterior = productos[(index - 1 + productos.length) % productos.length];
-    const siguiente = productos[(index + 1) % productos.length];
+    const anterior = productos[index - 1];
+    const siguiente = productos[index + 1];
 
-    nav.innerHTML = `
-      <button class="btn-nav" onclick="irAProducto('${anterior.codigo}')">
-        ← ${anterior.codigo}
-      </button>
-      <button class="btn-nav" onclick="window.location.href='catalogo.html'">
-        Volver al listado
-      </button>
-      <button class="btn-nav" onclick="irAProducto('${siguiente.codigo}')">
-        ${siguiente.codigo} →
-      </button>
-    `;
-  } catch (error) {
-    console.error("Error en cargarProducto:", error);
-    const info = document.getElementById("producto-info");
-    if (info) {
-      info.innerHTML = "<h2>Error</h2><p>No se pudo cargar el producto.</p>";
+    let navHTML = "";
+
+    if (anterior) {
+      navHTML += `
+        <a href="producto.html?codigo=${anterior["Codigo"]}" class="nav-btn">
+          ← ${anterior["Codigo"]}
+        </a>
+      `;
+    } else {
+      navHTML += `<span class="nav-btn nav-btn--disabled">← Anterior</span>`;
     }
+
+    navHTML += `
+      <a href="catalogo.html" class="nav-btn">Volver al listado</a>
+    `;
+
+    if (siguiente) {
+      navHTML += `
+        <a href="producto.html?codigo=${siguiente["Codigo"]}" class="nav-btn">
+          ${siguiente["Codigo"]} →
+        </a>
+      `;
+    } else {
+      navHTML += `<span class="nav-btn nav-btn--disabled">Siguiente →</span>`;
+    }
+
+    nav.innerHTML = navHTML;
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("producto-info").innerHTML =
+      "<h2>Ups, hubo un error</h2><p>Probá recargar la página.</p>";
   }
 }
 
-function armarLinkWhatsApp(prod) {
-  const precio = prod.precio
-    ? `$ ${Number(prod.precio).toLocaleString("es-AR", {
-        minimumFractionDigits: 2,
-      })}`
-    : "—";
-
-  const mensaje = [
-    "Hola! Me interesa este producto:",
-    "",
-    `Código: ${prod.codigo}`,
-    `Producto: ${prod.nombre_corto}`,
-    `Precio mayorista: ${precio}`,
-    "",
-    "¿Me pasás disponibilidad y cantidades mínimas?"
-  ].join("\n");
-
-  // Más adelante podemos poner tu número fijo acá:
-  // return `https://wa.me/54911TU_NUMERO?text=${encodeURIComponent(mensaje)}`;
-  return `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-}
-
-function irAProducto(codigo) {
-  window.location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
-}
-
+// Ejecutar cuando carga la página
 cargarProducto();
