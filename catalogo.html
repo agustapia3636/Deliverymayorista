@@ -1,3 +1,5 @@
+<script>
+
 function renderizar(lista){
     const grid = document.getElementById("grid");
     grid.innerHTML = "";
@@ -11,15 +13,12 @@ function renderizar(lista){
         const precioCliente= parsearPrecio(p["Precio Cliente"]);
         const precioUsado  = precioMayor ?? precioCliente;
 
-        // Descripción corta recortada
         let descCorta = descripcionL.trim();
         if (descCorta.length > 80) descCorta = descCorta.substring(0, 80) + "...";
 
-        // URLs de imagen
         const urlLower = `${BASE_IMG}/${codigo}.jpg`;
         const urlUpper = `${BASE_IMG}/${codigo}.JPG`;
 
-        // 👉 AHORA LA TARJETA ES UN <a> CLICKEABLE
         const card = document.createElement("a");
         card.className = "card";
         card.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
@@ -63,7 +62,6 @@ function renderizar(lista){
             ? `$ ${precioUsado.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
             : "$ Consultar";
 
-        // Armado final
         card.appendChild(contImg);
         card.appendChild(titulo);
         card.appendChild(desc);
@@ -72,4 +70,6 @@ function renderizar(lista){
         grid.appendChild(card);
     });
 }
+
+</script>
 
