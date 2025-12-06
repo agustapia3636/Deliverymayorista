@@ -21,7 +21,6 @@
       gap: 48px;
     }
 
-    /* Imagen a la izquierda */
     .producto-imagen {
       flex: 0 0 48%;
     }
@@ -35,7 +34,6 @@
       display: block;
     }
 
-    /* Info a la derecha */
     .producto-info {
       flex: 0 0 42%;
     }
@@ -152,7 +150,7 @@
     const BASE_IMG =
       "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
-    // Convierte "1992,2" → 1992.2
+    // "1992,2" -> 1992.2
     function parsearPrecio(valor) {
       if (typeof valor === "number") return valor;
       if (typeof valor === "string") {
@@ -186,7 +184,6 @@
         const data = await resp.json();
         const productos = Array.isArray(data) ? data : data.productos || [];
 
-        // Usa las claves de tu JSON
         const index = productos.findIndex((p) => p["Codigo"] === codigoURL);
 
         if (index === -1) {
@@ -232,8 +229,8 @@
         const precioTexto =
           precioUsado != null
             ? `$ ${precioUsado.toLocaleString("es-AR", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
               })}`
             : "";
 
@@ -290,8 +287,8 @@
       const precioTxt =
         precioMayor != null
           ? `$ ${precioMayor.toLocaleString("es-AR", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
             })}`
           : "Consultar";
 
@@ -305,7 +302,6 @@
         "¿Me pasás disponibilidad y cantidades mínimas?",
       ].join("\n");
 
-      // Podés cambiar wa.me/?text= por wa.me/TUNUMERO?text= si querés número fijo
       return `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
     }
 
