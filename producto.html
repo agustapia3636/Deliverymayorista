@@ -5,6 +5,106 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Producto | Delivery Mayorista</title>
   <link rel="stylesheet" href="css/estilos.css">
+
+  <!-- Ajustes específicos de layout para producto (desktop + mobile) -->
+  <style>
+    /* Layout base de la ficha (por si estilos.css no lo define así) */
+    main.producto-pagina {
+      padding: 32px 16px 40px;
+    }
+
+    main.producto-pagina .producto-wrapper {
+      max-width: 1120px;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 40px;
+    }
+
+    main.producto-pagina .producto-imagen {
+      flex: 1 1 50%;
+    }
+
+    main.producto-pagina .producto-info {
+      flex: 1 1 50%;
+    }
+
+    /* Aseguramos que la imagen se vea bien centrada y responsiva */
+    main.producto-pagina .producto-imagen img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 20px;
+      object-fit: contain;
+      background: #0a0a12;
+    }
+
+    /* Navegación inferior */
+    .producto-nav {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .producto-acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    /* ====== VISTA MOBILE / TABLET ====== */
+    @media (max-width: 900px) {
+      main.producto-pagina {
+        padding: 20px 12px 32px;
+      }
+
+      main.producto-pagina .producto-wrapper {
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      main.producto-pagina .producto-imagen,
+      main.producto-pagina .producto-info {
+        flex: 1 1 auto;
+        width: 100%;
+      }
+
+      main.producto-pagina .producto-info {
+        text-align: left;
+      }
+
+      .producto-acciones {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .producto-acciones .btn-secundario,
+      .producto-acciones .btn-whatsapp {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .producto-nav {
+        flex-wrap: wrap;
+        row-gap: 8px;
+      }
+    }
+
+    /* Mobile chico: hacer todo más cómodo */
+    @media (max-width: 480px) {
+      main.producto-pagina {
+        padding-top: 16px;
+      }
+
+      .producto-nav {
+        padding: 0 6px;
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -83,7 +183,7 @@
       const data = await resp.json();
       const productos = Array.isArray(data) ? data : (data.productos || []);
 
-      // ATENCIÓN: en tu JSON la clave es "Codigo"
+      // En tu JSON la clave es "Codigo"
       const index = productos.findIndex(p => p["Codigo"] === codigoURL);
 
       if (index === -1) {
