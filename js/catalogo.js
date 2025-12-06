@@ -11,7 +11,7 @@ let productos = [];
 // Cargar productos desde data/productos.json
 async function cargarProductos() {
   try {
-    const respuesta = await fetch('data/productos.json');
+    const respuesta = await fetch('productos.json');
     productos = await respuesta.json();
     poblarCategorias();
     renderizarProductos(productos);
