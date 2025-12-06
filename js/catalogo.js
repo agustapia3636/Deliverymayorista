@@ -1,7 +1,7 @@
-// URL base donde están las imágenes en GitHub
+// URL base de las imágenes en GitHub
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
-// Referencias a elementos del DOM
+// Elementos del DOM
 const grid = document.getElementById('grid-productos');
 const buscador = document.getElementById('buscador');
 const categoriaSelect = document.getElementById('categoria');
@@ -33,7 +33,7 @@ function poblarCategorias() {
   });
 }
 
-// Crear imagen del producto usando GitHub Raw
+// Crear la imagen de cada producto
 function crearImagenProducto(p) {
   const wrapper = document.createElement('div');
   wrapper.className = 'img-placeholder';
@@ -41,14 +41,12 @@ function crearImagenProducto(p) {
   const img = document.createElement('img');
   let triedLower = false;
 
-  // Primero probamos .JPG
   img.src = `${BASE_IMG}/${p.codigo}.JPG`;
   img.alt = p.nombre_corto || p.codigo;
   img.loading = 'lazy';
 
   img.onerror = () => {
     if (!triedLower) {
-      // Si .JPG falla, probamos .jpg
       triedLower = true;
       img.onerror = () => {
         wrapper.textContent = 'Sin imagen';
@@ -74,14 +72,14 @@ function renderizarProductos(lista) {
 
   grid.innerHTML = '';
   lista.forEach(p => {
-  const card = document.createElement('article');
-card.className = 'card-producto';
-card.style.cursor = 'pointer';
+    const card = document.createElement('article');
+    card.className = 'card-producto';
+    card.style.cursor = 'pointer';
 
-card.addEventListener('click', () => {
-  window.location.href = `producto.html?codigo=${encodeURIComponent(p.codigo)}`;
-});
-
+    // 👉 Click que lleva a la ficha del producto
+    card.addEventListener('click', () => {
+      window.location.href = `producto.html?codigo=${encodeURIComponent(p.codigo)}`;
+    });
 
     const imgWrapper = crearImagenProducto(p);
 
@@ -118,7 +116,7 @@ card.addEventListener('click', () => {
   });
 }
 
-// Filtros (buscador + categoría)
+// Filtros
 function aplicarFiltros() {
   const texto = buscador.value.toLowerCase().trim();
   const cat = categoriaSelect.value;
@@ -142,3 +140,4 @@ buscador.addEventListener('input', aplicarFiltros);
 categoriaSelect.addEventListener('change', aplicarFiltros);
 
 cargarProductos();
+
