@@ -301,5 +301,57 @@ body {
   .producto-wrapper {
     grid-template-columns: 1fr;  /* imagen arriba, texto abajo en celu */
   }
+/* Responsive para la ficha de producto */
+@media (max-width: 800px) {
+  .producto-wrapper {
+    grid-template-columns: 1fr;  /* imagen arriba, texto abajo en celu */
+  }
 }
 
+/* ===========================
+      GALERÍA DE IMÁGENES
+   =========================== */
+
+.producto-imagen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+#imagen-principal {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  transition: transform 0.2s;
+  cursor: zoom-in;
+}
+
+#imagen-principal:hover {
+  transform: scale(1.03);
+}
+
+.miniaturas {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.miniatura {
+  width: 65px;
+  height: 65px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #22283d;
+  cursor: pointer;
+  transition: border 0.2s, transform 0.2s;
+}
+
+.miniatura:hover {
+  border-color: #ff007a;
+  transform: scale(1.05);
+}
+
+.miniatura img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
