@@ -50,7 +50,6 @@ function actualizarMiniCarrito() {
   cantSpan.textContent = cantidad;
   totalSpan.textContent = formatearPrecio(total);
 
-  // De momento lo dejamos siempre visible
   mini.style.display = "flex";
 }
 
@@ -86,6 +85,7 @@ function addToCart(codigo, descripcion, precio, stock) {
   }
 
   guardarCarrito();
+  renderCarrito();
   actualizarMiniCarrito();
 }
 
@@ -101,6 +101,7 @@ function disminuir(codigo) {
   }
 
   guardarCarrito();
+  renderCarrito();
   actualizarMiniCarrito();
 }
 
@@ -108,16 +109,126 @@ function disminuir(codigo) {
 function eliminar(codigo) {
   carrito = carrito.filter(p => p.codigo !== codigo);
   guardarCarrito();
+  renderCarrito();
   actualizarMiniCarrito();
 }
 
-// Ir a la página del carrito (la vamos a crear después)
+// Render de la página del carrito (carrito.html)
+function renderCarrito() {
+  const contenedor = document.getElementById("carrito");
+  if (!contenedor) {
+    // No estoy en carrito.html, solo actualizo mini carrito
+    actualizarMiniCarrito();
+    return;
+  }
+
+  cargarCarrito();
+  contenedor.innerHTML = "";
+
+  if (carrito.length === 0) {
+    contenedor.innerHTML = `
+      <div class="carrito-vacio">
+        <p>Tu carrito está vacío.</p>
+        <a href="catalogo.html" class="btn-volver">← Ver catálogo</a>
+      </div>
+    `;
+    actualizarMiniCarrito();
+    return;
+  }
+
+  const lista = document.createElement("div");
+  lista.classList.add("carrito-lista");
+
+  carrito.forEach(item => {
+    const subtotal = item.precio * item.cantidad;
+
+    const fila = document.createElement("div");
+    fila.classList.add("item-carrito");
+
+    fila.innerHTML = `
+      <div class="item-carrito-descripcion">
+        <strong>${item.descripcion}</strong><br>
+        <span class="item-carrito-codigo">Código: ${item.codigo}</span><br>
+        <span class="item-carrito-stock">Stock: ${item.stock}</span>
+      </div>
+
+      <div class="item-carrito-controles">
+        <div class="item-carrito-cant">
+          <button type="button" onclick="disminuir('${item.codigo}')">-</button>
+          <span>${item.cantidad}</span>
+          <button type="button" onclick="addToCart('${item.codigo}','${item.descripcion}',${item.precio},${item.stock})">+</button>
+        </div>
+        <div class="item-carrito-precios">
+          <span>$${formatearPrecio(item.precio)} c/u</span>
+          <span>Subtotal: $${formatearPrecio(subtotal)}</span>
+        </div>
+        <button type="button" class="btn-eliminar" onclick="eliminar('${item.codigo}')">Quitar</button>
+      </div>
+    `;
+
+    lista.appendChild(fila);
+  });
+
+  const { total } = calcularTotales();
+
+  const totalDiv = document.createElement("div");
+  totalDiv.classList.add("total-carrito");
+  totalDiv.innerHTML = `
+    <hr>
+    <h2>Total: $${formatearPrecio(total)}</h2>
+  `;
+
+  contenedor.appendChild(lista);
+  contenedor.appendChild(totalDiv);
+}
+
+// Ir a la página del carrito
 function irAlCarrito() {
   window.location.href = "carrito.html";
+}
+
+// Generar texto para WhatsApp
+function generarTextoCarrito() {
+  cargarCarrito();
+
+  if (!carrito.length) return "";
+
+  const { total } = calcularTotales();
+
+  let lineas = [];
+  lineas.push("🛒 Pedido Delivery Mayorista");
+  lineas.push("");
+  carrito.forEach(item => {
+    const subtotal = item.precio * item.cantidad;
+    lineas.push(
+      `• x${item.cantidad} ${item.descripcion} (${item.codigo}) - $${formatearPrecio(
+        item.precio
+      )} c/u = $${formatearPrecio(subtotal)}`
+    );
+  });
+  lineas.push("");
+  lineas.push(`Total: $${formatearPrecio(total)}`);
+
+  return encodeURIComponent(lineas.join("\n"));
+}
+
+// Enviar carrito por WhatsApp
+function enviarCarritoWhatsApp() {
+  cargarCarrito();
+
+  if (!carrito.length) {
+    alert("Tu carrito está vacío.");
+    return;
+  }
+
+  const texto = generarTextoCarrito();
+  const url = "https://wa.me/?text=" + texto;
+  window.open(url, "_blank");
 }
 
 // Inicialización general
 window.addEventListener("DOMContentLoaded", function () {
   cargarCarrito();
+  renderCarrito();
   actualizarMiniCarrito();
 });
