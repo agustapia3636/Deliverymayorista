@@ -1,178 +1,175 @@
-// URL base de las imágenes en GitHub
-const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Mayorista | Catálogo</title>
 
-// Elementos del DOM
-const grid = document.getElementById("grid-productos");
-const buscador = document.getElementById("buscador");
-const categoriaSelect = document.getElementById("categoria");
+<style>
+    body {
+        background:#0f0f1a;
+        margin:0;
+        font-family: 'Segoe UI', sans-serif;
+        color:white;
+    }
 
+    header {
+        background: linear-gradient(90deg,#ff005d,#ffa400);
+        padding:15px 25px;
+        font-size:20px;
+        font-weight:700;
+    }
+
+    .toolbar {
+        display:flex;
+        gap:15px;
+        padding:25px;
+        justify-content:center;
+    }
+
+    .toolbar input, .toolbar select {
+        padding:12px 18px;
+        border-radius:30px;
+        border:none;
+        outline:none;
+        font-size:15px;
+    }
+
+    .grid {
+        display:grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap:25px;
+        padding:25px;
+    }
+
+    .card {
+        background:#0c0c17;
+        border-radius:22px;
+        padding:18px;
+        text-align:center;
+        min-height:260px;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+    }
+
+    .card img {
+        width:100%;
+        height:150px;
+        object-fit:cover;
+        border-radius:18px;
+        background:#0a0a12;
+    }
+
+    .card strong {
+        display:block;
+        margin-top:10px;
+        font-size:16px;
+    }
+
+    .precio {
+        color:#ffa400;
+        font-weight:700;
+        margin-top:5px;
+    }
+
+    .sin-imagen {
+        width:100%;
+        height:150px;
+        background:#111;
+        border-radius:18px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:14px;
+        opacity:0.8;
+    }
+</style>
+</head>
+
+<body>
+
+<header>DELIVERY MAYORISTA</header>
+
+<div class="toolbar">
+    <input id="busqueda" type="text" placeholder="Buscar por código o descripción">
+    <select id="categorias"></select>
+</div>
+
+<div id="grid" class="grid"></div>
+
+<script>
 let productos = [];
+let categorias = new Set();
 
-// ===============================
-// Cargar productos desde productos.json
-// ===============================
-async function cargarProductos() {
-  try {
-    const respuesta = await fetch("productos.json");
-    productos = await respuesta.json();
+async function cargarProductos(){
+    try {
+        const res = await fetch("productos.json");
+        productos = await res.json();
 
-    poblarCategorias();
-    renderizarProductos(productos);
-  } catch (error) {
-    console.error("Error cargando productos:", error);
-    grid.innerHTML = "<p>Error al cargar el catálogo.</p>";
-  }
-}
+        productos.forEach(p => categorias.add(p.categoria));
 
-// ===============================
-// Llenar el select de categorías
-// ===============================
-function poblarCategorias() {
-  const categorias = [
-    ...new Set(productos.map(p => p.categoria).filter(Boolean))
-  ];
-  categorias.sort();
-
-  categorias.forEach(cat => {
-    const opt = document.createElement("option");
-    opt.value = cat;
-    opt.textContent = cat;
-    categoriaSelect.appendChild(opt);
-  });
-}
-
-// ===============================
-// Crear la imagen de cada producto
-// ===============================
-function crearImagenProducto(p) {
-  const wrapper = document.createElement("div");
-  wrapper.className = "img-placeholder";
-
-  const img = document.createElement("img");
-  let triedLower = false;
-
-  const codigo = p.codigo;
-
-  img.src = `${BASE_IMG}/${codigo}.JPG`;
-  img.alt = p.nombre_corto || codigo;
-  img.loading = "lazy";
-
-  img.onerror = () => {
-    if (!triedLower) {
-      triedLower = true;
-      img.onerror = () => {
-        wrapper.textContent = "Sin imagen";
-        img.remove();
-      };
-      img.src = `${BASE_IMG}/${codigo}.jpg`;
-    } else {
-      wrapper.textContent = "Sin imagen";
-      img.remove();
+        cargarCategorias();
+        renderizar(productos);
+    } catch (e){
+        console.error("Error cargando productos.json", e);
     }
-  };
-
-  wrapper.appendChild(img);
-  return wrapper;
 }
 
-// ===============================
-// Pintar las tarjetas de productos
-// ===============================
-function renderizarProductos(lista) {
-  if (!lista.length) {
-    grid.innerHTML = "<p>No se encontraron productos.</p>";
-    return;
-  }
-
-  grid.innerHTML = "";
-
-  lista.forEach(p => {
-    const codigo = p.codigo;
-    const nombreCorto = p.nombre_corto;
-    const descLarga = p.descripcion_larga || "";
-    const categoriaTexto = p.categoria;
-
-    const precioNumero = Number(p.precio) || 0;
-    const precioFormateado = precioNumero.toLocaleString("es-AR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+function cargarCategorias(){
+    const select = document.getElementById("categorias");
+    select.innerHTML = `<option value="todos">Todas las categorías</option>`;
+    categorias.forEach(c => {
+        select.innerHTML += `<option value="${c}">${c}</option>`;
     });
+}
 
-    const card = document.createElement("article");
-    card.className = "card-producto";
-    card.style.cursor = "pointer";
+function renderizar(lista){
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
 
-    // Click → ficha de producto
-    card.addEventListener("click", () => {
-      window.location.href = `producto.html?codigo=${encodeURIComponent(
-        codigo
-      )}`;
+    lista.forEach(p => {
+        grid.innerHTML += `
+        <div class="card">
+            ${
+                p.imagen ?
+                `<img src="${p.imagen}" alt="${p.nombre_corto}">` :
+                `<div class="sin-imagen">Sin imagen</div>`
+            }
+            <strong>${p.codigo} - ${p.nombre_corto}</strong>
+            <div class="precio">$ ${p.precio}</div>
+        </div>
+        `;
     });
+}
 
-    const imgWrapper = crearImagenProducto(p);
+document.getElementById("busqueda").addEventListener("input", e => {
+    const val = e.target.value.toLowerCase();
+    filtrar(val, document.getElementById("categorias").value);
+});
 
-    const cuerpo = document.createElement("div");
-    cuerpo.className = "card-body";
+document.getElementById("categorias").addEventListener("change", e => {
+    filtrar(document.getElementById("busqueda").value.toLowerCase(), e.target.value);
+});
 
-    const titulo = document.createElement("h2");
-    titulo.textContent = `${codigo} - ${nombreCorto}`;
+function filtrar(texto, categoria){
+    let filtrados = productos.filter(p =>
+        p.codigo.toLowerCase().includes(texto) ||
+        p.nombre_corto.toLowerCase().includes(texto)
+    );
 
-    const desc = document.createElement("p");
-    desc.className = "descripcion";
-    const resumen =
-      descLarga.length > 160 ? descLarga.slice(0, 157) + "..." : descLarga;
-    desc.textContent = resumen;
-
-    const precio = document.createElement("p");
-    precio.className = "precio";
-    precio.textContent = `$ ${precioFormateado}`;
-
-    const categoria = document.createElement("p");
-    categoria.className = "categoria";
-    if (categoriaTexto) {
-      categoria.textContent = categoriaTexto;
+    if (categoria !== "todos"){
+        filtrados = filtrados.filter(p => p.categoria === categoria);
     }
 
-    cuerpo.appendChild(titulo);
-    cuerpo.appendChild(desc);
-    cuerpo.appendChild(precio);
-    cuerpo.appendChild(categoria);
-
-    card.appendChild(imgWrapper);
-    card.appendChild(cuerpo);
-    grid.appendChild(card);
-  });
+    renderizar(filtrados);
 }
 
-// ===============================
-// Filtros
-// ===============================
-function aplicarFiltros() {
-  const texto = buscador.value.toLowerCase().trim();
-  const cat = categoriaSelect.value;
+cargarProductos();
+</script>
 
-  const filtrados = productos.filter(p => {
-    const codigo = (p.codigo || "").toLowerCase();
-    const nombre = (p.nombre_corto || "").toLowerCase();
-    const desc = (p.descripcion_larga || "").toLowerCase();
-    const categoriaProd = p.categoria || "";
-
-    const coincideTexto =
-      !texto ||
-      codigo.includes(texto) ||
-      nombre.includes(texto) ||
-      desc.includes(texto);
-
-    const coincideCat = !cat || categoriaProd === cat;
-
-    return coincideTexto && coincideCat;
-  });
-
-  renderizarProductos(filtrados);
-}
-
-buscador.addEventListener("input", aplicarFiltros);
-categoriaSelect.addEventListener("change", aplicarFiltros);
+</body>
+</html>
 
 // Ejecutar carga inicial
 cargarProductos();
