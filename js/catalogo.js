@@ -1,14 +1,27 @@
+// ========================================
+//  CATÁLOGO + CARRITO (página catalogo.html)
+// ========================================
+
 // URL base de las imágenes en tu repo de GitHub
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
+
+// Clave del carrito en localStorage
+const CLAVE_CARRITO = "dm_carrito";
 
 // Elementos del DOM
 const grid = document.getElementById("lista-productos");      // contenedor de tarjetas
 const buscador = document.getElementById("buscador");         // input de búsqueda
 const filtroCategoria = document.getElementById("filtro-categoria"); // select de categorías
 
+// Mini carrito (globito abajo a la derecha)
+const miniCantidad = document.getElementById("mini-carrito-cantidad");
+const miniTotal    = document.getElementById("mini-carrito-total");
+
 let TODOS_LOS_PRODUCTOS = [];
 
-// ---------- UTILIDADES ----------
+// ========================================
+//  UTILIDADES GENERALES
+// ========================================
 
 // Devuelve un valor “seguro” (sin undefined)
 function safe(value, fallback = "") {
@@ -53,7 +66,82 @@ function formatearPrecio(valor) {
   });
 }
 
-// ---------- RENDER ----------
+// ========================================
+//  CARRITO (localStorage + mini carrito)
+// ========================================
+
+function leerCarrito() {
+  try {
+    const raw = localStorage.getItem(CLAVE_CARRITO);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    console.error("Error leyendo carrito", e);
+    return [];
+  }
+}
+
+function guardarCarrito(carrito) {
+  try {
+    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
+  } catch (e) {
+    console.error("Error guardando carrito", e);
+  }
+}
+
+// Actualiza el globito del mini carrito
+function actualizarMiniCarrito() {
+  const carrito = leerCarrito();
+
+  const totalProductos = carrito.reduce((acc, p) => acc + (p.cantidad || 0), 0);
+  const totalPrecio = carrito.reduce((acc, p) => {
+    const precio = Number(p.precio) || 0;
+    return acc + precio * (p.cantidad || 0);
+  }, 0);
+
+  if (miniCantidad) miniCantidad.textContent = totalProductos;
+  if (miniTotal)    miniTotal.textContent    = totalPrecio.toLocaleString("es-AR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
+}
+
+// Agrega un producto al carrito (o suma cantidad si ya existe)
+function agregarAlCarritoDesdeCatalogo(productoBasico, boton) {
+  let carrito = leerCarrito();
+
+  const idx = carrito.findIndex(p => p.codigo === productoBasico.codigo);
+  if (idx >= 0) {
+    carrito[idx].cantidad += 1;
+  } else {
+    carrito.push({
+      codigo: productoBasico.codigo,
+      nombre: productoBasico.nombre,
+      precio: productoBasico.precio,
+      cantidad: 1
+    });
+  }
+
+  guardarCarrito(carrito);
+  actualizarMiniCarrito();
+
+  // Actualizar texto del botón
+  const item = carrito.find(p => p.codigo === productoBasico.codigo);
+  if (boton && item) {
+    boton.textContent = `En carrito (${item.cantidad})`;
+    boton.classList.add("btn-agregar-carrito-activo");
+  }
+}
+
+// Navegar al carrito al tocar el mini-carrito
+function irAlCarrito() {
+  window.location.href = "carrito.html";
+}
+
+// ========================================
+//  RENDER DE PRODUCTOS
+// ========================================
 
 function renderProductos(lista) {
   grid.innerHTML = "";
@@ -63,17 +151,31 @@ function renderProductos(lista) {
     return;
   }
 
+  const carritoActual = leerCarrito();
+
   lista.forEach(prod => {
     // Soportamos varios nombres de propiedades por si el JSON cambia
-    const codigo      = safe(prod.codigo || prod.cod || prod.Code);
-    const nombre      = safe(prod.nombre || prod.descripcion || prod.titulo, "Sin nombre");
-    const categoria   = safe(prod.categoria || prod.rubro || prod.cat, "Sin categoría");
-    const descCorta   = safe(prod.descripcionCorta || prod.descripcion_corta || prod.descripcion || "");
-    const precioNum   = prod.precio ?? prod.precioMayorista ?? prod.precio_venta ?? prod.precioLista;
+    const codigo      = safe(prod.codigo || prod.cod || prod.Code || prod.Codigo);
+    const nombre      = safe(prod.nombre || prod.descripcion || prod.titulo || prod["Nombre Corto"], "Sin nombre");
+    const categoria   = safe(prod.categoria || prod.rubro || prod.cat || prod["Categoria Princ"], "Sin categoría");
+    const descCorta   = safe(
+      prod.descripcionCorta ||
+      prod.descripcion_corta ||
+      prod.descripcion ||
+      prod["Descripción Larga"] ||
+      "",
+      ""
+    );
+    const precioNum   = prod.precio ?? prod.precioMayorista ?? prod.precio_venta ?? prod.precioLista ?? prod["Precio Mayorista"];
     const precioTexto = formatearPrecio(precioNum);
 
     const card = document.createElement("article");
     card.classList.add("producto-card");
+
+    // ¿ya está en el carrito?
+    const itemCarrito = carritoActual.find(p => p.codigo === codigo);
+    const textoBoton  = itemCarrito ? `En carrito (${itemCarrito.cantidad})` : "Agregar al carrito";
+
     card.innerHTML = `
       <a class="producto-link" href="producto.html?codigo=${encodeURIComponent(codigo)}">
         <div class="producto-imagen-wrapper">
@@ -87,25 +189,53 @@ function renderProductos(lista) {
           <p class="producto-precio">$ ${precioTexto}</p>
         </div>
       </a>
+
+      <div class="producto-acciones">
+        <button type="button" class="btn-agregar-carrito">
+          ${textoBoton}
+        </button>
+      </div>
     `;
 
     const img = card.querySelector(".producto-imagen");
     setImagenProducto(img, codigo);
 
+    // Botón agregar al carrito
+    const btn = card.querySelector(".btn-agregar-carrito");
+
+    if (itemCarrito) {
+      btn.classList.add("btn-agregar-carrito-activo");
+    }
+
+    btn.addEventListener("click", (ev) => {
+      ev.preventDefault();   // que no navegue al producto
+      ev.stopPropagation();
+
+      const productoBasico = {
+        codigo,
+        nombre,
+        precio: Number(precioNum) || 0
+      };
+
+      agregarAlCarritoDesdeCatalogo(productoBasico, btn);
+    });
+
     grid.appendChild(card);
   });
 }
 
-// ---------- FILTROS ----------
+// ========================================
+//  FILTROS
+// ========================================
 
 function aplicarFiltros() {
   const texto = buscador.value.trim().toLowerCase();
   const cat = filtroCategoria.value;
 
   const filtrados = TODOS_LOS_PRODUCTOS.filter(prod => {
-    const codigo    = safe(prod.codigo || prod.cod || prod.Code, "").toString().toLowerCase();
-    const nombre    = safe(prod.nombre || prod.descripcion || prod.titulo, "").toLowerCase();
-    const categoria = safe(prod.categoria || prod.rubro || prod.cat, "").toLowerCase();
+    const codigo    = safe(prod.codigo || prod.cod || prod.Code || prod.Codigo, "").toString().toLowerCase();
+    const nombre    = safe(prod.nombre || prod.descripcion || prod.titulo || prod["Nombre Corto"], "").toLowerCase();
+    const categoria = safe(prod.categoria || prod.rubro || prod.cat || prod["Categoria Princ"], "").toLowerCase();
 
     const pasaTexto =
       !texto ||
@@ -129,11 +259,12 @@ if (filtroCategoria) {
   filtroCategoria.addEventListener("change", aplicarFiltros);
 }
 
-// ---------- CARGA INICIAL ----------
+// ========================================
+//  CARGA INICIAL
+// ========================================
 
 async function cargarProductos() {
   try {
-    // OJO: tu productos.json está en la RAÍZ del repo
     // desde catalogo.html la ruta correcta es "./productos.json"
     const resp = await fetch("./productos.json");
 
@@ -151,7 +282,7 @@ async function cargarProductos() {
       const categoriasUnicas = Array.from(
         new Set(
           TODOS_LOS_PRODUCTOS.map(p =>
-            safe(p.categoria || p.rubro || p.cat, "").toString()
+            safe(p.categoria || p.rubro || p.cat || p["Categoria Princ"], "").toString()
           ).filter(c => c !== "")
         )
       ).sort();
@@ -165,6 +296,7 @@ async function cargarProductos() {
     }
 
     renderProductos(TODOS_LOS_PRODUCTOS);
+    actualizarMiniCarrito();   // importante: mostrar estado si ya hay carrito
 
   } catch (err) {
     console.error(err);
@@ -173,4 +305,7 @@ async function cargarProductos() {
 }
 
 // Ejecutar al cargar la página
-document.addEventListener("DOMContentLoaded", cargarProductos);
+document.addEventListener("DOMContentLoaded", () => {
+  cargarProductos();
+  actualizarMiniCarrito();
+});
