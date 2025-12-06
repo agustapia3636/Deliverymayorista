@@ -1,11 +1,14 @@
-// Carga y renderiza el catálogo desde data/productos.json
+// URL base donde están las imágenes en GitHub
+const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
+// Referencias a elementos del DOM
 const grid = document.getElementById('grid-productos');
 const buscador = document.getElementById('buscador');
 const categoriaSelect = document.getElementById('categoria');
 
 let productos = [];
 
+// Cargar productos desde data/productos.json
 async function cargarProductos() {
   try {
     const respuesta = await fetch('data/productos.json');
@@ -18,6 +21,7 @@ async function cargarProductos() {
   }
 }
 
+// Llenar el select de categorías
 function poblarCategorias() {
   const categorias = [...new Set(productos.map(p => p.categoria).filter(Boolean))];
   categorias.sort();
@@ -29,6 +33,7 @@ function poblarCategorias() {
   });
 }
 
+// Crear imagen del producto usando GitHub Raw
 function crearImagenProducto(p) {
   const wrapper = document.createElement('div');
   wrapper.className = 'img-placeholder';
@@ -36,20 +41,20 @@ function crearImagenProducto(p) {
   const img = document.createElement('img');
   let triedLower = false;
 
-  // Primero probamos .JPG (como N0001.JPG)
-  img.src = `img/${p.codigo}.JPG`;
+  // Primero probamos .JPG
+  img.src = `${BASE_IMG}/${p.codigo}.JPG`;
   img.alt = p.nombre_corto || p.codigo;
   img.loading = 'lazy';
 
   img.onerror = () => {
     if (!triedLower) {
-      // Si .JPG falla, probamos con .jpg
+      // Si .JPG falla, probamos .jpg
       triedLower = true;
       img.onerror = () => {
         wrapper.textContent = 'Sin imagen';
         img.remove();
       };
-      img.src = `img/${p.codigo}.jpg`;
+      img.src = `${BASE_IMG}/${p.codigo}.jpg`;
     } else {
       wrapper.textContent = 'Sin imagen';
       img.remove();
@@ -60,6 +65,7 @@ function crearImagenProducto(p) {
   return wrapper;
 }
 
+// Pintar las tarjetas de productos
 function renderizarProductos(lista) {
   if (!lista.length) {
     grid.innerHTML = '<p>No se encontraron productos.</p>';
@@ -106,6 +112,7 @@ function renderizarProductos(lista) {
   });
 }
 
+// Filtros (buscador + categoría)
 function aplicarFiltros() {
   const texto = buscador.value.toLowerCase().trim();
   const cat = categoriaSelect.value;
