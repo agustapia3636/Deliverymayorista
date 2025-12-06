@@ -43,7 +43,7 @@ function parsearPrecio(valor) {
   return null;
 }
 
-// texto redondeado sin decimales
+// texto redondeado SIN decimales (como te gustaba antes)
 function formatearPrecio(valor) {
   const numero = parsearPrecio(valor);
   if (numero == null) return "Consultar";
@@ -192,13 +192,16 @@ function renderProductos(lista) {
     const codigo = safe(
       prod.codigo || prod.cod || prod.Code || prod.Codigo
     );
-    const nombre = safe(
+    const nombreBase = safe(
       prod.nombre ||
       prod.descripcion ||
       prod.titulo ||
       prod["Nombre Corto"],
       "Sin nombre"
     );
+    // Como antes: "N0247 - LLAVERO ..."
+    const nombre = `${codigo} - ${nombreBase}`;
+
     const categoria = safe(
       prod.categoria ||
       prod.rubro ||
@@ -229,26 +232,19 @@ function renderProductos(lista) {
     const card = document.createElement("article");
     card.classList.add("producto-card");
 
-    // URL a la página de detalle
-    const linkUrl = `producto.html?codigo=${encodeURIComponent(codigo)}`;
-
     const itemCarrito = carritoActual.find(p => p.codigo === codigo);
     const textoBoton = itemCarrito
       ? `En carrito (${itemCarrito.cantidad})`
       : "Agregar al carrito";
 
+    // 👉 ESTRUCTURA COMO LA QUE TENÍAS ANTES
     card.innerHTML = `
-      <a href="${linkUrl}" class="producto-link">
-        <div class="producto-img-wrapper">
-          <img class="producto-imagen" alt="${nombre}">
-        </div>
-      </a>
+      <div class="producto-img-wrapper">
+        <img class="producto-imagen" alt="${nombreBase}">
+      </div>
 
       <div class="producto-info">
-        <a href="${linkUrl}" class="producto-titulo-link">
-          <h3 class="producto-titulo">${nombre}</h3>
-        </a>
-        <p class="producto-codigo">Cod: ${codigo}</p>
+        <h3 class="producto-titulo">${nombre}</h3>
         <p class="producto-descripcion">${descCorta}</p>
         <p class="producto-categoria">${categoria}</p>
 
@@ -270,14 +266,21 @@ function renderProductos(lista) {
       btn.classList.add("btn-agregar-carrito-activo");
     }
 
+    // CLICK EN CARD → ir a detalle (imagen + texto)
+    card.addEventListener("click", ev => {
+      // si el click viene del botón, NO navegar
+      if (ev.target.closest(".btn-agregar-carrito")) return;
+      window.location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
+    });
+
     // CLICK en Agregar al carrito
     btn.addEventListener("click", ev => {
-      ev.preventDefault();   // no seguir el link por error
-      ev.stopPropagation();
+      ev.preventDefault();
+      ev.stopPropagation(); // para que no dispare el click de la card
 
       const productoBasico = {
         codigo,
-        nombre,
+        nombre: nombreBase,
         precio: precioNum,
         img: (img && (img.dataset.srcOk || img.src)) || null,
         stock: safe(prod.Stock ?? prod.stock, null),
