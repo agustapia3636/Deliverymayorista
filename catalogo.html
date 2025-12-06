@@ -7,31 +7,36 @@
   <link rel="stylesheet" href="css/estilos.css" />
 </head>
 <body>
-  <header class="header">
-    <div class="logo">DELIVERY MAYORISTA</div>
-    <nav>
-      <a href="index.html">Inicio</a>
-      <a href="catalogo.html" class="activo">Catálogo</a>
-    </nav>
-  </header>
 
-  <main class="contenedor">
-    <section class="filtros">
-      <input id="buscador" type="text" placeholder="Buscar por código o descripción..." />
-      <select id="categoria">
-        <option value="">Todas las categorías</option>
-      </select>
-    </section>
+<header class="header">
+  <div class="logo">DELIVERY MAYORISTA</div>
+  <nav>
+    <a href="index.html">Inicio</a>
+    <a href="catalogo.html" class="activo">Catálogo</a>
+  </nav>
+</header>
 
-    <section id="grid-productos" class="grid-productos">
-      <!-- Productos generados por JS -->
-    </section>
-  </main>
+<main class="contenedor">
 
-  <footer class="footer">
-    <p>Delivery Mayorista · Catálogo demo</p>
-  </footer>
+  <section class="filtros">
+    <input id="buscador" type="text" placeholder="Buscar por código o descripción..." />
+    <select id="categoria">
+      <option value="">Todas las categorías</option>
+    </select>
+  </section>
 
-  <script src="js/catalogo.js"></script>
+  <!-- EL GRID CORRECTO -->
+  <section>
+    <div id="grid-productos" class="grid"></div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <p>Delivery Mayorista · Catálogo demo</p>
+</footer>
+
+<script src="js/catalogo.js"></script>
 </body>
 </html>
+
