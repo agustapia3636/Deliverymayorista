@@ -11,7 +11,7 @@ async function cargarProducto() {
     return;
   }
 
-  const resp = await fetch("data/productos.json");
+  const resp = await fetch("productos.json");
   const productos = await resp.json();
 
   const index = productos.findIndex(p => p.codigo === codigo);
