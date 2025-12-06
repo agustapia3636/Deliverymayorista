@@ -120,3 +120,143 @@ function parsearPrecio(valor) {
     if (typeof valor === "string") {
         const limpio = valor.replace(/\./g, "").replace(",", ".");
         const num = Number(limpio);
+        return isNaN(num) ? null : num;
+    }
+    return null;
+}
+
+async function cargarProductos(){
+    try {
+        const res = await fetch("./productos.json");
+        const data = await res.json();
+
+        productos = Array.isArray(data) ? data : (data.productos || []);
+
+        productos.forEach(p => {
+            if (p["Categoria Princ"]) categorias.add(p["Categoria Princ"]);
+        });
+
+        cargarCategorias();
+        renderizar(productos);
+    } catch (e){
+        console.error("Error cargando productos.json", e);
+    }
+}
+
+function cargarCategorias(){
+    const select = document.getElementById("categorias");
+    select.innerHTML = `<option value="todos">Todas las categorías</option>`;
+    categorias.forEach(c => {
+        select.innerHTML += `<option value="${c}">${c}</option>`;
+    });
+}
+
+function renderizar(lista){
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+
+    lista.forEach(p => {
+        const codigo       = p["Codigo"] || "";
+        const nombreCorto  = p["Nombre Corto"] || "";
+        const descripcionL = p["Descripción Larga"] || "";
+        const categoria    = p["Categoria Princ"] || "";
+        const precioMayor  = parsearPrecio(p["Precio Mayorista"]);
+        const precioCliente= parsearPrecio(p["Precio Cliente"]);
+        const precioUsado  = precioMayor ?? precioCliente;
+
+        // Descripción corta recortada
+        let descCorta = descripcionL.trim();
+        if (descCorta.length > 80) descCorta = descCorta.substring(0, 80) + "...";
+
+        // URLs de imagen
+        const urlLower = `${BASE_IMG}/${codigo}.jpg`;
+        const urlUpper = `${BASE_IMG}/${codigo}.JPG`;
+
+        // TARJETA CLICKEABLE -> producto.html?codigo=XXXX
+        const card = document.createElement("a");
+        card.className = "card";
+        card.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
+        card.style.textDecoration = "none";
+        card.style.color = "inherit";
+
+        const contImg = document.createElement("div");
+
+        const img = document.createElement("img");
+        img.alt = `${codigo} - ${nombreCorto}`;
+        img.src = urlLower;
+
+        const placeholder = document.createElement("div");
+        placeholder.className = "sin-imagen";
+        placeholder.textContent = "Sin imagen";
+
+        let intento = 0;
+        img.onerror = () => {
+            if (intento === 0) {
+                img.src = urlUpper;
+                intento++;
+            } else {
+                img.style.display = "none";
+                placeholder.style.display = "flex";
+            }
+        };
+
+        contImg.appendChild(img);
+        contImg.appendChild(placeholder);
+
+        const titulo = document.createElement("strong");
+        titulo.textContent = `${codigo} - ${nombreCorto}`;
+
+        const desc = document.createElement("div");
+        desc.className = "descripcion";
+        desc.textContent = descCorta;
+
+        const precio = document.createElement("div");
+        precio.className = "precio";
+        precio.textContent = precioUsado != null
+            ? `$ ${precioUsado.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
+            : "$ Consultar";
+
+        card.appendChild(contImg);
+        card.appendChild(titulo);
+        card.appendChild(desc);
+        card.appendChild(precio);
+
+        grid.appendChild(card);
+    });
+}
+
+document.getElementById("busqueda").addEventListener("input", e => {
+    const val = e.target.value.toLowerCase();
+    filtrar(val, document.getElementById("categorias").value);
+});
+
+document.getElementById("categorias").addEventListener("change", e => {
+    filtrar(document.getElementById("busqueda").value.toLowerCase(), e.target.value);
+});
+
+function filtrar(texto, categoria){
+    let filtrados = productos.filter(p => {
+        const codigo      = (p["Codigo"] || "").toString().toLowerCase();
+        const nombreCorto = (p["Nombre Corto"] || "").toLowerCase();
+        const cat         = (p["Categoria Princ"] || "");
+
+        const pasaTexto =
+            !texto ||
+            codigo.includes(texto) ||
+            nombreCorto.includes(texto);
+
+        const pasaCat =
+            categoria === "todos" || cat === categoria;
+
+        return pasaTexto && pasaCat;
+    });
+
+    renderizar(filtrados);
+}
+
+// Ejecutar carga inicial
+cargarProductos();
+</script>
+
+</body>
+</html>
