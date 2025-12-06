@@ -29,6 +29,37 @@ function poblarCategorias() {
   });
 }
 
+function crearImagenProducto(p) {
+  const wrapper = document.createElement('div');
+  wrapper.className = 'img-placeholder';
+
+  const img = document.createElement('img');
+  let triedLower = false;
+
+  // Primero probamos .JPG (como N0001.JPG)
+  img.src = `img/${p.codigo}.JPG`;
+  img.alt = p.nombre_corto || p.codigo;
+  img.loading = 'lazy';
+
+  img.onerror = () => {
+    if (!triedLower) {
+      // Si .JPG falla, probamos con .jpg
+      triedLower = true;
+      img.onerror = () => {
+        wrapper.textContent = 'Sin imagen';
+        img.remove();
+      };
+      img.src = `img/${p.codigo}.jpg`;
+    } else {
+      wrapper.textContent = 'Sin imagen';
+      img.remove();
+    }
+  };
+
+  wrapper.appendChild(img);
+  return wrapper;
+}
+
 function renderizarProductos(lista) {
   if (!lista.length) {
     grid.innerHTML = '<p>No se encontraron productos.</p>';
@@ -40,9 +71,7 @@ function renderizarProductos(lista) {
     const card = document.createElement('article');
     card.className = 'card-producto';
 
-    const img = document.createElement('div');
-    img.className = 'img-placeholder';
-    img.textContent = 'Imagen';
+    const imgWrapper = crearImagenProducto(p);
 
     const cuerpo = document.createElement('div');
     cuerpo.className = 'card-body';
@@ -71,7 +100,7 @@ function renderizarProductos(lista) {
     cuerpo.appendChild(precio);
     cuerpo.appendChild(categoria);
 
-    card.appendChild(img);
+    card.appendChild(imgWrapper);
     card.appendChild(cuerpo);
     grid.appendChild(card);
   });
