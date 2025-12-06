@@ -44,28 +44,78 @@ function formatearNumero(n) {
 function detectarClaves(item) {
   if (!item || typeof item !== "object") return;
 
-  const keys = Object.keys(item).map(k => k.toLowerCase());
+  const keysOriginal = Object.keys(item);
+  const keysLower = keysOriginal.map(k => k.toLowerCase());
 
   function encontrar(candidatos) {
     for (const c of candidatos) {
-      const idx = keys.indexOf(c.toLowerCase());
-      if (idx !== -1) return Object.keys(item)[idx];
+      const idx = keysLower.indexOf(c.toLowerCase());
+      if (idx !== -1) return keysOriginal[idx];
     }
     return null;
   }
 
   // Descripción
-  KEY_DESC = encontrar(["descripcion", "descripcion_larga", "nombre", "titulo", "desc"]) || "descripcion";
+  KEY_DESC = encontrar([
+    "descripcion",
+    "descripcion_larga",
+    "nombre",
+    "titulo",
+    "desc"
+  ]) || "descripcion";
+
   // Código
   KEY_CODIGO = encontrar(["codigo", "cod", "sku", "id"]);
+
   // Precio unitario
-  KEY_PRECIO = encontrar(["precio", "preciolista", "precio_lista", "price", "unitario", "punitario"]);
+  KEY_PRECIO = encontrar([
+    "precio",
+    "preciolista",
+    "precio_lista",
+    "price",
+    "unitario",
+    "punitario"
+  ]);
+
   // Cantidad
   KEY_CANTIDAD = encontrar(["cantidad", "qty", "cant"]);
+
   // Stock
   KEY_STOCK = encontrar(["stock", "existencia", "disponible"]);
-  // Imagen
-  KEY_IMG = encontrar(["imagen", "img", "foto"]);
+
+  // Imagen (mucho más flexible ahora)
+  KEY_IMG = encontrar([
+    "imagen",
+    "img",
+    "foto",
+    "imagenurl",
+    "urlimagen",
+    "url_imagen",
+    "url_img",
+    "urlimg",
+    "image"
+  ]);
+
+  // Si todavía no encontró, busca por valor tipo URL de imagen
+  if (!KEY_IMG) {
+    for (let i = 0; i < keysOriginal.length; i++) {
+      const k = keysOriginal[i];
+      const v = item[k];
+      if (typeof v === "string") {
+        const lower = v.toLowerCase();
+        if (
+          lower.includes(".png") ||
+          lower.includes(".jpg") ||
+          lower.includes(".jpeg") ||
+          lower.includes(".webp") ||
+          lower.startsWith("http")
+        ) {
+          KEY_IMG = k;
+          break;
+        }
+      }
+    }
+  }
 }
 
 function obtenerValor(item, key, def) {
