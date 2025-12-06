@@ -290,40 +290,48 @@
             font-size:13px;
             padding:9px 14px;
         }
-    }
+/* ---------------------------
+   MINI CARRITO FLOTANTE
+--------------------------- */
 
-    /* MINI CARRITO FLOTANTE */
-    .mini-carrito {
-        position: fixed;
-        right: 16px;
-        bottom: 100px; /* arriba del botón WhatsApp */
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: #ffffff;
-        padding: 8px 12px;
-        border-radius: 999px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        cursor: pointer;
-        z-index: 9999;
-        font-size: 13px;
-        color: #000;
-    }
+.mini-carrito {
+  position: fixed;
+  right: 16px;
+  bottom: 100px;            /* POSICIÓN EN ESCRITORIO */
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  padding: 8px 12px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 9999;
+  font-size: 13px;
+  color: #000;
+}
 
-    .mini-carrito-icono {
-        font-size: 18px;
-    }
+.mini-carrito-icono {
+  font-size: 18px;
+}
 
-    .mini-carrito-texto {
-        display: flex;
-        flex-direction: column;
-        line-height: 1.1;
-    }
+.mini-carrito-texto {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
 
-    .mini-carrito-linea {
-        white-space: nowrap;
-        font-weight: 500;
-    }
+.mini-carrito-linea {
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+/* SOLO EN CELULAR: subir el mini carrito para que no tape el botón de WhatsApp */
+@media (max-width: 768px) {
+  .mini-carrito {
+    bottom: 210px !important;   /* AJUSTÁ ESTE NÚMERO SI LO QUERÉS MÁS ARRIBA O MÁS ABAJO */
+  }
+}
 </style>
 </head>
 
