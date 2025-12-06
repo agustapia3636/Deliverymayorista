@@ -50,7 +50,7 @@ function actualizarMiniCarrito() {
   cantSpan.textContent = cantidad;
   totalSpan.textContent = formatearPrecio(total);
 
-  // Por ahora lo dejamos siempre visible
+  // De momento lo dejamos siempre visible
   mini.style.display = "flex";
 }
 
@@ -121,4 +121,3 @@ window.addEventListener("DOMContentLoaded", function () {
   cargarCarrito();
   actualizarMiniCarrito();
 });
-SS
