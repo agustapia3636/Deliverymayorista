@@ -360,6 +360,41 @@ body {
 .miniaturas {
   min-height: 30px;      /* para que se vea la estructura sin romper */
   display: flex;
+  /* ------------------------------
+   MINI CARRITO FLOTANTE
+---------------------------------*/
+
+.mini-carrito {
+  position: fixed;
+  right: 16px;
+  bottom: 100px; /* arriba del botón WhatsApp */
+  display: none; /* el JS lo pone en flex */
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  padding: 8px 12px;
+  border-radius: 999px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  cursor: pointer;
+  z-index: 9999;
+  font-size: 13px;
+}
+
+.mini-carrito-icono {
+  font-size: 18px;
+}
+
+.mini-carrito-texto {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+
+.mini-carrito-linea {
+  white-space: nowrap;
+  font-weight: 500;
+}
+
   align-items: center;
   justify-content: flex-start;
 }
