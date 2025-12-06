@@ -1,12 +1,34 @@
-// URL base de las imágenes en GitHub
-const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
-
 // Elementos del DOM
 const grid = document.getElementById("grid-productos");
 const buscador = document.getElementById("buscador");
 const categoriaSelect = document.getElementById("categoria");
 
 let productos = [];
+
+// ===============================
+// Helper para cargar imágenes desde tu repo
+// ===============================
+function configurarImagenPorCodigo(img, codigo, onFalloTotal) {
+  const urls = [
+    `https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main/${codigo}.jpg`,
+    `https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main/${codigo}.JPG`,
+    `https://agustapia3636.github.io/deliverymayorista-img/${codigo}.jpg`,
+    `https://agustapia3636.github.io/deliverymayorista-img/${codigo}.JPG`,
+  ];
+
+  let idx = 0;
+
+  const intentar = () => {
+    if (idx >= urls.length) {
+      if (onFalloTotal) onFalloTotal();
+      return;
+    }
+    img.src = urls[idx++];
+  };
+
+  img.onerror = intentar;
+  intentar();
+}
 
 // ===============================
 // Cargar productos desde productos.json
@@ -49,27 +71,13 @@ function crearImagenProducto(p) {
   wrapper.className = "img-placeholder";
 
   const img = document.createElement("img");
-  let triedLower = false;
-
-  const codigo = p.codigo;
-
-  img.src = `${BASE_IMG}/${codigo}.JPG`;
-  img.alt = p.nombre_corto || codigo;
+  img.alt = p.nombre_corto || p.codigo;
   img.loading = "lazy";
 
-  img.onerror = () => {
-    if (!triedLower) {
-      triedLower = true;
-      img.onerror = () => {
-        wrapper.textContent = "Sin imagen";
-        img.remove();
-      };
-      img.src = `${BASE_IMG}/${codigo}.jpg`;
-    } else {
-      wrapper.textContent = "Sin imagen";
-      img.remove();
-    }
-  };
+  configurarImagenPorCodigo(img, p.codigo, () => {
+    wrapper.textContent = "Sin imagen";
+    img.remove();
+  });
 
   wrapper.appendChild(img);
   return wrapper;
@@ -92,7 +100,6 @@ function renderizarProductos(lista) {
     const descLarga = p.descripcion_larga || "";
     const categoriaTexto = p.categoria;
 
-    // precio ya viene como número en tu JSON
     const precioNumero = Number(p.precio) || 0;
     const precioFormateado = precioNumero.toLocaleString("es-AR", {
       minimumFractionDigits: 2,
@@ -120,7 +127,6 @@ function renderizarProductos(lista) {
 
     const desc = document.createElement("p");
     desc.className = "descripcion";
-    // resumen de la descripción para la tarjeta
     const resumen =
       descLarga.length > 160 ? descLarga.slice(0, 157) + "..." : descLarga;
     desc.textContent = resumen;
