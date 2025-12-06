@@ -23,20 +23,19 @@ let TODOS_LOS_PRODUCTOS = [];
 // UTILIDADES GENERALES
 // ========================================
 
-// valor seguro
 function safe(value, fallback = "") {
   return (value === undefined || value === null) ? fallback : value;
 }
 
-// convierte "19.585,8" -> 19585.8 / "1992,2" -> 1992.2
+// "19.585,8" -> 19585.8 / "1992,2" -> 1992.2
 function parsearPrecio(valor) {
   if (typeof valor === "number") return valor;
 
   if (typeof valor === "string") {
     const limpio = valor
       .toString()
-      .replace(/\./g, "")   // elimina separadores de miles
-      .replace(",", ".");   // cambia coma por punto decimal
+      .replace(/\./g, "")   // separador miles
+      .replace(",", ".");   // coma a punto
 
     const num = Number(limpio);
     return Number.isFinite(num) ? num : null;
@@ -44,7 +43,7 @@ function parsearPrecio(valor) {
   return null;
 }
 
-// devuelve texto listo para mostrar (redondeado sin decimales)
+// texto redondeado sin decimales
 function formatearPrecio(valor) {
   const numero = parsearPrecio(valor);
   if (numero == null) return "Consultar";
@@ -55,7 +54,7 @@ function formatearPrecio(valor) {
   });
 }
 
-// Intenta cargar .jpg y .JPG y guarda la URL correcta en data-src-ok
+// Intenta .jpg y .JPG y guarda la URL correcta en data-src-ok
 function setImagenProducto(imgElement, codigo) {
   if (!imgElement || !codigo) {
     if (imgElement) imgElement.style.display = "none";
@@ -78,7 +77,6 @@ function setImagenProducto(imgElement, codigo) {
   };
 
   imgElement.onload = () => {
-    // Guardamos la URL que realmente cargó bien
     imgElement.dataset.srcOk = imgElement.src;
   };
 
@@ -135,14 +133,12 @@ function actualizarMiniCarrito() {
 }
 
 // Agrega un producto al carrito desde el catálogo
-// AHORA incluye imagen y stock
 function agregarAlCarritoDesdeCatalogo(productoBasico, boton) {
   let carrito = leerCarrito();
 
   const idx = carrito.findIndex(p => p.codigo === productoBasico.codigo);
 
   if (idx >= 0) {
-    // Ya existe: sumamos 1 (respetando stock si viene)
     const item = carrito[idx];
     const stock = Number(item.stock ?? productoBasico.stock ?? 0) || 0;
 
@@ -157,9 +153,9 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton) {
     carrito.push({
       codigo: productoBasico.codigo,
       nombre: productoBasico.nombre,
-      precio: productoBasico.precio,   // ya es número
+      precio: productoBasico.precio,
       cantidad: 1,
-      img: productoBasico.img || null, // 👈 CLAVE: guardamos URL de imagen
+      img: productoBasico.img || null,
       stock: productoBasico.stock ?? null,
     });
   }
@@ -167,7 +163,6 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton) {
   guardarCarrito(carrito);
   actualizarMiniCarrito();
 
-  // Actualizar texto del botón
   const item = carrito.find(p => p.codigo === productoBasico.codigo);
   if (boton && item) {
     boton.textContent = `En carrito (${item.cantidad})`;
@@ -187,9 +182,7 @@ function renderProductos(lista) {
   grid.innerHTML = "";
 
   if (!lista || lista.length === 0) {
-    grid.innerHTML = `
-      <p>No se encontraron productos.</p>
-    `;
+    grid.innerHTML = `<p>No se encontraron productos.</p>`;
     return;
   }
 
@@ -222,7 +215,6 @@ function renderProductos(lista) {
       ""
     );
 
-    // tomamos cualquier campo de precio disponible
     const brutoPrecio =
       prod.precio ??
       prod.precioMayorista ??
@@ -237,19 +229,25 @@ function renderProductos(lista) {
     const card = document.createElement("article");
     card.classList.add("producto-card");
 
-    // ¿ya está en el carrito?
+    // URL a la página de detalle
+    const linkUrl = `producto.html?codigo=${encodeURIComponent(codigo)}`;
+
     const itemCarrito = carritoActual.find(p => p.codigo === codigo);
     const textoBoton = itemCarrito
       ? `En carrito (${itemCarrito.cantidad})`
       : "Agregar al carrito";
 
     card.innerHTML = `
-      <div class="producto-img-wrapper">
-        <img class="producto-imagen" alt="${nombre}">
-      </div>
+      <a href="${linkUrl}" class="producto-link">
+        <div class="producto-img-wrapper">
+          <img class="producto-imagen" alt="${nombre}">
+        </div>
+      </a>
 
       <div class="producto-info">
-        <h3 class="producto-titulo">${nombre}</h3>
+        <a href="${linkUrl}" class="producto-titulo-link">
+          <h3 class="producto-titulo">${nombre}</h3>
+        </a>
         <p class="producto-codigo">Cod: ${codigo}</p>
         <p class="producto-descripcion">${descCorta}</p>
         <p class="producto-categoria">${categoria}</p>
@@ -274,14 +272,13 @@ function renderProductos(lista) {
 
     // CLICK en Agregar al carrito
     btn.addEventListener("click", ev => {
-      ev.preventDefault();
+      ev.preventDefault();   // no seguir el link por error
       ev.stopPropagation();
 
       const productoBasico = {
         codigo,
         nombre,
         precio: precioNum,
-        // 👇 guardamos exactamente la imagen que se cargó bien
         img: (img && (img.dataset.srcOk || img.src)) || null,
         stock: safe(prod.Stock ?? prod.stock, null),
       };
@@ -361,7 +358,6 @@ async function cargarProductos() {
         )
       ).sort();
 
-      // primera opción: todas
       if (!filtroCategoria.querySelector("option[value='todas']")) {
         const optTodas = document.createElement("option");
         optTodas.value = "todas";
@@ -381,9 +377,7 @@ async function cargarProductos() {
     actualizarMiniCarrito();
   } catch (err) {
     console.error(err);
-    grid.innerHTML = `
-      <p>Error cargando productos.</p>
-    `;
+    grid.innerHTML = `<p>Error cargando productos.</p>`;
   }
 }
 
