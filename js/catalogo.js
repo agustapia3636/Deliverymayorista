@@ -29,7 +29,7 @@ async function cargarProductos() {
 // ===============================
 function poblarCategorias() {
   const categorias = [
-    ...new Set(productos.map(p => p["Categoria Princ"]).filter(Boolean))
+    ...new Set(productos.map(p => p.categoria).filter(Boolean))
   ];
   categorias.sort();
 
@@ -51,10 +51,10 @@ function crearImagenProducto(p) {
   const img = document.createElement("img");
   let triedLower = false;
 
-  const codigo = p["Codigo"];
+  const codigo = p.codigo;
 
   img.src = `${BASE_IMG}/${codigo}.JPG`;
-  img.alt = p["Nombre Corto"] || codigo;
+  img.alt = p.nombre_corto || codigo;
   img.loading = "lazy";
 
   img.onerror = () => {
@@ -87,21 +87,17 @@ function renderizarProductos(lista) {
   grid.innerHTML = "";
 
   lista.forEach(p => {
-    const codigo = p["Codigo"];
-    const nombreCorto = p["Nombre Corto"];
-    const descLarga = p["Descripción Larga"] || "";
-    const categoriaTexto = p["Categoria Princ"];
+    const codigo = p.codigo;
+    const nombreCorto = p.nombre_corto;
+    const descLarga = p.descripcion_larga || "";
+    const categoriaTexto = p.categoria;
 
-    const precioRaw = String(p["Precio Mayorista"] || "").trim();
-    const precioNumero = precioRaw
-      ? parseFloat(precioRaw.replace(".", "").replace(",", "."))
-      : 0;
-    const precioFormateado = precioNumero
-      ? precioNumero.toLocaleString("es-AR", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        })
-      : "";
+    // precio ya viene como número en tu JSON
+    const precioNumero = Number(p.precio) || 0;
+    const precioFormateado = precioNumero.toLocaleString("es-AR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
 
     const card = document.createElement("article");
     card.className = "card-producto";
@@ -124,13 +120,14 @@ function renderizarProductos(lista) {
 
     const desc = document.createElement("p");
     desc.className = "descripcion";
-    desc.textContent = descLarga;
+    // resumen de la descripción para la tarjeta
+    const resumen =
+      descLarga.length > 160 ? descLarga.slice(0, 157) + "..." : descLarga;
+    desc.textContent = resumen;
 
     const precio = document.createElement("p");
     precio.className = "precio";
-    if (precioFormateado) {
-      precio.textContent = `$ ${precioFormateado}`;
-    }
+    precio.textContent = `$ ${precioFormateado}`;
 
     const categoria = document.createElement("p");
     categoria.className = "categoria";
@@ -157,10 +154,10 @@ function aplicarFiltros() {
   const cat = categoriaSelect.value;
 
   const filtrados = productos.filter(p => {
-    const codigo = (p["Codigo"] || "").toLowerCase();
-    const nombre = (p["Nombre Corto"] || "").toLowerCase();
-    const desc = (p["Descripción Larga"] || "").toLowerCase();
-    const categoriaProd = p["Categoria Princ"] || "";
+    const codigo = (p.codigo || "").toLowerCase();
+    const nombre = (p.nombre_corto || "").toLowerCase();
+    const desc = (p.descripcion_larga || "").toLowerCase();
+    const categoriaProd = p.categoria || "";
 
     const coincideTexto =
       !texto ||
@@ -181,4 +178,3 @@ categoriaSelect.addEventListener("change", aplicarFiltros);
 
 // Ejecutar carga inicial
 cargarProductos();
-
