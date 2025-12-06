@@ -181,3 +181,4 @@ categoriaSelect.addEventListener("change", aplicarFiltros);
 
 // Ejecutar carga inicial
 cargarProductos();
+
