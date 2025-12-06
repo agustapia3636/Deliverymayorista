@@ -83,8 +83,7 @@
         justify-content:center;
         font-size:14px;
         opacity:0.8;
-        /* por defecto oculta, se muestra solo si falla la imagen */
-        display:none;
+        display:none; /* solo se muestra si falla la imagen */
     }
 </style>
 </head>
@@ -107,6 +106,18 @@ const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayori
 let productos = [];
 let categorias = new Set();
 
+// Convierte "2276,8" -> número 2276.8
+function parsearPrecio(valor) {
+    if (typeof valor === "number") return valor;
+    if (typeof valor === "string") {
+        // saco puntos de miles y cambio coma por punto
+        const limpio = valor.replace(/\./g, "").replace(",", ".");
+        const num = Number(limpio);
+        return isNaN(num) ? null : num;
+    }
+    return null;
+}
+
 async function cargarProductos(){
     try {
         // productos.json está en la misma carpeta que este HTML
@@ -117,7 +128,7 @@ async function cargarProductos(){
         productos = Array.isArray(data) ? data : (data.productos || []);
 
         productos.forEach(p => {
-            if (p.categoria) categorias.add(p.categoria);
+            if (p["Categoria Princ"]) categorias.add(p["Categoria Princ"]);
         });
 
         cargarCategorias();
@@ -140,37 +151,35 @@ function renderizar(lista){
     grid.innerHTML = "";
 
     lista.forEach(p => {
-        // Si el JSON ya trae p.imagen, lo usamos.
-        // Si no, armamos la ruta al repo en base al código.
-        let imagenBase = (p.imagen && p.imagen.trim() !== "")
-            ? p.imagen
-            : `${BASE_IMG}/${p.codigo}.jpg`;
+        const codigo       = p["Codigo"] || "";
+        const nombreCorto  = p["Nombre Corto"] || "";
+        const categoria    = p["Categoria Princ"] || "";
+        const precioMayor  = parsearPrecio(p["Precio Mayorista"]);
+        const precioCliente= parsearPrecio(p["Precio Cliente"]);
+        const precioUsado  = precioMayor ?? precioCliente; // priorizo mayorista
+
+        // Si el JSON ya trae p.imagen la podríamos usar, pero por ahora
+        // armamos la ruta directo desde el código
+        const urlLower = `${BASE_IMG}/${codigo}.jpg`;
+        const urlUpper = `${BASE_IMG}/${codigo}.JPG`;
 
         const card = document.createElement("div");
         card.className = "card";
 
-        // Contenedor de imagen + placeholder
         const contImg = document.createElement("div");
 
         const img = document.createElement("img");
-        img.src = imagenBase;
-        img.alt = p.nombre_corto || p.codigo;
+        img.alt = `${codigo} - ${nombreCorto}`;
+        img.src = urlLower; // primero pruebo .jpg
 
         const placeholder = document.createElement("div");
         placeholder.className = "sin-imagen";
         placeholder.textContent = "Sin imagen";
 
-        // Fallback: primero prueba .jpg, luego .JPG, y si nada, muestra placeholder
-        const urlLower = `${BASE_IMG}/${p.codigo}.jpg`;
-        const urlUpper = `${BASE_IMG}/${p.codigo}.JPG`;
         let intento = 0;
-
         img.onerror = () => {
-            if (intento === 0 && img.src !== urlLower) {
-                img.src = urlLower;
-                intento++;
-            } else if (intento === 1 && img.src !== urlUpper) {
-                img.src = urlUpper;
+            if (intento === 0) {
+                img.src = urlUpper; // pruebo .JPG
                 intento++;
             } else {
                 img.style.display = "none";
@@ -182,11 +191,13 @@ function renderizar(lista){
         contImg.appendChild(placeholder);
 
         const titulo = document.createElement("strong");
-        titulo.textContent = `${p.codigo} - ${p.nombre_corto}`;
+        titulo.textContent = `${codigo} - ${nombreCorto}`;
 
         const precio = document.createElement("div");
         precio.className = "precio";
-        precio.textContent = `$ ${p.precio}`;
+        precio.textContent = precioUsado != null
+            ? `$ ${precioUsado.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
+            : "$ Consultar";
 
         card.appendChild(contImg);
         card.appendChild(titulo);
@@ -206,14 +217,21 @@ document.getElementById("categorias").addEventListener("change", e => {
 });
 
 function filtrar(texto, categoria){
-    let filtrados = productos.filter(p =>
-        (p.codigo && p.codigo.toLowerCase().includes(texto)) ||
-        (p.nombre_corto && p.nombre_corto.toLowerCase().includes(texto))
-    );
+    let filtrados = productos.filter(p => {
+        const codigo      = (p["Codigo"] || "").toString().toLowerCase();
+        const nombreCorto = (p["Nombre Corto"] || "").toLowerCase();
+        const cat         = (p["Categoria Princ"] || "");
 
-    if (categoria !== "todos"){
-        filtrados = filtrados.filter(p => p.categoria === categoria);
-    }
+        const pasaTexto =
+            !texto ||
+            codigo.includes(texto) ||
+            nombreCorto.includes(texto);
+
+        const pasaCat =
+            categoria === "todos" || cat === categoria;
+
+        return pasaTexto && pasaCat;
+    });
 
     renderizar(filtrados);
 }
@@ -224,3 +242,4 @@ cargarProductos();
 
 </body>
 </html>
+
