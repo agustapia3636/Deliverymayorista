@@ -99,15 +99,11 @@ body {
 
 /* GRID DEL CATÁLOGO ---------------------- */
 
-/* Esta es la clase que usás en catalogo.html: class="grid" */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 1.5rem;
 }
-
-/* Si quisieras usar .grid-productos también, podrías hacer:
-   .grid-productos { comparten las mismas reglas que .grid } */
 
 /* TARJETA DE PRODUCTO -------------------- */
 
@@ -122,7 +118,6 @@ body {
   cursor: pointer;
 }
 
-/* Efecto hover para que se sienta “clickeable” */
 .card-producto:hover {
   transform: translateY(-4px);
   box-shadow: 0 18px 35px rgba(0, 0, 0, 0.6);
@@ -131,7 +126,7 @@ body {
 /* Contenedor de la imagen en la card */
 .img-placeholder {
   width: 100%;
-  aspect-ratio: 4 / 3;        /* mantiene proporción */
+  aspect-ratio: 4 / 3;
   overflow: hidden;
   border-radius: 16px 16px 0 0;
   display: flex;
@@ -144,7 +139,7 @@ body {
 .img-placeholder img {
   width: 100%;
   height: 100%;
-  object-fit: cover;          /* llena recortando un poco los bordes */
+  object-fit: cover;
   display: block;
 }
 
@@ -162,7 +157,7 @@ body {
   font-size: 0.85rem;
   color: #c3c8e0;
   margin: 0 0 0.4rem;
-  max-height: 3.2em;           /* 2 líneas aprox */
+  max-height: 3.2em;
   overflow: hidden;
 }
 
@@ -187,7 +182,7 @@ body {
   opacity: 0.7;
 }
 
-/* RESPONSIVE ---------------------------- */
+/* RESPONSIVE (CATÁLOGO) ------------------ */
 
 @media (max-width: 600px) {
   .contenedor {
@@ -201,6 +196,9 @@ body {
   .card-body h2 {
     font-size: 0.95rem;
   }
+}  /* ⚠️ AQUÍ CERRAMOS EL MEDIA  */
+
+
 /* ===========================
     PÁGINA DE PRODUCTO
    =========================== */
@@ -296,5 +294,12 @@ body {
   border-radius: 6px;
   cursor: pointer;
   color: #fff;
+}
+
+/* Responsive para la ficha de producto */
+@media (max-width: 800px) {
+  .producto-wrapper {
+    grid-template-columns: 1fr;  /* imagen arriba, texto abajo en celu */
+  }
 }
 
