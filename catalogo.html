@@ -1,42 +1,172 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Catálogo - Delivery Mayorista</title>
-  <link rel="stylesheet" href="css/estilos.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delivery Mayorista | Catálogo</title>
+
+<style>
+    body {
+        background:#0f0f1a;
+        margin:0;
+        font-family: 'Segoe UI', sans-serif;
+        color:white;
+    }
+
+    header {
+        background: linear-gradient(90deg,#ff005d,#ffa400);
+        padding:15px 25px;
+        font-size:20px;
+        font-weight:700;
+    }
+
+    .toolbar {
+        display:flex;
+        gap:15px;
+        padding:25px;
+        justify-content:center;
+    }
+
+    .toolbar input, .toolbar select {
+        padding:12px 18px;
+        border-radius:30px;
+        border:none;
+        outline:none;
+        font-size:15px;
+    }
+
+    .grid {
+        display:grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap:25px;
+        padding:25px;
+    }
+
+    .card {
+        background:#0c0c17;
+        border-radius:22px;
+        padding:18px;
+        text-align:center;
+        min-height:260px;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+    }
+
+    .card img {
+        width:100%;
+        height:150px;
+        object-fit:cover;
+        border-radius:18px;
+        background:#0a0a12;
+    }
+
+    .card strong {
+        display:block;
+        margin-top:10px;
+        font-size:16px;
+    }
+
+    .precio {
+        color:#ffa400;
+        font-weight:700;
+        margin-top:5px;
+    }
+
+    .sin-imagen {
+        width:100%;
+        height:150px;
+        background:#111;
+        border-radius:18px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-size:14px;
+        opacity:0.8;
+    }
+</style>
 </head>
+
 <body>
 
-<header class="header">
-  <div class="logo">DELIVERY MAYORISTA</div>
-  <nav>
-    <a href="index.html">Inicio</a>
-    <a href="catalogo.html" class="activo">Catálogo</a>
-  </nav>
-</header>
+<header>DELIVERY MAYORISTA</header>
 
-<main class="contenedor">
+<div class="toolbar">
+    <input id="busqueda" type="text" placeholder="Buscar por código o descripción">
+    <select id="categorias"></select>
+</div>
 
-  <section class="filtros">
-    <input id="buscador" type="text" placeholder="Buscar por código o descripción..." />
-    <select id="categoria">
-      <option value="">Todas las categorías</option>
-    </select>
-  </section>
+<div id="grid" class="grid"></div>
 
-  <!-- EL GRID CORRECTO -->
-  <section>
-    <div id="grid-productos" class="grid"></div>
-  </section>
+<script>
+let productos = [];
+let categorias = new Set();
 
-</main>
+async function cargarProductos(){
+    try {
+        const res = await fetch("productos.json");
+        productos = await res.json();
 
-<footer class="footer">
-  <p>Delivery Mayorista · Catálogo demo</p>
-</footer>
+        productos.forEach(p => categorias.add(p.categoria));
 
-<script src="js/catalogo.js"></script>
+        cargarCategorias();
+        renderizar(productos);
+    } catch (e){
+        console.error("Error cargando productos.json", e);
+    }
+}
+
+function cargarCategorias(){
+    const select = document.getElementById("categorias");
+    select.innerHTML = `<option value="todos">Todas las categorías</option>`;
+    categorias.forEach(c => {
+        select.innerHTML += `<option value="${c}">${c}</option>`;
+    });
+}
+
+function renderizar(lista){
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+
+    lista.forEach(p => {
+        grid.innerHTML += `
+        <div class="card">
+            ${
+                p.imagen ?
+                `<img src="${p.imagen}" alt="${p.nombre_corto}">` :
+                `<div class="sin-imagen">Sin imagen</div>`
+            }
+            <strong>${p.codigo} - ${p.nombre_corto}</strong>
+            <div class="precio">$ ${p.precio}</div>
+        </div>
+        `;
+    });
+}
+
+document.getElementById("busqueda").addEventListener("input", e => {
+    const val = e.target.value.toLowerCase();
+    filtrar(val, document.getElementById("categorias").value);
+});
+
+document.getElementById("categorias").addEventListener("change", e => {
+    filtrar(document.getElementById("busqueda").value.toLowerCase(), e.target.value);
+});
+
+function filtrar(texto, categoria){
+    let filtrados = productos.filter(p =>
+        p.codigo.toLowerCase().includes(texto) ||
+        p.nombre_corto.toLowerCase().includes(texto)
+    );
+
+    if (categoria !== "todos"){
+        filtrados = filtrados.filter(p => p.categoria === categoria);
+    }
+
+    renderizar(filtrados);
+}
+
+cargarProductos();
+</script>
+
 </body>
 </html>
-
