@@ -1,129 +1,60 @@
-// -----------------------------------------
-// CARRITO DELIVERY MAYORISTA (global)
-// -----------------------------------------
+// ========================================
+//  LÓGICA DE CARRITO (página carrito.html)
+//  Usa el mismo localStorage que el catálogo
+// ========================================
 
-let carrito = [];
+const CLAVE_CARRITO = "dm_carrito";
 
-// Cargar carrito desde localStorage
-function cargarCarrito() {
+function leerCarrito() {
   try {
-    const data = localStorage.getItem("carritoDM");
-    carrito = data ? JSON.parse(data) : [];
+    const raw = localStorage.getItem(CLAVE_CARRITO);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
   } catch (e) {
-    carrito = [];
+    console.error("Error leyendo carrito", e);
+    return [];
   }
 }
 
-// Guardar carrito
-function guardarCarrito() {
-  localStorage.setItem("carritoDM", JSON.stringify(carrito));
+function guardarCarrito(carrito) {
+  try {
+    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
+  } catch (e) {
+    console.error("Error guardando carrito", e);
+  }
 }
 
-// Formatear precio (sin decimales)
-function formatearPrecio(valor) {
-  return Math.round(valor).toLocaleString("es-AR");
-}
-
-// Totales
-function calcularTotales() {
-  let cantidad = 0;
-  let total = 0;
-
-  carrito.forEach(item => {
-    cantidad += item.cantidad;
-    total += item.cantidad * item.precio;
-  });
-
-  return { cantidad, total };
-}
-
-// Actualizar mini carrito flotante
+// Mini carrito (globito)
 function actualizarMiniCarrito() {
-  const cantSpan = document.getElementById("mini-carrito-cantidad");
-  const totalSpan = document.getElementById("mini-carrito-total");
-  const mini = document.getElementById("mini-carrito");
+  const carrito = leerCarrito();
+  const miniCantidad = document.getElementById("mini-carrito-cantidad");
+  const miniTotal    = document.getElementById("mini-carrito-total");
 
-  if (!cantSpan || !totalSpan || !mini) return;
+  const totalProductos = carrito.reduce((acc, p) => acc + (p.cantidad || 0), 0);
+  const totalPrecio = carrito.reduce((acc, p) => {
+    const precio = Number(p.precio) || 0;
+    return acc + precio * (p.cantidad || 0);
+  }, 0);
 
-  const { cantidad, total } = calcularTotales();
-
-  cantSpan.textContent = cantidad;
-  totalSpan.textContent = formatearPrecio(total);
-
-  mini.style.display = "flex";
+  if (miniCantidad) miniCantidad.textContent = totalProductos;
+  if (miniTotal)    miniTotal.textContent    = totalPrecio.toLocaleString("es-AR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  });
 }
 
-// Agregar producto al carrito
-function addToCart(codigo, descripcion, precio, stock) {
-  cargarCarrito(); // por si otra pestaña lo modificó
-
-  precio = Number(precio) || 0;
-  stock = Number(stock) || 0;
-
-  let item = carrito.find(p => p.codigo === codigo);
-
-  if (item) {
-    if (stock === 0 || item.cantidad < stock) {
-      item.cantidad++;
-    } else {
-      alert("No hay más stock disponible de este producto.");
-      return;
-    }
-  } else {
-    if (stock === 0) {
-      // Si no manejás stock en ese producto, igual lo dejamos agregar
-      stock = 9999;
-    }
-
-    carrito.push({
-      codigo,
-      descripcion,
-      precio,
-      cantidad: 1,
-      stock
-    });
-  }
-
-  guardarCarrito();
-  renderCarrito();
-  actualizarMiniCarrito();
+function irAlCarrito() {
+  // ya estamos en carrito, pero por si se usa desde otro lado:
+  window.location.href = "carrito.html";
 }
 
-// Disminuir cantidad
-function disminuir(codigo) {
-  let item = carrito.find(p => p.codigo === codigo);
-  if (!item) return;
-
-  if (item.cantidad > 1) {
-    item.cantidad--;
-  } else {
-    carrito = carrito.filter(p => p.codigo !== codigo);
-  }
-
-  guardarCarrito();
-  renderCarrito();
-  actualizarMiniCarrito();
-}
-
-// Eliminar producto del carrito
-function eliminar(codigo) {
-  carrito = carrito.filter(p => p.codigo !== codigo);
-  guardarCarrito();
-  renderCarrito();
-  actualizarMiniCarrito();
-}
-
-// Render de la página del carrito (carrito.html)
-function renderCarrito() {
+// Pintar la lista en carrito.html
+function cargarCarritoPagina() {
   const contenedor = document.getElementById("carrito");
-  if (!contenedor) {
-    // No estoy en carrito.html, solo actualizo mini carrito
-    actualizarMiniCarrito();
-    return;
-  }
+  const carrito = leerCarrito();
 
-  cargarCarrito();
-  contenedor.innerHTML = "";
+  if (!contenedor) return;
 
   if (carrito.length === 0) {
     contenedor.innerHTML = `
@@ -136,99 +67,131 @@ function renderCarrito() {
     return;
   }
 
-  const lista = document.createElement("div");
-  lista.classList.add("carrito-lista");
+  let total = 0;
+  let totalItems = 0;
 
-  carrito.forEach(item => {
-    const subtotal = item.precio * item.cantidad;
+  const htmlItems = carrito.map(item => {
+    const precio = Number(item.precio) || 0;
+    const subtotal = precio * (item.cantidad || 0);
+    total += subtotal;
+    totalItems += item.cantidad || 0;
 
-    const fila = document.createElement("div");
-    fila.classList.add("item-carrito");
+    const precioTxt   = precio ? `$ ${precio.toLocaleString("es-AR", { minimumFractionDigits: 0 })}` : "Consultar";
+    const subtotalTxt = subtotal ? `$ ${subtotal.toLocaleString("es-AR", { minimumFractionDigits: 0 })}` : "—";
 
-    fila.innerHTML = `
-      <div class="item-carrito-descripcion">
-        <strong>${item.descripcion}</strong><br>
-        <span class="item-carrito-codigo">Código: ${item.codigo}</span><br>
-        <span class="item-carrito-stock">Stock: ${item.stock}</span>
-      </div>
-
-      <div class="item-carrito-controles">
-        <div class="item-carrito-cant">
-          <button type="button" onclick="disminuir('${item.codigo}')">-</button>
-          <span>${item.cantidad}</span>
-          <button type="button" onclick="addToCart('${item.codigo}','${item.descripcion}',${item.precio},${item.stock})">+</button>
+    return `
+      <div class="item-carrito">
+        <div class="item-carrito-descripcion">
+          <div><strong>${item.codigo}</strong> - ${item.nombre || ""}</div>
+          <div class="item-carrito-stock">${precioTxt}</div>
         </div>
-        <div class="item-carrito-precios">
-          <span>$${formatearPrecio(item.precio)} c/u</span>
-          <span>Subtotal: $${formatearPrecio(subtotal)}</span>
+        <div class="item-carrito-controles">
+          <div class="item-carrito-cant">
+            <button type="button" onclick="restarCantidad('${item.codigo}')">−</button>
+            <span>${item.cantidad}</span>
+            <button type="button" onclick="sumarCantidad('${item.codigo}')">+</button>
+          </div>
+          <div class="item-carrito-precios">
+            <span>Subtotal: ${subtotalTxt}</span>
+          </div>
+          <button type="button" class="btn-eliminar" onclick="eliminarDelCarrito('${item.codigo}')">
+            Eliminar
+          </button>
         </div>
-        <button type="button" class="btn-eliminar" onclick="eliminar('${item.codigo}')">Quitar</button>
       </div>
     `;
+  }).join("");
 
-    lista.appendChild(fila);
-  });
-
-  const { total } = calcularTotales();
-
-  const totalDiv = document.createElement("div");
-  totalDiv.classList.add("total-carrito");
-  totalDiv.innerHTML = `
-    <hr>
-    <h2>Total: $${formatearPrecio(total)}</h2>
+  contenedor.innerHTML = `
+    <div class="carrito-lista">
+      ${htmlItems}
+    </div>
+    <div class="total-carrito">
+      <strong>Total (${totalItems} productos):</strong>
+      <div>$ ${total.toLocaleString("es-AR", { minimumFractionDigits: 0 })}</div>
+    </div>
   `;
 
-  contenedor.appendChild(lista);
-  contenedor.appendChild(totalDiv);
+  actualizarMiniCarrito();
 }
 
-// Ir a la página del carrito
-function irAlCarrito() {
-  window.location.href = "carrito.html";
+// Operaciones sobre cantidades
+function sumarCantidad(codigo) {
+  let carrito = leerCarrito();
+  const idx = carrito.findIndex(p => p.codigo === codigo);
+  if (idx >= 0) {
+    carrito[idx].cantidad += 1;
+    guardarCarrito(carrito);
+    cargarCarritoPagina();
+  }
 }
 
-// Generar texto para WhatsApp
-function generarTextoCarrito() {
-  cargarCarrito();
-
-  if (!carrito.length) return "";
-
-  const { total } = calcularTotales();
-
-  let lineas = [];
-  lineas.push("🛒 Pedido Delivery Mayorista");
-  lineas.push("");
-  carrito.forEach(item => {
-    const subtotal = item.precio * item.cantidad;
-    lineas.push(
-      `• x${item.cantidad} ${item.descripcion} (${item.codigo}) - $${formatearPrecio(
-        item.precio
-      )} c/u = $${formatearPrecio(subtotal)}`
-    );
-  });
-  lineas.push("");
-  lineas.push(`Total: $${formatearPrecio(total)}`);
-
-  return encodeURIComponent(lineas.join("\n"));
+function restarCantidad(codigo) {
+  let carrito = leerCarrito();
+  const idx = carrito.findIndex(p => p.codigo === codigo);
+  if (idx >= 0) {
+    if (carrito[idx].cantidad > 1) {
+      carrito[idx].cantidad -= 1;
+    } else {
+      carrito.splice(idx, 1);
+    }
+    guardarCarrito(carrito);
+    cargarCarritoPagina();
+  }
 }
 
-// Enviar carrito por WhatsApp
+function eliminarDelCarrito(codigo) {
+  let carrito = leerCarrito();
+  carrito = carrito.filter(p => p.codigo !== codigo);
+  guardarCarrito(carrito);
+  cargarCarritoPagina();
+}
+
+// Enviar el pedido por WhatsApp
 function enviarCarritoWhatsApp() {
-  cargarCarrito();
-
+  const carrito = leerCarrito();
   if (!carrito.length) {
-    alert("Tu carrito está vacío.");
+    alert("Tu carrito está vacío");
     return;
   }
 
-  const texto = generarTextoCarrito();
-  const url = "https://wa.me/?text=" + texto;
+  const lineas = [
+    "Hola! Te paso mi pedido mayorista:",
+    ""
+  ];
+
+  carrito.forEach(item => {
+    const precio = Number(item.precio) || 0;
+    const subtotal = precio * (item.cantidad || 0);
+    const subtotalTxt = subtotal
+      ? `$ ${subtotal.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
+      : "Consultar";
+
+    lineas.push(
+      `• ${item.codigo} - ${item.nombre || ""} x ${item.cantidad} (${subtotalTxt})`
+    );
+  });
+
+  const total = carrito.reduce((acc, p) => {
+    const precio = Number(p.precio) || 0;
+    return acc + precio * (p.cantidad || 0);
+  }, 0);
+
+  if (total) {
+    lineas.push("", `Total aprox: $ ${total.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`);
+  }
+
+  lineas.push("", "¿Me confirmás disponibilidad y cantidades mínimas?");
+
+  const mensaje = encodeURIComponent(lineas.join("\n"));
+
+  // Cambiá el número por el tuyo
+  const url = `https://wa.me/54911XXXXXXXX?text=${mensaje}`;
   window.open(url, "_blank");
 }
 
-// Inicialización general
-window.addEventListener("DOMContentLoaded", function () {
-  cargarCarrito();
-  renderCarrito();
+// Inicialización en carrito.html
+document.addEventListener("DOMContentLoaded", () => {
+  cargarCarritoPagina();
   actualizarMiniCarrito();
 });
