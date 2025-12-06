@@ -387,24 +387,17 @@ body {
 }
 
 /* ============================= */
-/* CURSOR CLICKEABLE EN LAS CARDS — FINAL */
+/* CURSOR CLICKEABLE EN LAS CARDS*/
 /* ============================= */
 
-/* Card completa clickeable */
+/* 1) CUALQUIER COSA DENTRO DE LA CARD → MANITO */
 .card-producto,
-.producto-card {
-  cursor: pointer;
+.card-producto * {
+  cursor: pointer !important;
 }
 
-/* Cualquier elemento dentro de la card también muestra la mano */
-.card-producto *,
-.producto-card * {
-  cursor: pointer;
-}
-
-/* Hover premium en escritorio */
-.card-producto:hover,
-.producto-card:hover {
+/* 2) HOVER PREMIUM EN ESCRITORIO */
+.card-producto:hover {
   transform: translateY(-4px);
   box-shadow: 0 18px 35px rgba(0, 0, 0, 0.6);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
