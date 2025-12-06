@@ -196,8 +196,7 @@ body {
   .card-body h2 {
     font-size: 0.95rem;
   }
-}  /* ⚠️ AQUÍ CERRAMOS EL MEDIA  */
-
+}
 
 /* ===========================
     PÁGINA DE PRODUCTO
@@ -301,11 +300,6 @@ body {
   .producto-wrapper {
     grid-template-columns: 1fr;  /* imagen arriba, texto abajo en celu */
   }
-/* Responsive para la ficha de producto */
-@media (max-width: 800px) {
-  .producto-wrapper {
-    grid-template-columns: 1fr;  /* imagen arriba, texto abajo en celu */
-  }
 }
 
 /* ===========================
@@ -355,11 +349,7 @@ body {
   height: 100%;
   object-fit: cover;
 }
-.producto-info,
-.producto-nav,
-.miniaturas {
-  min-height: 30px;      /* para que se vea la estructura sin romper */
-  display: flex;
+
 /* ===================== */
 /*  MINI CARRITO GLOBAL  */
 /* ===================== */
@@ -395,17 +385,16 @@ body {
   font-weight: 500;
 }
 
-/* ============================= */
 /* SOLO EN CELULAR: mover arriba */
-/* ============================= */
 @media (max-width: 768px) {
   #mini-carrito {
     bottom: 210px !important;   /* ← AJUSTÁ ESTE NÚMERO SI QUERÉS */
   }
 }
-/* ============================= */
-/* CURSOR CLICKEABLE EN LAS CARDS */
-/* ============================= */
+
+/* ======================================= */
+/* CURSOR CLICKEABLE EN LAS CARDS — FINAL  */
+/* ======================================= */
 
 /* Card completa clickeable (por si usás cualquiera de los dos nombres) */
 .card-producto,
@@ -417,6 +406,12 @@ body {
 .card-producto .img-placeholder img,
 .producto-card .producto-imagen,
 .card-producto img {
+  cursor: pointer;
+}
+
+/* Si la card está envuelta en un <a>, que también muestre la mano */
+.card-producto a,
+.producto-card a {
   cursor: pointer;
 }
 
