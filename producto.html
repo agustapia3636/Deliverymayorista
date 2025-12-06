@@ -6,109 +6,133 @@
   <title>Producto | Delivery Mayorista</title>
   <link rel="stylesheet" href="css/estilos.css">
 
-  <!-- Ajustes específicos de layout para producto (desktop + mobile) -->
   <style>
-    /* Layout base de la ficha (por si estilos.css no lo define así) */
+    /* ====== LAYOUT BASE DEL PRODUCTO ====== */
     main.producto-pagina {
       padding: 32px 16px 40px;
     }
 
     main.producto-pagina .producto-wrapper {
       max-width: 1120px;
-      margin: 0 auto 24px;
+      margin: auto;
       display: flex;
       align-items: flex-start;
-      justify-content: center;
       gap: 40px;
     }
 
-    main.producto-pagina .producto-imagen {
-      flex: 1 1 50%;
-    }
-
-    main.producto-pagina .producto-info {
-      flex: 1 1 50%;
-    }
-
-    /* Aseguramos que la imagen se vea bien centrada y responsiva */
     main.producto-pagina .producto-imagen img {
       width: 100%;
-      height: auto;
-      display: block;
       border-radius: 20px;
       object-fit: contain;
       background: #0a0a12;
+      display: block;
     }
 
-    /* Navegación inferior */
-    .producto-nav {
-      max-width: 1120px;
-      margin: 0 auto;
-      display: flex;
-      gap: 10px;
-      justify-content: center;
+    main.producto-pagina .producto-info {
+      flex: 1;
     }
 
     .producto-acciones {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 18px;
+      gap: 12px;
+      margin-top: 22px;
     }
 
-    /* ====== VISTA MOBILE / TABLET ====== */
+    .producto-nav {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    /* ====== MOBILE / TABLET (FIX REAL) ====== */
     @media (max-width: 900px) {
+
       main.producto-pagina {
         padding: 20px 12px 32px;
       }
 
       main.producto-pagina .producto-wrapper {
         flex-direction: column;
-        gap: 20px;
+        gap: 28px;
+        padding: 0 12px;
       }
 
       main.producto-pagina .producto-imagen,
       main.producto-pagina .producto-info {
-        flex: 1 1 auto;
         width: 100%;
+        display: block !important;
       }
 
+      /* TEXTO EN UNA SOLA COLUMNA SIEMPRE */
       main.producto-pagina .producto-info {
         text-align: left;
       }
 
+      .producto-titulo {
+        font-size: 28px;
+        line-height: 1.15;
+        margin-bottom: 6px;
+      }
+
+      .producto-categoria {
+        display: block;
+        margin-top: 4px;
+        margin-bottom: 12px;
+      }
+
+      .producto-descripcion {
+        display: block;
+        margin-bottom: 18px;
+        font-size: 15px;
+        line-height: 1.4;
+      }
+
+      .producto-precio {
+        font-size: 26px;
+        margin-bottom: 10px;
+      }
+
+      .producto-stock {
+        font-size: 15px;
+        margin-bottom: 20px;
+      }
+
+      /* BOTONES UNO BAJO DEL OTRO EN CELU */
       .producto-acciones {
         flex-direction: column;
         align-items: stretch;
+        gap: 10px;
+        margin-bottom: 26px;
       }
 
-      .producto-acciones .btn-secundario,
-      .producto-acciones .btn-whatsapp {
+      .btn-secundario,
+      .btn-whatsapp {
         width: 100%;
         justify-content: center;
       }
 
       .producto-nav {
+        justify-content: center;
         flex-wrap: wrap;
-        row-gap: 8px;
+        gap: 10px;
       }
     }
 
-    /* Mobile chico: hacer todo más cómodo */
+    /* ====== CELULARES CHICOS ====== */
     @media (max-width: 480px) {
-      main.producto-pagina {
-        padding-top: 16px;
-      }
-
-      .producto-nav {
-        padding: 0 6px;
-      }
+      .producto-titulo { font-size: 26px; }
+      .producto-precio { font-size: 24px; }
+      .producto-descripcion { font-size: 14px; }
     }
   </style>
 </head>
+
 <body>
 
-  <!-- TOPBAR -->
+  <!-- === TOPBAR === -->
   <header class="topbar">
     <div class="topbar-inner">
       <a href="index.html" class="logo-link">Delivery Mayorista</a>
@@ -116,23 +140,23 @@
     </div>
   </header>
 
-  <!-- PÁGINA DE PRODUCTO -->
+  <!-- === PRODUCT PAGE === -->
   <main class="producto-pagina contenedor">
 
     <div class="producto-wrapper">
 
-      <!-- Imagen / Galería -->
+      <!-- IMAGEN PRINCIPAL -->
       <div id="producto-imagen" class="producto-imagen">
         <img id="imagen-principal" src="" alt="producto" />
-        <div id="miniaturas" class="miniaturas"></div>
+        <div id="miniaturas"></div>
       </div>
 
-      <!-- Info del producto (se completa por JS) -->
+      <!-- INFO DEL PRODUCTO (DINÁMICO) -->
       <div id="producto-info" class="producto-info"></div>
 
     </div>
 
-    <!-- Navegación anterior / siguiente (se completa por JS) -->
+    <!-- NAVEGACIÓN -->
     <div id="producto-nav" class="producto-nav"></div>
 
   </main>
@@ -142,12 +166,10 @@
     Catálogo mayorista · Delivery Mayorista
   </footer>
 
-  <!-- 🔥 LÓGICA DE LA FICHA DE PRODUCTO -->
+  <!-- === JS DE PRODUCTO === -->
   <script>
-  // Mismo repo de imágenes que en el catálogo
   const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
-  // Convierte "2276,8" -> número 2276.8
   function parsearPrecio(valor) {
     if (typeof valor === "number") return valor;
     if (typeof valor === "string") {
@@ -168,136 +190,90 @@
     const infoDiv = document.getElementById("producto-info");
 
     if (!codigoURL) {
-      if (infoDiv) {
-        infoDiv.innerHTML = "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
-      }
+      infoDiv.innerHTML = "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
       return;
     }
 
     try {
       const resp = await fetch("productos.json");
-      if (!resp.ok) {
-        throw new Error("No se pudo cargar productos.json: " + resp.status);
-      }
-
       const data = await resp.json();
       const productos = Array.isArray(data) ? data : (data.productos || []);
-
-      // En tu JSON la clave es "Codigo"
       const index = productos.findIndex(p => p["Codigo"] === codigoURL);
 
       if (index === -1) {
-        if (infoDiv) {
-          infoDiv.innerHTML = "<h2>Producto no encontrado</h2><p>Verificá el código.</p>";
-        }
+        infoDiv.innerHTML = "<h2>Producto no encontrado</h2><p>Verificá el código.</p>";
         return;
       }
 
       const prod = productos[index];
-
-      const codigo       = prod["Codigo"] || "";
-      const nombreCorto  = prod["Nombre Corto"] || "";
-      const categoria    = prod["Categoria Princ"] || "";
-      const descLarga    = prod["Descripción Larga"] || "";
+      const codigo       = prod["Codigo"];
+      const nombreCorto  = prod["Nombre Corto"];
+      const categoria    = prod["Categoria Princ"];
+      const descLarga    = prod["Descripción Larga"];
       const precioMayor  = parsearPrecio(prod["Precio Mayorista"]);
       const precioCliente= parsearPrecio(prod["Precio Cliente"]);
       const precioUsado  = precioMayor ?? precioCliente;
       const stock        = prod["Stock"];
 
-      // ==========================
-      //   IMAGEN PRINCIPAL
-      // ==========================
+      /* === IMAGEN === */
       const imgPrincipal = document.getElementById("imagen-principal");
-      if (imgPrincipal) {
-        const urls = [
-          `${BASE_IMG}/${codigo}.jpg`,
-          `${BASE_IMG}/${codigo}.JPG`
-        ];
-        let intento = 0;
+      const urls = [
+        `${BASE_IMG}/${codigo}.jpg`,
+        `${BASE_IMG}/${codigo}.JPG`
+      ];
+      let intento = 0;
+      const probar = () => {
+        if (intento >= urls.length) return;
+        imgPrincipal.src = urls[intento];
+        intento++;
+      };
+      imgPrincipal.onerror = probar;
+      probar();
 
-        const probar = () => {
-          if (intento >= urls.length) return;
-          imgPrincipal.src = urls[intento];
-          intento++;
-        };
+      /* === INFO === */
+      const precioTexto = precioUsado != null
+        ? `$ ${precioUsado.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
+        : "";
 
-        imgPrincipal.alt = nombreCorto || codigo;
-        imgPrincipal.loading = "lazy";
-        imgPrincipal.onerror = probar;
+      const stockTexto = stock != null
+        ? `Stock: ${stock} unidades`
+        : "";
 
-        probar();
-      }
+      infoDiv.innerHTML = `
+        <p class="producto-codigo">${codigo}</p>
+        <h1 class="producto-titulo">${nombreCorto}</h1>
+        ${categoria ? `<p class="producto-categoria">${categoria}</p>` : ""}
+        ${descLarga ? `<p class="producto-descripcion">${descLarga}</p>` : ""}
+        ${precioTexto ? `<p class="producto-precio">${precioTexto}</p>` : ""}
+        ${stockTexto ? `<p class="producto-stock">${stockTexto}</p>` : ""}
 
-      // Miniaturas (por ahora vacío, pero listo para futuro)
-      const miniaturasDiv = document.getElementById("miniaturas");
-      if (miniaturasDiv) {
-        miniaturasDiv.innerHTML = "";
-      }
+        <div class="producto-acciones">
+          <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
+          <a href="${armarLinkWhatsApp(prod)}" target="_blank" class="btn-whatsapp">
+            Consultar por WhatsApp
+          </a>
+        </div>
+      `;
 
-      // ==========================
-      //   INFO DEL PRODUCTO
-      // ==========================
-      if (infoDiv) {
-        const precioTexto = precioUsado != null
-          ? `$ ${precioUsado.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
-          : "";
-
-        const stockTexto = stock != null
-          ? `Stock: ${stock} unidades`
-          : "";
-
-        infoDiv.innerHTML = `
-          <p class="producto-codigo">${codigo}</p>
-          <h1 class="producto-titulo">${nombreCorto}</h1>
-          ${categoria ? `<p class="producto-categoria">${categoria}</p>` : ""}
-          ${descLarga ? `<p class="producto-descripcion">${descLarga}</p>` : ""}
-          ${precioTexto ? `<p class="producto-precio">${precioTexto}</p>` : ""}
-          ${stockTexto ? `<p class="producto-stock">${stockTexto}</p>` : ""}
-          <div class="producto-acciones">
-            <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
-            <a href="${armarLinkWhatsApp(prod)}" target="_blank" class="btn-whatsapp">
-              Consultar por WhatsApp
-            </a>
-          </div>
-        `;
-      }
-
-      // ==========================
-      //   NAVEGACIÓN ANTERIOR / SIGUIENTE
-      // ==========================
+      /* === NAVEGACIÓN === */
       const nav = document.getElementById("producto-nav");
-      if (nav) {
-        const anterior = productos[(index - 1 + productos.length) % productos.length];
-        const siguiente = productos[(index + 1) % productos.length];
+      const anterior = productos[(index - 1 + productos.length) % productos.length]["Codigo"];
+      const siguiente = productos[(index + 1) % productos.length]["Codigo"];
 
-        const codAnt = anterior["Codigo"] || "";
-        const codSig = siguiente["Codigo"] || "";
-
-        nav.innerHTML = `
-          <button class="btn-nav" onclick="irAProducto('${codAnt}')">
-            ← ${codAnt}
-          </button>
-          <button class="btn-nav" onclick="window.location.href='catalogo.html'">
-            Volver al listado
-          </button>
-          <button class="btn-nav" onclick="irAProducto('${codSig}')">
-            ${codSig} →
-          </button>
-        `;
-      }
+      nav.innerHTML = `
+        <button class="btn-nav" onclick="irAProducto('${anterior}')">← ${anterior}</button>
+        <button class="btn-nav" onclick="window.location.href='catalogo.html'">Volver al listado</button>
+        <button class="btn-nav" onclick="irAProducto('${siguiente}')">${siguiente} →</button>
+      `;
 
     } catch (error) {
-      console.error("Error en cargarProducto:", error);
-      if (infoDiv) {
-        infoDiv.innerHTML = "<h2>Error</h2><p>No se pudo cargar el producto.</p>";
-      }
+      infoDiv.innerHTML = "<h2>Error</h2><p>No se pudo cargar el producto.</p>";
     }
   }
 
-  // Arma el link de WhatsApp con datos del producto (usando claves de tu JSON)
   function armarLinkWhatsApp(prod) {
-    const codigo      = prod["Codigo"] || "";
-    const nombreCorto = prod["Nombre Corto"] || "";
+    const codigo      = prod["Codigo"];
+    const nombreCorto = prod["Nombre Corto"];
     const precioMayor = parsearPrecio(prod["Precio Mayorista"]);
     const precioTxt   = precioMayor != null
       ? `$ ${precioMayor.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
@@ -313,16 +289,13 @@
       "¿Me pasás disponibilidad y cantidades mínimas?"
     ].join("\n");
 
-    // Si después querés tu número fijo, cambiás esta URL a: https://wa.me/TUNUMERO?text=...
     return `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
   }
 
-  // Cambia de producto desde los botones de navegación
   function irAProducto(codigo) {
     window.location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
   }
 
-  // Dispara la carga al entrar a la página
   cargarProducto();
   </script>
 
