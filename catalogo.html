@@ -291,6 +291,39 @@
             padding:9px 14px;
         }
     }
+
+    /* MINI CARRITO FLOTANTE */
+    .mini-carrito {
+        position: fixed;
+        right: 16px;
+        bottom: 100px; /* arriba del botón WhatsApp */
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: #ffffff;
+        padding: 8px 12px;
+        border-radius: 999px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        cursor: pointer;
+        z-index: 9999;
+        font-size: 13px;
+        color: #000;
+    }
+
+    .mini-carrito-icono {
+        font-size: 18px;
+    }
+
+    .mini-carrito-texto {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.1;
+    }
+
+    .mini-carrito-linea {
+        white-space: nowrap;
+        font-weight: 500;
+    }
 </style>
 </head>
 
@@ -346,16 +379,20 @@ function cargarSeleccionados() {
     if (raw) {
       const arr = JSON.parse(raw);
       if (Array.isArray(arr)) {
-        seleccionados = arr.map((o) => {
-          if (!o || typeof o !== "object") return null;
-          return {
-            codigo: o.codigo,
-            nombre: o.nombre || "",
-            precio: typeof o.precio === "number" ? o.precio : null,
-            cantidad:
-              typeof o.cantidad === "number" && o.cantidad > 0 ? o.cantidad : 1,
-          };
-        }).filter(Boolean);
+        seleccionados = arr
+          .map((o) => {
+            if (!o || typeof o !== "object") return null;
+            return {
+              codigo: o.codigo,
+              nombre: o.nombre || "",
+              precio: typeof o.precio === "number" ? o.precio : null,
+              cantidad:
+                typeof o.cantidad === "number" && o.cantidad > 0
+                  ? o.cantidad
+                  : 1,
+            };
+          })
+          .filter(Boolean);
       }
     }
   } catch (e) {
@@ -596,7 +633,7 @@ function renderizar(lista) {
     card.appendChild(precioDiv);
     card.appendChild(stockDiv);
 
-    // Botón agregar / actualizar carrito
+    // Botón agregar / actualizar carrito (lista de WhatsApp)
     const btnSel = document.createElement("button");
     btnSel.type = "button";
     btnSel.className = "btn-seleccionar";
@@ -702,7 +739,7 @@ cargarProductos();
 <!-- CARRITO GLOBAL -->
 <script src="js/carrito.js"></script>
 
-    <!-- MINI CARRITO FLOTANTE -->
+<!-- MINI CARRITO FLOTANTE (CARRITO GLOBAL) -->
 <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
   <div class="mini-carrito-icono">🛒</div>
   <div class="mini-carrito-texto">
