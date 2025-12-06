@@ -53,6 +53,8 @@
     .carrito-vacio {
       text-align: center;
       padding: 40px 0;
+      font-size: 15px;
+      opacity: .9;
     }
 
     .carrito-lista {
@@ -73,6 +75,7 @@
 
     .item-carrito-descripcion {
       font-size: 14px;
+      font-weight: 500;
     }
 
     .item-carrito-codigo,
@@ -87,20 +90,28 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
+      margin-top: 4px;
     }
 
     .item-carrito-cant {
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      font-size: 14px;
     }
 
     .item-carrito-cant button {
       border: none;
-      padding: 4px 8px;
+      padding: 4px 10px;
       border-radius: 4px;
       background: #f1f1f1;
       cursor: pointer;
+      font-size: 14px;
+    }
+
+    .item-carrito-cant-valor {
+      min-width: 24px;
+      text-align: center;
     }
 
     .item-carrito-precios {
@@ -118,11 +129,22 @@
       color: #990000;
       font-size: 12px;
       cursor: pointer;
+      white-space: nowrap;
     }
 
     .total-carrito {
       margin-top: 16px;
       text-align: right;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    .total-carrito span {
+      font-size: 18px;
+    }
+    .total-carrito-nota {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 4px;
     }
 
     .carrito-acciones {
@@ -142,6 +164,19 @@
       border: 1px solid #ccc;
       font-size: 14px;
       color:#fff;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .btn-vaciar {
+      display: inline-block;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid #ff4d4d;
+      background: rgba(255,77,77,0.08);
+      color: #ff9f9f;
+      font-size: 13px;
+      cursor: pointer;
     }
 
     .btn-whatsapp-carrito {
@@ -152,6 +187,14 @@
       background: #25D366;
       color: #ffffff;
       cursor: pointer;
+      display:flex;
+      align-items:center;
+      gap:6px;
+      white-space: nowrap;
+    }
+
+    .btn-whatsapp-carrito span {
+      font-size: 16px;
     }
 
     @media (max-width: 600px) {
@@ -161,9 +204,11 @@
       }
 
       .btn-whatsapp-carrito,
-      .btn-volver {
+      .btn-volver,
+      .btn-vaciar {
         width: 100%;
         text-align: center;
+        justify-content: center;
       }
     }
   </style>
@@ -185,8 +230,14 @@
 
   <div class="carrito-acciones">
     <a href="catalogo.html" class="btn-volver">← Seguir comprando</a>
+
+    <button type="button" class="btn-vaciar" onclick="vaciarCarrito()">
+      Vaciar carrito
+    </button>
+
     <button type="button" class="btn-whatsapp-carrito" onclick="enviarCarritoWhatsApp()">
-      Enviar pedido por WhatsApp
+      <span>🟢</span>
+      <span>Enviar pedido por WhatsApp</span>
     </button>
   </div>
 </main>
@@ -207,4 +258,3 @@
 <script src="js/carrito.js"></script>
 </body>
 </html>
-
