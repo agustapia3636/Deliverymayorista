@@ -1,13 +1,30 @@
-// URL base de imágenes (la misma que usás en el catálogo)
-const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main/";
+// Helper reutilizado para cargar imágenes
+function configurarImagenPorCodigo(img, codigo, onFalloTotal) {
+  const urls = [
+    `https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main/${codigo}.jpg`,
+    `https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main/${codigo}.JPG`,
+    `https://agustapia3636.github.io/deliverymayorista-img/${codigo}.jpg`,
+    `https://agustapia3636.github.io/deliverymayorista-img/${codigo}.JPG`,
+  ];
 
-// Carga de la ficha de producto
+  let idx = 0;
+
+  const intentar = () => {
+    if (idx >= urls.length) {
+      if (onFalloTotal) onFalloTotal();
+      return;
+    }
+    img.src = urls[idx++];
+  };
+
+  img.onerror = intentar;
+  intentar();
+}
+
 async function cargarProducto() {
   try {
-    // 1) Leer código desde la URL ?codigo=N0247
     const params = new URLSearchParams(window.location.search);
     const codigo = params.get("codigo");
-    console.log("Código en URL:", codigo);
 
     if (!codigo) {
       document.getElementById("producto-info").innerHTML =
@@ -15,18 +32,13 @@ async function cargarProducto() {
       return;
     }
 
-    // 2) Cargar productos.json (el que generaste desde el CSV)
     const resp = await fetch("productos.json");
     if (!resp.ok) {
       throw new Error("No se pudo cargar productos.json: " + resp.status);
     }
 
     const productos = await resp.json();
-    console.log("Productos cargados:", productos.length);
-
-    // 3) Buscar el producto por Codigo
-    const index = productos.findIndex(p => p["Codigo"] === codigo);
-    console.log("Índice encontrado:", index);
+    const index = productos.findIndex(p => p.codigo === codigo);
 
     if (index === -1) {
       document.getElementById("producto-info").innerHTML =
@@ -36,25 +48,15 @@ async function cargarProducto() {
 
     const prod = productos[index];
 
-    // =====================
-    // IMAGEN PRINCIPAL
-    // =====================
+    // Imagen principal
     const imgPrincipal = document.getElementById("imagen-principal");
-    // Suponiendo que la imagen se llama igual que el código, ej: N0247.jpg
-    imgPrincipal.src = BASE_IMG + prod["Codigo"] + ".jpg";
-    imgPrincipal.alt = prod["Nombre Corto"];
+    imgPrincipal.alt = prod.nombre_corto || prod.codigo;
+    configurarImagenPorCodigo(imgPrincipal, prod.codigo, () => {
+      imgPrincipal.src = "";
+    });
 
-    // Si después querés miniaturas, acá podríamos armar más rutas.
-
-    // =====================
-    // INFORMACIÓN DEL PRODUCTO
-    // =====================
-    const precioRaw = String(prod["Precio Mayorista"] || "").trim();
-    // Convertir "1992,2" en número 1992.2
-    const precioNumero = precioRaw
-      ? parseFloat(precioRaw.replace(".", "").replace(",", "."))
-      : 0;
-
+    // Info
+    const precioNumero = Number(prod.precio) || 0;
     const precioFormateado = precioNumero.toLocaleString("es-AR", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
@@ -62,11 +64,11 @@ async function cargarProducto() {
 
     const info = document.getElementById("producto-info");
     info.innerHTML = `
-      <p class="producto-codigo">${prod["Codigo"]}</p>
-      <h1 class="producto-titulo">${prod["Nombre Corto"]}</h1>
-      <p class="producto-categoria">${prod["Categoria Princ"]}</p>
+      <p class="producto-codigo">${prod.codigo}</p>
+      <h1 class="producto-titulo">${prod.nombre_corto}</h1>
+      <p class="producto-categoria">${prod.categoria || ""}</p>
       <p class="producto-descripcion">
-        ${prod["Descripción Larga"] || ""}
+        ${prod.descripcion_larga || ""}
       </p>
       <p class="producto-precio">
         <span class="moneda">$</span> ${precioFormateado}
@@ -76,7 +78,7 @@ async function cargarProducto() {
         <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
         <a
           href="https://wa.me/54XXXXXXXXXX?text=Hola,%20quiero%20consultar%20por%20el%20producto%20${encodeURIComponent(
-            prod["Codigo"] + " - " + prod["Nombre Corto"]
+            prod.codigo + " - " + prod.nombre_corto
           )}"
           target="_blank"
           class="btn-whatsapp"
@@ -86,9 +88,7 @@ async function cargarProducto() {
       </div>
     `;
 
-    // =====================
-    // NAVEGACIÓN ANTERIOR / SIGUIENTE
-    // =====================
+    // Navegación
     const nav = document.getElementById("producto-nav");
     const anterior = productos[index - 1];
     const siguiente = productos[index + 1];
@@ -97,8 +97,8 @@ async function cargarProducto() {
 
     if (anterior) {
       navHTML += `
-        <a href="producto.html?codigo=${anterior["Codigo"]}" class="nav-btn">
-          ← ${anterior["Codigo"]}
+        <a href="producto.html?codigo=${anterior.codigo}" class="nav-btn">
+          ← ${anterior.codigo}
         </a>
       `;
     } else {
@@ -111,8 +111,8 @@ async function cargarProducto() {
 
     if (siguiente) {
       navHTML += `
-        <a href="producto.html?codigo=${siguiente["Codigo"]}" class="nav-btn">
-          ${siguiente["Codigo"]} →
+        <a href="producto.html?codigo=${siguiente.codigo}" class="nav-btn">
+          ${siguiente.codigo} →
         </a>
       `;
     } else {
@@ -128,5 +128,4 @@ async function cargarProducto() {
   }
 }
 
-// Ejecutar cuando carga la página
 cargarProducto();
