@@ -367,7 +367,7 @@ body {
 .mini-carrito {
   position: fixed;
   right: 16px;
-  bottom: 100px; /* arriba del botón WhatsApp */
+  bottom: 140px; /* arriba del botón WhatsApp */
   display: none; /* el JS lo pone en flex */
   align-items: center;
   gap: 8px;
@@ -397,4 +397,10 @@ body {
 
   align-items: center;
   justify-content: flex-start;
+
+/* SOLO EN CELULAR: subir el mini carrito un poco más arriba */
+@media (max-width: 768px) {
+  .mini-carrito {
+    bottom: 150px !important;  /* ajusta si querés más o menos */
+  }
 }
