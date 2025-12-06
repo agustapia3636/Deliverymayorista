@@ -21,7 +21,7 @@
       gap: 48px;
     }
 
-    /* Imagen a la izquierda, no gigante */
+    /* Imagen a la izquierda */
     .producto-imagen {
       flex: 0 0 48%;
     }
@@ -149,8 +149,10 @@
 
   <!-- ============ LÓGICA JS ============ -->
   <script>
-    const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
+    const BASE_IMG =
+      "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
+    // Convierte "1992,2" → 1992.2
     function parsearPrecio(valor) {
       if (typeof valor === "number") return valor;
       if (typeof valor === "string") {
@@ -171,42 +173,45 @@
       const infoDiv = document.getElementById("producto-info");
 
       if (!codigoURL) {
-        infoDiv.innerHTML = "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
+        infoDiv.innerHTML =
+          "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
         return;
       }
 
       try {
         const resp = await fetch("productos.json");
-        if (!resp.ok) throw new Error("No se pudo cargar productos.json: " + resp.status);
+        if (!resp.ok)
+          throw new Error("No se pudo cargar productos.json: " + resp.status);
 
         const data = await resp.json();
-        const productos = Array.isArray(data) ? data : (data.productos || []);
+        const productos = Array.isArray(data) ? data : data.productos || [];
 
-        // 👇 usa las claves reales de tu JSON: "Codigo"
-        const index = productos.findIndex(p => p["Codigo"] === codigoURL);
+        // Usa las claves de tu JSON
+        const index = productos.findIndex((p) => p["Codigo"] === codigoURL);
 
         if (index === -1) {
-          infoDiv.innerHTML = "<h2>Producto no encontrado</h2><p>Verificá el código.</p>";
+          infoDiv.innerHTML =
+            "<h2>Producto no encontrado</h2><p>Verificá el código.</p>";
           return;
         }
 
         const prod = productos[index];
 
-        const codigo       = prod["Codigo"] || "";
-        const nombreCorto  = prod["Nombre Corto"] || "";
-        const categoria    = prod["Categoria Princ"] || "";
-        const descLarga    = prod["Descripción Larga"] || "";
-        const precioMayor  = parsearPrecio(prod["Precio Mayorista"]);
-        const precioCliente= parsearPrecio(prod["Precio Cliente"]);
-        const precioUsado  = precioMayor ?? precioCliente;
-        const stock        = prod["Stock"];
+        const codigo = prod["Codigo"] || "";
+        const nombreCorto = prod["Nombre Corto"] || "";
+        const categoria = prod["Categoria Princ"] || "";
+        const descLarga = prod["Descripción Larga"] || "";
+        const precioMayor = parsearPrecio(prod["Precio Mayorista"]);
+        const precioCliente = parsearPrecio(prod["Precio Cliente"]);
+        const precioUsado = precioMayor ?? precioCliente;
+        const stock = prod["Stock"];
 
         /* ========== IMAGEN ========== */
         const imgPrincipal = document.getElementById("imagen-principal");
         if (imgPrincipal) {
           const urls = [
             `${BASE_IMG}/${codigo}.jpg`,
-            `${BASE_IMG}/${codigo}.JPG`
+            `${BASE_IMG}/${codigo}.JPG`,
           ];
           let intento = 0;
           const probar = () => {
@@ -224,17 +229,26 @@
         if (miniaturasDiv) miniaturasDiv.innerHTML = "";
 
         /* ========== INFO ========== */
-        const precioTexto = precioUsado != null
-          ? `$ ${precioUsado.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
-          : "";
+        const precioTexto =
+          precioUsado != null
+            ? `$ ${precioUsado.toLocaleString("es-AR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`
+            : "";
 
-        const stockTexto = stock != null ? `Stock: ${stock} unidades` : "";
+        const stockTexto =
+          stock != null ? `Stock: ${stock} unidades` : "";
 
         infoDiv.innerHTML = `
           <p class="producto-codigo">${codigo}</p>
           <h1 class="producto-titulo">${nombreCorto}</h1>
           ${categoria ? `<p class="producto-categoria">${categoria}</p>` : ""}
-          ${descLarga ? `<p class="producto-descripcion">${descLarga}</p>` : ""}
+          ${
+            descLarga
+              ? `<p class="producto-descripcion">${descLarga}</p>`
+              : ""
+          }
           ${precioTexto ? `<p class="producto-precio">${precioTexto}</p>` : ""}
           ${stockTexto ? `<p class="producto-stock">${stockTexto}</p>` : ""}
           <div class="producto-acciones">
@@ -248,7 +262,8 @@
         /* ========== NAVEGACIÓN ========== */
         const nav = document.getElementById("producto-nav");
         if (nav) {
-          const anterior = productos[(index - 1 + productos.length) % productos.length];
+          const anterior =
+            productos[(index - 1 + productos.length) % productos.length];
           const siguiente = productos[(index + 1) % productos.length];
 
           const codAnt = anterior["Codigo"] || "";
@@ -260,20 +275,25 @@
             <button class="btn-nav" onclick="irAProducto('${codSig}')">${codSig} →</button>
           `;
         }
-
       } catch (err) {
         console.error("Error en cargarProducto:", err);
-        infoDiv.innerHTML = "<h2>Error</h2><p>No se pudo cargar el producto.</p>";
+        const infoDiv = document.getElementById("producto-info");
+        infoDiv.innerHTML =
+          "<h2>Error</h2><p>No se pudo cargar el producto.</p>";
       }
     }
 
     function armarLinkWhatsApp(prod) {
-      const codigo      = prod["Codigo"] || "";
+      const codigo = prod["Codigo"] || "";
       const nombreCorto = prod["Nombre Corto"] || "";
       const precioMayor = parsearPrecio(prod["Precio Mayorista"]);
-      const precioTxt   = precioMayor != null
-        ? `$ ${precioMayor.toLocaleString("es-AR", { minimumFractionDigits: 0 })}`
-        : "Consultar";
+      const precioTxt =
+        precioMayor != null
+          ? `$ ${precioMayor.toLocaleString("es-AR", {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}`
+          : "Consultar";
 
       const mensaje = [
         "Hola! Me interesa este producto:",
@@ -282,7 +302,7 @@
         `Producto: ${nombreCorto}`,
         `Precio mayorista: ${precioTxt}`,
         "",
-        "¿Me pasás disponibilidad y cantidades mínimas?"
+        "¿Me pasás disponibilidad y cantidades mínimas?",
       ].join("\n");
 
       // Podés cambiar wa.me/?text= por wa.me/TUNUMERO?text= si querés número fijo
@@ -290,7 +310,9 @@
     }
 
     function irAProducto(codigo) {
-      window.location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
+      window.location.href = `producto.html?codigo=${encodeURIComponent(
+        codigo
+      )}`;
     }
 
     cargarProducto();
