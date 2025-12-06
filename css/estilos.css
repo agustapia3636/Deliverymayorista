@@ -201,4 +201,100 @@ body {
   .card-body h2 {
     font-size: 0.95rem;
   }
+/* ===========================
+    PÁGINA DE PRODUCTO
+   =========================== */
+
+.producto-pagina {
+  margin-top: 2rem;
 }
+
+.producto-wrapper {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.producto-imagen img {
+  width: 100%;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+  transition: transform 0.2s;
+}
+
+.producto-imagen img:hover {
+  transform: scale(1.04);
+}
+
+.producto-info h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.producto-info .producto-codigo {
+  color: #9da4c4;
+  font-size: 0.9rem;
+}
+
+.producto-info .producto-categoria {
+  color: #ffb12a;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.producto-info .producto-descripcion {
+  margin: 1rem 0;
+  color: #cbd0e6;
+  line-height: 1.5;
+}
+
+.producto-precio {
+  color: #ffb800;
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 1.2rem 0;
+}
+
+.producto-acciones {
+  margin-top: 1rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.btn-whatsapp {
+  background: #25d366;
+  color: #fff;
+  padding: 0.8rem 1.4rem;
+  border-radius: 10px;
+  font-weight: bold;
+  text-decoration: none;
+  box-shadow: 0 6px 20px rgba(0, 255, 120, 0.4);
+}
+
+.btn-secundario {
+  background: #1c1f35;
+  padding: 0.8rem 1.4rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: #fff;
+}
+
+.producto-nav {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn-nav {
+  background: #101226;
+  border: 1px solid #30354f;
+  padding: 0.6rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #fff;
+}
+
