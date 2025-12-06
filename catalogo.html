@@ -123,7 +123,7 @@
         font-size:15px;
     }
 
-    /* ======== MOBILE ======== */
+    /* ======== TABLET / MOBILE GENERAL (≤768px) ======== */
     @media (max-width: 768px) {
         header {
             text-align:center;
@@ -168,6 +168,35 @@
 
         .precio {
             font-size:14px;
+        }
+    }
+
+    /* ======== MOBILE “CÓMODO” (teléfonos chicos ≤480px) ======== */
+    @media (max-width: 480px) {
+        .grid {
+            grid-template-columns: 1fr;   /* una tarjeta por fila */
+            gap:22px;
+        }
+
+        .card {
+            padding:16px 14px 16px;
+        }
+
+        .card-imgbox {
+            height:150px;
+        }
+
+        .card strong {
+            font-size:16px;
+        }
+
+        .descripcion {
+            font-size:13px;
+            min-height:38px;
+        }
+
+        .precio {
+            font-size:16px;
         }
     }
 </style>
