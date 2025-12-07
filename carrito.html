@@ -55,17 +55,18 @@
       margin-top: 8px;
     }
 
-    /* TARJETA ESTILO “SEGUNDA FOTO” */
+    /* TARJETA DEL PRODUCTO */
     .carrito-item {
       background: #151522;
       border-radius: 14px;
       padding: 18px 16px;
       display: grid;
-      grid-template-columns: auto 1fr auto;
-      grid-template-rows: auto auto;
+      grid-template-columns: auto 1fr;
+      grid-template-rows: auto auto auto;
       grid-template-areas:
-        "img info qty"
-        "img prices qty";
+        "img info"
+        "img qty"
+        "img delete";
       column-gap: 16px;
       row-gap: 8px;
       align-items: center;
@@ -81,46 +82,38 @@
       background: #ffffff;
     }
 
+    /* TEXTO DEL PRODUCTO (NOMBRE + DETALLES) */
     .carrito-info {
       grid-area: info;
       font-size: 15px;
     }
 
+    /* NOMBRE UN POCO MÁS CHICO Y PROLIJO */
     .carrito-info h2 {
-      margin: 0 0 6px;
-      font-size: 18px;
-      line-height: 1.3;
+      margin: 0 0 4px;
+      font-size: 17px;        /* <-- más chico */
+      font-weight: 600;
+      line-height: 1.25;
     }
 
     .carrito-info p {
-      margin: 3px 0;
-      line-height: 1.4;
+      margin: 2px 0;          /* <-- menos espacio pero ordenado */
+      line-height: 1.45;
+      font-size: 14.5px;
     }
 
-    /* BLOQUE PRECIOS (UNITARIO / SUBTOTAL) ABAJO, CENTRADO */
-    .carrito-precios {
-      grid-area: prices;
-      font-size: 15px;
-      line-height: 1.4;
-      margin-top: 4px;
-    }
-
-    .carrito-precios p {
-      margin: 2px 0;
-    }
-
-    /* CONTROLES DE CANTIDAD A LA DERECHA, HORIZONTALES - 1 + */
+    /* CANTIDAD: - 2 + EN HORIZONTAL, A LA IZQUIERDA */
     .carrito-controles {
       grid-area: qty;
       display: flex;
-      flex-direction: column;
       align-items: center;
       gap: 10px;
+      margin-top: 6px;
     }
 
     .cantidad-box {
       display: flex;
-      flex-direction: row; /* HORIZONTAL: - 1 + */
+      flex-direction: row; /* HORIZONTAL: - 2 + */
       align-items: center;
       gap: 8px;
     }
@@ -148,6 +141,12 @@
       font-size: 17px;
       background: #ffffff;
       color: #000000;
+    }
+
+    /* BOTÓN ELIMINAR ABAJO A LA IZQUIERDA */
+    .carrito-eliminar {
+      grid-area: delete;
+      margin-top: 4px;
     }
 
     .btn-eliminar {
@@ -245,11 +244,8 @@
         grid-template-rows: auto auto auto;
         grid-template-areas:
           "img info"
-          "img prices"
-          "img qty";
-      }
-      .carrito-controles {
-        align-items: flex-end;
+          "img qty"
+          "img delete";
       }
     }
   </style>
@@ -293,7 +289,7 @@
     </section>
   </main>
 
-  <!-- LÓGICA DEL CARRITO (NO LA TOCAMOS) -->
+  <!-- LÓGICA DEL CARRITO (NO SE TOCA) -->
   <script src="js/carrito.js"></script>
 </body>
 </html>
