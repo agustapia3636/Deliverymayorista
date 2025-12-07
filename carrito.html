@@ -1,308 +1,198 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tu carrito - Delivery Mayorista</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tu carrito - Delivery Mayorista</title>
 
-<style>
+  <!-- Tu hoja de estilos principal -->
+  <link rel="stylesheet" href="css/estilos.css" />
+
+  <!-- ESTILOS ESPECÍFICOS DEL CARRITO (sobreescriben lo anterior) -->
+  <style>
     body {
-        background: #0d0f1a;
-        color: white;
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
+      background-color: #05060b;
+      color: #ffffff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
     }
 
-    header {
-        background: linear-gradient(90deg,#ff006e,#ffa400);
-        padding: 18px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: bold;
-        font-size: 18px;
+    /* CONTENEDOR PRINCIPAL DEL CARRITO */
+    main.carrito-main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
     }
 
-    header a {
-        color: white;
-        text-decoration: none;
-        font-size: 15px;
+    .carrito-title {
+      font-size: 26px;
+      font-weight: 700;
+      margin: 18px 0 20px;
     }
 
-    h2 {
-        margin: 16px;
-        font-size: 26px;
-        font-weight: bold;
+    .carrito-back {
+      display: inline-block;
+      margin-top: 14px;
+      font-size: 14px;
+      text-decoration: none;
+      color: #c2a6ff;
     }
 
-    /* ====== TARJETA DEL PRODUCTO ====== */
-    .carrito-item {
-        display: flex;
-        gap: 14px;
-        background: #111324;
-        border-radius: 16px;
-        padding: 16px;
-        margin: 16px;
-        align-items: flex-start;
+    /* LISTA DE PRODUCTOS DEL CARRITO */
+    #carrito-lista {
+      margin-bottom: 24px;
     }
 
-    .carrito-item img {
-        max-width: 90px !important;
-        width: 90px !important;
-        height: auto !important;
-        border-radius: 8px;
-        object-fit: contain;
-        background: white;
+    /* Cada tarjeta que inyecta carrito.js (es un <article>) */
+    #carrito-lista article {
+      display: flex;
+      align-items: flex-start;
+      background: #12131a;
+      border-radius: 18px;
+      padding: 16px;
+      margin-bottom: 18px;
     }
 
-    .carrito-info {
-        flex: 1;
+    /* Imagen del producto (lo que venga como <img> dentro del article) */
+    #carrito-lista article img {
+      width: 76px;
+      height: 76px;
+      border-radius: 10px;
+      object-fit: contain;
+      margin-right: 14px;
+      flex-shrink: 0;
     }
 
-    .carrito-info h3 {
-        font-size: 16px;
-        font-weight: bold;
-        margin: 0 0 4px 0;
+    /* Título del producto (normalmente un <h3>) */
+    #carrito-lista article h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin: 0 0 6px 0;
     }
 
-    .carrito-info p {
-        font-size: 13px;
-        margin: 1px 0;
-        color: #cfd3e0;
+    /* Párrafos dentro de la tarjeta (Cod, Stock, Unitario, Subtotal) */
+    #carrito-lista article p {
+      margin: 2px 0;
+      font-size: 13px;
+      line-height: 1.25;
     }
 
-    .precio {
-        font-size: 14px;
-        color: #ffffff;
-        font-weight: bold;
-        margin-top: 6px;
+    /* Por si en el HTML generado hay spans especiales para precio/subtotal */
+    #carrito-lista article .precio-linea,
+    #carrito-lista article .subtotal-linea {
+      font-size: 13px;
+      font-weight: 500;
     }
 
-    .subtotal {
-        font-size: 14px;
-        color: #ff3e9c;
-        font-weight: bold;
-        margin-top: 4px;
+    /* Controles de cantidad: NO toco colores del + / - */
+    #carrito-lista article .cantidad-wrapper {
+      margin-top: 8px;
     }
 
-    /* ====== BOTONES – + ====== */
-    .cantidad-box {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-top: 10px;
+    /* Resumen inferior (total, nota, botones) */
+    .carrito-resumen {
+      text-align: center;
+      margin-top: 4px;
     }
 
-    .btn-cant {
-        background: #ff0077;
-        border: none;
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        color: white;
-        font-size: 20px;
+    .carrito-resumen .carrito-total {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
     }
 
-    .cantidad {
-        background: white;
-        color: black;
-        border-radius: 8px;
-        padding: 4px 12px;
-        font-weight: bold;
-        font-size: 16px;
+    .carrito-resumen .carrito-nota {
+      font-size: 13px;
+      opacity: 0.8;
+      margin-bottom: 22px;
     }
 
-    .btn-eliminar {
-        background: #ff4b4b;
-        border: none;
-        padding: 6px 14px;
-        border-radius: 8px;
-        color: white;
-        font-weight: bold;
-        margin-top: 6px;
+    .carrito-resumen .btn-base {
+      display: block;
+      width: 100%;
+      border-radius: 999px;
+      padding: 14px 18px;
+      font-size: 16px;
+      font-weight: 500;
+      border: none;
+      margin-bottom: 14px;
+      cursor: pointer;
     }
 
-    /* ====== TOTAL ====== */
-    .total-box {
-        text-align: center;
-        margin-top: 25px;
-        margin-bottom: 10px;
-        font-size: 20px;
-        font-weight: bold;
+    .carrito-resumen .btn-seguir {
+      background: #12131a;
+      color: #ffffff;
+      border: 1px solid #3a3b4a;
     }
 
-    .nota-stock {
-        text-align: center;
-        color: #9aa0b5;
-        font-size: 13px;
-        margin-bottom: 20px;
+    .carrito-resumen .btn-vaciar {
+      background: #e53935;
+      color: #ffffff;
     }
 
-    /* ====== BOTONES ACCIONES ====== */
-    .btn-accion {
-        display: block;
-        margin: 16px auto;
-        padding: 15px;
-        width: 90%;
-        border-radius: 50px;
-        font-size: 17px;
-        font-weight: bold;
-        text-align: center;
-        color: white;
-        border: none;
+    .carrito-resumen .btn-whatsapp {
+      background: #0bb94a;
+      color: #ffffff;
     }
 
-    .btn-vaciar {
-        background: #cf2f2f;
+    .carrito-resumen .btn-seguir span.icon {
+      margin-right: 6px;
     }
 
-    .btn-whatsapp {
-        background: #11c230;
-        box-shadow: 0 0 10px #11c230;
+    @media (min-width: 768px) {
+      main.carrito-main {
+        padding-top: 32px;
+      }
+      .carrito-title {
+        font-size: 28px;
+      }
     }
-
-    .btn-volver {
-        background: transparent;
-        border: 2px solid #fff;
-    }
-
-</style>
+  </style>
 </head>
 
 <body>
+  <!-- HEADER: si ya tenías uno funcionando, podés dejar el tuyo.
+       Este es el mismo estilo general que usás en el resto del sitio. -->
+  <header class="header">
+    <div class="header-contenido">
+      <h1 class="header-logo">Delivery Mayorista</h1>
+      <a href="catalogo.html" class="header-link">Ver catálogo</a>
+    </div>
+  </header>
 
-<header>
-    Delivery Mayorista
-    <a href="index.html">Ver catálogo</a>
-</header>
+  <main class="carrito-main">
+    <a href="catalogo.html" class="carrito-back">← Ir al catálogo</a>
+    <h2 class="carrito-title">Tu carrito</h2>
 
-<h2>Tu carrito</h2>
+    <!-- AQUÍ INYECTA LOS ITEMS EL carrito.js -->
+    <section id="carrito-lista"></section>
 
-<div id="carrito-lista"></div>
+    <!-- RESUMEN DEL CARRITO -->
+    <section class="carrito-resumen">
+      <p class="carrito-total">
+        Total (<span id="carrito-total-items">0</span> productos):
+        <span id="carrito-total-precio">$0</span>
+      </p>
 
-<div class="total-box" id="carrito-total"></div>
-<div class="nota-stock">Total estimado sujeto a stock y últimas actualizaciones.</div>
+      <p class="carrito-nota">
+        Total estimado sujeto a stock y últimas actualizaciones.
+      </p>
 
-<button class="btn-accion btn-volver" onclick="window.location='index.html'">← Seguir comprando</button>
-<button class="btn-accion btn-vaciar" id="btn-vaciar">Vaciar carrito</button>
-<button class="btn-accion btn-whatsapp" id="btn-whatsapp">Enviar pedido por WhatsApp</button>
+      <a href="catalogo.html" class="btn-base btn-seguir">
+        <span class="icon">←</span> Seguir comprando
+      </a>
 
-<script>
-/* ================== LÓGICA ================== */
-const CLAVE_CARRITO = "dm_carrito";
+      <button id="btn-vaciar" class="btn-base btn-vaciar">
+        Vaciar carrito
+      </button>
 
-/* Formato entero sin decimales, con miles */
-function formatoEntero(valor) {
-    return Math.round(valor).toLocaleString("es-AR", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0
-    });
-}
+      <button id="btn-whatsapp" class="btn-base btn-whatsapp">
+        Enviar pedido por WhatsApp
+      </button>
+    </section>
+  </main>
 
-function leerCarrito() {
-    try {
-        const raw = localStorage.getItem(CLAVE_CARRITO);
-        if (!raw) return [];
-        return JSON.parse(raw);
-    } catch {
-        return [];
-    }
-}
-
-function guardarCarrito(arr) {
-    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(arr));
-}
-
-function renderCarrito() {
-    const cont = document.getElementById("carrito-lista");
-    const spanTotal = document.getElementById("carrito-total");
-    const btnVaciar = document.getElementById("btn-vaciar");
-    const carrito = leerCarrito();
-
-    if (!carrito.length) {
-        cont.innerHTML = "<p style='margin:20px;text-align:center;'>Tu carrito está vacío.</p>";
-        spanTotal.textContent = "";
-        btnVaciar.disabled = true;
-        return;
-    }
-
-    btnVaciar.disabled = false;
-    cont.innerHTML = "";
-    let total = 0;
-
-    carrito.forEach((item, idx) => {
-        let precio = Number(item.precio) || 0;
-        let cantidad = Number(item.cantidad) || 1;
-        let subtotal = precio * cantidad;
-
-        const precioRed = formatoEntero(precio);
-        const subtotalRed = formatoEntero(subtotal);
-
-        total += Math.round(subtotal); // sumamos ya redondeado
-
-        const card = document.createElement("div");
-        card.className = "carrito-item";
-
-        card.innerHTML = `
-           <img src="${item.img}">
-           <div class="carrito-info">
-               <h3>${item.nombre}</h3>
-               <p>Cod: ${item.codigo}</p>
-               <p>Stock disponible: ${item.stock}</p>
-               <p class="precio">Unitario: $${precioRed}</p>
-               <p class="subtotal">Subtotal: $${subtotalRed}</p>
-
-               <div class="cantidad-box">
-                    <button class="btn-cant">-</button>
-                    <span class="cantidad">${cantidad}</span>
-                    <button class="btn-cant">+</button>
-               </div>
-
-               <button class="btn-eliminar">Eliminar</button>
-           </div>
-        `;
-
-        /* === Eventos === */
-        const btnMenos = card.querySelectorAll(".btn-cant")[0];
-        const btnMas = card.querySelectorAll(".btn-cant")[1];
-        const btnEliminar = card.querySelector(".btn-eliminar");
-
-        btnMenos.onclick = () => {
-            if (carrito[idx].cantidad > 1) {
-                carrito[idx].cantidad--;
-                guardarCarrito(carrito);
-                renderCarrito();
-            }
-        };
-
-        btnMas.onclick = () => {
-            carrito[idx].cantidad++;
-            guardarCarrito(carrito);
-            renderCarrito();
-        };
-
-        btnEliminar.onclick = () => {
-            carrito.splice(idx, 1);
-            guardarCarrito(carrito);
-            renderCarrito();
-        };
-
-        cont.append(card);
-    });
-
-    const totalRed = formatoEntero(total);
-    spanTotal.textContent = `Total (${carrito.length} productos): $${totalRed}`;
-}
-
-document.getElementById("btn-vaciar").onclick = () => {
-    localStorage.removeItem(CLAVE_CARRITO);
-    renderCarrito();
-};
-
-/* Inicializar */
-renderCarrito();
-</script>
-
+  <!-- LÓGICA DEL CARRITO (NO LA TOCAMOS) -->
+  <script src="js/carrito.js"></script>
 </body>
 </html>
