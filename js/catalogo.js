@@ -303,7 +303,7 @@ function renderProductos(lista) {
 
     if (btnMas) {
       btnMas.addEventListener("click", (ev) => {
-        ev.stopPropagation(); // 👈 no dispara click de la card
+        ev.stopPropagation(); // NO abre detalle
         let v = parseInt(input.value) || 1;
         if (!stockInicial || v < stockInicial) v++;
         input.value = v;
@@ -313,7 +313,7 @@ function renderProductos(lista) {
 
     if (btnMenos) {
       btnMenos.addEventListener("click", (ev) => {
-        ev.stopPropagation(); // 👈 no dispara click de la card
+        ev.stopPropagation(); // NO abre detalle
         let v = parseInt(input.value) || 1;
         if (v > 1) v--;
         input.value = v;
@@ -323,7 +323,7 @@ function renderProductos(lista) {
 
     if (input) {
       input.addEventListener("input", (ev) => {
-        ev.stopPropagation(); // 👈 no dispara click de la card
+        ev.stopPropagation(); // NO abre detalle
         actualizarStockVisible();
       });
     }
@@ -333,7 +333,7 @@ function renderProductos(lista) {
     // 🔥 CLICK EN BOTÓN → agrega usando cantidad elegida
     btn.addEventListener("click", ev => {
       ev.preventDefault();
-      ev.stopPropagation(); // importante
+      ev.stopPropagation(); // NO abre detalle
       const cant = parseInt(input.value) || 1;
 
       const productoBasico = {
@@ -347,12 +347,18 @@ function renderProductos(lista) {
       agregarAlCarritoDesdeCatalogo(productoBasico, btn, cant, stockParaCarrito);
     });
 
-    // CLICK EN CARD → detalle SOLO si no tocaste botones / input
-    card.addEventListener("click", ev => {
-      if (ev.target.closest(".btn-agregar-carrito")) return;
-      if (ev.target.closest(".cantidad-container"))  return;
+    // 👉 AHORA: SOLO IMAGEN Y TÍTULO LLEVAN AL DETALLE
+    const tituloEl = card.querySelector(".producto-titulo");
+    const imgEl    = card.querySelector(".producto-imagen");
+
+    function irADetalle(ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
       window.location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
-    });
+    }
+
+    if (tituloEl) tituloEl.addEventListener("click", irADetalle);
+    if (imgEl)    imgEl.addEventListener("click", irADetalle);
 
     grid.appendChild(card);
   });
