@@ -81,13 +81,17 @@
       font-size: 14px;
     }
 
+    .volver-catalogo a:hover {
+      text-decoration: underline;
+    }
+
     h1.carrito-titulo {
       font-size: 26px;
       margin: 10px 2px 18px;
       font-weight: 700;
     }
 
-    /* ---------- LISTA ---------- */
+    /* ---------- LISTA DE ÍTEMS ---------- */
     #carrito-lista {
       display: flex;
       flex-direction: column;
@@ -123,17 +127,31 @@
       display: block;
     }
 
-    /* BLOQUE DERECHA */
     .carrito-columna {
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    /* fila superior: nombre/cod/stock + unitario a la derecha */
+    .carrito-item-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .carrito-item-textos {
+      flex: 1;
+      min-width: 0;
     }
 
     .carrito-item-nombre {
       font-size: 14px;
       font-weight: 600;
+      margin-bottom: 4px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -142,26 +160,37 @@
     .carrito-item-detalle {
       font-size: 13px;
       color: var(--texto-secundario);
+      line-height: 1.25;
     }
 
-    /* PRECIOS CENTRADOS ENTRE BOTONES */
-    .carrito-item-precios {
-      text-align: center;
+    .carrito-item-unitario {
       font-size: 13px;
       color: var(--texto-secundario);
-      margin-top: 6px;
-    }
-
-    .carrito-item-precios span {
-      display: block;
       white-space: nowrap;
+      text-align: right;
+      margin-top: 2px;
     }
 
-    /* BOTONES - + */
+    .carrito-item-unitario strong {
+      font-weight: 600;
+      color: var(--texto-principal);
+    }
+
+    /* fila inferior: (- cant +) | subtotal | eliminar */
+    .carrito-item-bottom {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+
     .carrito-botones-fila {
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-shrink: 0;
     }
 
     .btn-cant {
@@ -179,6 +208,10 @@
       cursor: pointer;
     }
 
+    .btn-cant:active {
+      transform: scale(0.95);
+    }
+
     .carrito-item-cantidad {
       min-width: 32px;
       height: 32px;
@@ -191,12 +224,17 @@
       border-radius: 999px;
     }
 
-    /* FILA INFERIOR: BOTONES IZQ + ELIMINAR DERECHA */
-    .carrito-item-bottom {
-      margin-top: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
+    .carrito-item-subtotal {
+      font-size: 13px;
+      color: var(--texto-secundario);
+      white-space: nowrap;
+      text-align: center;
+      flex: 1;
+    }
+
+    .carrito-item-subtotal strong {
+      font-weight: 600;
+      color: var(--texto-principal);
     }
 
     .btn-eliminar {
@@ -208,9 +246,18 @@
       background: var(--rojo);
       color: #fff;
       cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .btn-eliminar:active {
+      transform: scale(0.97);
     }
 
     /* ---------- RESUMEN ---------- */
+    .carrito-resumen {
+      margin-top: 6px;
+      padding-bottom: 16px;
+    }
 
     .carrito-resumen-total {
       font-size: 20px;
@@ -260,7 +307,23 @@
       box-shadow: 0 0 18px rgba(0, 179, 65, 0.6);
     }
 
-    /* CARRITO VACÍO */
+    .btn-grande-borde:active,
+    .btn-grande-rojo:active,
+    .btn-grande-verde:active {
+      transform: scale(0.98);
+    }
+
+    .btn-grande-borde span.icono-flecha {
+      font-size: 18px;
+      margin-right: 6px;
+    }
+
+    .btn-desactivado {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ---------- ESTADO CARRITO VACÍO ---------- */
     .carrito-vacio {
       background: var(--bg-card);
       border-radius: var(--radio-grande);
@@ -269,9 +332,27 @@
       color: var(--texto-secundario);
       margin-bottom: 20px;
     }
+
+    @media (min-width: 720px) {
+      .carrito-item {
+        padding: 16px 18px 14px;
+      }
+
+      .carrito-item-img {
+        width: 96px;
+        height: 96px;
+      }
+
+      .carrito-item-nombre {
+        font-size: 15px;
+      }
+
+      .carrito-resumen-total {
+        font-size: 22px;
+      }
+    }
   </style>
 </head>
-
 <body>
 
   <!-- HEADER -->
@@ -287,199 +368,272 @@
 
     <h1 class="carrito-titulo">Tu carrito</h1>
 
+    <!-- LISTA DE ÍTEMS -->
     <div id="carrito-lista"></div>
 
     <!-- RESUMEN -->
-    <section>
+    <section class="carrito-resumen">
       <p class="carrito-resumen-total">
-        Total (<span id="carrito-total-items">0</span> productos): 
+        Total (<span id="carrito-total-items">0</span> productos):
         $<span id="carrito-total-precio">0</span>
       </p>
-
       <p class="carrito-resumen-aviso">
         Total estimado sujeto a stock y últimas actualizaciones.
       </p>
 
-      <button class="btn-grande-borde" id="btn-seguir">← Seguir comprando</button>
-      <button class="btn-grande-rojo" id="btn-vaciar">Vaciar carrito</button>
-      <button class="btn-grande-verde" id="btn-whatsapp">Enviar pedido por WhatsApp</button>
+      <button class="btn-grande-borde" id="btn-seguir">
+        <span class="icono-flecha">←</span>
+        <span>Seguir comprando</span>
+      </button>
+
+      <button class="btn-grande-rojo" id="btn-vaciar">
+        Vaciar carrito
+      </button>
+
+      <button class="btn-grande-verde" id="btn-whatsapp">
+        Enviar pedido por WhatsApp
+      </button>
     </section>
   </main>
 
-  <!-- ============ JS ============ -->
+  <!-- ================== LÓGICA DE CARRITO ================== -->
   <script>
     const CLAVE_CARRITO = "dm_carrito";
-    const TELEFONO_WHATSAPP = "5491112345678"; // cambiá por tu número real
 
+    // 👉 Cambiá este número por tu WhatsApp real en formato internacional
+    const TELEFONO_WHATSAPP = "5491112345678";
+
+    /* ---------- UTILIDADES ---------- */
     function leerCarrito() {
       try {
         const raw = localStorage.getItem(CLAVE_CARRITO);
         if (!raw) return [];
         const arr = JSON.parse(raw);
         return Array.isArray(arr) ? arr : [];
-      } catch {
+      } catch (e) {
+        console.error("Error leyendo carrito", e);
         return [];
       }
     }
 
-    function guardarCarrito(c) {
-      localStorage.setItem(CLAVE_CARRITO, JSON.stringify(c));
+    function guardarCarrito(carrito) {
+      try {
+        localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
+      } catch (e) {
+        console.error("Error guardando carrito", e);
+      }
     }
 
-    function formatear(n) {
-      return Number(n || 0).toLocaleString("es-AR", {
+    function formatearPrecio(valor) {
+      const num = Number(valor) || 0;
+      // redondeado sin decimales
+      return num.toLocaleString("es-AR", {
         minimumFractionDigits: 0,
         maximumFractionDigits: 0,
       });
     }
 
+    /* ---------- RENDER DEL CARRITO ---------- */
     function renderCarrito() {
-      const cont = document.getElementById("carrito-lista");
-      const spanItems = document.getElementById("carrito-total-items");
-      const spanPrecio = document.getElementById("carrito-total-precio");
+      const contenedor = document.getElementById("carrito-lista");
+      const spanTotalItems = document.getElementById("carrito-total-items");
+      const spanTotalPrecio = document.getElementById("carrito-total-precio");
+      const btnVaciar = document.getElementById("btn-vaciar");
+      const btnWhatsapp = document.getElementById("btn-whatsapp");
 
       const carrito = leerCarrito();
+
+      if (!contenedor || !spanTotalItems || !spanTotalPrecio) return;
+
+      // si está vacío
       if (!carrito.length) {
-        cont.innerHTML = `<div class="carrito-vacio">Tu carrito está vacío.</div>`;
-        spanItems.textContent = "0";
-        spanPrecio.textContent = "0";
+        contenedor.innerHTML = `
+          <div class="carrito-vacio">
+            Tu carrito está vacío.<br/>
+            Agregá productos desde el catálogo.
+          </div>
+        `;
+        spanTotalItems.textContent = "0";
+        spanTotalPrecio.textContent = "0";
+        if (btnVaciar) btnVaciar.disabled = true;
+        if (btnWhatsapp) {
+          btnWhatsapp.disabled = true;
+          btnWhatsapp.classList.add("btn-desactivado");
+        }
         return;
       }
 
-      cont.innerHTML = "";
-      let totalCant = 0;
+      // hay productos
+      if (btnVaciar) btnVaciar.disabled = false;
+      if (btnWhatsapp) {
+        btnWhatsapp.disabled = false;
+        btnWhatsapp.classList.remove("btn-desactivado");
+      }
+
+      contenedor.innerHTML = "";
+
+      let totalItems = 0;
       let totalPrecio = 0;
 
       carrito.forEach((item, i) => {
-        const cod = item.codigo ?? item.Codigo ?? "";
-        const nombre = item.nombre ?? item["Nombre Corto"] ?? item.nombreCorto ?? "Producto sin nombre";
+        const codigo =
+          item.codigo ?? item.Codigo ?? item.cod ?? item.Cod ?? "";
+        const nombre =
+          item.nombre ??
+          item["Nombre Corto"] ??
+          item.nombreCorto ??
+          "Producto sin nombre";
         const precio = Number(
-          item.precioMayorista ??
-          item.precio ??
-          item.PrecioMayorista ??
-          0
+          item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0
         );
-        const stock = Number(item.stock ?? item.Stock ?? 0);
-        const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
+        const stock = Number(
+          item.stock ?? item.Stock ?? item["Stock"] ?? 0
+        );
         const img = item.img ?? item.imagen ?? item.Imagen ?? "";
+        const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
 
-        totalCant += cantidad;
+        totalItems += cantidad;
         totalPrecio += precio * cantidad;
 
-        const card = document.createElement("div");
-        card.className = "carrito-item";
+        const card = document.createElement("article");
+        card.classList.add("carrito-item");
+
         card.innerHTML = `
           <div class="carrito-item-img">
             <img src="${img || "img/sin-imagen.png"}" alt="${nombre}">
           </div>
 
           <div class="carrito-columna">
-            <p class="carrito-item-nombre">${nombre}</p>
-            <p class="carrito-item-detalle">Cod: ${cod}</p>
-            <p class="carrito-item-detalle">Stock disponible: ${stock}</p>
-
-            <div class="carrito-item-precios">
-              <span>Unitario: $${formatear(precio)}</span>
-              <span>Subtotal: $${formatear(precio * cantidad)}</span>
+            <div class="carrito-item-header">
+              <div class="carrito-item-textos">
+                <p class="carrito-item-nombre">${nombre}</p>
+                <p class="carrito-item-detalle">Cod: ${codigo}</p>
+                <p class="carrito-item-detalle">Stock disponible: ${stock}</p>
+              </div>
+              <div class="carrito-item-unitario">
+                Unitario: <strong>$${formatearPrecio(precio)}</strong>
+              </div>
             </div>
 
             <div class="carrito-item-bottom">
               <div class="carrito-botones-fila">
-                <button class="btn-cant btn-menos" data-i="${i}" aria-label="Restar uno">−</button>
-                <span class="carrito-item-cantidad" data-i="${i}">${cantidad}</span>
-                <button class="btn-cant btn-mas" data-i="${i}" aria-label="Sumar uno">+</button>
+                <button class="btn-cant btn-menos" data-idx="${i}" aria-label="Restar uno">−</button>
+                <span class="carrito-item-cantidad" data-idx="${i}">${cantidad}</span>
+                <button class="btn-cant btn-mas" data-idx="${i}" aria-label="Sumar uno">+</button>
               </div>
 
-              <button class="btn-eliminar" data-i="${i}">Eliminar</button>
+              <div class="carrito-item-subtotal">
+                Subtotal: <strong>$${formatearPrecio(precio * cantidad)}</strong>
+              </div>
+
+              <button class="btn-eliminar" data-idx="${i}">Eliminar</button>
             </div>
           </div>
         `;
 
-        cont.appendChild(card);
+        contenedor.appendChild(card);
       });
 
-      spanItems.textContent = totalCant;
-      spanPrecio.textContent = formatear(totalPrecio);
+      spanTotalItems.textContent = String(totalItems);
+      spanTotalPrecio.textContent = formatearPrecio(totalPrecio);
 
-      // LISTENERS
-      document.querySelectorAll(".btn-mas").forEach(btn =>
-        btn.onclick = () => cambiarCantidad(btn.dataset.i, +1)
-      );
-
-      document.querySelectorAll(".btn-menos").forEach(btn =>
-        btn.onclick = () => cambiarCantidad(btn.dataset.i, -1)
-      );
-
-      document.querySelectorAll(".btn-eliminar").forEach(btn =>
-        btn.onclick = () => eliminar(btn.dataset.i)
-      );
-    }
-
-    function cambiarCantidad(i, delta) {
-      const c = leerCarrito();
-      const idx = Number(i);
-      if (isNaN(idx) || !c[idx]) return;
-
-      const item = c[idx];
-      const stock = Number(item.stock ?? item.Stock ?? 0) || Infinity;
-      let cant = Number(item.cantidad ?? item.Cantidad ?? 1);
-      cant += delta;
-      if (cant < 1) cant = 1;
-      if (cant > stock) cant = stock;
-
-      item.cantidad = cant;
-      c[idx] = item;
-      guardarCarrito(c);
-      renderCarrito();
-    }
-
-    function eliminar(i) {
-      const c = leerCarrito();
-      const idx = Number(i);
-      if (isNaN(idx) || !c[idx]) return;
-      c.splice(idx, 1);
-      guardarCarrito(c);
-      renderCarrito();
-    }
-
-    document.getElementById("btn-seguir").onclick = () => {
-      window.location.href = "catalogo.html";
-    };
-
-    document.getElementById("btn-vaciar").onclick = () => {
-      if (confirm("¿Vaciar carrito completo?")) {
-        guardarCarrito([]);
-        renderCarrito();
-      }
-    };
-
-    document.getElementById("btn-whatsapp").onclick = () => {
-      const c = leerCarrito();
-      if (!c.length) return;
-
-      let txt = "Hola! Quiero hacer este pedido mayorista:%0A%0A";
-
-      c.forEach(item => {
-        const cod = item.codigo ?? item.Codigo ?? "";
-        const nombre = item.nombre ?? item["Nombre Corto"] ?? "Producto sin nombre";
-        const precio = Number(
-          item.precioMayorista ??
-          item.precio ??
-          item.PrecioMayorista ??
-          0
+      // listeners para botones (+, -, eliminar)
+      contenedor.querySelectorAll(".btn-mas").forEach((btn) => {
+        btn.addEventListener("click", () =>
+          cambiarCantidad(btn.dataset.idx, +1)
         );
-        const cant = Number(item.cantidad ?? item.Cantidad ?? 1);
-        const sub = precio * cant;
-
-        txt += `• ${cod} - ${nombre} x ${cant}u = $${formatear(sub)}%0A`;
       });
 
-      const total = document.getElementById("carrito-total-precio").textContent || "0";
-      txt += `%0A🔹 Total estimado: $${total}`;
+      contenedor.querySelectorAll(".btn-menos").forEach((btn) => {
+        btn.addEventListener("click", () =>
+          cambiarCantidad(btn.dataset.idx, -1)
+        );
+      });
 
-      window.open(`https://wa.me/${TELEFONO_WHATSAPP}?text=${txt}`, "_blank");
-    };
+      contenedor.querySelectorAll(".btn-eliminar").forEach((btn) => {
+        btn.addEventListener("click", () =>
+          eliminarItem(btn.dataset.idx)
+        );
+      });
+    }
 
+    function cambiarCantidad(idx, delta) {
+      const carrito = leerCarrito();
+      const i = Number(idx);
+      if (isNaN(i) || !carrito[i]) return;
+
+      const item = carrito[i];
+      const stock = Number(
+        item.stock ?? item.Stock ?? item["Stock"] ?? 0
+      );
+      let cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
+
+      cantidad += delta;
+
+      if (cantidad < 1) cantidad = 1;
+      if (stock && cantidad > stock) cantidad = stock;
+
+      item.cantidad = cantidad;
+      carrito[i] = item;
+
+      guardarCarrito(carrito);
+      renderCarrito();
+    }
+
+    function eliminarItem(idx) {
+      const carrito = leerCarrito();
+      const i = Number(idx);
+      if (isNaN(i) || !carrito[i]) return;
+      carrito.splice(i, 1);
+      guardarCarrito(carrito);
+      renderCarrito();
+    }
+
+    /* ---------- BOTONES PRINCIPALES ---------- */
+    document.getElementById("btn-seguir").addEventListener("click", () => {
+      window.location.href = "catalogo.html";
+    });
+
+    document.getElementById("btn-vaciar").addEventListener("click", () => {
+      if (!confirm("¿Vaciar carrito completo?")) return;
+      guardarCarrito([]);
+      renderCarrito();
+    });
+
+    document.getElementById("btn-whatsapp").addEventListener("click", () => {
+      const carrito = leerCarrito();
+      if (!carrito.length) return;
+
+      let texto = "Hola! Quiero hacer este pedido mayorista:%0A%0A";
+
+      carrito.forEach((item) => {
+        const codigo =
+          item.codigo ?? item.Codigo ?? item.cod ?? item.Cod ?? "";
+        const nombre =
+          item.nombre ??
+          item["Nombre Corto"] ??
+          item.nombreCorto ??
+          "Producto sin nombre";
+        const precio = Number(
+          item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0
+        );
+        const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
+        const subtotal = precio * cantidad;
+
+        texto += `• ${codigo} - ${nombre} x ${cantidad}u = $${formatearPrecio(
+          subtotal
+        )}%0A`;
+      });
+
+      const total =
+        document.getElementById("carrito-total-precio").textContent || "0";
+      texto += `%0A🔹 Total estimado: $${total}`;
+
+      const url = `https://wa.me/${TELEFONO_WHATSAPP}?text=${texto}`;
+      window.open(url, "_blank");
+    });
+
+    // ---------- INICIO ----------
     renderCarrito();
   </script>
 </body>
