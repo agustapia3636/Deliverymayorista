@@ -387,17 +387,20 @@ body {
 }
 
 /* ============================= */
-/* CURSOR CLICKABLE EN LAS CARDS*/
+/* CURSOR CLICKEABLE EN LAS CARDS*/
 /* ============================= */
 
-/* 👉 TODA LA CARD Y TODO SU CONTENIDO = MANITO */
+/* 1) CUALQUIER COSA DENTRO DE LA CARD → MANITO */
 .card-producto,
-.card-producto * {
+.card-producto *,
+.producto-card,
+.producto-card * {
   cursor: pointer !important;
 }
 
-/* HOVER PREMIUM */
-.card-producto:hover {
+/* 2) HOVER PREMIUM EN ESCRITORIO */
+.card-producto:hover,
+.producto-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 18px 35px rgba(0, 0, 0, 0.6);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
