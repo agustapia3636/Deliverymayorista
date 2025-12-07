@@ -157,11 +157,10 @@
       line-height: 1.25;
     }
 
-    /* PARTE INFERIOR: BOTONES + PRECIOS + ELIMINAR */
+    /* ---------- PARTE INFERIOR: BOTONES + PRECIOS + ELIMINAR ---------- */
     .carrito-item-bottom {
       display: flex;
       align-items: center;
-      justify-content: space-between;
       gap: 12px;
       width: 100%;
     }
@@ -170,6 +169,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-shrink: 0;
     }
 
     .btn-cant {
@@ -219,18 +219,14 @@
     .btn-eliminar {
       border: none;
       border-radius: 999px;
-      padding: 8px 16px;
+      padding: 8px 0;
+      width: 110px;          /* ← ancho fijo */
       font-size: 14px;
       font-weight: 600;
       background: var(--rojo);
       color: #fff;
       cursor: pointer;
-      flex-shrink: 0;
-
-      /* ancho fijo para que no se agrande/achique */
-      width: 110px;
-      min-width: 110px;
-      max-width: 110px;
+      flex-shrink: 0;        /* ← no se achica */
       text-align: center;
     }
 
@@ -360,7 +356,7 @@
   <!-- ================== LÓGICA DE CARRITO ================== -->
   <script>
     const CLAVE_CARRITO = "dm_carrito";
-    const TELEFONO_WHATSAPP = "5491112345678"; // TU NÚMERO
+    const TELEFONO_WHATSAPP = "5491112345678"; // tu número
 
     /* ---------- UTILIDADES ---------- */
     function leerCarrito() {
@@ -402,7 +398,7 @@
 
       if (!contenedor || !spanTotalItems || !spanTotalPrecio) return;
 
-      // si está vacío
+      // carrito vacío
       if (!carrito.length) {
         contenedor.innerHTML = `
           <div class="carrito-vacio">
@@ -413,9 +409,7 @@
         spanTotalItems.textContent = "0";
         spanTotalPrecio.textContent = "0";
         if (btnVaciar) btnVaciar.disabled = true;
-        if (btnWhatsapp) {
-          btnWhatsapp.disabled = true;
-        }
+        if (btnWhatsapp) btnWhatsapp.disabled = true;
         return;
       }
 
@@ -430,8 +424,7 @@
       carrito.forEach((item, idx) => {
         const codigo = item.codigo ?? item.Codigo ?? item.cod ?? "";
         const nombre = item.nombre ?? item["Nombre Corto"] ?? item.nombreCorto ?? "Producto sin nombre";
-        const precio =
-          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
+        const precio = Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
         const stock = Number(item.stock ?? item.Stock ?? item["Stock"] ?? 0);
         const img = item.img ?? item.imagen ?? item.Imagen ?? "";
         const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
@@ -541,8 +534,7 @@
       carrito.forEach((item) => {
         const codigo = item.codigo ?? item.Codigo ?? "";
         const nombre = item.nombre ?? item["Nombre Corto"] ?? "Producto sin nombre";
-        const precio =
-          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
+        const precio = Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
         const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
         const subtotal = precio * cantidad;
 
