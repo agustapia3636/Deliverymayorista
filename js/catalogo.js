@@ -43,7 +43,7 @@ function parsearPrecio(valor) {
   return null;
 }
 
-// texto redondeado SIN decimales (como te gustaba antes)
+// texto redondeado SIN decimales
 function formatearPrecio(valor) {
   const numero = parsearPrecio(valor);
   if (numero == null) return "Consultar";
@@ -232,6 +232,9 @@ function renderProductos(lista) {
     const card = document.createElement("article");
     card.classList.add("producto-card");
 
+    // 🔹 FORZAMOS CURSOR MANITO EN LA CARD
+    card.style.cursor = "pointer";
+
     const itemCarrito = carritoActual.find(p => p.codigo === codigo);
     const textoBoton = itemCarrito
       ? `En carrito (${itemCarrito.cantidad})`
@@ -260,6 +263,11 @@ function renderProductos(lista) {
 
     const img = card.querySelector(".producto-imagen");
     setImagenProducto(img, codigo);
+
+    // 🔹 FORZAMOS CURSOR MANITO EN LA IMAGEN TAMBIÉN
+    if (img) {
+      img.style.cursor = "pointer";
+    }
 
     const btn = card.querySelector(".btn-agregar-carrito");
     if (itemCarrito) {
