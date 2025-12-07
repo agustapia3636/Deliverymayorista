@@ -66,9 +66,9 @@
     }
 
     main {
-      max-width: 960px;
+      max-width: 1000px;
       margin: 0 auto;
-      padding: 16px 14px 32px;
+      padding: 16px 12px 32px;
     }
 
     .volver-catalogo {
@@ -102,10 +102,11 @@
     .carrito-item {
       background: var(--bg-card);
       border-radius: var(--radio-grande);
-      padding: 14px 14px 12px;
+      padding: 14px 18px 14px;
       display: flex;
-      gap: 12px;
+      gap: 14px;
       box-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
+      width: 100%;
     }
 
     .carrito-item-img {
@@ -127,7 +128,7 @@
       display: block;
     }
 
-    .carrito-columna {
+    .carrito-item-body {
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -135,23 +136,25 @@
       min-width: 0;
     }
 
-    /* fila superior: nombre/cod/stock solamente */
+    /* CABECERA (nombre + cod/stock + precios) */
     .carrito-item-header {
       display: flex;
+      justify-content: space-between;
       align-items: flex-start;
-      justify-content: flex-start;
-      gap: 8px;
+      gap: 10px;
+      width: 100%;
     }
 
-    .carrito-item-textos {
+    .carrito-item-info {
       flex: 1;
       min-width: 0;
     }
 
+    /* Nombre en una sola línea, más chico */
     .carrito-item-nombre {
       font-size: 14px;
       font-weight: 600;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -163,21 +166,32 @@
       line-height: 1.25;
     }
 
-    /* fila inferior: (- cant +) | precios (unitario+subtotal) | eliminar */
-    .carrito-item-bottom {
-      margin-top: 10px;
+    /* Precios a la derecha, uno arriba del otro */
+    .carrito-item-precios {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: nowrap;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+      font-size: 13px;
+      color: var(--texto-secundario);
+      gap: 2px;
+      white-space: nowrap;
     }
 
-    .carrito-botones-fila {
+    /* ---------- CONTROLES + ELIMINAR ---------- */
+    .carrito-item-footer {
+      margin-top: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap; /* si la pantalla es muy chica, baja de renglón */
+    }
+
+    .carrito-item-controles {
       display: flex;
       align-items: center;
       gap: 6px;
-      flex-shrink: 0;
     }
 
     .btn-cant {
@@ -211,22 +225,6 @@
       border-radius: 999px;
     }
 
-    .carrito-item-precios {
-      font-size: 13px;
-      color: var(--texto-secundario);
-      text-align: center;
-      white-space: nowrap;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .carrito-item-precios strong {
-      font-weight: 600;
-      color: var(--texto-principal);
-    }
-
     .btn-eliminar {
       border: none;
       border-radius: 999px;
@@ -236,7 +234,7 @@
       background: var(--rojo);
       color: #fff;
       cursor: pointer;
-      flex-shrink: 0;
+      white-space: nowrap;
     }
 
     .btn-eliminar:active {
@@ -308,11 +306,6 @@
       margin-right: 6px;
     }
 
-    .btn-desactivado {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
     /* ---------- ESTADO CARRITO VACÍO ---------- */
     .carrito-vacio {
       background: var(--bg-card);
@@ -325,7 +318,7 @@
 
     @media (min-width: 720px) {
       .carrito-item {
-        padding: 16px 18px 14px;
+        padding: 16px 22px 16px;
       }
 
       .carrito-item-img {
@@ -364,7 +357,7 @@
     <!-- RESUMEN -->
     <section class="carrito-resumen">
       <p class="carrito-resumen-total">
-        Total (<span id="carrito-total-items">0</span> productos):
+        Total (<span id="carrito-total-items">0</span> productos): 
         $<span id="carrito-total-precio">0</span>
       </p>
       <p class="carrito-resumen-aviso">
@@ -419,7 +412,7 @@
       // redondeado sin decimales
       return num.toLocaleString("es-AR", {
         minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
+        maximumFractionDigits: 0
       });
     }
 
@@ -465,20 +458,12 @@
       let totalItems = 0;
       let totalPrecio = 0;
 
-      carrito.forEach((item, i) => {
-        const codigo =
-          item.codigo ?? item.Codigo ?? item.cod ?? item.Cod ?? "";
-        const nombre =
-          item.nombre ??
-          item["Nombre Corto"] ??
-          item.nombreCorto ??
-          "Producto sin nombre";
-        const precio = Number(
-          item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0
-        );
-        const stock = Number(
-          item.stock ?? item.Stock ?? item["Stock"] ?? 0
-        );
+      carrito.forEach((item, idx) => {
+        const codigo = item.codigo ?? item.Codigo ?? item.cod ?? "";
+        const nombre = item.nombre ?? item["Nombre Corto"] ?? item.nombreCorto ?? "Producto sin nombre";
+        const precio =
+          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
+        const stock = Number(item.stock ?? item.Stock ?? item["Stock"] ?? 0);
         const img = item.img ?? item.imagen ?? item.Imagen ?? "";
         const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
 
@@ -493,28 +478,28 @@
             <img src="${img || "img/sin-imagen.png"}" alt="${nombre}">
           </div>
 
-          <div class="carrito-columna">
+          <div class="carrito-item-body">
             <div class="carrito-item-header">
-              <div class="carrito-item-textos">
+              <div class="carrito-item-info">
                 <p class="carrito-item-nombre">${nombre}</p>
                 <p class="carrito-item-detalle">Cod: ${codigo}</p>
                 <p class="carrito-item-detalle">Stock disponible: ${stock}</p>
               </div>
-            </div>
-
-            <div class="carrito-item-bottom">
-              <div class="carrito-botones-fila">
-                <button class="btn-cant btn-menos" data-idx="${i}" aria-label="Restar uno">−</button>
-                <span class="carrito-item-cantidad" data-idx="${i}">${cantidad}</span>
-                <button class="btn-cant btn-mas" data-idx="${i}" aria-label="Sumar uno">+</button>
-              </div>
 
               <div class="carrito-item-precios">
-                <span>Unitario: <strong>$${formatearPrecio(precio)}</strong></span>
-                <span>Subtotal: <strong>$${formatearPrecio(precio * cantidad)}</strong></span>
+                <span>Unitario: $${formatearPrecio(precio)}</span>
+                <span>Subtotal: $${formatearPrecio(precio * cantidad)}</span>
+              </div>
+            </div>
+
+            <div class="carrito-item-footer">
+              <div class="carrito-item-controles">
+                <button class="btn-cant btn-menos" data-idx="${idx}" aria-label="Restar uno">−</button>
+                <span class="carrito-item-cantidad" data-idx="${idx}">${cantidad}</span>
+                <button class="btn-cant btn-mas" data-idx="${idx}" aria-label="Sumar uno">+</button>
               </div>
 
-              <button class="btn-eliminar" data-idx="${i}">Eliminar</button>
+              <button class="btn-eliminar" data-idx="${idx}">Eliminar</button>
             </div>
           </div>
         `;
@@ -527,21 +512,15 @@
 
       // listeners para botones (+, -, eliminar)
       contenedor.querySelectorAll(".btn-mas").forEach((btn) => {
-        btn.addEventListener("click", () =>
-          cambiarCantidad(btn.dataset.idx, +1)
-        );
+        btn.addEventListener("click", () => cambiarCantidad(btn.dataset.idx, +1));
       });
 
       contenedor.querySelectorAll(".btn-menos").forEach((btn) => {
-        btn.addEventListener("click", () =>
-          cambiarCantidad(btn.dataset.idx, -1)
-        );
+        btn.addEventListener("click", () => cambiarCantidad(btn.dataset.idx, -1));
       });
 
       contenedor.querySelectorAll(".btn-eliminar").forEach((btn) => {
-        btn.addEventListener("click", () =>
-          eliminarItem(btn.dataset.idx)
-        );
+        btn.addEventListener("click", () => eliminarItem(btn.dataset.idx));
       });
     }
 
@@ -551,9 +530,7 @@
       if (isNaN(i) || !carrito[i]) return;
 
       const item = carrito[i];
-      const stock = Number(
-        item.stock ?? item.Stock ?? item["Stock"] ?? 0
-      );
+      const stock = Number(item.stock ?? item.Stock ?? item["Stock"] ?? 0);
       let cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
 
       cantidad += delta;
@@ -595,26 +572,17 @@
       let texto = "Hola! Quiero hacer este pedido mayorista:%0A%0A";
 
       carrito.forEach((item) => {
-        const codigo =
-          item.codigo ?? item.Codigo ?? item.cod ?? item.Cod ?? "";
-        const nombre =
-          item.nombre ??
-          item["Nombre Corto"] ??
-          item.nombreCorto ??
-          "Producto sin nombre";
-        const precio = Number(
-          item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0
-        );
+        const codigo = item.codigo ?? item.Codigo ?? "";
+        const nombre = item.nombre ?? item["Nombre Corto"] ?? "Producto sin nombre";
+        const precio =
+          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
         const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
         const subtotal = precio * cantidad;
 
-        texto += `• ${codigo} - ${nombre} x ${cantidad}u = $${formatearPrecio(
-          subtotal
-        )}%0A`;
+        texto += `• ${codigo} - ${nombre} x ${cantidad}u = $${formatearPrecio(subtotal)}%0A`;
       });
 
-      const total =
-        document.getElementById("carrito-total-precio").textContent || "0";
+      const total = document.getElementById("carrito-total-precio").textContent || "0";
       texto += `%0A🔹 Total estimado: $${total}`;
 
       const url = `https://wa.me/${TELEFONO_WHATSAPP}?text=${texto}`;
