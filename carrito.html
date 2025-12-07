@@ -157,7 +157,7 @@
       line-height: 1.25;
     }
 
-    /* PRECIOS (ABAJO, CENTRADOS ENTRE BOTONES Y ELIMINAR) */
+    /* PARTE INFERIOR: BOTONES + PRECIOS + ELIMINAR */
     .carrito-item-bottom {
       display: flex;
       align-items: center;
@@ -226,6 +226,11 @@
       color: #fff;
       cursor: pointer;
       flex-shrink: 0;
+
+      width: 110px;       /* ancho fijo */
+      min-width: 110px;
+      max-width: 110px;
+      text-align: center;
     }
 
     .btn-eliminar:active {
@@ -453,105 +458,4 @@
             <div class="carrito-item-controles">
               <button class="btn-cant btn-menos" data-idx="${idx}" aria-label="Restar uno">−</button>
               <span class="carrito-item-cantidad" data-idx="${idx}">${cantidad}</span>
-              <button class="btn-cant btn-mas" data-idx="${idx}" aria-label="Sumar uno">+</button>
-            </div>
-
-            <div class="carrito-item-precios">
-              <span>Unitario: $${formatearPrecio(precio)}</span>
-              <span>Subtotal: $${formatearPrecio(precio * cantidad)}</span>
-            </div>
-
-            <button class="btn-eliminar" data-idx="${idx}">Eliminar</button>
-          </div>
-        `;
-
-        contenedor.appendChild(card);
-      });
-
-      spanTotalItems.textContent = String(totalItems);
-      spanTotalPrecio.textContent = formatearPrecio(totalPrecio);
-
-      // listeners
-      contenedor.querySelectorAll(".btn-mas").forEach((btn) => {
-        btn.addEventListener("click", () => cambiarCantidad(btn.dataset.idx, +1));
-      });
-
-      contenedor.querySelectorAll(".btn-menos").forEach((btn) => {
-        btn.addEventListener("click", () => cambiarCantidad(btn.dataset.idx, -1));
-      });
-
-      contenedor.querySelectorAll(".btn-eliminar").forEach((btn) => {
-        btn.addEventListener("click", () => eliminarItem(btn.dataset.idx));
-      });
-    }
-
-    function cambiarCantidad(idx, delta) {
-      const carrito = leerCarrito();
-      const i = Number(idx);
-      if (isNaN(i) || !carrito[i]) return;
-
-      const item = carrito[i];
-      const stock = Number(item.stock ?? item.Stock ?? item["Stock"] ?? 0);
-      let cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
-
-      cantidad += delta;
-
-      if (cantidad < 1) cantidad = 1;
-      if (stock && cantidad > stock) cantidad = stock;
-
-      item.cantidad = cantidad;
-      carrito[i] = item;
-
-      guardarCarrito(carrito);
-      renderCarrito();
-    }
-
-    function eliminarItem(idx) {
-      const carrito = leerCarrito();
-      const i = Number(idx);
-      if (isNaN(i) || !carrito[i]) return;
-      carrito.splice(i, 1);
-      guardarCarrito(carrito);
-      renderCarrito();
-    }
-
-    /* ---------- BOTONES PRINCIPALES ---------- */
-    document.getElementById("btn-seguir").addEventListener("click", () => {
-      window.location.href = "catalogo.html";
-    });
-
-    document.getElementById("btn-vaciar").addEventListener("click", () => {
-      if (!confirm("¿Vaciar carrito completo?")) return;
-      guardarCarrito([]);
-      renderCarrito();
-    });
-
-    document.getElementById("btn-whatsapp").addEventListener("click", () => {
-      const carrito = leerCarrito();
-      if (!carrito.length) return;
-
-      let texto = "Hola! Quiero hacer este pedido mayorista:%0A%0A";
-
-      carrito.forEach((item) => {
-        const codigo = item.codigo ?? item.Codigo ?? "";
-        const nombre = item.nombre ?? item["Nombre Corto"] ?? "Producto sin nombre";
-        const precio =
-          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
-        const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
-        const subtotal = precio * cantidad;
-
-        texto += `• ${codigo} - ${nombre} x ${cantidad}u = $${formatearPrecio(subtotal)}%0A`;
-      });
-
-      const total = document.getElementById("carrito-total-precio").textContent || "0";
-      texto += `%0A🔹 Total estimado: $${total}`;
-
-      const url = `https://wa.me/${TELEFONO_WHATSAPP}?text=${texto}`;
-      window.open(url, "_blank");
-    });
-
-    // Inicio
-    renderCarrito();
-  </script>
-</body>
-</html>
+              <button class="btn-cant btn-mas" data-idx="${idx}"
