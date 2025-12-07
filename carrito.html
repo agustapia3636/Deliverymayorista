@@ -1,243 +1,295 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tu carrito | Delivery Mayorista</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tu carrito - Delivery Mayorista</title>
 
-  <!-- Tus estilos globales -->
-  <link rel="stylesheet" href="css/estilos.css" />
-
-  <style>
+<style>
     body {
-      margin: 0;
-      font-family: "Poppins", Arial, sans-serif;
-      background: #0f0f19;
-      color: #ffffff;
+        background: #0d0f1a;
+        color: white;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
     }
 
-    /* BARRA SUPERIOR IGUAL QUE EL CATÁLOGO */
-    .topbar {
-      background: linear-gradient(90deg, #ff005a, #ff9900);
-      padding: 14px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 18px;
-      font-weight: 600;
+    header {
+        background: linear-gradient(90deg,#ff006e,#ffa400);
+        padding: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bold;
+        font-size: 18px;
     }
 
-    .topbar-title {
-      text-transform: uppercase;
+    header a {
+        color: white;
+        text-decoration: none;
+        font-size: 15px;
     }
 
-    .topbar-link {
-      color: #fff;
-      font-size: 15px;
-      text-decoration: none;
+    h2 {
+        margin: 16px;
+        font-size: 28px;
+        font-weight: bold;
     }
 
-    /* CONTENIDO PRINCIPAL */
-    .carrito-main {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 18px;
-    }
-
-    .titulo-seccion {
-      font-size: 24px;
-      font-weight: 700;
-      margin: 10px 0 18px;
-    }
-
-    /* CARD DEL PRODUCTO
-       (NO CAMBIO FLEX / GRID NI POSICIONES QUE YA TENÉS EN estilos.css)
-       SOLO LE DOY FONDO, BORDE Y ESPACIADO GENERAL
-    */
+    /* ====== TARJETA DEL PRODUCTO ====== */
     .carrito-item {
-      background: #151522;
-      border-radius: 14px;
-      padding: 18px 16px;
-      margin-bottom: 22px;
+        display: flex;
+        gap: 14px;
+        background: #111324;
+        border-radius: 16px;
+        padding: 16px;
+        margin: 16px;
+        align-items: flex-start;
     }
 
-    /* IMAGEN (por si no la tenías estilizada antes) */
     .carrito-item img {
-      border-radius: 8px;
-      background: #ffffff;
+        max-width: 90px !important;
+        width: 90px !important;
+        height: auto !important;
+        border-radius: 8px;
+        object-fit: contain;
+        background: white;
     }
 
-    /* TEXTO DEL PRODUCTO: NOMBRE Y DATOS */
-    .carrito-info h2 {
-      margin: 0 0 4px;
-      font-size: 16px;        /* más chico que antes */
-      font-weight: 600;
-      line-height: 1.3;
+    .carrito-info {
+        flex: 1;
+    }
+
+    .carrito-info h3 {
+        font-size: 17px;
+        font-weight: bold;
+        margin: 0 0 6px 0;
     }
 
     .carrito-info p {
-      margin: 2px 0;          /* menos espacio entre líneas */
-      font-size: 13.5px;      /* un poco más chico, más limpio */
-      line-height: 1.45;
+        font-size: 14px;
+        margin: 2px 0;
+        color: #cfd3e0;
     }
 
-    /* CANTIDAD - NÚMERO +  (NO CAMBIO POSICIÓN, SOLO UN POCO DE LOOK) */
-    .cantidad-box button {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: none;
-      font-size: 22px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      background: #ff1280;
-      color: #ffffff;
+    .precio {
+        font-size: 15px;
+        color: #ffffff;
+        font-weight: bold;
+        margin-top: 6px;
     }
 
-    .cantidad-box input {
-      width: 60px;
-      text-align: center;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: none;
-      font-size: 17px;
-      background: #ffffff;
-      color: #000000;
+    .subtotal {
+        font-size: 15px;
+        color: #ff3e9c;
+        font-weight: bold;
+        margin-top: 4px;
     }
 
-    /* BOTÓN ELIMINAR */
+    /* ====== BOTONES – + ====== */
+    .cantidad-box {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .btn-cant {
+        background: #ff0077;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        color: white;
+        font-size: 20px;
+    }
+
+    .cantidad {
+        background: white;
+        color: black;
+        border-radius: 8px;
+        padding: 4px 12px;
+        font-weight: bold;
+        font-size: 16px;
+    }
+
     .btn-eliminar {
-      background: #e0483c;
-      border: none;
-      padding: 8px 14px;
-      border-radius: 10px;
-      color: #fff;
-      font-size: 14px;
-      cursor: pointer;
-      white-space: nowrap;
+        background: #ff4b4b;
+        border: none;
+        padding: 6px 14px;
+        border-radius: 8px;
+        color: white;
+        font-weight: bold;
+        margin-top: 6px;
     }
 
-    /* RESUMEN TOTAL ABAJO */
-    .carrito-resumen {
-      margin-top: 26px;
-      text-align: center;
+    /* ====== TOTAL ====== */
+    .total-box {
+        text-align: center;
+        margin-top: 25px;
+        margin-bottom: 10px;
+        font-size: 20px;
+        font-weight: bold;
     }
 
-    .carrito-resumen h2 {
-      margin: 0 0 6px;
-      font-size: 21px;
+    .nota-stock {
+        text-align: center;
+        color: #9aa0b5;
+        font-size: 13px;
+        margin-bottom: 20px;
     }
 
-    .carrito-resumen p {
-      margin: 4px 0 0;
-      font-size: 13px;
-      opacity: 0.8;
-    }
-
-    /* BOTONES INFERIORES */
-    .carrito-acciones {
-      margin-top: 26px;
-      text-align: center;
-    }
-
-    .btn-seguir {
-      background: #151522;
-      border-radius: 999px;
-      padding: 14px 18px;
-      border: 1px solid #ffffff33;
-      color: #ffffff;
-      font-size: 16px;
-      width: 100%;
-      max-width: 430px;
-      margin: 0 auto 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-    }
-
-    .btn-seguir span {
-      font-size: 20px;
+    /* ====== BOTONES ACCIONES ====== */
+    .btn-accion {
+        display: block;
+        margin: 16px auto;
+        padding: 15px;
+        width: 90%;
+        border-radius: 50px;
+        font-size: 17px;
+        font-weight: bold;
+        text-align: center;
+        color: white;
+        border: none;
     }
 
     .btn-vaciar {
-      background: #c0392b;
-      border: none;
-      padding: 14px 18px;
-      border-radius: 16px;
-      color: #ffffff;
-      font-size: 17px;
-      width: 100%;
-      max-width: 430px;
-      margin: 0 auto 12px;
-      display: block;
-      cursor: pointer;
+        background: #cf2f2f;
     }
 
     .btn-whatsapp {
-      background: #10b628;
-      border: none;
-      padding: 16px 18px;
-      border-radius: 16px;
-      color: #ffffff;
-      font-size: 18px;
-      width: 100%;
-      max-width: 430px;
-      margin: 0 auto;
-      display: block;
-      font-weight: 600;
-      cursor: pointer;
+        background: #11c230;
+        box-shadow: 0 0 10px #11c230;
     }
 
-    .btn-desactivado {
-      opacity: 0.4;
-      pointer-events: none;
+    .btn-volver {
+        background: transparent;
+        border: 2px solid #fff;
     }
-  </style>
+
+</style>
 </head>
 
 <body>
-  <!-- BARRA SUPERIOR -->
-  <header class="topbar">
-    <div class="topbar-title">Delivery Mayorista</div>
-    <a href="catalogo.html" class="topbar-link">Ver catálogo</a>
-  </header>
 
-  <main class="carrito-main">
-    <h1 class="titulo-seccion">Tu carrito</h1>
+<header>
+    Delivery Mayorista
+    <a href="index.html">Ver catálogo</a>
+</header>
 
-    <!-- AQUÍ EL JS INYECTA LAS CARDS -->
-    <section id="carrito-lista" class="carrito-lista"></section>
+<h2>Tu carrito</h2>
 
-    <!-- RESUMEN TOTAL -->
-    <section class="carrito-resumen">
-      <h2>
-        Total (<span id="carrito-total-items">0</span> productos):
-        $<span id="carrito-total-precio">0</span>
-      </h2>
-      <p>Total estimado sujeto a stock y últimas actualizaciones.</p>
-    </section>
+<div id="carrito-lista"></div>
 
-    <!-- BOTONES INFERIORES -->
-    <section class="carrito-acciones">
-      <button class="btn-seguir" onclick="window.location.href='catalogo.html'">
-        <span>←</span> Seguir comprando
-      </button>
+<div class="total-box" id="carrito-total"></div>
+<div class="nota-stock">Total estimado sujeto a stock y últimas actualizaciones.</div>
 
-      <button id="btn-vaciar" class="btn-vaciar">
-        Vaciar carrito
-      </button>
+<button class="btn-accion btn-volver" onclick="window.location='index.html'">← Seguir comprando</button>
+<button class="btn-accion btn-vaciar" id="btn-vaciar">Vaciar carrito</button>
+<button class="btn-accion btn-whatsapp" id="btn-whatsapp">Enviar pedido por WhatsApp</button>
 
-      <button id="btn-whatsapp" class="btn-whatsapp">
-        Enviar pedido por WhatsApp
-      </button>
-    </section>
-  </main>
+<script>
+/* ================== LÓGICA ================== */
+const CLAVE_CARRITO = "dm_carrito";
 
-  <!-- LÓGICA DEL CARRITO -->
-  <script src="js/carrito.js"></script>
+function leerCarrito() {
+    try {
+        const raw = localStorage.getItem(CLAVE_CARRITO);
+        if (!raw) return [];
+        return JSON.parse(raw);
+    } catch {
+        return [];
+    }
+}
+
+function guardarCarrito(arr) {
+    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(arr));
+}
+
+function renderCarrito() {
+    const cont = document.getElementById("carrito-lista");
+    const spanTotal = document.getElementById("carrito-total");
+    const btnVaciar = document.getElementById("btn-vaciar");
+    const carrito = leerCarrito();
+
+    if (!carrito.length) {
+        cont.innerHTML = "<p style='margin:20px;text-align:center;'>Tu carrito está vacío.</p>";
+        spanTotal.textContent = "";
+        btnVaciar.disabled = true;
+        return;
+    }
+
+    btnVaciar.disabled = false;
+    cont.innerHTML = "";
+    let total = 0;
+
+    carrito.forEach((item, idx) => {
+        let precio = Number(item.precio) || 0;
+        let cantidad = Number(item.cantidad) || 1;
+        let subtotal = precio * cantidad;
+        total += subtotal;
+
+        const card = document.createElement("div");
+        card.className = "carrito-item";
+
+        card.innerHTML = `
+           <img src="${item.img}">
+           <div class="carrito-info">
+               <h3>${item.nombre}</h3>
+               <p>Cod: ${item.codigo}</p>
+               <p>Stock disponible: ${item.stock}</p>
+               <p class="precio">Unitario: $${precio.toLocaleString()}</p>
+               <p class="subtotal">Subtotal: $${subtotal.toLocaleString()}</p>
+
+               <div class="cantidad-box">
+                    <button class="btn-cant">-</button>
+                    <span class="cantidad">${cantidad}</span>
+                    <button class="btn-cant">+</button>
+               </div>
+
+               <button class="btn-eliminar">Eliminar</button>
+           </div>
+        `;
+
+        /* === Eventos === */
+        const btnMenos = card.querySelectorAll(".btn-cant")[0];
+        const btnMas = card.querySelectorAll(".btn-cant")[1];
+        const btnEliminar = card.querySelector(".btn-eliminar");
+
+        btnMenos.onclick = () => {
+            if (carrito[idx].cantidad > 1) {
+                carrito[idx].cantidad--;
+                guardarCarrito(carrito);
+                renderCarrito();
+            }
+        };
+
+        btnMas.onclick = () => {
+            carrito[idx].cantidad++;
+            guardarCarrito(carrito);
+            renderCarrito();
+        };
+
+        btnEliminar.onclick = () => {
+            carrito.splice(idx, 1);
+            guardarCarrito(carrito);
+            renderCarrito();
+        };
+
+        cont.append(card);
+    });
+
+    spanTotal.textContent = `Total (${carrito.length} productos): $${total.toLocaleString()}`;
+}
+
+document.getElementById("btn-vaciar").onclick = () => {
+    localStorage.removeItem(CLAVE_CARRITO);
+    renderCarrito();
+};
+
+/* LISTO */
+renderCarrito();
+</script>
+
 </body>
 </html>
