@@ -2,29 +2,33 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
+  <title>Delivery Mayorista - Catálogo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Delivery Mayorista - Inicio</title>
-  <link rel="stylesheet" href="css/estilos.css" />
+
+  <link rel="stylesheet" href="estilos.css" />
 </head>
 <body>
   <header class="header">
-    <div class="logo">DELIVERY MAYORISTA</div>
-    <nav>
-      <a href="catalogo.html">Catálogo</a>
-      <a href="#contacto">Contacto</a>
-    </nav>
+    <h1>DELIVERY MAYORISTA</h1>
+    <p class="header-subtitle">Catálogo mayorista con stock visible y carrito</p>
   </header>
 
   <main class="contenedor">
-    <section class="hero">
-      <h1>Catálogo Mayorista Online</h1>
-      <p>Más de 500 productos importados para tu negocio, con precios por mayor.</p>
-      <a class="btn-primario" href="catalogo.html">Ver catálogo</a>
+    <section id="catalogo" class="catalogo">
+      <!-- Las cards de productos se generan desde app.js -->
     </section>
   </main>
 
-  <footer id="contacto" class="footer">
-    <p>Delivery Mayorista · Catálogo demo estático</p>
-  </footer>
+  <!-- Botón flotante de carrito -->
+  <a href="carrito.html" class="carrito-flotante">
+    🛒 <span id="carrito-total-items">0</span>
+  </a>
+
+  <!-- Botón flotante de WhatsApp -->
+  <a href="https://wa.me/5491112345678" target="_blank" class="whatsapp-flotante">
+    💬
+  </a>
+
+  <script src="app.js"></script>
 </body>
 </html>
