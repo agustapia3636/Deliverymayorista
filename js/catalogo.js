@@ -132,31 +132,37 @@ function actualizarMiniCarrito() {
   }
 }
 
-// Agrega un producto al carrito desde el catálogo
-function agregarAlCarritoDesdeCatalogo(productoBasico, boton) {
+// ========================================
+// AGREGAR AL CARRITO DESDE CATÁLOGO
+// ========================================
+
+function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, stockDisponible) {
   let carrito = leerCarrito();
 
   const idx = carrito.findIndex(p => p.codigo === productoBasico.codigo);
 
+  let cantidad = Number(cantidadElegida) || 1;
+
   if (idx >= 0) {
     const item = carrito[idx];
-    const stock = Number(item.stock ?? productoBasico.stock ?? 0) || 0;
 
-    if (!stock || item.cantidad < stock) {
-      item.cantidad += 1;
-    } else {
+    if (item.cantidad + cantidad > stockDisponible) {
       alert("No hay más stock disponible de este producto.");
       return;
     }
 
+    item.cantidad += cantidad;
+
   } else {
+    if (cantidad > stockDisponible) cantidad = stockDisponible;
+
     carrito.push({
       codigo: productoBasico.codigo,
       nombre: productoBasico.nombre,
       precio: productoBasico.precio,
-      cantidad: 1,
+      cantidad,
       img: productoBasico.img || null,
-      stock: productoBasico.stock ?? null,
+      stock: stockDisponible,
     });
   }
 
@@ -175,7 +181,7 @@ function irAlCarrito() {
 }
 
 // ========================================
-// RENDER DE PRODUCTOS
+// NUEVA CARD CON CANTIDAD + STOCK DINÁMICO
 // ========================================
 
 function renderProductos(lista) {
@@ -192,6 +198,7 @@ function renderProductos(lista) {
     const codigo = safe(
       prod.codigo || prod.cod || prod.Code || prod.Codigo
     );
+
     const nombreBase = safe(
       prod.nombre ||
       prod.descripcion ||
@@ -199,7 +206,7 @@ function renderProductos(lista) {
       prod["Nombre Corto"],
       "Sin nombre"
     );
-    // Título como en tu screenshot: N0247 - LLAVERO...
+
     const titulo = `${codigo} - ${nombreBase}`;
 
     const descLarga = safe(
@@ -222,18 +229,12 @@ function renderProductos(lista) {
     const precioNum = parsearPrecio(brutoPrecio) || 0;
     const precioTexto = formatearPrecio(brutoPrecio);
 
-    // Stock (para mostrar y para carrito)
     const stockBruto = safe(prod.Stock ?? prod.stock, "");
     const stockNum = Number(stockBruto) || 0;
-    const stockTexto = stockNum
-      ? `Stock: ${stockNum} unidades`
-      : (stockBruto ? `Stock: ${stockBruto}` : "");
+    const stockTexto = stockNum ? `Stock: ${stockNum} unidades` : (stockBruto ? `Stock: ${stockBruto}` : "");
 
     const card = document.createElement("article");
     card.classList.add("producto-card");
-
-    // 🔹 FORZAMOS CURSOR MANITO EN LA CARD
-    card.style.cursor = "pointer";
 
     const itemCarrito = carritoActual.find(p => p.codigo === codigo);
     const textoBoton = itemCarrito
@@ -253,7 +254,13 @@ function renderProductos(lista) {
           <span class="producto-precio">$ ${precioTexto}</span>
         </div>
 
-        ${stockTexto ? `<p class="producto-stock">${stockTexto}</p>` : ""}
+        ${stockTexto ? `<p class="producto-stock stock-text" data-stock="${stockNum}">${stockTexto}</p>` : ""}
+
+        <div class="cantidad-container">
+          <button class="btn-cantidad menos">−</button>
+          <input type="number" class="input-cantidad" value="1" min="1" max="${stockNum}">
+          <button class="btn-cantidad mas">+</button>
+        </div>
 
         <button class="btn-agregar-carrito">
           ${textoBoton}
@@ -264,37 +271,66 @@ function renderProductos(lista) {
     const img = card.querySelector(".producto-imagen");
     setImagenProducto(img, codigo);
 
-    // 🔹 FORZAMOS CURSOR MANITO EN LA IMAGEN TAMBIÉN
-    if (img) {
-      img.style.cursor = "pointer";
-    }
-
     const btn = card.querySelector(".btn-agregar-carrito");
     if (itemCarrito) {
       btn.classList.add("btn-agregar-carrito-activo");
     }
 
-    // CLICK EN CARD → ir a detalle (imagen + texto)
-    card.addEventListener("click", ev => {
-      // si el click viene del botón, NO navegar
-      if (ev.target.closest(".btn-agregar-carrito")) return;
-      window.location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
+    // 🔥 CONTROL: STOCK DINÁMICO
+    const input = card.querySelector(".input-cantidad");
+    const stockVisible = card.querySelector(".stock-text");
+    const stockInicial = stockNum;
+
+    function actualizarStockVisible() {
+      let cant = parseInt(input.value) || 1;
+
+      if (cant < 1) cant = 1;
+      if (cant > stockInicial) cant = stockInicial;
+
+      input.value = cant;
+      const restante = stockInicial - cant;
+      stockVisible.textContent = `Stock: ${restante} unidades`;
+    }
+
+    card.querySelector(".mas").addEventListener("click", () => {
+      let v = parseInt(input.value) || 1;
+      if (v < stockInicial) v++;
+      input.value = v;
+      actualizarStockVisible();
     });
 
-    // CLICK en Agregar al carrito
+    card.querySelector(".menos").addEventListener("click", () => {
+      let v = parseInt(input.value) || 1;
+      if (v > 1) v--;
+      input.value = v;
+      actualizarStockVisible();
+    });
+
+    input.addEventListener("input", actualizarStockVisible);
+
+    actualizarStockVisible();
+
+    // 🔥 CLICK EN BOTÓN → agrega usando cantidad elegida
     btn.addEventListener("click", ev => {
       ev.preventDefault();
-      ev.stopPropagation(); // para que no dispare el click de la card
+      ev.stopPropagation();
+
+      const cant = parseInt(input.value) || 1;
 
       const productoBasico = {
         codigo,
-        nombre: nombreBase,                 // solo el nombre, sin código
+        nombre: nombreBase,
         precio: precioNum,
-        img: (img && (img.dataset.srcOk || img.src)) || null,
-        stock: stockNum || stockBruto || null,
+        img: (img && (img.dataset.srcOk || img.src)) || null
       };
 
-      agregarAlCarritoDesdeCatalogo(productoBasico, btn);
+      agregarAlCarritoDesdeCatalogo(productoBasico, btn, cant, stockInicial);
+    });
+
+    // CLICK EN CARD → detalle
+    card.addEventListener("click", ev => {
+      if (ev.target.closest(".btn-agregar-carrito")) return;
+      window.location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
     });
 
     grid.appendChild(card);
