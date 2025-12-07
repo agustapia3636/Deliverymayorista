@@ -322,6 +322,12 @@ function renderProductos(lista) {
     }
 
     if (input) {
+      // seleccionar todo el número al hacer foco (para que 2 reemplace al 1, no quede 12)
+      input.addEventListener("focus", (ev) => {
+        ev.stopPropagation();
+        ev.target.select();
+      });
+
       input.addEventListener("input", (ev) => {
         ev.stopPropagation(); // NO abre detalle
         actualizarStockVisible();
@@ -347,7 +353,7 @@ function renderProductos(lista) {
       agregarAlCarritoDesdeCatalogo(productoBasico, btn, cant, stockParaCarrito);
     });
 
-    // 👉 AHORA: SOLO IMAGEN Y TÍTULO LLEVAN AL DETALLE
+    // 👉 SOLO IMAGEN Y TÍTULO LLEVAN AL DETALLE
     const tituloEl = card.querySelector(".producto-titulo");
     const imgEl    = card.querySelector(".producto-imagen");
 
