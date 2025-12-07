@@ -16,8 +16,15 @@
       --rojo: #ff3b3b;
       --verde: #00b341;
       --gris-borde: #2b2a3a;
-      --radio-grande: 22px;
-      --fuente: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --radio-grande: 20px;
+      --fuente: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
@@ -25,9 +32,9 @@
       background: radial-gradient(circle at top, #141327 0, #05030c 55%);
       color: var(--texto-principal);
       min-height: 100vh;
-      margin: 0;
     }
 
+    /* ---------- HEADER ---------- */
     header {
       background: linear-gradient(90deg, #ff007a, #ff9800);
       padding: 16px 18px 14px;
@@ -44,110 +51,86 @@
 
     .logo-texto {
       font-weight: 700;
+      letter-spacing: 0.06em;
       font-size: 18px;
     }
 
     .link-catalogo-header {
-      background: rgba(0, 0, 0, 0.18);
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      color: #fff;
       padding: 8px 14px;
       border-radius: 999px;
-      font-size: 13px;
-      text-decoration: none;
-      color: white;
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
     main {
-      max-width: 1020px; /* ⭐ CARD MÁS ANCHA ⭐ */
+      max-width: 980px; /* un poco más chica que antes */
       margin: 0 auto;
-      padding: 18px 14px 32px;
+      padding: 16px 14px 32px;
+    }
+
+    .volver-catalogo {
+      margin: 8px 2px 10px;
+    }
+
+    .volver-catalogo a {
+      color: #c28cff;
+      text-decoration: none;
+      font-size: 14px;
     }
 
     h1.carrito-titulo {
       font-size: 26px;
-      margin-bottom: 20px;
+      margin: 10px 2px 18px;
       font-weight: 700;
     }
 
-    /* ================== CARD ================== */
+    /* ---------- LISTA DE ÍTEMS ---------- */
     #carrito-lista {
       display: flex;
       flex-direction: column;
-      gap: 22px;
+      gap: 18px;
       margin-bottom: 28px;
     }
 
     .carrito-item {
       background: var(--bg-card);
       border-radius: var(--radio-grande);
-      padding: 18px 18px 16px;
+      padding: 14px 16px 14px; /* menos padding: card más chica */
       display: flex;
-      gap: 18px;
+      gap: 14px;
       align-items: flex-start;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.55);
-      width: 100%;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
+    }
+
+    /* COLUMNA IZQUIERDA: IMAGEN + BOTONES ROSA ABAJO */
+    .carrito-item-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
     .carrito-item-img {
-      width: 95px;
-      height: 95px;
-      border-radius: 16px;
+      width: 86px;
+      height: 86px; /* foto un toque más chica */
+      border-radius: 14px;
       background: #05040d;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
-      flex-shrink: 0;
     }
 
     .carrito-item-img img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
-    }
-
-    /* ================== INFO A LA DERECHA ================== */
-    .carrito-item-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-width: 0;
-    }
-
-    .carrito-item-nombre {
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .carrito-item-detalle {
-      font-size: 13px;
-      color: var(--texto-secundario);
-      line-height: 1.25;
-    }
-
-    /* PRECIO A LA DERECHA */
-    .carrito-item-precios {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      text-align: right;
-      font-size: 13px;
-      color: var(--texto-secundario);
-      gap: 2px;
-      margin-top: 6px;
-    }
-
-    /* ================== BOTONES ABAJO ================== */
-    .carrito-item-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 14px;
-      width: 100%;
+      display: block;
     }
 
     .carrito-item-controles {
@@ -162,12 +145,17 @@
       border-radius: 999px;
       border: none;
       background: var(--rosa);
-      color: white;
+      color: #fff;
       font-size: 17px;
       font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
+    }
+
+    .btn-cant:active {
+      transform: scale(0.95);
     }
 
     .carrito-item-cantidad {
@@ -177,32 +165,99 @@
       text-align: center;
       font-size: 15px;
       font-weight: 600;
+      background: #ffffff;
+      color: #111;
       border-radius: 999px;
-      background: white;
-      color: black;
+    }
+
+    /* COLUMNA DERECHA: NOMBRE, COD, STOCK, PRECIOS, ELIMINAR */
+    .carrito-item-right {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .carrito-item-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .carrito-item-textos {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .carrito-item-nombre {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .carrito-item-detalle {
+      font-size: 13px;
+      color: var(--texto-secundario);
+      line-height: 1.25;
+    }
+
+    /* precios a la derecha, uno arriba del otro */
+    .carrito-item-precios {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      text-align: right;
+      font-size: 13px;
+      color: var(--texto-secundario);
+      gap: 2px;
+      margin-top: 2px;
+    }
+
+    .carrito-item-precios span {
+      white-space: nowrap;
+    }
+
+    .carrito-item-bottom {
+      margin-top: 10px;
+      display: flex;
+      justify-content: flex-end;
     }
 
     .btn-eliminar {
       border: none;
       border-radius: 999px;
-      padding: 10px 22px;
+      padding: 9px 22px;
       font-size: 14px;
       font-weight: 600;
       background: var(--rojo);
-      color: white;
+      color: #fff;
+      cursor: pointer;
     }
 
-    /* ================== RESUMEN ================== */
+    .btn-eliminar:active {
+      transform: scale(0.97);
+    }
+
+    /* ---------- RESUMEN ---------- */
+    .carrito-resumen {
+      margin-top: 6px;
+      padding-bottom: 16px;
+    }
+
     .carrito-resumen-total {
       font-size: 22px;
       font-weight: 700;
-      margin-bottom: 6px;
       text-align: center;
+      margin-bottom: 6px;
     }
 
     .carrito-resumen-aviso {
-      color: var(--texto-suave);
       font-size: 13px;
+      color: var(--texto-suave);
       text-align: center;
       margin-bottom: 20px;
     }
@@ -213,176 +268,306 @@
       width: 100%;
       border-radius: 999px;
       padding: 14px 18px;
-      margin-bottom: 14px;
       font-size: 16px;
       font-weight: 600;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
+      margin-bottom: 14px;
     }
 
     .btn-grande-borde {
       background: transparent;
+      color: var(--texto-principal);
       border: 1px solid var(--gris-borde);
-      color: white;
     }
 
     .btn-grande-rojo {
       background: var(--rojo);
-      color: white;
+      color: #fff;
       border: none;
     }
 
     .btn-grande-verde {
       background: var(--verde);
-      color: white;
+      color: #fff;
       border: none;
-      box-shadow: 0 0 18px rgba(0,179,65,0.6);
+      box-shadow: 0 0 18px rgba(0, 179, 65, 0.6);
+    }
+
+    .btn-grande-borde span.icono-flecha {
+      font-size: 18px;
+      margin-right: 6px;
+    }
+
+    .carrito-vacio {
+      background: var(--bg-card);
+      border-radius: var(--radio-grande);
+      padding: 20px 18px;
+      text-align: center;
+      color: var(--texto-secundario);
+      margin-bottom: 20px;
     }
   </style>
 </head>
-
 <body>
 
-<header>
-  <div class="logo-texto">DELIVERY MAYORISTA</div>
-  <a href="catalogo.html" class="link-catalogo-header">Ver catálogo</a>
-</header>
+  <!-- HEADER -->
+  <header>
+    <div class="logo-texto">DELIVERY MAYORISTA</div>
+    <a href="catalogo.html" class="link-catalogo-header">Ver catálogo</a>
+  </header>
 
-<main>
+  <main>
+    <div class="volver-catalogo">
+      <a href="catalogo.html">&larr; Ir al catálogo</a>
+    </div>
 
-  <h1 class="carrito-titulo">Tu carrito</h1>
+    <h1 class="carrito-titulo">Tu carrito</h1>
 
-  <div id="carrito-lista"></div>
+    <!-- LISTA DE ÍTEMS -->
+    <div id="carrito-lista"></div>
 
-  <section class="carrito-resumen">
-    <p class="carrito-resumen-total">
-      Total (<span id="carrito-total-items">0</span> productos): 
-      $<span id="carrito-total-precio">0</span>
-    </p>
-    <p class="carrito-resumen-aviso">
-      Total estimado sujeto a stock y últimas actualizaciones.
-    </p>
+    <!-- RESUMEN -->
+    <section class="carrito-resumen">
+      <p class="carrito-resumen-total">
+        Total (<span id="carrito-total-items">0</span> productos): 
+        $<span id="carrito-total-precio">0</span>
+      </p>
+      <p class="carrito-resumen-aviso">
+        Total estimado sujeto a stock y últimas actualizaciones.
+      </p>
 
-    <button class="btn-grande-borde" onclick="window.location.href='catalogo.html'">
-      ← Seguir comprando
-    </button>
+      <button class="btn-grande-borde" id="btn-seguir">
+        <span class="icono-flecha">←</span>
+        <span>Seguir comprando</span>
+      </button>
 
-    <button class="btn-grande-rojo" id="btn-vaciar">Vaciar carrito</button>
+      <button class="btn-grande-rojo" id="btn-vaciar">
+        Vaciar carrito
+      </button>
 
-    <button class="btn-grande-verde" id="btn-whatsapp">Enviar pedido por WhatsApp</button>
-  </section>
+      <button class="btn-grande-verde" id="btn-whatsapp">
+        Enviar pedido por WhatsApp
+      </button>
+    </section>
+  </main>
 
-</main>
+  <!-- ================== LÓGICA DE CARRITO ================== -->
+  <script>
+    const CLAVE_CARRITO = "dm_carrito";
+    const TELEFONO_WHATSAPP = "5491112345678";
 
-<script>
-  const CLAVE_CARRITO = "dm_carrito";
-  const TELEFONO_WHATSAPP = "5491112345678";
-
-  function leerCarrito() {
-    try {
-      const raw = localStorage.getItem(CLAVE_CARRITO);
-      if (!raw) return [];
-      const arr = JSON.parse(raw);
-      return Array.isArray(arr) ? arr : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function guardarCarrito(c) {
-    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(c));
-  }
-
-  function formatearPrecio(n) {
-    return Number(n).toLocaleString("es-AR", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    });
-  }
-
-  function renderCarrito() {
-    const cont = document.getElementById("carrito-lista");
-    const tItems = document.getElementById("carrito-total-items");
-    const tPrecio = document.getElementById("carrito-total-precio");
-
-    const carrito = leerCarrito();
-    if (!carrito.length) {
-      cont.innerHTML = `<div style="color:#bbb;padding:22px;">Carrito vacío</div>`;
-      tItems.textContent = "0";
-      tPrecio.textContent = "0";
-      return;
+    function leerCarrito() {
+      try {
+        const raw = localStorage.getItem(CLAVE_CARRITO);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) {
+        console.error("Error leyendo carrito", e);
+        return [];
+      }
     }
 
-    cont.innerHTML = "";
-    let totalItems = 0;
-    let totalPrecio = 0;
+    function guardarCarrito(carrito) {
+      try {
+        localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
+      } catch (e) {
+        console.error("Error guardando carrito", e);
+      }
+    }
 
-    carrito.forEach((item, i) => {
-      const nombre = item.nombre;
-      const codigo = item.codigo;
-      const stock = item.stock;
-      const precio = item.precioMayorista;
-      const cantidad = item.cantidad;
-      const img = item.img;
+    function formatearPrecio(valor) {
+      const num = Number(valor) || 0;
+      return num.toLocaleString("es-AR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      });
+    }
 
-      totalItems += cantidad;
-      totalPrecio += precio * cantidad;
+    function obtenerPrecio(item) {
+      // lectura robusta para evitar NaN
+      const precioBruto =
+        item.precioMayorista ??
+        item.precio_mayorista ??
+        item.precio ??
+        item.PrecioMayorista ??
+        item.Precio ??
+        0;
+      return Number(precioBruto) || 0;
+    }
 
-      const card = document.createElement("article");
-      card.className = "carrito-item";
+    function obtenerStock(item) {
+      return Number(
+        item.stock ?? item.Stock ?? item["Stock"] ?? item.stock_disponible ?? 0
+      ) || 0;
+    }
 
-      card.innerHTML = `
-        <div class="carrito-item-img">
-          <img src="${img}">
-        </div>
+    function obtenerCantidad(item) {
+      return Number(item.cantidad ?? item.Cantidad ?? 1) || 1;
+    }
 
-        <div class="carrito-item-info">
-          <p class="carrito-item-nombre">${nombre}</p>
-          <p class="carrito-item-detalle">Cod: ${codigo}</p>
-          <p class="carrito-item-detalle">Stock disponible: ${stock}</p>
+    /* ---------- RENDER DEL CARRITO ---------- */
+    function renderCarrito() {
+      const contenedor = document.getElementById("carrito-lista");
+      const spanTotalItems = document.getElementById("carrito-total-items");
+      const spanTotalPrecio = document.getElementById("carrito-total-precio");
 
-          <div class="carrito-item-precios">
-            <span>Unitario: $${formatearPrecio(precio)}</span>
-            <span>Subtotal: $${formatearPrecio(precio * cantidad)}</span>
+      const carrito = leerCarrito();
+
+      if (!carrito.length) {
+        contenedor.innerHTML = `
+          <div class="carrito-vacio">
+            Tu carrito está vacío.<br/>
+            Agregá productos desde el catálogo.
+          </div>
+        `;
+        spanTotalItems.textContent = "0";
+        spanTotalPrecio.textContent = "0";
+        return;
+      }
+
+      contenedor.innerHTML = "";
+
+      let totalItems = 0;
+      let totalPrecio = 0;
+
+      carrito.forEach((item, idx) => {
+        const codigo = item.codigo ?? item.Codigo ?? item.cod ?? "";
+        const nombre =
+          item.nombre ?? item["Nombre Corto"] ?? item.nombreCorto ?? "Producto sin nombre";
+        const precio = obtenerPrecio(item);
+        const stock = obtenerStock(item);
+        const img = item.img ?? item.imagen ?? item.Imagen ?? "img/sin-imagen.png";
+        const cantidad = obtenerCantidad(item);
+
+        totalItems += cantidad;
+        totalPrecio += precio * cantidad;
+
+        const card = document.createElement("article");
+        card.classList.add("carrito-item");
+
+        card.innerHTML = `
+          <div class="carrito-item-left">
+            <div class="carrito-item-img">
+              <img src="${img}" alt="${nombre}">
+            </div>
+            <div class="carrito-item-controles">
+              <button class="btn-cant btn-menos" data-idx="${idx}" aria-label="Restar uno">−</button>
+              <span class="carrito-item-cantidad" data-idx="${idx}">${cantidad}</span>
+              <button class="btn-cant btn-mas" data-idx="${idx}" aria-label="Sumar uno">+</button>
+            </div>
           </div>
 
-          <div class="carrito-item-bottom">
-            <div class="carrito-item-controles">
-              <button class="btn-cant" onclick="cambiar(${i}, -1)">−</button>
-              <span class="carrito-item-cantidad">${cantidad}</span>
-              <button class="btn-cant" onclick="cambiar(${i}, 1)">+</button>
+          <div class="carrito-item-right">
+            <div class="carrito-item-top">
+              <div class="carrito-item-textos">
+                <p class="carrito-item-nombre">${nombre}</p>
+                <p class="carrito-item-detalle">Cod: ${codigo}</p>
+                <p class="carrito-item-detalle">Stock disponible: ${stock}</p>
+              </div>
+
+              <div class="carrito-item-precios">
+                <span>Unitario: $${formatearPrecio(precio)}</span>
+                <span>Subtotal: $${formatearPrecio(precio * cantidad)}</span>
+              </div>
             </div>
 
-            <button class="btn-eliminar" onclick="eliminar(${i})">Eliminar</button>
+            <div class="carrito-item-bottom">
+              <button class="btn-eliminar" data-idx="${idx}">Eliminar</button>
+            </div>
           </div>
-        </div>
-      `;
+        `;
 
-      cont.appendChild(card);
+        contenedor.appendChild(card);
+      });
+
+      spanTotalItems.textContent = String(totalItems);
+      spanTotalPrecio.textContent = formatearPrecio(totalPrecio);
+
+      contenedor.querySelectorAll(".btn-mas").forEach((btn) => {
+        btn.addEventListener("click", () => cambiarCantidad(btn.dataset.idx, +1));
+      });
+
+      contenedor.querySelectorAll(".btn-menos").forEach((btn) => {
+        btn.addEventListener("click", () => cambiarCantidad(btn.dataset.idx, -1));
+      });
+
+      contenedor.querySelectorAll(".btn-eliminar").forEach((btn) => {
+        btn.addEventListener("click", () => eliminarItem(btn.dataset.idx));
+      });
+    }
+
+    function cambiarCantidad(idx, delta) {
+      const carrito = leerCarrito();
+      const i = Number(idx);
+      if (isNaN(i) || !carrito[i]) return;
+
+      const item = carrito[i];
+      const stock = obtenerStock(item);
+      let cantidad = obtenerCantidad(item);
+
+      cantidad += delta;
+      if (cantidad < 1) cantidad = 1;
+      if (stock && cantidad > stock) cantidad = stock;
+
+      item.cantidad = cantidad;
+      carrito[i] = item;
+
+      guardarCarrito(carrito);
+      renderCarrito();
+    }
+
+    function eliminarItem(idx) {
+      const carrito = leerCarrito();
+      const i = Number(idx);
+      if (isNaN(i) || !carrito[i]) return;
+      carrito.splice(i, 1);
+      guardarCarrito(carrito);
+      renderCarrito();
+    }
+
+    /* ---------- BOTONES PRINCIPALES ---------- */
+    document.getElementById("btn-seguir").addEventListener("click", () => {
+      window.location.href = "catalogo.html";
     });
 
-    tItems.textContent = totalItems;
-    tPrecio.textContent = formatearPrecio(totalPrecio);
-  }
+    document.getElementById("btn-vaciar").addEventListener("click", () => {
+      if (!confirm("¿Vaciar carrito completo?")) return;
+      guardarCarrito([]);
+      renderCarrito();
+    });
 
-  function cambiar(i, d) {
-    const carrito = leerCarrito();
-    carrito[i].cantidad += d;
-    if (carrito[i].cantidad < 1) carrito[i].cantidad = 1;
-    guardarCarrito(carrito);
+    document.getElementById("btn-whatsapp").addEventListener("click", () => {
+      const carrito = leerCarrito();
+      if (!carrito.length) return;
+
+      let texto = "Hola! Quiero hacer este pedido mayorista:%0A%0A";
+
+      carrito.forEach((item) => {
+        const codigo = item.codigo ?? item.Codigo ?? "";
+        const nombre =
+          item.nombre ?? item["Nombre Corto"] ?? "Producto sin nombre";
+        const precio = obtenerPrecio(item);
+        const cantidad = obtenerCantidad(item);
+        const subtotal = precio * cantidad;
+
+        texto += `• ${codigo} - ${nombre} x ${cantidad}u = $${formatearPrecio(
+          subtotal
+        )}%0A`;
+      });
+
+      const total = document.getElementById("carrito-total-precio").textContent || "0";
+      texto += `%0A🔹 Total estimado: $${total}`;
+
+      const url = `https://wa.me/${TELEFONO_WHATSAPP}?text=${texto}`;
+      window.open(url, "_blank");
+    });
+
+    // ---------- INICIO ----------
     renderCarrito();
-  }
-
-  function eliminar(i) {
-    const carrito = leerCarrito();
-    carrito.splice(i, 1);
-    guardarCarrito(carrito);
-    renderCarrito();
-  }
-
-  renderCarrito();
-</script>
-
+  </script>
 </body>
 </html>
