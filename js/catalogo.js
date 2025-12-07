@@ -384,7 +384,7 @@ if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
 
 async function cargarProductos() {
   try {
-    const resp = await fetch("./productos.json");
+    const resp = await fetch("data/productos.json");
     if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
     const data = await resp.json();
@@ -393,32 +393,33 @@ async function cargarProductos() {
       : (data.productos || []);
 
     // llenar combo de categorías
-    if (filtroCategoria) {
-      const categoriasUnicas = Array.from(
-        new Set(
-          TODOS_LOS_PRODUCTOS.map(p =>
-            safe(
-              p.categoria || p.rubro || p.cat || p["Categoria Princ"],
-              ""
-            ).toString()
-          ).filter(c => c !== "")
-        )
-      ).sort();
+    if (filtroCategoria)
+      {
+        const categoriasUnicas = Array.from(
+          new Set(
+            TODOS_LOS_PRODUCTOS.map(p =>
+              safe(
+                p.categoria || p.rubro || p.cat || p["Categoria Princ"],
+                ""
+              ).toString()
+            ).filter(c => c !== "")
+          )
+        ).sort();
 
-      if (!filtroCategoria.querySelector("option[value='todas']")) {
-        const optTodas = document.createElement("option");
-        optTodas.value = "todas";
-        optTodas.textContent = "Todas las categorías";
-        filtroCategoria.appendChild(optTodas);
+        if (!filtroCategoria.querySelector("option[value='todas']")) {
+          const optTodas = document.createElement("option");
+          optTodas.value = "todas";
+          optTodas.textContent = "Todas las categorías";
+          filtroCategoria.appendChild(optTodas);
+        }
+
+        categoriasUnicas.forEach(cat => {
+          const op = document.createElement("option");
+          op.value = cat.toLowerCase();
+          op.textContent = cat;
+          filtroCategoria.appendChild(op);
+        });
       }
-
-      categoriasUnicas.forEach(cat => {
-        const op = document.createElement("option");
-        op.value = cat.toLowerCase();
-        op.textContent = cat;
-        filtroCategoria.appendChild(op);
-      });
-    }
 
     renderProductos(TODOS_LOS_PRODUCTOS);
     actualizarMiniCarrito();
