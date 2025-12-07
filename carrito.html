@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tu carrito | Delivery Mayorista</title>
 
-  <!-- Si tenés estilos globales -->
+  <!-- Si usás estilos globales, lo mantenemos -->
   <link rel="stylesheet" href="css/estilos.css" />
 
   <style>
@@ -16,7 +16,7 @@
       color: #ffffff;
     }
 
-    /* BARRA SUPERIOR TIPO CATÁLOGO */
+    /* BARRA SUPERIOR IGUAL QUE CATÁLOGO */
     .topbar {
       background: linear-gradient(90deg, #ff005a, #ff9900);
       padding: 14px 18px;
@@ -50,23 +50,30 @@
       margin: 10px 0 18px;
     }
 
-    /* LISTA DE ITEMS */
+    /* LISTA */
     .carrito-lista {
       margin-top: 8px;
     }
 
-    /* TARJETA DE CADA PRODUCTO (ESTILO PARECIDO A LA 2ª FOTO) */
+    /* TARJETA ESTILO “SEGUNDA FOTO” */
     .carrito-item {
       background: #151522;
       border-radius: 14px;
       padding: 18px 16px;
-      display: flex;
-      gap: 16px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      grid-template-rows: auto auto;
+      grid-template-areas:
+        "img info qty"
+        "img prices qty";
+      column-gap: 16px;
+      row-gap: 8px;
       align-items: center;
       margin-bottom: 22px;
     }
 
     .carrito-item img {
+      grid-area: img;
       width: 90px;
       height: 90px;
       object-fit: contain;
@@ -75,7 +82,7 @@
     }
 
     .carrito-info {
-      flex: 1;
+      grid-area: info;
       font-size: 15px;
     }
 
@@ -90,8 +97,21 @@
       line-height: 1.4;
     }
 
-    /* CONTROLES A LA DERECHA (VERTICALES COMO LA 1ª FOTO) */
+    /* BLOQUE PRECIOS (UNITARIO / SUBTOTAL) ABAJO, CENTRADO */
+    .carrito-precios {
+      grid-area: prices;
+      font-size: 15px;
+      line-height: 1.4;
+      margin-top: 4px;
+    }
+
+    .carrito-precios p {
+      margin: 2px 0;
+    }
+
+    /* CONTROLES DE CANTIDAD A LA DERECHA, HORIZONTALES - 1 + */
     .carrito-controles {
+      grid-area: qty;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -100,14 +120,14 @@
 
     .cantidad-box {
       display: flex;
-      flex-direction: column;  /* VERTICAL: -, número, + */
+      flex-direction: row; /* HORIZONTAL: - 1 + */
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .cantidad-box button {
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       border: none;
       font-size: 22px;
@@ -141,7 +161,7 @@
       white-space: nowrap;
     }
 
-    /* RESUMEN TOTAL ABAJO, ESTILO 2ª FOTO */
+    /* RESUMEN TOTAL ABAJO */
     .carrito-resumen {
       margin-top: 26px;
       text-align: center;
@@ -158,7 +178,7 @@
       opacity: 0.8;
     }
 
-    /* BOTONES GRANDES INFERIORES */
+    /* BOTONES INFERIORES COMO EN LA SEGUNDA FOTO */
     .carrito-acciones {
       margin-top: 26px;
       text-align: center;
@@ -219,18 +239,24 @@
       pointer-events: none;
     }
 
-    /* RESPONSIVE PEQUEÑO: por si algo se apreta mucho */
     @media (max-width: 480px) {
       .carrito-item {
-        align-items: flex-start;
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto auto;
+        grid-template-areas:
+          "img info"
+          "img prices"
+          "img qty";
+      }
+      .carrito-controles {
+        align-items: flex-end;
       }
     }
   </style>
 </head>
 
 <body>
-
-  <!-- Barra superior estilo catálogo -->
+  <!-- BARRA SUPERIOR -->
   <header class="topbar">
     <div class="topbar-title">Delivery Mayorista</div>
     <a href="catalogo.html" class="topbar-link">Ver catálogo</a>
@@ -239,10 +265,10 @@
   <main class="carrito-main">
     <h1 class="titulo-seccion">Tu carrito</h1>
 
-    <!-- Aquí el JS inyecta las tarjetas -->
+    <!-- AQUÍ EL JS INYECTA LAS CARDS -->
     <section id="carrito-lista" class="carrito-lista"></section>
 
-    <!-- Resumen total -->
+    <!-- RESUMEN TOTAL -->
     <section class="carrito-resumen">
       <h2>
         Total (<span id="carrito-total-items">0</span> productos):
@@ -251,7 +277,7 @@
       <p>Total estimado sujeto a stock y últimas actualizaciones.</p>
     </section>
 
-    <!-- Botones inferiores -->
+    <!-- BOTONES INFERIORES -->
     <section class="carrito-acciones">
       <button class="btn-seguir" onclick="window.location.href='catalogo.html'">
         <span>←</span> Seguir comprando
@@ -267,7 +293,7 @@
     </section>
   </main>
 
-  <!-- Lógica del carrito (no la tocamos) -->
+  <!-- LÓGICA DEL CARRITO (NO LA TOCAMOS) -->
   <script src="js/carrito.js"></script>
 </body>
 </html>
