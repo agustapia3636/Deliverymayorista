@@ -405,3 +405,17 @@ body {
   box-shadow: 0 18px 35px rgba(0, 0, 0, 0.6);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
+/* ======================================= */
+/* CURSOR CLICKEABLE EN LAS CARDS (FINAL) */
+/* ======================================= */
+
+/* Toda card del catálogo (articles dentro de #lista-productos) muestra manito */
+#lista-productos article,
+#lista-productos article * {
+  cursor: pointer !important;
+}
+
+/* El botón mantiene su propio cursor (ya lo tiene por defecto, esto es por seguridad) */
+#lista-productos article button {
+  cursor: pointer !important;
+}
