@@ -12,6 +12,7 @@ const CLAVE_CARRITO = "dm_carrito";
 const grid = document.getElementById("lista-productos");      // contenedor de tarjetas
 const buscador = document.getElementById("buscador");         // input de búsqueda
 const filtroCategoria = document.getElementById("filtro-categoria"); // select de categorías
+const filtroSubcategoria = document.getElementById("filtro-subcategoria"); // 🚀 nuevo select de subcategorías
 
 // Mini carrito (globito abajo a la derecha)
 const miniCantidad = document.getElementById("mini-carrito-cantidad");
@@ -244,7 +245,7 @@ function renderProductos(lista) {
       : "Agregar al carrito";
 
     card.innerHTML = `
-      <div class="producto-img-wrapper">
+      <div class="producto-imagen-wrapper">
         <img class="producto-imagen" alt="${nombreBase}">
       </div>
 
@@ -405,7 +406,8 @@ function renderProductos(lista) {
 
 function aplicarFiltros() {
   const texto = buscador.value.trim().toLowerCase();
-  const cat   = filtroCategoria.value;
+  const cat   = filtroCategoria ? filtroCategoria.value : "";
+  const sub   = filtroSubcategoria ? filtroSubcategoria.value : "";
 
   const filtrados = TODOS_LOS_PRODUCTOS.filter(prod => {
     const codigo = safe(
@@ -425,20 +427,29 @@ function aplicarFiltros() {
       ""
     ).toLowerCase();
 
+    const subcategoria = safe(
+      prod.subcategoria || prod.Subcategoria || prod["Subcategoria"],
+      ""
+    ).toLowerCase();
+
     const pasaTexto =
       !texto || codigo.includes(texto) || nombre.includes(texto);
 
     const pasaCategoria =
       !cat || cat === "todas" || categoria === cat.toLowerCase();
 
-    return pasaTexto && pasaCategoria;
+    const pasaSubcategoria =
+      !sub || sub === "todas" || subcategoria === sub.toLowerCase();
+
+    return pasaTexto && pasaCategoria && pasaSubcategoria;
   });
 
   renderProductos(filtrados);
 }
 
-if (buscador)        buscador.addEventListener("input",  aplicarFiltros);
-if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
+if (buscador)           buscador.addEventListener("input",  aplicarFiltros);
+if (filtroCategoria)    filtroCategoria.addEventListener("change", aplicarFiltros);
+if (filtroSubcategoria) filtroSubcategoria.addEventListener("change", aplicarFiltros);
 
 // ========================================
 // CARGA INICIAL
@@ -479,6 +490,33 @@ async function cargarProductos() {
         op.value = cat.toLowerCase();
         op.textContent = cat;
         filtroCategoria.appendChild(op);
+      });
+    }
+
+    // 🚀 llenar combo de subcategorías
+    if (filtroSubcategoria) {
+      const subcatsUnicas = Array.from(
+        new Set(
+          TODOS_LOS_PRODUCTOS.map(p =>
+            safe(
+              p.subcategoria || p.Subcategoria || p["Subcategoria"],
+              ""
+            ).toString()
+          ).filter(s => s !== "")
+        )
+      ).sort();
+
+      filtroSubcategoria.innerHTML = "";
+      const optTodasSub = document.createElement("option");
+      optTodasSub.value = "todas";
+      optTodasSub.textContent = "Todas las subcategorías";
+      filtroSubcategoria.appendChild(optTodasSub);
+
+      subcatsUnicas.forEach(sub => {
+        const op = document.createElement("option");
+        op.value = sub.toLowerCase();
+        op.textContent = sub;
+        filtroSubcategoria.appendChild(op);
       });
     }
 
