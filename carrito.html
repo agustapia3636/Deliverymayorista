@@ -32,7 +32,7 @@
 
     h2 {
         margin: 16px;
-        font-size: 28px;
+        font-size: 26px;
         font-weight: bold;
     }
 
@@ -61,26 +61,26 @@
     }
 
     .carrito-info h3 {
-        font-size: 17px;
+        font-size: 16px;
         font-weight: bold;
-        margin: 0 0 6px 0;
+        margin: 0 0 4px 0;
     }
 
     .carrito-info p {
-        font-size: 14px;
-        margin: 2px 0;
+        font-size: 13px;
+        margin: 1px 0;
         color: #cfd3e0;
     }
 
     .precio {
-        font-size: 15px;
+        font-size: 14px;
         color: #ffffff;
         font-weight: bold;
         margin-top: 6px;
     }
 
     .subtotal {
-        font-size: 15px;
+        font-size: 14px;
         color: #ff3e9c;
         font-weight: bold;
         margin-top: 4px;
@@ -192,6 +192,14 @@
 /* ================== LÓGICA ================== */
 const CLAVE_CARRITO = "dm_carrito";
 
+/* Formato entero sin decimales, con miles */
+function formatoEntero(valor) {
+    return Math.round(valor).toLocaleString("es-AR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    });
+}
+
 function leerCarrito() {
     try {
         const raw = localStorage.getItem(CLAVE_CARRITO);
@@ -227,7 +235,11 @@ function renderCarrito() {
         let precio = Number(item.precio) || 0;
         let cantidad = Number(item.cantidad) || 1;
         let subtotal = precio * cantidad;
-        total += subtotal;
+
+        const precioRed = formatoEntero(precio);
+        const subtotalRed = formatoEntero(subtotal);
+
+        total += Math.round(subtotal); // sumamos ya redondeado
 
         const card = document.createElement("div");
         card.className = "carrito-item";
@@ -238,8 +250,8 @@ function renderCarrito() {
                <h3>${item.nombre}</h3>
                <p>Cod: ${item.codigo}</p>
                <p>Stock disponible: ${item.stock}</p>
-               <p class="precio">Unitario: $${precio.toLocaleString()}</p>
-               <p class="subtotal">Subtotal: $${subtotal.toLocaleString()}</p>
+               <p class="precio">Unitario: $${precioRed}</p>
+               <p class="subtotal">Subtotal: $${subtotalRed}</p>
 
                <div class="cantidad-box">
                     <button class="btn-cant">-</button>
@@ -279,7 +291,8 @@ function renderCarrito() {
         cont.append(card);
     });
 
-    spanTotal.textContent = `Total (${carrito.length} productos): $${total.toLocaleString()}`;
+    const totalRed = formatoEntero(total);
+    spanTotal.textContent = `Total (${carrito.length} productos): $${totalRed}`;
 }
 
 document.getElementById("btn-vaciar").onclick = () => {
@@ -287,7 +300,7 @@ document.getElementById("btn-vaciar").onclick = () => {
     renderCarrito();
 };
 
-/* LISTO */
+/* Inicializar */
 renderCarrito();
 </script>
 
