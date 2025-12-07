@@ -282,27 +282,33 @@ function renderProductos(lista) {
     const stockVisible = card.querySelector(".stock-text");
     const stockInicial = stockNum || 0;
 
-    // ---- manejo cantidad (PC + iPhone) ----
-    function normalizarCantidad() {
-      if (!input) return;
-      let cant = parseInt(input.value, 10);
-
-      if (!Number.isFinite(cant) || cant < 1) {
-        cant = 1; // si está vacío o mal, queda en 1
-      }
-      if (stockInicial > 0 && cant > stockInicial) {
-        cant = stockInicial; // no pasarse del stock
-      }
-
-      input.value = String(cant);
-      // el texto de stock queda fijo "Stock: X unidades"
-    }
+    // -------- CANTIDAD + STOCK DINÁMICO (PC + iPhone) --------
 
     function obtenerCantidadSegura() {
       let cant = parseInt(input.value, 10);
       if (!Number.isFinite(cant) || cant < 1) cant = 1;
       if (stockInicial > 0 && cant > stockInicial) cant = stockInicial;
       return cant;
+    }
+
+    function actualizarStockVisible() {
+      if (!stockVisible || stockInicial <= 0) return;
+
+      const raw = input.value;
+      if (raw === "" || raw == null) {
+        // si está vacío, mostramos stock completo
+        stockVisible.textContent = `Stock: ${stockInicial} unidades`;
+        return;
+      }
+
+      let cant = parseInt(raw, 10);
+      if (!Number.isFinite(cant) || cant < 1) cant = 1;
+      if (stockInicial > 0 && cant > stockInicial) cant = stockInicial;
+
+      let restante = stockInicial - cant;
+      if (restante < 0) restante = 0;
+
+      stockVisible.textContent = `Stock: ${restante} unidades`;
     }
 
     const btnMas   = card.querySelector(".btn-cantidad.mas");
@@ -316,6 +322,7 @@ function renderProductos(lista) {
         else v += 1;
         if (stockInicial > 0 && v > stockInicial) v = stockInicial;
         input.value = String(v);
+        actualizarStockVisible();
       });
     }
 
@@ -326,6 +333,7 @@ function renderProductos(lista) {
         if (!Number.isFinite(v) || v <= 1) v = 1;
         else v -= 1;
         input.value = String(v);
+        actualizarStockVisible();
       });
     }
 
@@ -334,14 +342,21 @@ function renderProductos(lista) {
       input.addEventListener("input", (ev) => {
         ev.stopPropagation();
         ev.target.value = ev.target.value.replace(/\D/g, "");
-        // NO normalizamos a stock acá, para que no salte a 10 en iPhone
+        actualizarStockVisible(); // actualiza stock en vivo
       });
 
-      // Cuando sale del campo, recién ajustamos a 1..stock
+      // Cuando sale del campo, ajustamos a 1..stock y stock visible
       input.addEventListener("blur", (ev) => {
         ev.stopPropagation();
-        normalizarCantidad();
+        const cant = obtenerCantidadSegura();
+        input.value = String(cant);
+        actualizarStockVisible();
       });
+    }
+
+    // estado inicial: sin cantidad → stock completo
+    if (stockVisible && stockInicial > 0) {
+      stockVisible.textContent = `Stock: ${stockInicial} unidades`;
     }
 
     // 🔥 CLICK EN BOTÓN → agrega usando cantidad elegida
@@ -350,6 +365,8 @@ function renderProductos(lista) {
       ev.stopPropagation();
 
       const cant = obtenerCantidadSegura();
+      input.value = String(cant);
+      actualizarStockVisible();
 
       const productoBasico = {
         codigo,
