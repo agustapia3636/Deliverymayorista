@@ -1,291 +1,265 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Carrito | Delivery Mayorista</title>
-  <link rel="stylesheet" href="css/estilos.css">
+// ================================
+// CARRITO - Delivery Mayorista
+// ================================
 
-  <style>
-    /* Ajustes visuales para la página del carrito */
-    body {
-      background:#0f0f1a;
-      margin:0;
-      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      color:white;
-    }
+const CLAVE_CARRITO = "dm_carrito";
 
-    header.topbar {
-      background: linear-gradient(90deg,#ff005d,#ffa400);
-      padding:15px 25px;
-    }
-    .topbar-inner {
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      max-width:1100px;
-      margin:0 auto;
-    }
-    .logo-link {
-      color:#fff;
-      font-weight:700;
-      font-size:20px;
-      text-decoration:none;
-    }
-    .topbar-link {
-      color:#fff;
-      text-decoration:none;
-      font-size:14px;
-      font-weight:500;
-    }
+// CAMBIÁ ESTE NÚMERO POR TU WHATSAPP REAL
+const NUMERO_WHATSAPP = "5491112345678";
 
-    /* ancho más compacto */
-    main.carrito-pagina {
-      max-width: 600px;
-      margin: 90px auto 40px;
-      padding: 0 16px;
-    }
+// -------- UTILIDADES --------
 
-    .carrito-pagina h1 {
-      font-size: 24px;
-      margin-bottom: 16px;
-    }
+function leerCarrito() {
+  try {
+    const raw = localStorage.getItem(CLAVE_CARRITO);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    console.error("Error leyendo carrito", e);
+    return [];
+  }
+}
 
-    .carrito-vacio {
-      text-align: center;
-      padding: 40px 0;
-      font-size: 15px;
-      opacity: .9;
-    }
+function guardarCarrito(carrito) {
+  try {
+    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
+  } catch (e) {
+    console.error("Error guardando carrito", e);
+  }
+}
 
-    .carrito-lista {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+function formatearPrecio(valor) {
+  if (typeof valor === "string") {
+    const limpio = valor.replace(/\./g, "").replace(",", ".");
+    const num = Number(limpio);
+    if (Number.isFinite(num)) {
+      valor = num;
     }
+  }
+  if (typeof valor !== "number") return "0";
 
-    .item-carrito {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      padding: 12px;
-      border-radius: 8px;
-      background: #141420;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    }
+  return valor.toLocaleString("es-AR", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+}
 
-    /* Layout imagen + info */
-    .item-carrito-top {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
+// -------- RENDER DEL CARRITO --------
 
-    .item-carrito-img {
-      width: 56px;
-      height: 56px;
-      border-radius: 8px;
-      overflow: hidden;
-      background: #19192b;
-      flex-shrink: 0;
-    }
+function renderCarrito() {
+  const contenedor = document.getElementById("carrito-lista");
+  const spanTotalItems = document.getElementById("carrito-total-items");
+  const spanTotalPrecio = document.getElementById("carrito-total-precio");
+  const btnVaciar = document.getElementById("btn-vaciar");
+  const btnWhatsapp = document.getElementById("btn-whatsapp");
 
-    .item-carrito-img img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
+  let carrito = leerCarrito();
 
-    .item-carrito-info {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
+  if (!contenedor) return;
 
-    .item-carrito-descripcion {
-      font-size: 14px;
-      font-weight: 500;
-    }
+  if (!carrito || carrito.length === 0) {
+    contenedor.innerHTML = `
+      <div class="carrito-vacio">
+        <p>Tu carrito está vacío.</p>
+        <a href="catalogo.html" class="btn-volver-catalogo-simple">
+          ← Ir al catálogo
+        </a>
+      </div>
+    `;
 
-    .item-carrito-codigo,
-    .item-carrito-stock {
-      font-size: 12px;
-      color: #aaa;
-    }
+    if (spanTotalItems) spanTotalItems.textContent = "0";
+    if (spanTotalPrecio) spanTotalPrecio.textContent = "0";
 
-    .item-carrito-controles {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-top: 4px;
+    if (btnVaciar) btnVaciar.disabled = true;
+    if (btnWhatsapp) {
+      btnWhatsapp.classList.add("btn-desactivado");
+      btnWhatsapp.removeAttribute("href");
     }
+    return;
+  }
 
-    .item-carrito-cant {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-    }
+  // Hay productos
+  if (btnVaciar) btnVaciar.disabled = false;
 
-    .item-carrito-cant button {
-      border: none;
-      padding: 4px 10px;
-      border-radius: 4px;
-      background: #f1f1f1;
-      cursor: pointer;
-      font-size: 14px;
-    }
+  contenedor.innerHTML = "";
 
-    .item-carrito-cant-valor {
-      min-width: 24px;
-      text-align: center;
-    }
+  let totalItems = 0;
+  let totalPrecio = 0;
 
-    .item-carrito-precios {
-      display: flex;
-      flex-direction: column;
-      font-size: 13px;
-      text-align: right;
-    }
+  carrito.forEach((item, idx) => {
+    const codigo = item.codigo || "";
+    const nombre = item.nombre || "Producto sin nombre";
+    const precio = Number(item.precio) || 0;
+    const cantidad = Number(item.cantidad) || 1;
+    const stock = item.stock ?? null;
+    const img = item.img || "";
 
-    .btn-eliminar {
-      border: none;
-      padding: 6px 10px;
-      border-radius: 4px;
-      background: #ffdddd;
-      color: #990000;
-      font-size: 12px;
-      cursor: pointer;
-      white-space: nowrap;
-    }
+    totalItems += cantidad;
+    totalPrecio += precio * cantidad;
 
-    .total-carrito {
-      margin-top: 16px;
-      text-align: right;
-      font-size: 16px;
-      font-weight: 600;
-    }
-    .total-carrito span {
-      font-size: 18px;
-    }
-    .total-carrito-nota {
-      font-size: 12px;
-      color: #aaa;
-      margin-top: 4px;
-    }
+    const subtotalTexto = formatearPrecio(precio * cantidad);
+    const precioTexto = formatearPrecio(precio);
 
-    .carrito-acciones {
-      margin-top: 24px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      justify-content: space-between;
-      align-items: center;
-    }
+    const card = document.createElement("article");
+    card.classList.add("carrito-item");
 
-    .btn-volver {
-      display: inline-block;
-      padding: 8px 14px;
-      border-radius: 999px;
-      text-decoration: none;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      color:#fff;
-      background: transparent;
-      cursor: pointer;
-    }
+    card.innerHTML = `
+      <div class="carrito-item-img">
+        ${
+          img
+            ? `<img src="${img}" alt="${nombre}" loading="lazy" />`
+            : `<div class="carrito-item-img-placeholder">?</div>`
+        }
+      </div>
 
-    .btn-vaciar {
-      display: inline-block;
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: 1px solid #ff4d4d;
-      background: rgba(255,77,77,0.08);
-      color: #ff9f9f;
-      font-size: 13px;
-      cursor: pointer;
-    }
+      <div class="carrito-item-info">
+        <h3 class="carrito-item-nombre">${nombre}</h3>
+        <p class="carrito-item-codigo">Cod: ${codigo}</p>
+        ${
+          stock !== null && stock !== undefined
+            ? `<p class="carrito-item-stock">Stock disponible: ${stock}</p>`
+            : ""
+        }
+        <p class="carrito-item-precios">
+          Unitario: $${precioTexto}<br>
+          Subtotal: $${subtotalTexto}
+        </p>
+      </div>
 
-    .btn-whatsapp-carrito {
-      border: none;
-      padding: 10px 16px;
-      border-radius: 999px;
-      font-size: 14px;
-      background: #25D366;
-      color: #ffffff;
-      cursor: pointer;
-      display:flex;
-      align-items:center;
-      gap:6px;
-      white-space: nowrap;
-    }
+      <div class="carrito-item-controles" data-index="${idx}">
+        <div class="carrito-item-cant-row">
+          <button class="btn-cantidad menos">−</button>
+          <input
+            type="number"
+            class="input-cantidad"
+            value="${cantidad}"
+            min="1"
+          />
+          <button class="btn-cantidad mas">+</button>
+        </div>
+        <button class="btn-eliminar">Eliminar</button>
+      </div>
+    `;
 
-    .btn-whatsapp-carrito span {
-      font-size: 16px;
-    }
+    contenedor.appendChild(card);
+  });
 
-    @media (max-width: 600px) {
-      .carrito-acciones {
-        flex-direction: column;
-        align-items: stretch;
+  if (spanTotalItems) spanTotalItems.textContent = totalItems.toString();
+  if (spanTotalPrecio) spanTotalPrecio.textContent = formatearPrecio(totalPrecio);
+
+  // Actualizar enlace de WhatsApp
+  if (btnWhatsapp) {
+    if (carrito.length === 0) {
+      btnWhatsapp.classList.add("btn-desactivado");
+      btnWhatsapp.removeAttribute("href");
+    } else {
+      btnWhatsapp.classList.remove("btn-desactivado");
+
+      let texto = "Hola! Quiero hacer este pedido mayorista:%0A%0A";
+      carrito.forEach((item) => {
+        const codigo = item.codigo || "";
+        const nombre = item.nombre || "";
+        const precio = Number(item.precio) || 0;
+        const cantidad = Number(item.cantidad) || 1;
+        const subtotal = precio * cantidad;
+
+        texto += `• ${codigo} - ${nombre} x ${cantidad}u = $${formatearPrecio(
+          subtotal
+        )}%0A`;
+      });
+      texto += `%0A Total productos: ${totalItems}`;
+      texto += `%0A Total estimado: $${formatearPrecio(totalPrecio)}`;
+
+      const url = `https://wa.me/${NUMERO_WHATSAPP}?text=${texto}`;
+      btnWhatsapp.href = url;
+    }
+  }
+
+  // Listeners para botones +, -, eliminar
+  contenedor.querySelectorAll(".carrito-item-controles").forEach((cont) => {
+    const index = Number(cont.dataset.index);
+    const btnMas = cont.querySelector(".btn-cantidad.mas");
+    const btnMenos = cont.querySelector(".btn-cantidad.menos");
+    const input = cont.querySelector(".input-cantidad");
+    const btnEliminar = cont.querySelector(".btn-eliminar");
+
+    if (!Number.isFinite(index)) return;
+
+    const normalizarCantidad = () => {
+      let valor = parseInt(input.value, 10);
+      if (!Number.isFinite(valor) || valor < 1) valor = 1;
+
+      const item = carrito[index];
+      const stock = item.stock ?? null;
+      if (stock !== null && Number.isFinite(Number(stock))) {
+        const max = Number(stock);
+        if (valor > max) valor = max;
       }
 
-      .btn-whatsapp-carrito,
-      .btn-volver,
-      .btn-vaciar {
-        width: 100%;
-        text-align: center;
-        justify-content: center;
-      }
+      input.value = String(valor);
+      carrito[index].cantidad = valor;
+      guardarCarrito(carrito);
+      renderCarrito();
+    };
+
+    if (btnMas) {
+      btnMas.addEventListener("click", () => {
+        let valor = parseInt(input.value, 10);
+        if (!Number.isFinite(valor) || valor < 1) valor = 1;
+        valor++;
+        input.value = String(valor);
+        normalizarCantidad();
+      });
     }
-  </style>
-</head>
-<body>
 
-<header class="topbar">
-  <div class="topbar-inner">
-    <a href="index.html" class="logo-link">Delivery Mayorista</a>
-    <a href="catalogo.html" class="topbar-link">Ver catálogo</a>
-  </div>
-</header>
+    if (btnMenos) {
+      btnMenos.addEventListener("click", () => {
+        let valor = parseInt(input.value, 10);
+        if (!Number.isFinite(valor) || valor <= 1) valor = 1;
+        else valor--;
+        input.value = String(valor);
+        normalizarCantidad();
+      });
+    }
 
-<main class="carrito-pagina">
-  <h1>Tu carrito</h1>
+    if (input) {
+      input.addEventListener("input", (ev) => {
+        ev.target.value = ev.target.value.replace(/\D/g, "");
+      });
+      input.addEventListener("blur", normalizarCantidad);
+      input.addEventListener("change", normalizarCantidad);
+      input.addEventListener("keyup", (e) => {
+        if (e.key === "Enter") normalizarCantidad();
+      });
+    }
 
-  <!-- acá carrito.js va a pintar los items o el mensaje "vacío" -->
-  <div id="carrito"></div>
+    if (btnEliminar) {
+      btnEliminar.addEventListener("click", () => {
+        carrito.splice(index, 1);
+        guardarCarrito(carrito);
+        renderCarrito();
+      });
+    }
+  });
+}
 
-  <div class="carrito-acciones">
-    <a href="catalogo.html" class="btn-volver">← Seguir comprando</a>
+// -------- BOTÓN VACIAR --------
 
-    <button type="button" class="btn-vaciar" onclick="vaciarCarrito()">
-      Vaciar carrito
-    </button>
+function configurarBotonVaciar() {
+  const btn = document.getElementById("btn-vaciar");
+  if (!btn) return;
 
-    <button type="button" class="btn-whatsapp-carrito" onclick="enviarCarritoWhatsApp()">
-      <span>🟢</span>
-      <span>Enviar pedido por WhatsApp</span>
-    </button>
-  </div>
-</main>
+  btn.addEventListener("click", () => {
+    if (!confirm("¿Vaciar todo el carrito?")) return;
+    localStorage.removeItem(CLAVE_CARRITO);
+    renderCarrito();
+  });
+}
 
-<!-- Mini carrito -->
-<div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
-  <div class="mini-carrito-icono">🛒</div>
-  <div class="mini-carrito-texto">
-    <span class="mini-carrito-linea">
-      <span id="mini-carrito-cantidad">0</span> productos
-    </span>
-    <span class="mini-carrito-linea">
-      $<span id="mini-carrito-total">0</span>
-    </span>
-  </div>
-</div>
+// -------- INICIALIZACIÓN --------
 
-<script src="js/carrito.js"></script>
-</body>
-</html>
+document.addEventListener("DOMContentLoaded", () => {
+  configurarBotonVaciar();
+  renderCarrito();
+});
