@@ -3,63 +3,166 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tu Carrito | Delivery Mayorista</title>
+    <title>Tu carrito</title>
 
     <link rel="stylesheet" href="css/estilos.css" />
+
+    <style>
+        body {
+            background:#0f0f19;
+            color:#fff;
+            font-family: 'Poppins', sans-serif;
+            margin:0;
+            padding:0;
+        }
+
+        .header-carrito {
+            background: linear-gradient(90deg,#ff005a,#ff8000);
+            padding:18px;
+            text-align:center;
+            font-size:23px;
+            font-weight:600;
+        }
+
+        .carrito-container {
+            max-width: 1000px;
+            margin:auto;
+            padding: 25px 18px;
+        }
+
+        .carrito-item {
+            background:#13131f;
+            border-radius:12px;
+            padding:18px;
+            display:flex;
+            gap:15px;
+            align-items:center;
+            margin-bottom:15px;
+        }
+
+        .carrito-item img {
+            width:90px;
+            height:90px;
+            object-fit:contain;
+            border-radius:8px;
+        }
+
+        .carrito-info {
+            flex:1;
+        }
+
+        .cantidad-btns {
+            display:flex;
+            gap:8px;
+            align-items:center;
+        }
+
+        .cantidad-btns input {
+            width:55px;
+            text-align:center;
+            background:#fff;
+            border-radius:6px;
+            border:none;
+            padding:5px;
+            color:#000;
+        }
+
+        .btn-eliminar {
+            background:#c0392b;
+            border:none;
+            padding:7px 16px;
+            border-radius:7px;
+            color:#fff;
+            cursor:pointer;
+            font-size:14px;
+        }
+
+        .btn-vaciar {
+            display:block;
+            background:#c0392b;
+            width:100%;
+            padding:14px;
+            text-align:center;
+            border:none;
+            border-radius:10px;
+            margin-top:20px;
+            color:#fff;
+            font-size:16px;
+        }
+
+        .btn-whatsapp {
+            display:block;
+            width:100%;
+            margin-top:20px;
+            padding:15px;
+            border-radius:10px;
+            border:none;
+            color:#fff;
+            font-size:18px;
+            font-weight:600;
+            background:#1ebc51;
+        }
+
+        .multi-actions {
+            margin-top:25px;
+        }
+
+        .seguir-comprando {
+            background:#13131f;
+            border-radius:10px;
+            padding:14px;
+            text-align:center;
+            font-size:17px;
+            border:none;
+            width:100%;
+            margin-bottom:14px;
+            color:#fff;
+        }
+
+        .total-box {
+            margin-top:25px;
+            font-size:20px;
+            font-weight:600;
+            text-align:right;
+        }
+
+        .btn-desactivado {
+            opacity:0.4;
+            pointer-events:none;
+        }
+    </style>
+
 </head>
+
 <body>
 
-    <!-- ENCABEZADO -->
-    <header class="header">
-        <h1>DELIVERY MAYORISTA</h1>
-        <a href="catalogo.html" class="btn-volver-catalogo">Ver catálogo</a>
-    </header>
+    <div class="header-carrito">Tu carrito</div>
 
-    <!-- CONTENEDOR PRINCIPAL -->
-    <main class="contenedor-carrito">
+    <div class="carrito-container">
 
-        <h2>Tu carrito</h2>
+        <div id="carrito-lista"></div>
 
-        <!-- LISTA DE PRODUCTOS -->
-        <div id="carrito-lista" class="carrito-lista">
-            <!-- Los productos se inyectan con JS -->
+        <div class="total-box">
+            Total (<span id="carrito-total-items">0</span> productos):
+            <span id="carrito-total-precio">$0</span>
         </div>
 
-        <!-- RESUMEN TOTAL -->
-        <div class="carrito-resumen">
-            <h3>
-                Total (<span id="carrito-total-items">0</span> productos):
-                $<span id="carrito-total-precio">0</span>
-            </h3>
-            <p class="nota-stock">
-                Total estimado sujeto a stock y últimas actualizaciones.
-            </p>
-        </div>
+        <div class="multi-actions">
 
-        <!-- BOTONES -->
-        <div class="carrito-botones">
-
-            <!-- 🔙 SEGUIR COMPRANDO -->
-            <a href="catalogo.html" class="btn-volver-catalogo-simple">
+            <button onclick="window.location.href='catalogo.html'" class="seguir-comprando">
                 ← Seguir comprando
-            </a>
+            </button>
 
-            <!-- 🗑 VACIAR -->
-            <button id="btn-vaciar" class="btn-vaciar">
+            <button class="btn-vaciar" id="btn-vaciar">
                 Vaciar carrito
             </button>
 
-            <!-- 🟢 WHATSAPP -->
             <a id="btn-whatsapp" class="btn-whatsapp" target="_blank">
                 🟢 Enviar pedido por WhatsApp
             </a>
-
         </div>
+    </div>
 
-    </main>
-
-    <!-- LÓGICA -->
     <script src="js/carrito.js"></script>
-
 </body>
 </html>
