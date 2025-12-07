@@ -143,17 +143,17 @@
 
     .carrito-item-textos {
       flex: 1;
-      min-width: 0; /* para que text-overflow funcione */
+      min-width: 0;
     }
 
     /* 👉 NOMBRE EN UNA SOLA LÍNEA */
     .carrito-item-nombre {
-      font-size: 14px;          /* un poco más chico */
+      font-size: 14px;
       font-weight: 600;
       margin-bottom: 4px;
-      white-space: nowrap;      /* UNA sola línea */
+      white-space: nowrap;      /* 1 sola línea */
       overflow: hidden;
-      text-overflow: ellipsis;  /* por si algún nombre es demasiado largo */
+      text-overflow: ellipsis;
     }
 
     .carrito-item-detalle {
@@ -200,14 +200,16 @@
       border-radius: 999px;
     }
 
-    /* fila de precios */
+    /* 👉 PRECIOS UNO DEBAJO DEL OTRO, ALINEADOS A LA DERECHA */
     .carrito-item-precios {
       margin-top: 4px;
       display: flex;
-      justify-content: flex-end;
-      gap: 24px;
+      flex-direction: column;
+      align-items: flex-end;   /* se pega a la derecha */
+      text-align: right;
       font-size: 13px;
       color: var(--texto-secundario);
+      gap: 2px;
     }
 
     .carrito-item-precios span {
@@ -236,7 +238,6 @@
     }
 
     /* ---------- RESUMEN ---------- */
-
     .carrito-resumen {
       margin-top: 6px;
       padding-bottom: 16px;
@@ -379,7 +380,6 @@
     const CLAVE_CARRITO = "dm_carrito";
 
     // 👉 Cambiá este número por tu WhatsApp real en formato internacional
-    //    Ejemplo Argentina (Mendoza): 5492611234567
     const TELEFONO_WHATSAPP = "5491112345678";
 
     /* ---------- UTILIDADES ---------- */
