@@ -446,7 +446,7 @@ if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
 
 async function cargarProductos() {
   try {
-    const resp = await fetch("https://agustapia3636.github.io/Deliverymayorista/productos.json");
+    const resp = await fetch("data/productos.json");
     if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
     const data = await resp.json();
