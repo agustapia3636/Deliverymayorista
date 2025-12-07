@@ -384,7 +384,8 @@ if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
 
 async function cargarProductos() {
   try {
-    const resp = await fetch("https://agustapia3636.github.io/Deliverymayorista/data/productos.json");
+    // 🔥 URL ABSOLUTA QUE YA SABEMOS QUE FUNCIONA EN TU NAVEGADOR
+    const resp = await fetch("https://agustapia3636.github.io/Deliverymayorista/productos.json");
     if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
     const data = await resp.json();
@@ -424,7 +425,7 @@ async function cargarProductos() {
     actualizarMiniCarrito();
   } catch (err) {
     console.error(err);
-    grid.innerHTML = `<p>Error cargando productos.</p>`;
+    grid.innerHTML = `<p>Error cargando productos: ${err.message}</p>`;
   }
 }
 
