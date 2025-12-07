@@ -146,7 +146,7 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, s
   if (idx >= 0) {
     const item = carrito[idx];
 
-    if (item.cantidad + cantidad > stockDisponible) {
+    if (stockDisponible && item.cantidad + cantidad > stockDisponible) {
       alert("No hay más stock disponible de este producto.");
       return;
     }
@@ -154,7 +154,7 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, s
     item.cantidad += cantidad;
 
   } else {
-    if (cantidad > stockDisponible) cantidad = stockDisponible;
+    if (stockDisponible && cantidad > stockDisponible) cantidad = stockDisponible;
 
     carrito.push({
       codigo:  productoBasico.codigo,
@@ -278,13 +278,13 @@ function renderProductos(lista) {
       btn.classList.add("btn-agregar-carrito-activo");
     }
 
-    // 🔥 CONTROL: STOCK DINÁMICO (ahora seguro aunque no haya <p class="stock-text">)
+    // 🔥 CONTROL: STOCK DINÁMICO (seguro aunque no haya <p class="stock-text">)
     const input        = card.querySelector(".input-cantidad");
     const stockVisible = card.querySelector(".stock-text");
     const stockInicial = stockNum || 0;
 
     function actualizarStockVisible() {
-      if (!input) return;          // por las dudas
+      if (!input) return;
       let cant = parseInt(input.value) || 1;
 
       if (cant < 1) cant = 1;
@@ -302,7 +302,8 @@ function renderProductos(lista) {
     const btnMenos = card.querySelector(".btn-cantidad.menos");
 
     if (btnMas) {
-      btnMas.addEventListener("click", () => {
+      btnMas.addEventListener("click", (ev) => {
+        ev.stopPropagation(); // 👈 no dispara click de la card
         let v = parseInt(input.value) || 1;
         if (!stockInicial || v < stockInicial) v++;
         input.value = v;
@@ -311,7 +312,8 @@ function renderProductos(lista) {
     }
 
     if (btnMenos) {
-      btnMenos.addEventListener("click", () => {
+      btnMenos.addEventListener("click", (ev) => {
+        ev.stopPropagation(); // 👈 no dispara click de la card
         let v = parseInt(input.value) || 1;
         if (v > 1) v--;
         input.value = v;
@@ -320,7 +322,10 @@ function renderProductos(lista) {
     }
 
     if (input) {
-      input.addEventListener("input", actualizarStockVisible);
+      input.addEventListener("input", (ev) => {
+        ev.stopPropagation(); // 👈 no dispara click de la card
+        actualizarStockVisible();
+      });
     }
 
     actualizarStockVisible();
@@ -328,8 +333,7 @@ function renderProductos(lista) {
     // 🔥 CLICK EN BOTÓN → agrega usando cantidad elegida
     btn.addEventListener("click", ev => {
       ev.preventDefault();
-      ev.stopPropagation();
-
+      ev.stopPropagation(); // importante
       const cant = parseInt(input.value) || 1;
 
       const productoBasico = {
@@ -343,9 +347,10 @@ function renderProductos(lista) {
       agregarAlCarritoDesdeCatalogo(productoBasico, btn, cant, stockParaCarrito);
     });
 
-    // CLICK EN CARD → detalle
+    // CLICK EN CARD → detalle SOLO si no tocaste botones / input
     card.addEventListener("click", ev => {
       if (ev.target.closest(".btn-agregar-carrito")) return;
+      if (ev.target.closest(".cantidad-container"))  return;
       window.location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
     });
 
