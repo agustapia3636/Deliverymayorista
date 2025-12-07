@@ -103,7 +103,7 @@
     .carrito-item {
       background: var(--bg-card);
       border-radius: var(--radio-grande);
-      padding: 22px 22px 20px;
+      padding: 22px 28px 22px; /* espacio lateral extra para que entre todo */
       display: flex;
       flex-direction: column;
       gap: 18px;
@@ -157,13 +157,13 @@
       line-height: 1.25;
     }
 
-    /* ---------- PARTE INFERIOR: BOTONES + PRECIOS + ELIMINAR ---------- */
+    /* ---------- BOTONES / PRECIOS / ELIMINAR ---------- */
     .carrito-item-bottom {
       display: grid;
-      grid-template-columns: auto minmax(150px, 1fr) 145px;
+      grid-template-columns: auto 1fr auto; /* controles – precios – eliminar */
       align-items: center;
+      gap: 18px;
       width: 100%;
-      gap: 12px;
     }
 
     .carrito-item-controles {
@@ -213,21 +213,21 @@
       font-size: 14px;
       color: var(--texto-secundario);
       gap: 2px;
-      white-space: nowrap; /* evita que los precios rompan líneas raras */
+      /* SIN white-space: nowrap; para que pueda cortar línea si hace falta */
     }
 
     .btn-eliminar {
+      width: 120px;          /* ancho fijo, no se agranda ni achica */
+      text-align: center;
       border: none;
       border-radius: 999px;
-      padding: 8px 16px;
+      padding: 10px 0;
       font-size: 14px;
       font-weight: 600;
       background: var(--rojo);
       color: #fff;
       cursor: pointer;
       flex-shrink: 0;
-      width: 145px;        /* ancho fijo para que nunca cambie */
-      text-align: center;
     }
 
     .btn-eliminar:active {
@@ -306,7 +306,7 @@
 
     @media (min-width: 720px) {
       .carrito-item {
-        padding: 24px 26px 22px;
+        padding: 24px 30px 22px;
       }
     }
   </style>
@@ -409,7 +409,9 @@
         spanTotalItems.textContent = "0";
         spanTotalPrecio.textContent = "0";
         if (btnVaciar) btnVaciar.disabled = true;
-        if (btnWhatsapp) btnWhatsapp.disabled = true;
+        if (btnWhatsapp) {
+          btnWhatsapp.disabled = true;
+        }
         return;
       }
 
