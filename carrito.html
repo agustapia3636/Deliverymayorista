@@ -1,221 +1,273 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tu carrito</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tu carrito | Delivery Mayorista</title>
 
-    <!-- si usás estilos.css, lo dejamos por si hay estilos globales -->
-    <link rel="stylesheet" href="css/estilos.css" />
+  <!-- Si tenés estilos globales -->
+  <link rel="stylesheet" href="css/estilos.css" />
 
-    <style>
-        body {
-            background:#0f0f19;
-            color:#fff;
-            font-family: 'Poppins', Arial, sans-serif;
-            margin:0;
-            padding:0;
-        }
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", Arial, sans-serif;
+      background: #0f0f19;
+      color: #ffffff;
+    }
 
-        .header-carrito {
-            background: linear-gradient(90deg,#ff005a,#ff8000);
-            padding:20px;
-            text-align:center;
-            font-size:26px;
-            font-weight:700;
-        }
+    /* BARRA SUPERIOR TIPO CATÁLOGO */
+    .topbar {
+      background: linear-gradient(90deg, #ff005a, #ff9900);
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 600;
+    }
 
-        .carrito-container {
-            max-width: 1000px;
-            margin:auto;
-            padding: 25px 18px 40px;
-        }
+    .topbar-title {
+      text-transform: uppercase;
+    }
 
-        /* TARJETA DEL PRODUCTO EN EL CARRITO */
-        .carrito-item {
-            background:#13131f;
-            border-radius:12px;
-            padding:20px 18px;
-            display:flex;
-            gap:18px;
-            align-items:flex-start;
-            margin-bottom:24px;  /* más espacio entre tarjetas */
-        }
+    .topbar-link {
+      color: #fff;
+      font-size: 15px;
+      text-decoration: none;
+    }
 
-        .carrito-item img {
-            width:90px;
-            height:90px;
-            object-fit:contain;
-            border-radius:8px;
-            background: #fff;
-        }
+    /* CONTENIDO PRINCIPAL */
+    .carrito-main {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 18px;
+    }
 
-        .carrito-info {
-            flex:1;
-        }
+    .titulo-seccion {
+      font-size: 24px;
+      font-weight: 700;
+      margin: 10px 0 18px;
+    }
 
-        .carrito-info h2,
-        .carrito-info h3 {
-            margin:0 0 8px;
-            font-size:20px;
-            line-height:1.3;
-        }
+    /* LISTA DE ITEMS */
+    .carrito-lista {
+      margin-top: 8px;
+    }
 
-        /* MÁS AIRE ENTRE LÍNEAS DE TEXTO */
-        .carrito-info p {
-            margin:6px 0;
-            line-height:1.5;
-            font-size:15px;
-        }
+    /* TARJETA DE CADA PRODUCTO (ESTILO PARECIDO A LA 2ª FOTO) */
+    .carrito-item {
+      background: #151522;
+      border-radius: 14px;
+      padding: 18px 16px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 22px;
+    }
 
-        /* CONTROLES DE CANTIDAD */
-        .cantidad-box {
-            display:flex;
-            gap:6px;
-            align-items:center;
-            margin-top:10px;
-        }
+    .carrito-item img {
+      width: 90px;
+      height: 90px;
+      object-fit: contain;
+      border-radius: 8px;
+      background: #ffffff;
+    }
 
-        .cantidad-box input {
-            width:60px;
-            text-align:center;
-            background:#fff;
-            border-radius:6px;
-            border:none;
-            padding:6px;
-            color:#000;
-            font-size:16px;
-        }
+    .carrito-info {
+      flex: 1;
+      font-size: 15px;
+    }
 
-        .cantidad-box button {
-            width:36px;
-            height:36px;
-            border-radius:50%;
-            background:#ff1170;
-            border:none;
-            font-size:20px;
-            color:#fff;
-        }
+    .carrito-info h2 {
+      margin: 0 0 6px;
+      font-size: 18px;
+      line-height: 1.3;
+    }
 
-        .btn-eliminar {
-            background:#c0392b;
-            border:none;
-            padding:8px 16px;
-            border-radius:7px;
-            color:#fff;
-            cursor:pointer;
-            font-size:14px;
-            margin-top:10px;
-        }
+    .carrito-info p {
+      margin: 3px 0;
+      line-height: 1.4;
+    }
 
-        /* TOTAL */
-        .total-box {
-            margin-top:26px;         /* más separado de las cards */
-            font-size:20px;
-            font-weight:600;
-            text-align:center;
-        }
+    /* CONTROLES A LA DERECHA (VERTICALES COMO LA 1ª FOTO) */
+    .carrito-controles {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
 
-        .nota-stock {
-            font-size:13px;
-            opacity:0.8;
-            margin-top:6px;
-        }
+    .cantidad-box {
+      display: flex;
+      flex-direction: column;  /* VERTICAL: -, número, + */
+      align-items: center;
+      gap: 6px;
+    }
 
-        /* BOTONES FINALES */
-        .multi-actions {
-            margin-top:25px;
-            text-align:center;
-        }
+    .cantidad-box button {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      border: none;
+      font-size: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      background: #ff1280;
+      color: #ffffff;
+    }
 
-        .seguir-comprando {
-            background:#13131f;
-            border-radius:10px;
-            padding:14px;
-            text-align:center;
-            font-size:17px;
-            border:none;
-            width:100%;
-            max-width:380px;
-            margin:0 auto 14px;
-            color:#fff;
-            cursor:pointer;
-        }
+    .cantidad-box input {
+      width: 60px;
+      text-align: center;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 17px;
+      background: #ffffff;
+      color: #000000;
+    }
 
-        .btn-vaciar {
-            display:block;
-            background:#c0392b;
-            width:100%;
-            max-width:420px;
-            padding:14px;
-            text-align:center;
-            border:none;
-            border-radius:10px;
-            margin:12px auto 0;
-            color:#fff;
-            font-size:16px;
-            cursor:pointer;
-        }
+    .btn-eliminar {
+      background: #e0483c;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
 
-        .btn-whatsapp {
-            display:block;
-            width:100%;
-            max-width:420px;
-            margin:16px auto 0;
-            padding:15px;
-            border-radius:10px;
-            border:none;
-            color:#fff;
-            font-size:18px;
-            font-weight:600;
-            background:#1ebc51;
-            text-decoration:none;
-        }
+    /* RESUMEN TOTAL ABAJO, ESTILO 2ª FOTO */
+    .carrito-resumen {
+      margin-top: 26px;
+      text-align: center;
+    }
 
-        .btn-desactivado {
-            opacity:0.4;
-            pointer-events:none;
-        }
-    </style>
+    .carrito-resumen h2 {
+      margin: 0 0 6px;
+      font-size: 21px;
+    }
+
+    .carrito-resumen p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    /* BOTONES GRANDES INFERIORES */
+    .carrito-acciones {
+      margin-top: 26px;
+      text-align: center;
+    }
+
+    .btn-seguir {
+      background: #151522;
+      border-radius: 999px;
+      padding: 14px 18px;
+      border: 1px solid #ffffff33;
+      color: #ffffff;
+      font-size: 16px;
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .btn-seguir span {
+      font-size: 20px;
+    }
+
+    .btn-vaciar {
+      background: #c0392b;
+      border: none;
+      padding: 14px 18px;
+      border-radius: 16px;
+      color: #ffffff;
+      font-size: 17px;
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto 12px;
+      display: block;
+      cursor: pointer;
+    }
+
+    .btn-whatsapp {
+      background: #10b628;
+      border: none;
+      padding: 16px 18px;
+      border-radius: 16px;
+      color: #ffffff;
+      font-size: 18px;
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      display: block;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-desactivado {
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* RESPONSIVE PEQUEÑO: por si algo se apreta mucho */
+    @media (max-width: 480px) {
+      .carrito-item {
+        align-items: flex-start;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-    <div class="header-carrito">Tu carrito</div>
+  <!-- Barra superior estilo catálogo -->
+  <header class="topbar">
+    <div class="topbar-title">Delivery Mayorista</div>
+    <a href="catalogo.html" class="topbar-link">Ver catálogo</a>
+  </header>
 
-    <div class="carrito-container">
+  <main class="carrito-main">
+    <h1 class="titulo-seccion">Tu carrito</h1>
 
-        <!-- LISTA DE PRODUCTOS DEL CARRITO (se llena por JS) -->
-        <div id="carrito-lista"></div>
+    <!-- Aquí el JS inyecta las tarjetas -->
+    <section id="carrito-lista" class="carrito-lista"></section>
 
-        <!-- TOTAL -->
-        <div class="total-box">
-            Total (<span id="carrito-total-items">0</span> productos):
-            $<span id="carrito-total-precio">0</span>
-            <p class="nota-stock">
-                Total estimado sujeto a stock y últimas actualizaciones.
-            </p>
-        </div>
+    <!-- Resumen total -->
+    <section class="carrito-resumen">
+      <h2>
+        Total (<span id="carrito-total-items">0</span> productos):
+        $<span id="carrito-total-precio">0</span>
+      </h2>
+      <p>Total estimado sujeto a stock y últimas actualizaciones.</p>
+    </section>
 
-        <!-- BOTONES FINALES -->
-        <div class="multi-actions">
-            <button onclick="window.location.href='catalogo.html'" class="seguir-comprando">
-                ← Seguir comprando
-            </button>
+    <!-- Botones inferiores -->
+    <section class="carrito-acciones">
+      <button class="btn-seguir" onclick="window.location.href='catalogo.html'">
+        <span>←</span> Seguir comprando
+      </button>
 
-            <button class="btn-vaciar" id="btn-vaciar">
-                Vaciar carrito
-            </button>
+      <button id="btn-vaciar" class="btn-vaciar">
+        Vaciar carrito
+      </button>
 
-            <a id="btn-whatsapp" class="btn-whatsapp" target="_blank">
-                🟢 Enviar pedido por WhatsApp
-            </a>
-        </div>
+      <button id="btn-whatsapp" class="btn-whatsapp">
+        Enviar pedido por WhatsApp
+      </button>
+    </section>
+  </main>
 
-    </div>
-
-    <!-- LÓGICA DEL CARRITO (mismo JS que ya tenías) -->
-    <script src="js/carrito.js"></script>
-
+  <!-- Lógica del carrito (no la tocamos) -->
+  <script src="js/carrito.js"></script>
 </body>
 </html>
