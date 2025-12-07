@@ -66,7 +66,7 @@
     }
 
     main {
-      max-width: 1000px;
+      max-width: 960px;
       margin: 0 auto;
       padding: 16px 12px 32px;
     }
@@ -102,9 +102,9 @@
     .carrito-item {
       background: var(--bg-card);
       border-radius: var(--radio-grande);
-      padding: 14px 18px 14px;
+      padding: 16px 16px 14px;
       display: flex;
-      gap: 14px;
+      gap: 12px;
       box-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
       width: 100%;
     }
@@ -133,28 +133,25 @@
       display: flex;
       flex-direction: column;
       gap: 6px;
-      min-width: 0;
     }
 
-    /* CABECERA (nombre + cod/stock + precios) */
-    .carrito-item-header {
+    .carrito-item-main {
       display: flex;
-      justify-content: space-between;
       align-items: flex-start;
+      justify-content: space-between;
       gap: 10px;
-      width: 100%;
     }
 
-    .carrito-item-info {
+    .carrito-item-textos {
       flex: 1;
       min-width: 0;
     }
 
-    /* Nombre en una sola línea, más chico */
+    /* Nombre en 1 línea */
     .carrito-item-nombre {
-      font-size: 14px;
+      font-size: 14px;      /* un poco más chico */
       font-weight: 600;
-      margin-bottom: 2px;
+      margin-bottom: 3px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -168,30 +165,33 @@
 
     /* Precios a la derecha, uno arriba del otro */
     .carrito-item-precios {
+      flex-shrink: 0;
+      font-size: 13px;
+      text-align: right;
+      color: var(--texto-secundario);
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
-      text-align: right;
-      font-size: 13px;
-      color: var(--texto-secundario);
       gap: 2px;
+      margin-left: 6px;
+    }
+
+    .carrito-item-precios span {
       white-space: nowrap;
     }
 
-    /* ---------- CONTROLES + ELIMINAR ---------- */
+    /* Fila de abajo: botones cantidad + eliminar */
     .carrito-item-footer {
       margin-top: 10px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       gap: 12px;
-      flex-wrap: wrap; /* si la pantalla es muy chica, baja de renglón */
     }
 
     .carrito-item-controles {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
 
     .btn-cant {
@@ -228,13 +228,13 @@
     .btn-eliminar {
       border: none;
       border-radius: 999px;
-      padding: 10px 20px;
+      padding: 10px 24px;
       font-size: 14px;
       font-weight: 600;
       background: var(--rojo);
       color: #fff;
       cursor: pointer;
-      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .btn-eliminar:active {
@@ -318,7 +318,7 @@
 
     @media (min-width: 720px) {
       .carrito-item {
-        padding: 16px 22px 16px;
+        padding: 18px 20px 16px;
       }
 
       .carrito-item-img {
@@ -461,8 +461,12 @@
       carrito.forEach((item, idx) => {
         const codigo = item.codigo ?? item.Codigo ?? item.cod ?? "";
         const nombre = item.nombre ?? item["Nombre Corto"] ?? item.nombreCorto ?? "Producto sin nombre";
-        const precio =
-          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
+        const precio = Number(
+          item.precioMayorista ??
+          item.precio ??
+          item.PrecioMayorista ??
+          0
+        );
         const stock = Number(item.stock ?? item.Stock ?? item["Stock"] ?? 0);
         const img = item.img ?? item.imagen ?? item.Imagen ?? "";
         const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
@@ -479,8 +483,8 @@
           </div>
 
           <div class="carrito-item-body">
-            <div class="carrito-item-header">
-              <div class="carrito-item-info">
+            <div class="carrito-item-main">
+              <div class="carrito-item-textos">
                 <p class="carrito-item-nombre">${nombre}</p>
                 <p class="carrito-item-detalle">Cod: ${codigo}</p>
                 <p class="carrito-item-detalle">Stock disponible: ${stock}</p>
@@ -574,8 +578,12 @@
       carrito.forEach((item) => {
         const codigo = item.codigo ?? item.Codigo ?? "";
         const nombre = item.nombre ?? item["Nombre Corto"] ?? "Producto sin nombre";
-        const precio =
-          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
+        const precio = Number(
+          item.precioMayorista ??
+          item.precio ??
+          item.PrecioMayorista ??
+          0
+        );
         const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
         const subtotal = precio * cantidad;
 
