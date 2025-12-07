@@ -322,14 +322,21 @@ function renderProductos(lista) {
     }
 
     if (input) {
-      // seleccionar todo el número al hacer foco (para que 2 reemplace al 1, no quede 12)
+      // 👉 al hacer foco, vaciamos el campo para no terminar con "12" y esas cosas
       input.addEventListener("focus", (ev) => {
         ev.stopPropagation();
-        ev.target.select();
+        ev.target.value = "";
       });
 
+      // mientras escribe, solo dejamos números, pero NO tocamos el stock aún
       input.addEventListener("input", (ev) => {
-        ev.stopPropagation(); // NO abre detalle
+        ev.stopPropagation();
+        ev.target.value = ev.target.value.replace(/\D/g, "");
+      });
+
+      // cuando sale del input (blur), recién ahí ajustamos a 1..stock
+      input.addEventListener("blur", (ev) => {
+        ev.stopPropagation();
         actualizarStockVisible();
       });
     }
