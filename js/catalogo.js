@@ -256,11 +256,11 @@ function renderProductos(lista) {
           <span class="producto-precio">$ ${precioTexto}</span>
         </div>
 
-        ${stockTexto ? `<p class="producto-stock stock-text" data-stock="${stockNum}">${stockTexto}</p>` : ""}
+        ${stockTexto ? `<p class="producto-stock stock-text">${stockTexto}</p>` : ""}
 
         <div class="cantidad-container">
           <button class="btn-cantidad menos">−</button>
-          <input type="number" class="input-cantidad" value="1" min="1" max="${stockNum || 999}">
+          <input type="number" class="input-cantidad">
           <button class="btn-cantidad mas">+</button>
         </div>
 
@@ -278,24 +278,31 @@ function renderProductos(lista) {
       btn.classList.add("btn-agregar-carrito-activo");
     }
 
-    // 🔥 CONTROL: STOCK DINÁMICO (seguro aunque no haya <p class="stock-text">)
     const input        = card.querySelector(".input-cantidad");
     const stockVisible = card.querySelector(".stock-text");
     const stockInicial = stockNum || 0;
 
-    function actualizarStockVisible() {
+    // ---- manejo cantidad (PC + iPhone) ----
+    function normalizarCantidad() {
       if (!input) return;
-      let cant = parseInt(input.value) || 1;
+      let cant = parseInt(input.value, 10);
 
-      if (cant < 1) cant = 1;
-      if (stockInicial > 0 && cant > stockInicial) cant = stockInicial;
-
-      input.value = cant;
-
-      if (stockVisible && stockInicial > 0) {
-        const restante = stockInicial - cant;
-        stockVisible.textContent = `Stock: ${restante} unidades`;
+      if (!Number.isFinite(cant) || cant < 1) {
+        cant = 1; // si está vacío o mal, queda en 1
       }
+      if (stockInicial > 0 && cant > stockInicial) {
+        cant = stockInicial; // no pasarse del stock
+      }
+
+      input.value = String(cant);
+      // el texto de stock queda fijo "Stock: X unidades"
+    }
+
+    function obtenerCantidadSegura() {
+      let cant = parseInt(input.value, 10);
+      if (!Number.isFinite(cant) || cant < 1) cant = 1;
+      if (stockInicial > 0 && cant > stockInicial) cant = stockInicial;
+      return cant;
     }
 
     const btnMas   = card.querySelector(".btn-cantidad.mas");
@@ -303,51 +310,46 @@ function renderProductos(lista) {
 
     if (btnMas) {
       btnMas.addEventListener("click", (ev) => {
-        ev.stopPropagation(); // NO abre detalle
-        let v = parseInt(input.value) || 1;
-        if (!stockInicial || v < stockInicial) v++;
-        input.value = v;
-        actualizarStockVisible();
+        ev.stopPropagation();
+        let v = parseInt(input.value, 10);
+        if (!Number.isFinite(v) || v < 1) v = 1;
+        else v += 1;
+        if (stockInicial > 0 && v > stockInicial) v = stockInicial;
+        input.value = String(v);
       });
     }
 
     if (btnMenos) {
       btnMenos.addEventListener("click", (ev) => {
-        ev.stopPropagation(); // NO abre detalle
-        let v = parseInt(input.value) || 1;
-        if (v > 1) v--;
-        input.value = v;
-        actualizarStockVisible();
+        ev.stopPropagation();
+        let v = parseInt(input.value, 10);
+        if (!Number.isFinite(v) || v <= 1) v = 1;
+        else v -= 1;
+        input.value = String(v);
       });
     }
 
     if (input) {
-      // 👉 al hacer foco, vaciamos el campo para no terminar con "12" y esas cosas
-      input.addEventListener("focus", (ev) => {
-        ev.stopPropagation();
-        ev.target.value = "";
-      });
-
-      // mientras escribe, solo dejamos números, pero NO tocamos el stock aún
+      // Solo permitir números mientras escribe
       input.addEventListener("input", (ev) => {
         ev.stopPropagation();
         ev.target.value = ev.target.value.replace(/\D/g, "");
+        // NO normalizamos a stock acá, para que no salte a 10 en iPhone
       });
 
-      // cuando sale del input (blur), recién ahí ajustamos a 1..stock
+      // Cuando sale del campo, recién ajustamos a 1..stock
       input.addEventListener("blur", (ev) => {
         ev.stopPropagation();
-        actualizarStockVisible();
+        normalizarCantidad();
       });
     }
-
-    actualizarStockVisible();
 
     // 🔥 CLICK EN BOTÓN → agrega usando cantidad elegida
     btn.addEventListener("click", ev => {
       ev.preventDefault();
-      ev.stopPropagation(); // NO abre detalle
-      const cant = parseInt(input.value) || 1;
+      ev.stopPropagation();
+
+      const cant = obtenerCantidadSegura();
 
       const productoBasico = {
         codigo,
@@ -424,7 +426,6 @@ if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
 
 async function cargarProductos() {
   try {
-    // URL ABSOLUTA QUE SABEMOS QUE EXISTE
     const resp = await fetch("https://agustapia3636.github.io/Deliverymayorista/productos.json");
     if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
