@@ -1,170 +1,161 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tu carrito</title>
 
 <style>
-  body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #0e0e18;
-    color: white;
-  }
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #0f0f18;
+        color: #fff;
+    }
 
-  header {
-    padding: 20px;
-    text-align: center;
-    background: linear-gradient(90deg, #ff005e, #ff8a00);
-    font-size: 26px;
-    font-weight: bold;
-    color: white;
-  }
+    header {
+        background: linear-gradient(90deg, #ff0066, #ff9900);
+        padding: 24px 0;
+        text-align: center;
+        font-size: 28px;
+        font-weight: 700;
+    }
 
-  .contenedor {
-    padding: 20px;
-    max-width: 900px;
-    margin: auto;
-  }
+    a {
+        color: #b48dff;
+        text-decoration: none;
+        display: block;
+        font-size: 19px;
+        margin: 18px 18px;
+    }
 
-  /* ---------------- TARJETA DEL PRODUCTO ---------------- */
+    /* TARJETA CARRITO */
+    .carrito-item {
+        background: #12121f;
+        border-radius: 14px;
+        padding: 22px 16px;
+        margin: 28px 18px;
+        display: flex;
+        gap: 16px;
+    }
 
-  .carrito-item {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    background: #161622;
-    border-radius: 14px;
-    padding: 22px 18px;     /* MÁS AIRE */
-    gap: 18px;
-    margin-bottom: 25px;
-  }
+    .carrito-item img {
+        width: 95px;
+        height: auto;
+        border-radius: 10px;
+    }
 
-  .carrito-item img {
-    width: 120px;
-    height: auto;
-    border-radius: 10px;
-    background: white;
-  }
+    .info {
+        flex: 1;
+        font-size: 16px;
+    }
 
-  .item-info {
-    flex: 1;
-  }
+    .info h2 {
+        margin-top: 0;
+        margin-bottom: 8px;
+        font-size: 20px;
+        line-height: 1.3;
+    }
 
-  .item-info h2 {
-    margin: 0 0 6px;
-    font-size: 20px;
-    line-height: 1.25;
-  }
+    .info p {
+        margin: 6px 0;
+        line-height: 1.45;
+        font-size: 15px;
+    }
 
-  .item-info p {
-    margin: 4px 0;                /* MÁS SEPARACIÓN ENTRE LÍNEAS */
-    line-height: 1.45;            /* MÁS AIRE */
-    font-size: 15px;
-  }
+    /* BOTONES DE CANTIDAD */
+    .cantidad-box {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 8px;
+    }
 
-  /* Botones sumar/restar */
-  .cantidad-box {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-top: 10px;
-  }
+    .cantidad-box button {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        font-size: 22px;
+        border: none;
+        cursor: pointer;
+        background: #ff2777;
+        color: white;
+    }
 
-  .cantidad-box button {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #ff1170;
-    border: none;
-    font-size: 20px;
-    color: white;
-  }
+    .cantidad-box input {
+        width: 70px;
+        text-align: center;
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: none;
+        font-size: 18px;
+    }
 
-  .cantidad-box input {
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: none;
-    text-align: center;
-    width: 50px;
-    font-size: 16px;
-  }
+    /* BOTÓN ELIMINAR */
+    .eliminar-btn {
+        background: #ff3939;
+        padding: 10px 18px;
+        border-radius: 10px;
+        color: white;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        margin-top: 12px;
+    }
 
-  .btn-eliminar {
-    background: #ff2b2b;
-    border: none;
-    padding: 10px 18px;
-    border-radius: 10px;
-    color: white;
-    font-size: 15px;
-  }
+    /* TOTAL GENERAL */
+    #carrito-total {
+        font-size: 23px;
+        font-weight: bold;
+        text-align: center;
+        margin-top: 30px;
+        margin-bottom: 12px;
+    }
 
-  /* ---------------- TOTAL ---------------- */
+    /* BOTONES FINALES */
+    .btn-big {
+        width: 85%;
+        margin: 18px auto;
+        display: block;
+        padding: 15px 0;
+        font-size: 19px;
+        font-weight: bold;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        text-align: center;
+    }
 
-  .total-box {
-    text-align: center;
-    margin-top: 30px;       /* MÁS ESPACIO DESPUÉS DE CARDS */
-    font-size: 22px;
-  }
+    .btn-red {
+        background: #c42a2a;
+        color: white;
+    }
 
-  /* ---------------- ACCIONES ---------------- */
+    .btn-green {
+        background: #1ba81b;
+        color: white;
+    }
 
-  .acciones {
-    text-align: center;
-    margin-top: 30px;
-  }
-
-  .btn-vaciar {
-    background: #c12a2a;
-    border: none;
-    padding: 16px;
-    border-radius: 10px;
-    width: 100%;
-    max-width: 500px;
-    color: white;
-    font-size: 18px;
-    margin-bottom: 14px;
-  }
-
-  .btn-whatsapp {
-    background: #1edc3a;
-    border: none;
-    padding: 18px;
-    border-radius: 10px;
-    width: 100%;
-    max-width: 500px;
-    color: white;
-    font-size: 19px;
-    margin-top: 6px;
-  }
-
-  a.volver {
-    display: block;
-    color: #b0aaff;
-    text-decoration: none;
-    font-size: 18px;
-    margin-bottom: 25px;
-  }
+    .btn-back {
+        text-align: center;
+        font-size: 19px;
+        margin-top: 12px;
+    }
 </style>
-
 </head>
+
 <body>
 
 <header>Tu carrito</header>
 
-<div class="contenedor">
-  <a class="volver" href="catalogo.html">← Ir al catálogo</a>
+<a href="catalogo.html">← Ir al catálogo</a>
 
-  <div id="carrito-lista"></div>
+<div id="carrito-lista"></div>
 
-  <div class="total-box" id="carrito-total"></div>
+<div id="carrito-total"></div>
 
-  <div class="acciones">
-    <button id="vaciar" class="btn-vaciar">Vaciar carrito</button>
-    <button id="whatsapp" class="btn-whatsapp">Enviar pedido por WhatsApp</button>
-  </div>
-</div>
+<button id="vaciar" class="btn-big btn-red">Vaciar carrito</button>
+<button id="whatsapp" class="btn-big btn-green">Enviar pedido por WhatsApp</button>
 
 <script src="js/carrito.js"></script>
 
