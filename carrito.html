@@ -1,265 +1,65 @@
-// ================================
-// CARRITO - Delivery Mayorista
-// ================================
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tu Carrito | Delivery Mayorista</title>
 
-const CLAVE_CARRITO = "dm_carrito";
+    <link rel="stylesheet" href="css/estilos.css" />
+</head>
+<body>
 
-// CAMBIÁ ESTE NÚMERO POR TU WHATSAPP REAL
-const NUMERO_WHATSAPP = "5491112345678";
+    <!-- ENCABEZADO -->
+    <header class="header">
+        <h1>DELIVERY MAYORISTA</h1>
+        <a href="catalogo.html" class="btn-volver-catalogo">Ver catálogo</a>
+    </header>
 
-// -------- UTILIDADES --------
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="contenedor-carrito">
 
-function leerCarrito() {
-  try {
-    const raw = localStorage.getItem(CLAVE_CARRITO);
-    if (!raw) return [];
-    const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr : [];
-  } catch (e) {
-    console.error("Error leyendo carrito", e);
-    return [];
-  }
-}
+        <h2>Tu carrito</h2>
 
-function guardarCarrito(carrito) {
-  try {
-    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
-  } catch (e) {
-    console.error("Error guardando carrito", e);
-  }
-}
-
-function formatearPrecio(valor) {
-  if (typeof valor === "string") {
-    const limpio = valor.replace(/\./g, "").replace(",", ".");
-    const num = Number(limpio);
-    if (Number.isFinite(num)) {
-      valor = num;
-    }
-  }
-  if (typeof valor !== "number") return "0";
-
-  return valor.toLocaleString("es-AR", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-}
-
-// -------- RENDER DEL CARRITO --------
-
-function renderCarrito() {
-  const contenedor = document.getElementById("carrito-lista");
-  const spanTotalItems = document.getElementById("carrito-total-items");
-  const spanTotalPrecio = document.getElementById("carrito-total-precio");
-  const btnVaciar = document.getElementById("btn-vaciar");
-  const btnWhatsapp = document.getElementById("btn-whatsapp");
-
-  let carrito = leerCarrito();
-
-  if (!contenedor) return;
-
-  if (!carrito || carrito.length === 0) {
-    contenedor.innerHTML = `
-      <div class="carrito-vacio">
-        <p>Tu carrito está vacío.</p>
-        <a href="catalogo.html" class="btn-volver-catalogo-simple">
-          ← Ir al catálogo
-        </a>
-      </div>
-    `;
-
-    if (spanTotalItems) spanTotalItems.textContent = "0";
-    if (spanTotalPrecio) spanTotalPrecio.textContent = "0";
-
-    if (btnVaciar) btnVaciar.disabled = true;
-    if (btnWhatsapp) {
-      btnWhatsapp.classList.add("btn-desactivado");
-      btnWhatsapp.removeAttribute("href");
-    }
-    return;
-  }
-
-  // Hay productos
-  if (btnVaciar) btnVaciar.disabled = false;
-
-  contenedor.innerHTML = "";
-
-  let totalItems = 0;
-  let totalPrecio = 0;
-
-  carrito.forEach((item, idx) => {
-    const codigo = item.codigo || "";
-    const nombre = item.nombre || "Producto sin nombre";
-    const precio = Number(item.precio) || 0;
-    const cantidad = Number(item.cantidad) || 1;
-    const stock = item.stock ?? null;
-    const img = item.img || "";
-
-    totalItems += cantidad;
-    totalPrecio += precio * cantidad;
-
-    const subtotalTexto = formatearPrecio(precio * cantidad);
-    const precioTexto = formatearPrecio(precio);
-
-    const card = document.createElement("article");
-    card.classList.add("carrito-item");
-
-    card.innerHTML = `
-      <div class="carrito-item-img">
-        ${
-          img
-            ? `<img src="${img}" alt="${nombre}" loading="lazy" />`
-            : `<div class="carrito-item-img-placeholder">?</div>`
-        }
-      </div>
-
-      <div class="carrito-item-info">
-        <h3 class="carrito-item-nombre">${nombre}</h3>
-        <p class="carrito-item-codigo">Cod: ${codigo}</p>
-        ${
-          stock !== null && stock !== undefined
-            ? `<p class="carrito-item-stock">Stock disponible: ${stock}</p>`
-            : ""
-        }
-        <p class="carrito-item-precios">
-          Unitario: $${precioTexto}<br>
-          Subtotal: $${subtotalTexto}
-        </p>
-      </div>
-
-      <div class="carrito-item-controles" data-index="${idx}">
-        <div class="carrito-item-cant-row">
-          <button class="btn-cantidad menos">−</button>
-          <input
-            type="number"
-            class="input-cantidad"
-            value="${cantidad}"
-            min="1"
-          />
-          <button class="btn-cantidad mas">+</button>
+        <!-- LISTA DE PRODUCTOS -->
+        <div id="carrito-lista" class="carrito-lista">
+            <!-- Los productos se inyectan con JS -->
         </div>
-        <button class="btn-eliminar">Eliminar</button>
-      </div>
-    `;
 
-    contenedor.appendChild(card);
-  });
+        <!-- RESUMEN TOTAL -->
+        <div class="carrito-resumen">
+            <h3>
+                Total (<span id="carrito-total-items">0</span> productos):
+                $<span id="carrito-total-precio">0</span>
+            </h3>
+            <p class="nota-stock">
+                Total estimado sujeto a stock y últimas actualizaciones.
+            </p>
+        </div>
 
-  if (spanTotalItems) spanTotalItems.textContent = totalItems.toString();
-  if (spanTotalPrecio) spanTotalPrecio.textContent = formatearPrecio(totalPrecio);
+        <!-- BOTONES -->
+        <div class="carrito-botones">
 
-  // Actualizar enlace de WhatsApp
-  if (btnWhatsapp) {
-    if (carrito.length === 0) {
-      btnWhatsapp.classList.add("btn-desactivado");
-      btnWhatsapp.removeAttribute("href");
-    } else {
-      btnWhatsapp.classList.remove("btn-desactivado");
+            <!-- 🔙 SEGUIR COMPRANDO -->
+            <a href="catalogo.html" class="btn-volver-catalogo-simple">
+                ← Seguir comprando
+            </a>
 
-      let texto = "Hola! Quiero hacer este pedido mayorista:%0A%0A";
-      carrito.forEach((item) => {
-        const codigo = item.codigo || "";
-        const nombre = item.nombre || "";
-        const precio = Number(item.precio) || 0;
-        const cantidad = Number(item.cantidad) || 1;
-        const subtotal = precio * cantidad;
+            <!-- 🗑 VACIAR -->
+            <button id="btn-vaciar" class="btn-vaciar">
+                Vaciar carrito
+            </button>
 
-        texto += `• ${codigo} - ${nombre} x ${cantidad}u = $${formatearPrecio(
-          subtotal
-        )}%0A`;
-      });
-      texto += `%0A Total productos: ${totalItems}`;
-      texto += `%0A Total estimado: $${formatearPrecio(totalPrecio)}`;
+            <!-- 🟢 WHATSAPP -->
+            <a id="btn-whatsapp" class="btn-whatsapp" target="_blank">
+                🟢 Enviar pedido por WhatsApp
+            </a>
 
-      const url = `https://wa.me/${NUMERO_WHATSAPP}?text=${texto}`;
-      btnWhatsapp.href = url;
-    }
-  }
+        </div>
 
-  // Listeners para botones +, -, eliminar
-  contenedor.querySelectorAll(".carrito-item-controles").forEach((cont) => {
-    const index = Number(cont.dataset.index);
-    const btnMas = cont.querySelector(".btn-cantidad.mas");
-    const btnMenos = cont.querySelector(".btn-cantidad.menos");
-    const input = cont.querySelector(".input-cantidad");
-    const btnEliminar = cont.querySelector(".btn-eliminar");
+    </main>
 
-    if (!Number.isFinite(index)) return;
+    <!-- LÓGICA -->
+    <script src="js/carrito.js"></script>
 
-    const normalizarCantidad = () => {
-      let valor = parseInt(input.value, 10);
-      if (!Number.isFinite(valor) || valor < 1) valor = 1;
-
-      const item = carrito[index];
-      const stock = item.stock ?? null;
-      if (stock !== null && Number.isFinite(Number(stock))) {
-        const max = Number(stock);
-        if (valor > max) valor = max;
-      }
-
-      input.value = String(valor);
-      carrito[index].cantidad = valor;
-      guardarCarrito(carrito);
-      renderCarrito();
-    };
-
-    if (btnMas) {
-      btnMas.addEventListener("click", () => {
-        let valor = parseInt(input.value, 10);
-        if (!Number.isFinite(valor) || valor < 1) valor = 1;
-        valor++;
-        input.value = String(valor);
-        normalizarCantidad();
-      });
-    }
-
-    if (btnMenos) {
-      btnMenos.addEventListener("click", () => {
-        let valor = parseInt(input.value, 10);
-        if (!Number.isFinite(valor) || valor <= 1) valor = 1;
-        else valor--;
-        input.value = String(valor);
-        normalizarCantidad();
-      });
-    }
-
-    if (input) {
-      input.addEventListener("input", (ev) => {
-        ev.target.value = ev.target.value.replace(/\D/g, "");
-      });
-      input.addEventListener("blur", normalizarCantidad);
-      input.addEventListener("change", normalizarCantidad);
-      input.addEventListener("keyup", (e) => {
-        if (e.key === "Enter") normalizarCantidad();
-      });
-    }
-
-    if (btnEliminar) {
-      btnEliminar.addEventListener("click", () => {
-        carrito.splice(index, 1);
-        guardarCarrito(carrito);
-        renderCarrito();
-      });
-    }
-  });
-}
-
-// -------- BOTÓN VACIAR --------
-
-function configurarBotonVaciar() {
-  const btn = document.getElementById("btn-vaciar");
-  if (!btn) return;
-
-  btn.addEventListener("click", () => {
-    if (!confirm("¿Vaciar todo el carrito?")) return;
-    localStorage.removeItem(CLAVE_CARRITO);
-    renderCarrito();
-  });
-}
-
-// -------- INICIALIZACIÓN --------
-
-document.addEventListener("DOMContentLoaded", () => {
-  configurarBotonVaciar();
-  renderCarrito();
-});
+</body>
+</html>
