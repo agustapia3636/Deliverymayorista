@@ -289,10 +289,10 @@ body {
   color: #fff;
 }
 
-/* Responsive para la ficha de producto */
+/* Responsive */
 @media (max-width: 800px) {
   .producto-wrapper {
-    grid-template-columns: 1fr;  /* imagen arriba, texto abajo en celu */
+    grid-template-columns: 1fr;
   }
 }
 
@@ -382,21 +382,21 @@ body {
 /* SOLO EN CELULAR: mover arriba */
 @media (max-width: 768px) {
   #mini-carrito {
-    bottom: 210px !important;   /* ← AJUSTÁ ESTE NÚMERO SI QUERÉS */
+    bottom: 210px !important;
   }
 }
 
 /* ============================= */
-/* CURSOR CLICKEABLE EN LAS CARDS*/
+/* CURSOR CLICKABLE EN LAS CARDS*/
 /* ============================= */
 
-/* 1) CUALQUIER COSA DENTRO DE LA CARD → MANITO */
+/* 👉 TODA LA CARD Y TODO SU CONTENIDO = MANITO */
 .card-producto,
 .card-producto * {
   cursor: pointer !important;
 }
 
-/* 2) HOVER PREMIUM EN ESCRITORIO */
+/* HOVER PREMIUM */
 .card-producto:hover {
   transform: translateY(-4px);
   box-shadow: 0 18px 35px rgba(0, 0, 0, 0.6);
