@@ -302,6 +302,13 @@
       margin-right: 6px;
     }
 
+    /* Estado desactivado (cuando el carrito está vacío) */
+    .btn-desactivado {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none !important;
+    }
+
     /* ---------- ESTADO CARRITO VACÍO ---------- */
     .carrito-vacio {
       background: var(--bg-card);
@@ -456,9 +463,17 @@
 
       carrito.forEach((item, idx) => {
         const codigo = item.codigo ?? item.Codigo ?? item.cod ?? "";
-        const nombre = item.nombre ?? item["Nombre Corto"] ?? item.nombreCorto ?? "Producto sin nombre";
-        const precio =
-          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
+        const nombre =
+          item.nombre ??
+          item["Nombre Corto"] ??
+          item.nombreCorto ??
+          "Producto sin nombre";
+        const precio = Number(
+          item.precioMayorista ??
+          item.precio ??
+          item.PrecioMayorista ??
+          0
+        );
         const stock = Number(item.stock ?? item.Stock ?? item["Stock"] ?? 0);
         const img = item.img ?? item.imagen ?? item.Imagen ?? "";
         const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
@@ -551,39 +566,56 @@
     }
 
     /* ---------- BOTONES PRINCIPALES ---------- */
-    document.getElementById("btn-seguir").addEventListener("click", () => {
-      window.location.href = "catalogo.html";
-    });
+    const btnSeguir = document.getElementById("btn-seguir");
+    const btnVaciar = document.getElementById("btn-vaciar");
+    const btnWhatsapp = document.getElementById("btn-whatsapp");
 
-    document.getElementById("btn-vaciar").addEventListener("click", () => {
-      if (!confirm("¿Vaciar carrito completo?")) return;
-      guardarCarrito([]);
-      renderCarrito();
-    });
-
-    document.getElementById("btn-whatsapp").addEventListener("click", () => {
-      const carrito = leerCarrito();
-      if (!carrito.length) return;
-
-      let texto = "Hola! Quiero hacer este pedido mayorista:%0A%0A";
-
-      carrito.forEach((item) => {
-        const codigo = item.codigo ?? item.Codigo ?? "";
-        const nombre = item.nombre ?? item["Nombre Corto"] ?? "Producto sin nombre";
-        const precio =
-          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
-        const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
-        const subtotal = precio * cantidad;
-
-        texto += `• ${codigo} - ${nombre} x ${cantidad}u = $${formatearPrecio(subtotal)}%0A`;
+    if (btnSeguir) {
+      btnSeguir.addEventListener("click", () => {
+        window.location.href = "catalogo.html";
       });
+    }
 
-      const total = document.getElementById("carrito-total-precio").textContent || "0";
-      texto += `%0A🔹 Total estimado: $${total}`;
+    if (btnVaciar) {
+      btnVaciar.addEventListener("click", () => {
+        if (!confirm("¿Vaciar carrito completo?")) return;
+        guardarCarrito([]);
+        renderCarrito();
+      });
+    }
 
-      const url = `https://wa.me/${TELEFONO_WHATSAPP}?text=${texto}`;
-      window.open(url, "_blank");
-    });
+    if (btnWhatsapp) {
+      btnWhatsapp.addEventListener("click", () => {
+        const carrito = leerCarrito();
+        if (!carrito.length) return;
+
+        let texto = "Hola! Quiero hacer este pedido mayorista:%0A%0A";
+
+        carrito.forEach((item) => {
+          const codigo = item.codigo ?? item.Codigo ?? "";
+          const nombre =
+            item.nombre ??
+            item["Nombre Corto"] ??
+            "Producto sin nombre";
+          const precio = Number(
+            item.precioMayorista ??
+            item.precio ??
+            item.PrecioMayorista ??
+            0
+          );
+          const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
+          const subtotal = precio * cantidad;
+
+          texto += `• ${codigo} - ${nombre} x ${cantidad}u = $${formatearPrecio(subtotal)}%0A`;
+        });
+
+        const total = document.getElementById("carrito-total-precio").textContent || "0";
+        texto += `%0A🔹 Total estimado: $${total}`;
+
+        const url = `https://wa.me/${TELEFONO_WHATSAPP}?text=${texto}`;
+        window.open(url, "_blank");
+      });
+    }
 
     // ---------- INICIO ----------
     renderCarrito();
