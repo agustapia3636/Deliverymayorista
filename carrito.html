@@ -157,11 +157,10 @@
       line-height: 1.25;
     }
 
-    /* ---------- CONTROLES + PRECIOS + ELIMINAR ---------- */
-    /* Mantiene el botón fijo y la parte central de ancho estable */
+    /* ---------- PARTE INFERIOR: BOTONES + PRECIOS + ELIMINAR ---------- */
     .carrito-item-bottom {
       display: grid;
-      grid-template-columns: auto 135px auto;
+      grid-template-columns: auto minmax(150px, 1fr) 145px;
       align-items: center;
       width: 100%;
       gap: 12px;
@@ -204,16 +203,17 @@
       border-radius: 999px;
     }
 
-    /* CENTRAL: dos líneas, centradas, una arriba de la otra */
     .carrito-item-precios {
+      flex: 1;
       display: flex;
       flex-direction: column;
-      justify-content: center;
       align-items: center;
+      justify-content: center;
       text-align: center;
       font-size: 14px;
       color: var(--texto-secundario);
       gap: 2px;
+      white-space: nowrap; /* evita que los precios rompan líneas raras */
     }
 
     .btn-eliminar {
@@ -225,6 +225,9 @@
       background: var(--rojo);
       color: #fff;
       cursor: pointer;
+      flex-shrink: 0;
+      width: 145px;        /* ancho fijo para que nunca cambie */
+      text-align: center;
     }
 
     .btn-eliminar:active {
@@ -291,6 +294,7 @@
       transform: scale(0.98);
     }
 
+    /* ---------- CARRITO VACÍO ---------- */
     .carrito-vacio {
       background: var(--bg-card);
       border-radius: var(--radio-grande);
@@ -299,10 +303,16 @@
       color: var(--texto-secundario);
       margin-bottom: 20px;
     }
+
+    @media (min-width: 720px) {
+      .carrito-item {
+        padding: 24px 26px 22px;
+      }
+    }
   </style>
 </head>
-
 <body>
+
   <!-- HEADER -->
   <header>
     <div class="logo-texto">DELIVERY MAYORISTA</div>
@@ -346,21 +356,27 @@
   <!-- ================== LÓGICA DE CARRITO ================== -->
   <script>
     const CLAVE_CARRITO = "dm_carrito";
-    const TELEFONO_WHATSAPP = "5491112345678"; // tu número
+    const TELEFONO_WHATSAPP = "5491112345678"; // TU NÚMERO
 
+    /* ---------- UTILIDADES ---------- */
     function leerCarrito() {
       try {
         const raw = localStorage.getItem(CLAVE_CARRITO);
         if (!raw) return [];
         const arr = JSON.parse(raw);
         return Array.isArray(arr) ? arr : [];
-      } catch {
+      } catch (e) {
+        console.error("Error leyendo carrito", e);
         return [];
       }
     }
 
     function guardarCarrito(carrito) {
-      localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
+      try {
+        localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
+      } catch (e) {
+        console.error("Error guardando carrito", e);
+      }
     }
 
     function formatearPrecio(valor) {
@@ -370,23 +386,35 @@
       });
     }
 
+    /* ---------- RENDER DEL CARRITO ---------- */
     function renderCarrito() {
       const contenedor = document.getElementById("carrito-lista");
       const spanTotalItems = document.getElementById("carrito-total-items");
       const spanTotalPrecio = document.getElementById("carrito-total-precio");
+      const btnVaciar = document.getElementById("btn-vaciar");
+      const btnWhatsapp = document.getElementById("btn-whatsapp");
 
       const carrito = leerCarrito();
 
+      if (!contenedor || !spanTotalItems || !spanTotalPrecio) return;
+
+      // si está vacío
       if (!carrito.length) {
         contenedor.innerHTML = `
           <div class="carrito-vacio">
             Tu carrito está vacío.<br/>
             Agregá productos desde el catálogo.
-          </div>`;
+          </div>
+        `;
         spanTotalItems.textContent = "0";
         spanTotalPrecio.textContent = "0";
+        if (btnVaciar) btnVaciar.disabled = true;
+        if (btnWhatsapp) btnWhatsapp.disabled = true;
         return;
       }
+
+      if (btnVaciar) btnVaciar.disabled = false;
+      if (btnWhatsapp) btnWhatsapp.disabled = false;
 
       contenedor.innerHTML = "";
 
@@ -395,8 +423,10 @@
 
       carrito.forEach((item, idx) => {
         const codigo = item.codigo ?? item.Codigo ?? item.cod ?? "";
-        const nombre = item.nombre ?? item["Nombre Corto"] ?? item.nombreCorto ?? "Producto sin nombre";
-        const precio = Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
+        const nombre =
+          item.nombre ?? item["Nombre Corto"] ?? item.nombreCorto ?? "Producto sin nombre";
+        const precio =
+          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
         const stock = Number(item.stock ?? item.Stock ?? item["Stock"] ?? 0);
         const img = item.img ?? item.imagen ?? item.Imagen ?? "";
         const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
@@ -412,6 +442,7 @@
             <div class="carrito-item-img">
               <img src="${img || "img/sin-imagen.png"}" alt="${nombre}">
             </div>
+
             <div class="carrito-item-textos">
               <p class="carrito-item-nombre">${nombre}</p>
               <p class="carrito-item-detalle">Cod: ${codigo}</p>
@@ -421,9 +452,9 @@
 
           <div class="carrito-item-bottom">
             <div class="carrito-item-controles">
-              <button class="btn-cant btn-menos" data-idx="${idx}">−</button>
+              <button class="btn-cant btn-menos" data-idx="${idx}" aria-label="Restar uno">−</button>
               <span class="carrito-item-cantidad" data-idx="${idx}">${cantidad}</span>
-              <button class="btn-cant btn-mas" data-idx="${idx}">+</button>
+              <button class="btn-cant btn-mas" data-idx="${idx}" aria-label="Sumar uno">+</button>
             </div>
 
             <div class="carrito-item-precios">
@@ -441,15 +472,16 @@
       spanTotalItems.textContent = String(totalItems);
       spanTotalPrecio.textContent = formatearPrecio(totalPrecio);
 
-      contenedor.querySelectorAll(".btn-mas").forEach(btn => {
+      // listeners
+      contenedor.querySelectorAll(".btn-mas").forEach((btn) => {
         btn.addEventListener("click", () => cambiarCantidad(btn.dataset.idx, +1));
       });
 
-      contenedor.querySelectorAll(".btn-menos").forEach(btn => {
+      contenedor.querySelectorAll(".btn-menos").forEach((btn) => {
         btn.addEventListener("click", () => cambiarCantidad(btn.dataset.idx, -1));
       });
 
-      contenedor.querySelectorAll(".btn-eliminar").forEach(btn => {
+      contenedor.querySelectorAll(".btn-eliminar").forEach((btn) => {
         btn.addEventListener("click", () => eliminarItem(btn.dataset.idx));
       });
     }
@@ -464,6 +496,7 @@
       let cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
 
       cantidad += delta;
+
       if (cantidad < 1) cantidad = 1;
       if (stock && cantidad > stock) cantidad = stock;
 
@@ -483,6 +516,7 @@
       renderCarrito();
     }
 
+    /* ---------- BOTONES PRINCIPALES ---------- */
     document.getElementById("btn-seguir").addEventListener("click", () => {
       window.location.href = "catalogo.html";
     });
@@ -501,8 +535,10 @@
 
       carrito.forEach((item) => {
         const codigo = item.codigo ?? item.Codigo ?? "";
-        const nombre = item.nombre ?? item["Nombre Corto"] ?? "Producto sin nombre";
-        const precio = Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
+        const nombre =
+          item.nombre ?? item["Nombre Corto"] ?? "Producto sin nombre";
+        const precio =
+          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
         const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
         const subtotal = precio * cantidad;
 
@@ -516,6 +552,7 @@
       window.open(url, "_blank");
     });
 
+    // Inicio
     renderCarrito();
   </script>
 </body>
