@@ -15,7 +15,7 @@ const filtroCategoria = document.getElementById("filtro-categoria"); // select d
 
 // Mini carrito (globito abajo a la derecha)
 const miniCantidad = document.getElementById("mini-carrito-cantidad");
-const miniTotal = document.getElementById("mini-carrito-total");
+const miniTotal   = document.getElementById("mini-carrito-total");
 
 let TODOS_LOS_PRODUCTOS = [];
 
@@ -157,12 +157,12 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, s
     if (cantidad > stockDisponible) cantidad = stockDisponible;
 
     carrito.push({
-      codigo: productoBasico.codigo,
-      nombre: productoBasico.nombre,
-      precio: productoBasico.precio,
+      codigo:  productoBasico.codigo,
+      nombre:  productoBasico.nombre,
+      precio:  productoBasico.precio,
       cantidad,
-      img: productoBasico.img || null,
-      stock: stockDisponible,
+      img:     productoBasico.img || null,
+      stock:   stockDisponible,
     });
   }
 
@@ -181,7 +181,7 @@ function irAlCarrito() {
 }
 
 // ========================================
-// NUEVA CARD CON CANTIDAD + STOCK DINÁMICO
+// RENDER DE PRODUCTOS (con cantidad + stock dinámico)
 // ========================================
 
 function renderProductos(lista) {
@@ -226,12 +226,14 @@ function renderProductos(lista) {
       prod["Precio Mayorista"] ??
       prod["Precio Cliente"];
 
-    const precioNum = parsearPrecio(brutoPrecio) || 0;
+    const precioNum   = parsearPrecio(brutoPrecio) || 0;
     const precioTexto = formatearPrecio(brutoPrecio);
 
     const stockBruto = safe(prod.Stock ?? prod.stock, "");
-    const stockNum = Number(stockBruto) || 0;
-    const stockTexto = stockNum ? `Stock: ${stockNum} unidades` : (stockBruto ? `Stock: ${stockBruto}` : "");
+    const stockNum   = Number(stockBruto) || 0;
+    const stockTexto = stockNum
+      ? `Stock: ${stockNum} unidades`
+      : (stockBruto ? `Stock: ${stockBruto}` : "");
 
     const card = document.createElement("article");
     card.classList.add("producto-card");
@@ -258,7 +260,7 @@ function renderProductos(lista) {
 
         <div class="cantidad-container">
           <button class="btn-cantidad menos">−</button>
-          <input type="number" class="input-cantidad" value="1" min="1" max="${stockNum}">
+          <input type="number" class="input-cantidad" value="1" min="1" max="${stockNum || 999}">
           <button class="btn-cantidad mas">+</button>
         </div>
 
@@ -276,37 +278,50 @@ function renderProductos(lista) {
       btn.classList.add("btn-agregar-carrito-activo");
     }
 
-    // 🔥 CONTROL: STOCK DINÁMICO
-    const input = card.querySelector(".input-cantidad");
+    // 🔥 CONTROL: STOCK DINÁMICO (ahora seguro aunque no haya <p class="stock-text">)
+    const input        = card.querySelector(".input-cantidad");
     const stockVisible = card.querySelector(".stock-text");
-    const stockInicial = stockNum;
+    const stockInicial = stockNum || 0;
 
     function actualizarStockVisible() {
+      if (!input) return;          // por las dudas
       let cant = parseInt(input.value) || 1;
 
       if (cant < 1) cant = 1;
-      if (cant > stockInicial) cant = stockInicial;
+      if (stockInicial > 0 && cant > stockInicial) cant = stockInicial;
 
       input.value = cant;
-      const restante = stockInicial - cant;
-      stockVisible.textContent = `Stock: ${restante} unidades`;
+
+      if (stockVisible && stockInicial > 0) {
+        const restante = stockInicial - cant;
+        stockVisible.textContent = `Stock: ${restante} unidades`;
+      }
     }
 
-    card.querySelector(".mas").addEventListener("click", () => {
-      let v = parseInt(input.value) || 1;
-      if (v < stockInicial) v++;
-      input.value = v;
-      actualizarStockVisible();
-    });
+    const btnMas   = card.querySelector(".btn-cantidad.mas");
+    const btnMenos = card.querySelector(".btn-cantidad.menos");
 
-    card.querySelector(".menos").addEventListener("click", () => {
-      let v = parseInt(input.value) || 1;
-      if (v > 1) v--;
-      input.value = v;
-      actualizarStockVisible();
-    });
+    if (btnMas) {
+      btnMas.addEventListener("click", () => {
+        let v = parseInt(input.value) || 1;
+        if (!stockInicial || v < stockInicial) v++;
+        input.value = v;
+        actualizarStockVisible();
+      });
+    }
 
-    input.addEventListener("input", actualizarStockVisible);
+    if (btnMenos) {
+      btnMenos.addEventListener("click", () => {
+        let v = parseInt(input.value) || 1;
+        if (v > 1) v--;
+        input.value = v;
+        actualizarStockVisible();
+      });
+    }
+
+    if (input) {
+      input.addEventListener("input", actualizarStockVisible);
+    }
 
     actualizarStockVisible();
 
@@ -324,7 +339,8 @@ function renderProductos(lista) {
         img: (img && (img.dataset.srcOk || img.src)) || null
       };
 
-      agregarAlCarritoDesdeCatalogo(productoBasico, btn, cant, stockInicial);
+      const stockParaCarrito = stockInicial || 9999;
+      agregarAlCarritoDesdeCatalogo(productoBasico, btn, cant, stockParaCarrito);
     });
 
     // CLICK EN CARD → detalle
@@ -343,7 +359,7 @@ function renderProductos(lista) {
 
 function aplicarFiltros() {
   const texto = buscador.value.trim().toLowerCase();
-  const cat = filtroCategoria.value;
+  const cat   = filtroCategoria.value;
 
   const filtrados = TODOS_LOS_PRODUCTOS.filter(prod => {
     const codigo = safe(
@@ -375,7 +391,7 @@ function aplicarFiltros() {
   renderProductos(filtrados);
 }
 
-if (buscador) buscador.addEventListener("input", aplicarFiltros);
+if (buscador)        buscador.addEventListener("input",  aplicarFiltros);
 if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
 
 // ========================================
@@ -384,7 +400,7 @@ if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
 
 async function cargarProductos() {
   try {
-    // 🔥 URL ABSOLUTA QUE YA SABEMOS QUE FUNCIONA EN TU NAVEGADOR
+    // URL ABSOLUTA QUE SABEMOS QUE EXISTE
     const resp = await fetch("https://agustapia3636.github.io/Deliverymayorista/productos.json");
     if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
