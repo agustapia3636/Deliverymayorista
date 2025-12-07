@@ -338,14 +338,17 @@ function renderProductos(lista) {
     }
 
     if (input) {
-      // Solo permitir números mientras escribe
-      input.addEventListener("input", (ev) => {
+      // Manejador compartido para iPhone + PC
+      const handleTyping = (ev) => {
         ev.stopPropagation();
         ev.target.value = ev.target.value.replace(/\D/g, "");
-        actualizarStockVisible(); // actualiza stock en vivo
-      });
+        actualizarStockVisible();
+      };
 
-      // Cuando sale del campo, ajustamos a 1..stock y stock visible
+      ["input", "keyup", "change"].forEach(evt =>
+        input.addEventListener(evt, handleTyping)
+      );
+
       input.addEventListener("blur", (ev) => {
         ev.stopPropagation();
         const cant = obtenerCantidadSegura();
