@@ -386,6 +386,76 @@
       font-weight: 500;
     }
 
+    /* ===========================
+       PAGINADOR CATÁLOGO
+    ============================*/
+    .paginador-contenedor {
+      padding: 0 25px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .paginador-resumen {
+      font-size: 13px;
+      opacity: 0.8;
+      text-align: center;
+    }
+
+    .paginador {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .paginador-btn,
+    .paginador-numero {
+      border-radius: 999px;
+      border: none;
+      min-width: 32px;
+      height: 32px;
+      padding: 0 10px;
+      font-size: 13px;
+      cursor: pointer;
+      background: #202432;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.08s ease;
+    }
+
+    .paginador-btn:hover:not(:disabled),
+    .paginador-numero:hover {
+      background: #2c3244;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    .paginador-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .paginador-numero--activo {
+      background: #ffa400;
+      color: #000;
+      font-weight: 700;
+    }
+
+    .paginador-numeros {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
     /* SOLO EN CELULAR */
     @media (max-width: 768px) {
       header {
@@ -417,7 +487,7 @@
       }
 
       .grid {
-        padding: 16px 12px 28px;
+        padding: 16px 12px 12px;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 18px;
       }
@@ -453,6 +523,10 @@
         right: 12px;
         font-size: 13px;
         padding: 9px 14px;
+      }
+
+      .paginador-contenedor {
+        padding: 4px 12px 20px;
       }
     }
 
@@ -530,6 +604,36 @@
   </div>
 
   <div id="lista-productos" class="grid"></div>
+
+  <!-- PAGINADOR + RESUMEN -->
+  <div class="paginador-contenedor">
+    <div id="resumen-resultados" class="paginador-resumen">
+      <!-- Se completa desde catalogo.js -->
+    </div>
+    <div id="paginador" class="paginador">
+      <button
+        id="btn-pagina-anterior"
+        class="paginador-btn"
+        type="button"
+        disabled
+      >
+        ‹
+      </button>
+
+      <div id="paginador-numeros" class="paginador-numeros">
+        <!-- Botones de página generados por JS -->
+      </div>
+
+      <button
+        id="btn-pagina-siguiente"
+        class="paginador-btn"
+        type="button"
+        disabled
+      >
+        ›
+      </button>
+    </div>
+  </div>
 
   <!-- Botón flotante de WhatsApp (mensaje simple genérico) -->
   <a
