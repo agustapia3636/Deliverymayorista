@@ -1,7 +1,7 @@
 // ========================================
 // CATÁLOGO + CARRITO (página catalogo.html)
 // Mega menú categorías tipo "Telefonía"
-// con 3er nivel de ETIQUETAS libres
+// con 3er nivel de ETIQUETAS libres + iconos
 // ========================================
 
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
@@ -39,7 +39,7 @@ let categoriaSeleccionada    = "todas";
 let subcategoriaSeleccionada = "todas";
 let etiquetaSeleccionada     = "todas";
 
-let labelCategoriaActual  = "Todas las categorías";
+let labelCategoriaActual    = "Todas las categorías";
 let labelSubcategoriaActual = null;
 let labelEtiquetaActual     = null;
 
@@ -476,6 +476,29 @@ function aplicarFiltros() {
   renderProductos(filtrados);
 }
 
+// ========= ICONOS PARA CATEGORÍAS =========
+
+function iconoParaCategoria(catLabel) {
+  if (!catLabel) return "•";
+  const txt = catLabel.toLowerCase();
+
+  if (txt.includes("vehicul")) return "🚗";
+  if (txt.includes("auto") || txt.includes("motor")) return "🚙";
+  if (txt.includes("baño") || txt.includes("cocina")) return "🏠";
+  if (txt.includes("hogar")) return "🏡";
+  if (txt.includes("camping")) return "⛺";
+  if (txt.includes("cuidado personal")) return "🧴";
+  if (txt.includes("decoración") || txt.includes("decoracion")) return "🕯️";
+  if (txt.includes("juguete") || txt.includes("regalería") || txt.includes("regaleria")) return "🧸";
+  if (txt.includes("librería") || txt.includes("libreria") || txt.includes("oficina")) return "📚";
+  if (txt.includes("electr") || txt.includes("audio")) return "🔌";
+  if (txt.includes("herramient") || txt.includes("ferreter")) return "🛠";
+  if (txt.includes("bolsos") || txt.includes("mochila")) return "🎒";
+  if (txt.includes("bazar")) return "🍽️";
+
+  return "•";
+}
+
 // ========= MEGA MENÚ: CATEGORÍAS / SUBCATEGORÍAS / ETIQUETAS =========
 
 function cerrarMegaMenu() {
@@ -590,13 +613,11 @@ function construirMenuEtiquetas(catKey, subKey, catLabel, subLabel) {
   let setTags = null;
 
   if (ck === "todas") {
-    // Si está en "todas las categorías" mostramos solo "Todas"
     setTags = null;
   } else if (MAPA_TAGS[ck]) {
     if (MAPA_TAGS[ck][sk]) {
       setTags = MAPA_TAGS[ck][sk];
     } else {
-      // Si no hay tags para la subcat, juntamos todos los de la categoría
       const temp = new Set();
       Object.values(MAPA_TAGS[ck]).forEach(s => {
         s.forEach(t => temp.add(t));
@@ -613,7 +634,6 @@ function construirMenuEtiquetas(catKey, subKey, catLabel, subLabel) {
     }
   }
 
-  // Siempre ponemos "Todas"
   const liTodas = document.createElement("li");
   liTodas.className = "mega-tagitem mega-tagitem-activo";
   liTodas.textContent = "Todas";
@@ -624,7 +644,7 @@ function construirMenuEtiquetas(catKey, subKey, catLabel, subLabel) {
   megaTagList.appendChild(liTodas);
 
   if (!setTags || setTags.size === 0) {
-    return; // solo "Todas"
+    return;
   }
 
   Array.from(setTags)
@@ -699,6 +719,7 @@ function construirMenuCategorias(categoriasUnicas) {
   liTodas.className = "mega-item mega-item-activo";
   liTodas.textContent = "Todas las categorías";
   liTodas.dataset.catKey = "todas";
+  liTodas.dataset.icon   = "★";
   liTodas.addEventListener("click", () => seleccionarCategoria("todas"));
   megaCatList.appendChild(liTodas);
 
@@ -710,6 +731,7 @@ function construirMenuCategorias(categoriasUnicas) {
     li.className = "mega-item";
     li.textContent = cat;
     li.dataset.catKey = key;
+    li.dataset.icon   = iconoParaCategoria(cat);
     li.addEventListener("click", () => seleccionarCategoria(key));
     megaCatList.appendChild(li);
   });
@@ -748,8 +770,8 @@ async function cargarProductos() {
         ""
       ).toString().trim();
 
-      const catKey = catOriginal.toLowerCase() || "sin-categoria";
-      const subKey = subOriginal.toLowerCase() || "sin-subcategoria";
+      const catKey = (catOriginal.toLowerCase() || "sin-categoria");
+      const subKey = (subOriginal.toLowerCase() || "sin-subcategoria");
 
       if (!MAPA_CAT_SUB[catKey]) {
         MAPA_CAT_SUB[catKey] = new Set();
@@ -770,7 +792,7 @@ async function cargarProductos() {
         if (!MAPA_TAGS[catKey]) MAPA_TAGS[catKey] = {};
         if (!MAPA_TAGS[catKey][subKey]) MAPA_TAGS[catKey][subKey] = new Set();
         etiquetasNorm.forEach(t => MAPA_TAGS[catKey][subKey].add(
-          t.charAt(0).toUpperCase() + t.slice(1) // guardo capitalizado
+          t.charAt(0).toUpperCase() + t.slice(1)
         ));
       }
     });
