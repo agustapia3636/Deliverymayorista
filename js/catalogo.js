@@ -2,55 +2,44 @@
 // CATÁLOGO + CARRITO (página catalogo.html)
 // ========================================
 
-// URL base de las imágenes en tu repo de GitHub
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
-
-// Clave del carrito en localStorage (misma que usa carrito.html)
 const CLAVE_CARRITO = "dm_carrito";
 
-// Elementos del DOM
-const grid = document.getElementById("lista-productos");      // contenedor de tarjetas
-const buscador = document.getElementById("buscador");         // input de búsqueda
-const filtroCategoria = document.getElementById("filtro-categoria");     // select categoría
-const filtroSubcategoria = document.getElementById("filtro-subcategoria"); // select subcategoría (oculto)
-const contSubMenu = document.getElementById("subcategoria-menu");        // submenú a la derecha
+// DOM
+const grid = document.getElementById("lista-productos");
+const buscador = document.getElementById("buscador");
+const filtroCategoria = document.getElementById("filtro-categoria");
+const filtroSubcategoria = document.getElementById("filtro-subcategoria"); // oculto
+const contSubMenu = document.getElementById("subcategoria-menu");
 
-// Mini carrito (globito abajo a la derecha)
 const miniCantidad = document.getElementById("mini-carrito-cantidad");
 const miniTotal   = document.getElementById("mini-carrito-total");
 
-// Mapa: categoria (lowercase) -> Set(subcategorías originales)
+// mapa cat → subcats
 let MAPA_CAT_SUB = {};
-// Conjunto global de subcategorías (por si lo necesitás después)
 let TODAS_LAS_SUBCATS = new Set();
-
 let TODOS_LOS_PRODUCTOS = [];
 
-// ========================================
-// UTILIDADES GENERALES
-// ========================================
+// ========= UTILIDADES =========
 
 function safe(value, fallback = "") {
   return (value === undefined || value === null) ? fallback : value;
 }
 
-// "19.585,8" -> 19585.8 / "1992,2" -> 1992.2
 function parsearPrecio(valor) {
   if (typeof valor === "number") return valor;
 
   if (typeof valor === "string") {
     const limpio = valor
       .toString()
-      .replace(/\./g, "")   // separador miles
-      .replace(",", ".");   // coma a punto
-
+      .replace(/\./g, "")
+      .replace(",", ".");
     const num = Number(limpio);
     return Number.isFinite(num) ? num : null;
   }
   return null;
 }
 
-// texto redondeado SIN decimales
 function formatearPrecio(valor) {
   const numero = parsearPrecio(valor);
   if (numero == null) return "Consultar";
@@ -61,7 +50,6 @@ function formatearPrecio(valor) {
   });
 }
 
-// Intenta .jpg y .JPG y guarda la URL correcta en data-src-ok
 function setImagenProducto(imgElement, codigo) {
   if (!imgElement || !codigo) {
     if (imgElement) imgElement.style.display = "none";
@@ -86,15 +74,12 @@ function setImagenProducto(imgElement, codigo) {
   imgElement.onload = () => {
     imgElement.dataset.srcOk = imgElement.src;
   };
-
   imgElement.onerror = probar;
 
   probar();
 }
 
-// ========================================
-// CARRITO (localStorage + mini carrito)
-// ========================================
+// ========= CARRITO =========
 
 function leerCarrito() {
   try {
@@ -116,7 +101,6 @@ function guardarCarrito(carrito) {
   }
 }
 
-// Actualiza el globito del mini carrito
 function actualizarMiniCarrito() {
   const carrito = leerCarrito();
 
@@ -139,30 +123,20 @@ function actualizarMiniCarrito() {
   }
 }
 
-// ========================================
-// AGREGAR AL CARRITO DESDE CATÁLOGO
-// ========================================
-
 function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, stockDisponible) {
   let carrito = leerCarrito();
-
   const idx = carrito.findIndex(p => p.codigo === productoBasico.codigo);
-
   let cantidad = Number(cantidadElegida) || 1;
 
   if (idx >= 0) {
     const item = carrito[idx];
-
     if (stockDisponible && item.cantidad + cantidad > stockDisponible) {
       alert("No hay más stock disponible de este producto.");
       return;
     }
-
     item.cantidad += cantidad;
-
   } else {
     if (stockDisponible && cantidad > stockDisponible) cantidad = stockDisponible;
-
     carrito.push({
       codigo:  productoBasico.codigo,
       nombre:  productoBasico.nombre,
@@ -187,9 +161,7 @@ function irAlCarrito() {
   window.location.href = "carrito.html";
 }
 
-// ========================================
-// RENDER DE PRODUCTOS
-// ========================================
+// ========= RENDER PRODUCTOS =========
 
 function renderProductos(lista) {
   grid.innerHTML = "";
@@ -289,8 +261,6 @@ function renderProductos(lista) {
     const stockVisible = card.querySelector(".stock-text");
     const stockInicial = stockNum || 0;
 
-    // -------- CANTIDAD + STOCK DINÁMICO --------
-
     function obtenerCantidadSegura() {
       let cant = parseInt(input.value, 10);
       if (!Number.isFinite(cant) || cant < 1) cant = 1;
@@ -349,11 +319,9 @@ function renderProductos(lista) {
         ev.target.value = ev.target.value.replace(/\D/g, "");
         actualizarStockVisible();
       };
-
       ["input", "keyup", "change"].forEach(evt =>
         input.addEventListener(evt, handleTyping)
       );
-
       input.addEventListener("blur", (ev) => {
         ev.stopPropagation();
         const cant = obtenerCantidadSegura();
@@ -401,9 +369,7 @@ function renderProductos(lista) {
   });
 }
 
-// ========================================
-// FILTROS
-// ========================================
+// ========= FILTROS =========
 
 function aplicarFiltros() {
   const texto = buscador.value.trim().toLowerCase();
@@ -414,9 +380,7 @@ function aplicarFiltros() {
     const codigo = safe(
       prod.codigo || prod.cod || prod.Code || prod.Codigo,
       ""
-    )
-      .toString()
-      .toLowerCase();
+    ).toString().toLowerCase();
 
     const nombre = safe(
       prod.nombre || prod.descripcion || prod.titulo || prod["Nombre Corto"],
@@ -448,9 +412,7 @@ function aplicarFiltros() {
   renderProductos(filtrados);
 }
 
-// ========================================
-// SUBMENÚ DE SUBCATEGORÍAS A LA DERECHA
-// ========================================
+// ========= SUBMENÚ (chips derecha) =========
 
 function marcarChipActiva(chipActiva) {
   if (!contSubMenu) return;
@@ -466,7 +428,6 @@ function renderSubcategoriaMenu(catKey) {
   const key = (catKey || "todas").toLowerCase();
   contSubMenu.innerHTML = "";
 
-  // Si no hay categoría o es "todas", no mostramos submenú
   if (key === "todas" || !MAPA_CAT_SUB[key] || MAPA_CAT_SUB[key].size === 0) {
     contSubMenu.style.display = "none";
     if (filtroSubcategoria) filtroSubcategoria.value = "todas";
@@ -479,7 +440,6 @@ function renderSubcategoriaMenu(catKey) {
     (a, b) => a.localeCompare(b, "es")
   );
 
-  // Botón "Todas"
   const chipTodas = document.createElement("button");
   chipTodas.className = "subcat-chip activa";
   chipTodas.textContent = "Todas";
@@ -490,7 +450,6 @@ function renderSubcategoriaMenu(catKey) {
   });
   contSubMenu.appendChild(chipTodas);
 
-  // Chips de cada subcategoría
   subList.forEach(sub => {
     const chip = document.createElement("button");
     chip.className = "subcat-chip";
@@ -506,9 +465,7 @@ function renderSubcategoriaMenu(catKey) {
   });
 }
 
-// ========================================
-// CARGA INICIAL
-// ========================================
+// ========= CARGA INICIAL =========
 
 async function cargarProductos() {
   try {
@@ -520,7 +477,6 @@ async function cargarProductos() {
       ? data
       : (data.productos || []);
 
-    // Construimos map categoria -> subcategorías
     MAPA_CAT_SUB = {};
     TODAS_LAS_SUBCATS = new Set();
 
@@ -545,7 +501,6 @@ async function cargarProductos() {
       }
     });
 
-    // llenar combo de categorías
     if (filtroCategoria) {
       const categoriasUnicas = Array.from(
         new Set(
@@ -572,7 +527,6 @@ async function cargarProductos() {
       });
     }
 
-    // llenamos el select oculto de subcategorías con TODAS (por si se necesita)
     if (filtroSubcategoria) {
       const listaSubs = Array.from(TODAS_LAS_SUBCATS).sort(
         (a, b) => a.localeCompare(b, "es")
@@ -591,9 +545,7 @@ async function cargarProductos() {
       filtroSubcategoria.value = "todas";
     }
 
-    // al inicio: sin submenú (porque la categoría es "todas")
     renderSubcategoriaMenu("todas");
-
     renderProductos(TODOS_LOS_PRODUCTOS);
     actualizarMiniCarrito();
   } catch (err) {
@@ -602,9 +554,7 @@ async function cargarProductos() {
   }
 }
 
-// ========================================
-// EVENTOS
-// ========================================
+// ========= EVENTOS =========
 
 if (buscador) {
   buscador.addEventListener("input", aplicarFiltros);
