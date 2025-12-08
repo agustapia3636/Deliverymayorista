@@ -900,52 +900,27 @@ function renderPaginacion(listaCompleta) {
 }
 
 // ====== CARGA DE PRODUCTOS ======
-
 async function cargarProductos() {
   try {
     let data = null;
 
-    // 1) Si vienen productos embebidos en la página (opcional)
+    // 1) Si vienen productos embebidos (no lo estás usando ahora, pero lo dejamos)
     if (window.PRODUCTOS_EMBEBIDOS && Array.isArray(window.PRODUCTOS_EMBEBIDOS)) {
       data = window.PRODUCTOS_EMBEBIDOS;
     } else {
-      // 2) Probamos varias rutas posibles para el JSON
-      const rutas = [
-        "data/productos.json",
-        "productos.json",
-        "./data/productos.json",
-        "./productos.json"
-      ];
-
-      let ultimaError = null;
-
-      for (const ruta of rutas) {
-        try {
-          const resp = await fetch(ruta, { cache: "no-store" });
-          if (!resp.ok) {
-            ultimaError = new Error(`Respuesta no OK (${resp.status}) en ${ruta}`);
-            continue;
-          }
-          data = await resp.json();
-          console.log("Productos cargados desde:", ruta);
-          break;
-        } catch (e) {
-          ultimaError = e;
-        }
+      // 2) Ruta normal desde catalogo.html → /data/productos.json
+      const resp = await fetch("data/productos.json", { cache: "no-store" });
+      if (!resp.ok) {
+        throw new Error("No se pudo cargar data/productos.json");
       }
-
-      if (!data) {
-        throw ultimaError || new Error("No se pudo cargar productos.json en ninguna ruta");
-      }
+      data = await resp.json();
+      console.log("Productos cargados desde data/productos.json");
     }
 
-    // 3) Nos aseguramos de quedarnos con un ARRAY
+    // 3) Aseguramos que sea un ARRAY
     if (!Array.isArray(data)) {
-      if (data && Array.isArray(data.productos)) {
-        data = data.productos;
-      } else {
-        throw new Error("El JSON de productos no es un array válido");
-      }
+      console.error("El JSON de productos no es un array.");
+      return;
     }
 
     TODOS_LOS_PRODUCTOS = data;
@@ -964,7 +939,6 @@ async function cargarProductos() {
     }
   }
 }
-
 // ====== EVENTOS BUSCADOR Y TOGGLE ======
 
 if (buscador) {
