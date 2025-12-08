@@ -238,15 +238,15 @@
       const prod = productos[index];
 
       // mapeo al nuevo formato de productos.json
-      const codigo = prod.codigo || "";
-      const nombreCorto = prod.nombre || "";
-      const categoria = prod.categoria || "";
-      const descLarga = prod.descripcionLarga || "";
-      const precioMayor = parsearPrecio(prod.precio);
-      const precioCliente = null; // si más adelante querés otro precio
-      const precioUsado = precioMayor ?? precioCliente ?? null;
-      const stock = prod.stock ?? "";
-      const stockNum = Number(stock);
+const codigo       = prod.codigo || "";
+const nombreCorto  = prod.nombre || "";
+const categoria    = prod.categoria || "";
+const subcategoria = prod.subcategoria || "";   // 👈 NUEVO
+const descLarga    = prod.descripcionLarga || "";
+const precioMayor  = parsearPrecio(prod.precio);
+const stock        = prod.stock ?? "";
+const stockNum     = Number(stock);
+
 
       /* ========== IMAGEN ========== */
       const imgPrincipal = document.getElementById("imagen-principal");
