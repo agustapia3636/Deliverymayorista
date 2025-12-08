@@ -2,562 +2,663 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tu carrito - Delivery Mayorista</title>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>Delivery Mayorista | Catálogo</title>
 
   <style>
-    :root {
-      --bg-body: #05030c;
-      --bg-card: #11101c;
-      --texto-principal: #ffffff;
-      --texto-secundario: #d4d4f0;
-      --texto-suave: #9b9bb5;
-      --rosa: #ff007a;
-      --rojo: #ff3b3b;
-      --verde: #00b341;
-      --gris-borde: #2b2a3a;
-      --radio-grande: 18px;
-      --fuente: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    /* Ocultamos los selects reales (se usan internamente para filtros) */
+    #filtro-categoria,
+    #filtro-subcategoria {
+      display: none !important;
     }
 
     body {
-      font-family: var(--fuente);
-      background: radial-gradient(circle at top, #141327 0, #05030c 55%);
-      color: var(--texto-principal);
-      min-height: 100vh;
+      background: #0f0f1a;
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
+        sans-serif;
+      color: white;
     }
 
-    /* ---------- HEADER ---------- */
     header {
-      background: linear-gradient(90deg, #ff007a, #ff9800);
-      padding: 16px 18px 14px;
+      background: linear-gradient(90deg, #ff005d, #ffa400);
+      padding: 15px 25px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 15px;
+      padding: 25px;
+      justify-content: flex-start;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .toolbar input {
+      padding: 12px 18px;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      min-width: 260px;
+    }
+
+    /* ===========================
+       MEGA MENÚ CATEGORÍAS
+       (3 columnas: Cat / Subcat / Etiquetas)
+    ============================*/
+
+    .mega-dropdown {
+      position: relative;
+      min-width: 260px;
+    }
+
+    .mega-toggle {
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      background: #ffffff;
+      color: #000;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom-left-radius: 18px;
-      border-bottom-right-radius: 18px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55);
-      position: sticky;
-      top: 0;
-      z-index: 20;
     }
 
-    .logo-texto {
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      font-size: 18px;
-    }
-
-    .link-catalogo-header {
-      font-size: 13px;
-      font-weight: 600;
-      text-decoration: none;
-      color: #fff;
-      padding: 8px 14px;
-      border-radius: 999px;
-      background: rgba(0, 0, 0, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.25);
-    }
-
-    main {
-      max-width: 1050px;
-      margin: 0 auto;
-      padding: 18px 16px 32px;
-    }
-
-    .volver-catalogo {
-      margin: 8px 2px 10px;
-    }
-
-    .volver-catalogo a {
-      color: #c28cff;
-      text-decoration: none;
-      font-size: 14px;
-    }
-
-    .volver-catalogo a:hover {
-      text-decoration: underline;
-    }
-
-    h1.carrito-titulo {
-      font-size: 26px;
-      margin: 10px 2px 18px;
-      font-weight: 700;
-    }
-
-    /* ---------- LISTA DE ÍTEMS ---------- */
-    #carrito-lista {
-      display: flex;
-      flex-direction: column;
-      gap: 22px;
-      margin-bottom: 32px;
-    }
-
-    /* ---------- CARD DEL CARRITO ---------- */
-    .carrito-item {
-      background: var(--bg-card);
-      border-radius: var(--radio-grande);
-      padding: 22px 18px 22px;  /* un poco menos de padding lateral para que entre todo */
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
-      width: 100%;
-    }
-
-    .carrito-item-top {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      width: 100%;
-    }
-
-    .carrito-item-img {
-      flex-shrink: 0;
-      width: 82px;
-      height: 82px;
-      border-radius: 14px;
-      background: #05040d;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-    }
-
-    .carrito-item-img img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-
-    .carrito-item-textos {
-      min-width: 0;
-      flex: 1;
-    }
-
-    .carrito-item-nombre {
-      font-size: 15px;
-      font-weight: 600;
-      margin-bottom: 3px;
+    .mega-label {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      max-width: 230px;
+      text-align: left;
     }
 
-    .carrito-item-detalle {
-      font-size: 14px;
-      color: var(--texto-secundario);
-      line-height: 1.25;
+    .mega-arrow {
+      font-size: 10px;
+      margin-left: 8px;
     }
 
-    /* ---------- BOTONES / PRECIOS / ELIMINAR ---------- */
-    .carrito-item-bottom {
-      display: flex;      /* fila: controles - precios - eliminar */
-      align-items: center;
-      gap: 10px;          /* menos espacio para que todo entre bien */
-      width: 100%;
-    }
-
-    .carrito-item-controles {
-      display: flex;
-      align-items: center;
-      gap: 4px;           /* un poquito menos de gap */
-    }
-
-    .btn-cant {
-      width: 32px;
-      height: 32px;
-      border-radius: 999px;
-      border: none;
-      background: var(--rosa);
+    .mega-menu {
+      position: absolute;
+      top: 110%;
+      left: 0;
+      background: #111217;
       color: #fff;
-      font-size: 17px;
-      font-weight: 700;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+      display: none;
+      min-width: 420px;
+      max-width: 720px;
+      padding: 12px 8px 40px; /* extra abajo para el botón reset */
+      z-index: 999;
+      column-gap: 4px;
+    }
+
+    .mega-dropdown.open .mega-menu {
       display: flex;
-      align-items: center;
-      justify-content: center;
+    }
+
+    .mega-col {
+      flex: 1;
+      padding: 4px 8px;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .mega-col:last-child {
+      border-right: none;
+    }
+
+    .mega-col h4 {
+      font-size: 13px;
+      margin: 4px 4px 8px;
+      opacity: 0.75;
+    }
+
+    .mega-col ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .mega-item,
+    .mega-subitem,
+    .mega-tagitem {
+      padding: 7px 10px;
+      border-radius: 10px;
+      font-size: 13px;
       cursor: pointer;
+      white-space: nowrap;
+      margin: 2px 0;
+      transition: background 0.12s ease, color 0.12s ease;
     }
 
-    .btn-cant:active {
-      transform: scale(0.95);
+    .mega-item:hover,
+    .mega-subitem:hover,
+    .mega-tagitem:hover {
+      background: #1f2430;
     }
 
-    .carrito-item-cantidad {
-      min-width: 32px;
-      height: 32px;
-      line-height: 32px;
-      text-align: center;
-      font-size: 15px;
+    .mega-item-activo,
+    .mega-subitem-activo,
+    .mega-tagitem-activo {
+      background: #ffa400;
+      color: #000;
       font-weight: 600;
-      background: #ffffff;
-      color: #111;
-      border-radius: 999px;
     }
 
-    .carrito-item-precios {
-      flex: 0 0 110px;    /* ancho fijo MÁS chico para que no empuje el botón */
-      width: 110px;
+    /* Iconos en la columna de categorías */
+    .mega-item {
+      position: relative;
+      padding-left: 30px; /* espacio para el icono */
+    }
+
+    .mega-item::before {
+      content: attr(data-icon);
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      opacity: 0.95;
+    }
+
+    /* Botón premium reset filtros */
+    .mega-reset-btn {
+      position: absolute;
+      right: 14px;
+      bottom: 10px;
+      padding: 5px 12px;
+      font-size: 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: transparent;
+      color: #ffa400;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mega-reset-btn span {
+      font-size: 12px;
+    }
+
+    .mega-reset-btn:hover {
+      background: #ffa400;
+      color: #000;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 25px;
+      padding: 25px;
+    }
+
+    .producto-card {
+      position: relative;
+      background: #0c0c17;
+      border-radius: 22px;
+      padding: 18px 16px 16px;
+      text-align: center;
+      min-height: 260px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      font-size: 13px;    /* un puntito menos de tamaño */
-      color: var(--texto-secundario);
-      gap: 2px;
-      word-break: break-word;
-      white-space: nowrap;
+      justify-content: flex-start;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+      text-decoration: none;
+      color: inherit;
+      opacity: 1;
+      translate: 0;
     }
 
-    .btn-eliminar {
-      width: 100px;       /* ancho fijo moderado */
-      text-align: center;
-      border: none;
-      border-radius: 999px;
-      padding: 8px 0;
-      font-size: 13px;
-      font-weight: 600;
-      background: var(--rojo);
-      color: #fff;
-      cursor: pointer;
-      flex-shrink: 0;
-      margin-left: auto;  /* pegado al borde derecho PERO dentro de la card */
+    .producto-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
     }
 
-    .btn-eliminar:active {
-      transform: scale(0.97);
-    }
-
-    /* ---------- RESUMEN ---------- */
-    .carrito-resumen {
-      margin-top: 6px;
-      padding-bottom: 16px;
-    }
-
-    .carrito-resumen-total {
-      font-size: 22px;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: 6px;
-    }
-
-    .carrito-resumen-aviso {
-      font-size: 13px;
-      color: var(--texto-suave);
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .btn-grande-borde,
-    .btn-grande-rojo,
-    .btn-grande-verde {
+    .producto-imagen-wrapper {
       width: 100%;
-      border-radius: 999px;
-      padding: 14px 18px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
+      height: 160px;
+      border-radius: 18px;
+      background: #0a0a12;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 14px;
+      overflow: hidden;
+      position: relative;
+      margin-bottom: 10px;
     }
 
-    .btn-grande-borde {
-      background: transparent;
-      color: var(--texto-principal);
-      border: 1px solid var(--gris-borde);
+    .producto-imagen {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 16px;
+      display: block;
+      cursor: pointer;
     }
 
-    .btn-grande-rojo {
-      background: var(--rojo);
-      color: #fff;
+    .producto-titulo {
+      margin-top: 2px;
+      font-size: 15px;
+      line-height: 1.15;
+      cursor: pointer;
+    }
+
+    .producto-descripcion {
+      opacity: 0.8;
+      font-size: 13px;
+      margin-top: 6px;
+      line-height: 1.25;
+      min-height: 36px;
+    }
+
+    .producto-precio-row {
+      margin-top: 8px;
+    }
+
+    .producto-precio {
+      color: #ffa400;
+      font-weight: 700;
+      margin-top: 4px;
+      font-size: 15px;
+    }
+
+    .producto-stock {
+      opacity: 0.8;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .cantidad-container {
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-cantidad {
+      border-radius: 999px;
       border: none;
-    }
-
-    .btn-grande-verde {
-      background: var(--verde);
+      width: 24px;
+      height: 24px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #202432;
       color: #fff;
-      border: none;
-      box-shadow: 0 0 18px rgba(0, 179, 65, 0.6);
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .btn-grande-borde:active,
-    .btn-grande-rojo:active,
-    .btn-grande-verde:active {
-      transform: scale(0.98);
-    }
-
-    /* ---------- CARRITO VACÍO ---------- */
-    .carrito-vacio {
-      background: var(--bg-card);
-      border-radius: var(--radio-grande);
-      padding: 20px 18px;
+    .input-cantidad {
+      width: 50px;
       text-align: center;
-      color: var(--texto-secundario);
-      margin-bottom: 20px;
+      border-radius: 999px;
+      border: none;
+      padding: 4px 6px;
+      font-size: 13px;
+      outline: none;
     }
 
-    @media (min-width: 720px) {
-      .carrito-item {
-        padding: 24px 24px 22px;
+    .btn-agregar-carrito {
+      margin-top: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+      background: #202432;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-agregar-carrito-activo {
+      background: #1ebe57;
+    }
+
+    /* BOTÓN FLOTANTE WHATSAPP EN CATÁLOGO (simple, link fijo) */
+    .btn-wa-flotante {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: #25d366;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 24px;
+      font-weight: 600;
+      font-size: 14px;
+      text-decoration: none;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+      z-index: 999;
+      transition: transform 0.08s ease, filter 0.08s ease;
+    }
+
+    .btn-wa-flotante:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+
+    /* MINI CARRITO FLOTANTE */
+    .mini-carrito {
+      position: fixed;
+      right: 16px;
+      bottom: 100px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      padding: 8px 12px;
+      border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      z-index: 9999;
+      font-size: 13px;
+      color: #000;
+    }
+
+    .mini-carrito-icono {
+      font-size: 18px;
+    }
+
+    .mini-carrito-texto {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .mini-carrito-linea {
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    /* ===========================
+       PAGINADOR CATÁLOGO
+    ============================*/
+    .paginador-contenedor {
+      padding: 0 25px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .paginador-resumen {
+      font-size: 13px;
+      opacity: 0.8;
+      text-align: center;
+    }
+
+    .paginador {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .paginador-btn,
+    .paginador-numero {
+      border-radius: 999px;
+      border: none;
+      min-width: 32px;
+      height: 32px;
+      padding: 0 10px;
+      font-size: 13px;
+      cursor: pointer;
+      background: #202432;
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.08s ease;
+    }
+
+    .paginador-btn:hover:not(:disabled),
+    .paginador-numero:hover {
+      background: #2c3244;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+    }
+
+    .paginador-btn:disabled {
+      opacity: 0.4;
+      cursor: default;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .paginador-numero--activo {
+      background: #ffa400;
+      color: #000;
+      font-weight: 700;
+    }
+
+    .paginador-numeros {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* SOLO EN CELULAR */
+    @media (max-width: 768px) {
+      header {
+        text-align: center;
+        font-size: 18px;
+      }
+
+      .toolbar {
+        padding: 18px 12px 10px;
+        gap: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .toolbar input {
+        width: 100%;
+        max-width: 420px;
+        font-size: 14px;
+      }
+
+      .mega-dropdown {
+        width: 100%;
+        max-width: 420px;
+      }
+
+      .mega-menu {
+        max-width: 100%;
+        min-width: 100%;
+      }
+
+      .grid {
+        padding: 16px 12px 12px;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 18px;
+      }
+
+      .producto-card {
+        padding: 14px 12px 14px;
+        border-radius: 18px;
+      }
+
+      .producto-imagen-wrapper {
+        height: 150px;
+      }
+
+      .producto-titulo {
+        font-size: 14px;
+      }
+
+      .producto-descripcion {
+        font-size: 12px;
+        min-height: 32px;
+      }
+
+      .producto-precio {
+        font-size: 14px;
+      }
+
+      #mini-carrito {
+        bottom: 150px !important;
+      }
+
+      .btn-wa-flotante {
+        bottom: 80px;
+        right: 12px;
+        font-size: 13px;
+        padding: 9px 14px;
+      }
+
+      .paginador-contenedor {
+        padding: 4px 12px 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 22px;
+      }
+
+      .producto-card {
+        padding: 16px 14px 16px;
+      }
+
+      .producto-imagen-wrapper {
+        height: 150px;
+      }
+
+      .producto-titulo {
+        font-size: 16px;
+      }
+
+      .producto-descripcion {
+        font-size: 13px;
+        min-height: 38px;
+      }
+
+      .producto-precio {
+        font-size: 16px;
       }
     }
   </style>
 </head>
+
 <body>
+  <header>DELIVERY MAYORISTA</header>
 
-  <!-- HEADER -->
-  <header>
-    <div class="logo-texto">DELIVERY MAYORISTA</div>
-    <a href="catalogo.html" class="link-catalogo-header">Ver catálogo</a>
-  </header>
+  <div class="toolbar">
+    <input
+      id="buscador"
+      type="text"
+      placeholder="Buscar por código o descripción"
+    />
 
-  <main>
-    <div class="volver-catalogo">
-      <a href="catalogo.html">&larr; Ir al catálogo</a>
+    <!-- MEGA DROPDOWN DE CATEGORÍAS -->
+    <div class="mega-dropdown" id="megaDropdown">
+      <button id="categoriaToggle" class="mega-toggle">
+        <span class="mega-label">Todas las categorías</span>
+        <span class="mega-arrow">▾</span>
+      </button>
+
+      <div id="megaMenu" class="mega-menu">
+        <div class="mega-col">
+          <h4>Categorías</h4>
+          <ul id="megaCategorias"></ul>
+        </div>
+        <div class="mega-col">
+          <h4 id="megaSubTitle">Subcategorías</h4>
+          <ul id="megaSubcategorias"></ul>
+        </div>
+        <div class="mega-col">
+          <h4 id="megaTagTitle">Etiquetas</h4>
+          <ul id="megaEtiquetas"></ul>
+        </div>
+
+        <!-- Botón premium reset filtros -->
+        <button id="megaReset" class="mega-reset-btn">
+          <span>🔄</span> Limpiar filtros
+        </button>
+      </div>
     </div>
 
-    <h1 class="carrito-titulo">Tu carrito</h1>
+    <!-- selects ocultos para la lógica de filtros -->
+    <select id="filtro-categoria"></select>
+    <select id="filtro-subcategoria"></select>
+  </div>
 
-    <!-- LISTA DE ÍTEMS -->
-    <div id="carrito-lista"></div>
+  <div id="lista-productos" class="grid"></div>
 
-    <!-- RESUMEN -->
-    <section class="carrito-resumen">
-      <p class="carrito-resumen-total">
-        Total (<span id="carrito-total-items">0</span> productos):
-        $<span id="carrito-total-precio">0</span>
-      </p>
-      <p class="carrito-resumen-aviso">
-        Total estimado sujeto a stock y últimas actualizaciones.
-      </p>
-
-      <button class="btn-grande-borde" id="btn-seguir">
-        ← Seguir comprando
+  <!-- PAGINADOR + RESUMEN -->
+  <div class="paginador-contenedor">
+    <div id="resumen-resultados" class="paginador-resumen">
+      <!-- Se completa desde catalogo.js -->
+    </div>
+    <div id="paginador" class="paginador">
+      <button
+        id="btn-pagina-anterior"
+        class="paginador-btn"
+        type="button"
+        disabled
+      >
+        ‹
       </button>
 
-      <button class="btn-grande-rojo" id="btn-vaciar">
-        Vaciar carrito
+      <div id="paginador-numeros" class="paginador-numeros">
+        <!-- Botones de página generados por JS -->
+      </div>
+
+      <button
+        id="btn-pagina-siguiente"
+        class="paginador-btn"
+        type="button"
+        disabled
+      >
+        ›
       </button>
+    </div>
+  </div>
 
-      <button class="btn-grande-verde" id="btn-whatsapp">
-        Enviar pedido por WhatsApp
-      </button>
-    </section>
-  </main>
+  <!-- Botón flotante de WhatsApp (mensaje simple genérico) -->
+  <a
+    id="wa-flotante"
+    class="btn-wa-flotante"
+    href="https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista."
+    target="_blank"
+  >
+    WhatsApp Mayorista
+  </a>
 
-  <!-- ================== LÓGICA DE CARRITO ================== -->
-  <script>
-    const CLAVE_CARRITO = "dm_carrito";
-    const TELEFONO_WHATSAPP = "5491112345678"; // TU NÚMERO
+  <!-- MINI CARRITO GLOBAL -->
+  <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
+    <div class="mini-carrito-icono">🛒</div>
+    <div class="mini-carrito-texto">
+      <span class="mini-carrito-linea">
+        <span id="mini-carrito-cantidad">0</span> productos
+      </span>
+      <span class="mini-carrito-linea">
+        $<span id="mini-carrito-total">0</span>
+      </span>
+    </div>
+  </div>
 
-    /* ---------- UTILIDADES ---------- */
-    function leerCarrito() {
-      try {
-        const raw = localStorage.getItem(CLAVE_CARRITO);
-        if (!raw) return [];
-        const arr = JSON.parse(raw);
-        return Array.isArray(arr) ? arr : [];
-      } catch (e) {
-        console.error("Error leyendo carrito", e);
-        return [];
-      }
-    }
-
-    function guardarCarrito(carrito) {
-      try {
-        localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
-      } catch (e) {
-        console.error("Error guardando carrito", e);
-      }
-    }
-
-    function formatearPrecio(valor) {
-      const num = Number(valor) || 0;
-      return Math.round(num).toLocaleString("es-AR", {
-        maximumFractionDigits: 0
-      });
-    }
-
-    /* ---------- RENDER DEL CARRITO ---------- */
-    function renderCarrito() {
-      const contenedor = document.getElementById("carrito-lista");
-      const spanTotalItems = document.getElementById("carrito-total-items");
-      const spanTotalPrecio = document.getElementById("carrito-total-precio");
-      const btnVaciar = document.getElementById("btn-vaciar");
-      const btnWhatsapp = document.getElementById("btn-whatsapp");
-
-      const carrito = leerCarrito();
-
-      if (!contenedor || !spanTotalItems || !spanTotalPrecio) return;
-
-      // si está vacío
-      if (!carrito.length) {
-        contenedor.innerHTML = `
-          <div class="carrito-vacio">
-            Tu carrito está vacío.<br/>
-            Agregá productos desde el catálogo.
-          </div>
-        `;
-        spanTotalItems.textContent = "0";
-        spanTotalPrecio.textContent = "0";
-        if (btnVaciar) btnVaciar.disabled = true;
-        if (btnWhatsapp) {
-          btnWhatsapp.disabled = true;
-        }
-        return;
-      }
-
-      if (btnVaciar) btnVaciar.disabled = false;
-      if (btnWhatsapp) btnWhatsapp.disabled = false;
-
-      contenedor.innerHTML = "";
-
-      let totalItems = 0;
-      let totalPrecio = 0;
-
-      carrito.forEach((item, idx) => {
-        const codigo = item.codigo ?? item.Codigo ?? item.cod ?? "";
-        const nombre =
-          item.nombre ?? item["Nombre Corto"] ?? item.nombreCorto ?? "Producto sin nombre";
-        const precio =
-          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
-        const stock = Number(item.stock ?? item.Stock ?? item["Stock"] ?? 0);
-        const img = item.img ?? item.imagen ?? item.Imagen ?? "";
-        const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
-
-        totalItems += cantidad;
-        totalPrecio += precio * cantidad;
-
-        const card = document.createElement("article");
-        card.classList.add("carrito-item");
-
-        card.innerHTML = `
-          <div class="carrito-item-top">
-            <div class="carrito-item-img">
-              <img src="${img || "img/sin-imagen.png"}" alt="${nombre}">
-            </div>
-
-            <div class="carrito-item-textos">
-              <p class="carrito-item-nombre">${nombre}</p>
-              <p class="carrito-item-detalle">Cod: ${codigo}</p>
-              <p class="carrito-item-detalle">Stock disponible: ${stock}</p>
-            </div>
-          </div>
-
-          <div class="carrito-item-bottom">
-            <div class="carrito-item-controles">
-              <button class="btn-cant btn-menos" data-idx="${idx}" aria-label="Restar uno">−</button>
-              <span class="carrito-item-cantidad" data-idx="${idx}">${cantidad}</span>
-              <button class="btn-cant btn-mas" data-idx="${idx}" aria-label="Sumar uno">+</button>
-            </div>
-
-            <div class="carrito-item-precios">
-              <span>Unitario: $${formatearPrecio(precio)}</span>
-              <span>Subtotal: $${formatearPrecio(precio * cantidad)}</span>
-            </div>
-
-            <button class="btn-eliminar" data-idx="${idx}">Eliminar</button>
-          </div>
-        `;
-
-        contenedor.appendChild(card);
-      });
-
-      spanTotalItems.textContent = String(totalItems);
-      spanTotalPrecio.textContent = formatearPrecio(totalPrecio);
-
-      // listeners
-      contenedor.querySelectorAll(".btn-mas").forEach((btn) => {
-        btn.addEventListener("click", () => cambiarCantidad(btn.dataset.idx, +1));
-      });
-
-      contenedor.querySelectorAll(".btn-menos").forEach((btn) => {
-        btn.addEventListener("click", () => cambiarCantidad(btn.dataset.idx, -1));
-      });
-
-      contenedor.querySelectorAll(".btn-eliminar").forEach((btn) => {
-        btn.addEventListener("click", () => eliminarItem(btn.dataset.idx));
-      });
-    }
-
-    function cambiarCantidad(idx, delta) {
-      const carrito = leerCarrito();
-      const i = Number(idx);
-      if (isNaN(i) || !carrito[i]) return;
-
-      const item = carrito[i];
-      const stock = Number(item.stock ?? item.Stock ?? item["Stock"] ?? 0);
-      let cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
-
-      cantidad += delta;
-
-      if (cantidad < 1) cantidad = 1;
-      if (stock && cantidad > stock) cantidad = stock;
-
-      item.cantidad = cantidad;
-      carrito[i] = item;
-
-      guardarCarrito(carrito);
-      renderCarrito();
-    }
-
-    function eliminarItem(idx) {
-      const carrito = leerCarrito();
-      const i = Number(idx);
-      if (isNaN(i) || !carrito[i]) return;
-      carrito.splice(i, 1);
-      guardarCarrito(carrito);
-      renderCarrito();
-    }
-
-    /* ---------- BOTONES PRINCIPALES ---------- */
-    document.getElementById("btn-seguir").addEventListener("click", () => {
-      window.location.href = "catalogo.html";
-    });
-
-    document.getElementById("btn-vaciar").addEventListener("click", () => {
-      if (!confirm("¿Vaciar carrito completo?")) return;
-      guardarCarrito([]);
-      renderCarrito();
-    });
-
-    document.getElementById("btn-whatsapp").addEventListener("click", () => {
-      const carrito = leerCarrito();
-      if (!carrito.length) return;
-
-      let texto = "Hola! Quiero hacer este pedido mayorista:%0A%0A";
-
-      carrito.forEach((item) => {
-        const codigo = item.codigo ?? item.Codigo ?? "";
-        const nombre =
-          item.nombre ?? item["Nombre Corto"] ?? "Producto sin nombre";
-        const precio =
-          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
-        const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
-        const subtotal = precio * cantidad;
-
-        texto += `• ${codigo} - ${nombre} x ${cantidad}u = $${formatearPrecio(subtotal)}%0A`;
-      });
-
-      const total = document.getElementById("carrito-total-precio").textContent || "0";
-      texto += `%0A🔹 Total estimado: $${total}`;
-
-      const url = `https://wa.me/${TELEFONO_WHATSAPP}?text=${texto}`;
-      window.open(url, "_blank");
-    });
-
-    // Inicio
-    renderCarrito();
-  </script>
+  <!-- SCRIPT DEL CATÁLOGO + CARRITO -->
+  <script src="js/catalogo.js?v=5"></script>
 </body>
 </html>
