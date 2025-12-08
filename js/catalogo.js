@@ -2,6 +2,7 @@
 // CATÁLOGO + CARRITO (página catalogo.html)
 // Mega menú categorías tipo "Telefonía"
 // con 3er nivel de ETIQUETAS libres + iconos
+// + memoria de filtros en localStorage
 // ========================================
 
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
@@ -42,6 +43,37 @@ let etiquetaSeleccionada     = "todas";
 let labelCategoriaActual    = "Todas las categorías";
 let labelSubcategoriaActual = null;
 let labelEtiquetaActual     = null;
+
+// ========================
+// GUARDAR / LEER FILTROS
+// ========================
+
+const CLAVE_FILTROS = "dm_filtros";
+
+function guardarFiltrosActuales() {
+  const data = {
+    categoria: categoriaSeleccionada || "todas",
+    subcategoria: subcategoriaSeleccionada || "todas",
+    etiqueta: etiquetaSeleccionada || "todas"
+  };
+  try {
+    localStorage.setItem(CLAVE_FILTROS, JSON.stringify(data));
+  } catch (e) {
+    console.error("Error guardando filtros", e);
+  }
+}
+
+function leerFiltrosGuardados() {
+  try {
+    const raw = localStorage.getItem(CLAVE_FILTROS);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    return data;
+  } catch (e) {
+    console.error("Error leyendo filtros", e);
+    return null;
+  }
+}
 
 // ========= UTILIDADES =========
 
@@ -475,6 +507,7 @@ function aplicarFiltros() {
 
   renderProductos(filtrados);
 }
+
 // ========= ICONOS PARA CATEGORÍAS =========
 
 function iconoParaCategoria(catLabel) {
@@ -528,28 +561,7 @@ function iconoParaCategoria(catLabel) {
   if (txt.includes("decor")) return "🕯️";
   if (txt.includes("juguet") || txt.includes("regal")) return "🧸";
   if (txt.includes("librer") || txt.includes("oficina")) return "📚";
-  if (txt.includes("electr") || txt.includes("audio")) return "🔌";
-  if (txt.includes("herramient") || txt.includes("ferreter")) return "🛠";
-  if (txt.includes("bolso") || txt.includes("mochila")) return "🎒";
-  if (txt.includes("bazar")) return "🛍️";
-
-  // Último recurso
-  return "•";
-}
-
-  if (mapa[txt]) return mapa[txt];
-
-  // Fallback por si agregás nuevas categorías más adelante
-  if (txt.includes("vehicul")) return "🚗";
-  if (txt.includes("auto") || txt.includes("motor")) return "🚙";
-  if (txt.includes("baño") || txt.includes("bano") || txt.includes("cocina")) return "🍽️";
-  if (txt.includes("hogar")) return "🏡";
-  if (txt.includes("camping")) return "⛺";
-  if (txt.includes("cuidado")) return "🧴";
-  if (txt.includes("decor")) return "🕯️";
-  if (txt.includes("juguet") || txt.includes("regal")) return "🧸";
-  if (txt.includes("librer") || txt.includes("oficina")) return "📚";
-  if (txt.includes("electr") || txt.includes("audio")) return "🔌";
+  if (txt.includes("electr")) return "🔌";
   if (txt.includes("herramient") || txt.includes("ferreter")) return "🛠";
   if (txt.includes("bolso") || txt.includes("mochila")) return "🎒";
   if (txt.includes("bazar")) return "🛍️";
@@ -623,6 +635,7 @@ function seleccionarCategoria(catKey) {
 
   actualizarTextoToggle();
   aplicarFiltros();
+  guardarFiltrosActuales();
 }
 
 function seleccionarSubcategoria(catKey, subKey, subLabel) {
@@ -637,12 +650,13 @@ function seleccionarSubcategoria(catKey, subKey, subLabel) {
     });
   }
 
-  labelSubcategoriaActual = subKey === "todas" ? null : subLabel;
+  labelSubcategoriaActual = subKey === "todas" ? null : (subLabel || subKey);
   labelEtiquetaActual     = null;
 
-  construirMenuEtiquetas(catKey, subKey, labelCategoriaActual, subLabel);
+  construirMenuEtiquetas(catKey, subKey, labelCategoriaActual, labelSubcategoriaActual);
   actualizarTextoToggle();
   aplicarFiltros();
+  guardarFiltrosActuales();
 }
 
 function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
@@ -654,10 +668,11 @@ function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
     });
   }
 
-  labelEtiquetaActual = tagKey === "todas" ? null : tagLabel;
+  labelEtiquetaActual = tagKey === "todas" ? null : (tagLabel || tagKey);
 
   actualizarTextoToggle();
   aplicarFiltros();
+  guardarFiltrosActuales();
   cerrarMegaMenu();
 }
 
@@ -924,7 +939,64 @@ if (megaToggle && megaDropdown) {
   });
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  cargarProductos();
+// ========= INICIO: CARGA + RESTAURAR FILTROS =========
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await cargarProductos();
   actualizarMiniCarrito();
+
+  const guardados = leerFiltrosGuardados();
+  if (guardados) {
+    const { categoria, subcategoria, etiqueta } = guardados;
+
+    const catKey = categoria || "todas";
+    const subKey = subcategoria || "todas";
+    const tagKey = etiqueta || "todas";
+
+    // Categoría
+    if (catKey && catKey !== "todas") {
+      seleccionarCategoria(catKey);
+    }
+
+    // Subcategoría
+    if (subKey && subKey !== "todas") {
+      let subLabel = null;
+      const setSubs = MAPA_CAT_SUB[catKey];
+      if (setSubs) {
+        for (const s of setSubs) {
+          if (s.toLowerCase() === subKey) {
+            subLabel = s;
+            break;
+          }
+        }
+      }
+      seleccionarSubcategoria(catKey, subKey, subLabel || subKey);
+    }
+
+    // Etiqueta
+    if (tagKey && tagKey !== "todas") {
+      let tagLabel = null;
+      const tagsPorCat = MAPA_TAGS[catKey];
+      if (tagsPorCat) {
+        let setTags = tagsPorCat[subKey];
+        if (!setTags) {
+          const tmp = new Set();
+          Object.values(tagsPorCat).forEach(st => st.forEach(t => tmp.add(t)));
+          setTags = tmp;
+        }
+        if (setTags) {
+          for (const t of setTags) {
+            if (t.toLowerCase() === tagKey) {
+              tagLabel = t;
+              break;
+            }
+          }
+        }
+      }
+      seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel || tagKey);
+    }
+
+    actualizarTextoToggle();
+    aplicarFiltros();
+  }
 });
