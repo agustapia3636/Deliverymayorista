@@ -905,26 +905,56 @@ async function cargarProductos() {
   try {
     let data = null;
 
+    // 1) Si vienen productos embebidos en la página (opcional)
     if (window.PRODUCTOS_EMBEBIDOS && Array.isArray(window.PRODUCTOS_EMBEBIDOS)) {
       data = window.PRODUCTOS_EMBEBIDOS;
     } else {
-      const resp = await fetch("data/productos.json");
-      if (!resp.ok) {
-        throw new Error("No se pudo cargar productos.json");
+      // 2) Probamos varias rutas posibles para el JSON
+      const rutas = [
+        "data/productos.json",
+        "productos.json",
+        "./data/productos.json",
+        "./productos.json"
+      ];
+
+      let ultimaError = null;
+
+      for (const ruta of rutas) {
+        try {
+          const resp = await fetch(ruta, { cache: "no-store" });
+          if (!resp.ok) {
+            ultimaError = new Error(`Respuesta no OK (${resp.status}) en ${ruta}`);
+            continue;
+          }
+          data = await resp.json();
+          console.log("Productos cargados desde:", ruta);
+          break;
+        } catch (e) {
+          ultimaError = e;
+        }
       }
-      data = await resp.json();
+
+      if (!data) {
+        throw ultimaError || new Error("No se pudo cargar productos.json en ninguna ruta");
+      }
     }
 
+    // 3) Nos aseguramos de quedarnos con un ARRAY
     if (!Array.isArray(data)) {
-      console.error("El JSON de productos no es un array.");
-      return;
+      if (data && Array.isArray(data.productos)) {
+        data = data.productos;
+      } else {
+        throw new Error("El JSON de productos no es un array válido");
+      }
     }
 
     TODOS_LOS_PRODUCTOS = data;
 
+    // 4) Construimos categorías / subcategorías / etiquetas
     construirMapaCatSub(TODOS_LOS_PRODUCTOS);
     cargarFiltrosGuardados();
 
+    // 5) Render inicial
     renderizarMegaMenu();
     aplicarFiltros();
   } catch (err) {
