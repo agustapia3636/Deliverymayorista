@@ -12,7 +12,7 @@ const CLAVE_CARRITO = "dm_carrito";
 const grid = document.getElementById("lista-productos");      // contenedor de tarjetas
 const buscador = document.getElementById("buscador");         // input de búsqueda
 const filtroCategoria = document.getElementById("filtro-categoria"); // select de categorías
-const filtroSubcategoria = document.getElementById("filtro-subcategoria"); // 🚀 nuevo select de subcategorías
+const filtroSubcategoria = document.getElementById("filtro-subcategoria"); // select de subcategorías
 
 // Mini carrito (globito abajo a la derecha)
 const miniCantidad = document.getElementById("mini-carrito-cantidad");
@@ -457,7 +457,8 @@ if (filtroSubcategoria) filtroSubcategoria.addEventListener("change", aplicarFil
 
 async function cargarProductos() {
   try {
-    const resp = await fetch("data/productos.json");
+    // 🔴 AHORA LEE EL productos.json QUE TENÉS EN LA RAÍZ
+    const resp = await fetch("productos.json");
     if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
     const data = await resp.json();
@@ -478,12 +479,11 @@ async function cargarProductos() {
         )
       ).sort();
 
-      if (!filtroCategoria.querySelector("option[value='todas']")) {
-        const optTodas = document.createElement("option");
-        optTodas.value = "todas";
-        optTodas.textContent = "Todas las categorías";
-        filtroCategoria.appendChild(optTodas);
-      }
+      filtroCategoria.innerHTML = "";
+      const optTodas = document.createElement("option");
+      optTodas.value = "todas";
+      optTodas.textContent = "Todas las categorías";
+      filtroCategoria.appendChild(optTodas);
 
       categoriasUnicas.forEach(cat => {
         const op = document.createElement("option");
