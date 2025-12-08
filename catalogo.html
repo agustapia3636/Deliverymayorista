@@ -97,7 +97,7 @@
       display: none;
       min-width: 420px;
       max-width: 720px;
-      padding: 12px 8px;
+      padding: 12px 8px 40px; /* extra abajo para el botón reset */
       z-index: 999;
       column-gap: 4px;
     }
@@ -170,6 +170,32 @@
       transform: translateY(-50%);
       font-size: 15px;
       opacity: 0.95;
+    }
+
+    /* Botón premium reset filtros */
+    .mega-reset-btn {
+      position: absolute;
+      right: 14px;
+      bottom: 10px;
+      padding: 5px 12px;
+      font-size: 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: transparent;
+      color: #ffa400;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mega-reset-btn span {
+      font-size: 12px;
+    }
+
+    .mega-reset-btn:hover {
+      background: #ffa400;
+      color: #000;
     }
 
     .grid {
@@ -490,6 +516,11 @@
           <h4 id="megaTagTitle">Etiquetas</h4>
           <ul id="megaEtiquetas"></ul>
         </div>
+
+        <!-- Botón premium reset filtros -->
+        <button id="megaReset" class="mega-reset-btn">
+          <span>🔄</span> Limpiar filtros
+        </button>
       </div>
     </div>
 
@@ -524,6 +555,6 @@
   </div>
 
   <!-- SCRIPT DEL CATÁLOGO + CARRITO -->
-  <script src="js/catalogo.js?v=4"></script>
+  <script src="js/catalogo.js?v=5"></script>
 </body>
 </html>
