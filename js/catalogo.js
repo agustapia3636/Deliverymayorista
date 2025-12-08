@@ -4,8 +4,6 @@
 // con 3er nivel de ETIQUETAS libres + iconos
 // + memoria de filtros en localStorage
 // + botón premium "Limpiar filtros"
-// + PAGINACIÓN PREMIUM
-// + WhatsApp inteligente desde carrito
 // ========================================
 
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
@@ -30,17 +28,6 @@ const megaResetBtn = document.getElementById("megaReset");
 
 const miniCantidad = document.getElementById("mini-carrito-cantidad");
 const miniTotal    = document.getElementById("mini-carrito-total");
-
-// Paginación
-const resumenResultados   = document.getElementById("resumen-resultados");
-const btnPaginaAnterior   = document.getElementById("btn-pagina-anterior");
-const btnPaginaSiguiente  = document.getElementById("btn-pagina-siguiente");
-const contenedorNumeros   = document.getElementById("paginador-numeros");
-const contenedorPaginador = document.querySelector(".paginador-contenedor");
-
-const ITEMS_POR_PAGINA = 24;
-let paginaActual = 1;
-let ultimoTotalFiltrado = 0;
 
 // mapa categoría → subcategorías
 let MAPA_CAT_SUB   = {};
@@ -67,11 +54,9 @@ const CLAVE_FILTROS = "dm_filtros";
 
 function guardarFiltrosActuales() {
   const data = {
-    categoria:    categoriaSeleccionada || "todas",
+    categoria: categoriaSeleccionada || "todas",
     subcategoria: subcategoriaSeleccionada || "todas",
-    etiqueta:     etiquetaSeleccionada || "todas",
-    pagina:       paginaActual || 1,
-    busqueda:     buscador ? buscador.value.trim().toLowerCase() : ""
+    etiqueta: etiquetaSeleccionada || "todas"
   };
   try {
     localStorage.setItem(CLAVE_FILTROS, JSON.stringify(data));
@@ -247,58 +232,6 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, s
 
 function irAlCarrito() {
   window.location.href = "carrito.html";
-}
-
-// ========= MENSAJE WHATSAPP DESDE CARRITO =========
-
-function generarMensajeWhatsAppCarrito() {
-  const carrito = leerCarrito();
-
-  if (!carrito || carrito.length === 0) {
-    return "Hola! Quiero consultar por el catálogo mayorista de Delivery Mayorista.";
-  }
-
-  let lineas = [];
-  lineas.push("Hola! Quiero hacer un pedido mayorista en Delivery Mayorista:");
-  lineas.push("");
-
-  let total = 0;
-
-  carrito.forEach((item) => {
-    const codigo = item.codigo || "";
-    const nombre = item.nombre || "";
-    const cantidad = item.cantidad || 0;
-    const precioNum = Number(item.precio) || 0;
-    const subtotal = precioNum * cantidad;
-    total += subtotal;
-
-    const precioTxt = precioNum.toLocaleString("es-AR", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    });
-
-    const subtotalTxt = subtotal.toLocaleString("es-AR", {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    });
-
-    lineas.push(
-      `• ${codigo} - ${nombre} x ${cantidad} u. ($ ${precioTxt} c/u) = $ ${subtotalTxt}`
-    );
-  });
-
-  lineas.push("");
-  lineas.push(
-    "Total aproximado: $ " +
-      total.toLocaleString("es-AR", {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 0,
-      })
-  );
-  lineas.push("");
-  lineas.push("Muchas gracias.");
-
-  return lineas.join("\n");
 }
 
 // ========= RENDER PRODUCTOS =========
@@ -574,140 +507,7 @@ function aplicarFiltros() {
     return pasaTexto && pasaCategoria && pasaSubcategoria && pasaEtiqueta;
   });
 
-  renderConPaginador(filtrados);
-}
-
-// ========= PAGINACIÓN PREMIUM =========
-
-function renderConPaginador(listaFiltrada) {
-  ultimoTotalFiltrado = listaFiltrada.length;
-
-  let totalPaginas = Math.max(
-    1,
-    Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
-  );
-
-  if (paginaActual > totalPaginas) paginaActual = totalPaginas;
-  if (paginaActual < 1) paginaActual = 1;
-
-  const inicio = (paginaActual - 1) * ITEMS_POR_PAGINA;
-  const fin    = inicio + ITEMS_POR_PAGINA;
-
-  const paginaLista = listaFiltrada.slice(inicio, fin);
-
-  // Render de tarjetas
-  renderProductos(paginaLista);
-
-  // Resumen
-  if (resumenResultados) {
-    if (ultimoTotalFiltrado === 0) {
-      resumenResultados.textContent = "0 productos encontrados";
-    } else {
-      const desde = inicio + 1;
-      const hasta = inicio + paginaLista.length;
-      resumenResultados.textContent = `Mostrando ${desde}-${hasta} de ${ultimoTotalFiltrado} productos`;
-    }
-  }
-
-  // Configuración visual del contenedor del paginador (sticky + ocultar si 1 sola página)
-  if (contenedorPaginador) {
-    if (totalPaginas <= 1) {
-      contenedorPaginador.style.display = "none";
-    } else {
-      contenedorPaginador.style.display   = "flex";
-      contenedorPaginador.style.position  = "sticky";
-      contenedorPaginador.style.bottom    = "0";
-      contenedorPaginador.style.zIndex    = "40";
-      contenedorPaginador.style.background = "#0f0f1a";
-    }
-  }
-
-  if (!contenedorNumeros) return;
-
-  // Animación suave
-  contenedorNumeros.style.transition = "opacity 0.15s ease, transform 0.15s ease";
-  contenedorNumeros.style.opacity    = "0";
-  contenedorNumeros.style.transform  = "translateY(4px)";
-
-  contenedorNumeros.innerHTML = "";
-
-  // Si no hay más de una página, terminamos acá
-  if (totalPaginas <= 1) {
-    if (btnPaginaAnterior) btnPaginaAnterior.disabled = true;
-    if (btnPaginaSiguiente) btnPaginaSiguiente.disabled = true;
-    requestAnimationFrame(() => {
-      contenedorNumeros.style.opacity   = "1";
-      contenedorNumeros.style.transform = "translateY(0)";
-    });
-    return;
-  }
-
-  // Helper para crear botón numerado
-  function crearBotonPagina(num) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "paginador-numero";
-    if (num === paginaActual) {
-      btn.classList.add("paginador-numero--activo");
-    }
-    btn.textContent = num;
-    btn.addEventListener("click", () => {
-      paginaActual = num;
-      guardarFiltrosActuales();
-      aplicarFiltros();
-    });
-    contenedorNumeros.appendChild(btn);
-  }
-
-  const rango = 3;
-  const total = totalPaginas;
-
-  // 1) Primera página
-  crearBotonPagina(1);
-
-  // 2) "..." inicial
-  if (paginaActual - rango > 2) {
-    const dots = document.createElement("span");
-    dots.textContent = "…";
-    dots.style.opacity = "0.5";
-    dots.style.padding = "0 6px";
-    contenedorNumeros.appendChild(dots);
-  }
-
-  // 3) Páginas intermedias alrededor de la actual
-  for (
-    let i = Math.max(2, paginaActual - rango);
-    i <= Math.min(total - 1, paginaActual + rango);
-    i++
-  ) {
-    crearBotonPagina(i);
-  }
-
-  // 4) "..." final
-  if (paginaActual + rango < total - 1) {
-    const dots2 = document.createElement("span");
-    dots2.textContent = "…";
-    dots2.style.opacity = "0.5";
-    dots2.style.padding = "0 6px";
-    contenedorNumeros.appendChild(dots2);
-  }
-
-  // 5) Última página
-  if (total > 1) crearBotonPagina(total);
-
-  // Prev / Next
-  if (btnPaginaAnterior) {
-    btnPaginaAnterior.disabled = paginaActual <= 1;
-  }
-  if (btnPaginaSiguiente) {
-    btnPaginaSiguiente.disabled = paginaActual >= totalPaginas;
-  }
-
-  // Terminar animación
-  requestAnimationFrame(() => {
-    contenedorNumeros.style.opacity   = "1";
-    contenedorNumeros.style.transform = "translateY(0)";
-  });
+  renderProductos(filtrados);
 }
 
 // ========= ICONOS PARA CATEGORÍAS =========
@@ -715,11 +515,14 @@ function renderConPaginador(listaFiltrada) {
 function iconoParaCategoria(catLabel) {
   if (!catLabel) return "•";
 
+  // Normalizamos el texto para matchear bien
   const txt = catLabel.toLowerCase().trim();
 
+  // Mapeo explícito por nombre de categoría
   const mapa = {
     "todas las categorías": "★",
 
+    // Las que se ven en tu menú
     "accesorios vehiculares": "🚗",
     "baño y cocina": "🍽️",
     "bano y cocina": "🍽️",
@@ -729,6 +532,7 @@ function iconoParaCategoria(catLabel) {
     "decoración": "🕯️",
     "decoracion": "🕯️",
 
+    // Por si tenés estas u otras similares
     "bazar": "🛍️",
     "hogar": "🏡",
     "librería": "📚",
@@ -749,6 +553,7 @@ function iconoParaCategoria(catLabel) {
 
   if (mapa[txt]) return mapa[txt];
 
+  // Fallback si agregás nuevas categorías más adelante
   if (txt.includes("vehicul")) return "🚗";
   if (txt.includes("auto") || txt.includes("motor")) return "🚙";
   if (txt.includes("baño") || txt.includes("bano") || txt.includes("cocina")) return "🍽️";
@@ -763,6 +568,7 @@ function iconoParaCategoria(catLabel) {
   if (txt.includes("bolso") || txt.includes("mochila")) return "🎒";
   if (txt.includes("bazar")) return "🛍️";
 
+  // Último recurso
   return "•";
 }
 
@@ -810,7 +616,6 @@ function seleccionarCategoria(catKey) {
   categoriaSeleccionada    = catKey || "todas";
   subcategoriaSeleccionada = "todas";
   etiquetaSeleccionada     = "todas";
-  paginaActual             = 1;
 
   if (filtroCategoria)    filtroCategoria.value    = categoriaSeleccionada;
   if (filtroSubcategoria) filtroSubcategoria.value = "todas";
@@ -838,7 +643,6 @@ function seleccionarCategoria(catKey) {
 function seleccionarSubcategoria(catKey, subKey, subLabel) {
   subcategoriaSeleccionada = subKey || "todas";
   etiquetaSeleccionada     = "todas";
-  paginaActual             = 1;
 
   if (filtroSubcategoria) filtroSubcategoria.value = subcategoriaSeleccionada;
 
@@ -859,7 +663,6 @@ function seleccionarSubcategoria(catKey, subKey, subLabel) {
 
 function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
   etiquetaSeleccionada = tagKey || "todas";
-  paginaActual         = 1;
 
   if (megaTagList) {
     megaTagList.querySelectorAll(".mega-tagitem").forEach(li => {
@@ -877,8 +680,6 @@ function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
 
 // Botón Premium: limpiar filtros
 function resetearFiltrosMega() {
-  if (buscador) buscador.value = "";
-  paginaActual = 1;
   seleccionarCategoria("todas");
   cerrarMegaMenu();
 }
@@ -1113,7 +914,7 @@ async function cargarProductos() {
       filtroSubcategoria.value = "todas";
     }
 
-    aplicarFiltros();
+    renderProductos(TODOS_LOS_PRODUCTOS);
     actualizarMiniCarrito();
   } catch (err) {
     console.error(err);
@@ -1124,41 +925,7 @@ async function cargarProductos() {
 // ========= EVENTOS =========
 
 if (buscador) {
-  buscador.addEventListener("input", () => {
-    paginaActual = 1;
-    aplicarFiltros();
-    guardarFiltrosActuales();
-  });
-}
-
-if (btnPaginaAnterior) {
-  btnPaginaAnterior.addEventListener("click", () => {
-    const totalPaginas = Math.max(
-      1,
-      Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
-    );
-    if (paginaActual > 1) {
-      paginaActual--;
-      if (paginaActual < 1) paginaActual = 1;
-      guardarFiltrosActuales();
-      aplicarFiltros();
-    }
-  });
-}
-
-if (btnPaginaSiguiente) {
-  btnPaginaSiguiente.addEventListener("click", () => {
-    const totalPaginas = Math.max(
-      1,
-      Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
-    );
-    if (paginaActual < totalPaginas) {
-      paginaActual++;
-      if (paginaActual > totalPaginas) paginaActual = totalPaginas;
-      guardarFiltrosActuales();
-      aplicarFiltros();
-    }
-  });
+  buscador.addEventListener("input", aplicarFiltros);
 }
 
 if (megaToggle && megaDropdown) {
@@ -1193,43 +960,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   await cargarProductos();
   actualizarMiniCarrito();
 
-  // WhatsApp inteligente desde carrito
-  const btnWA = document.getElementById("wa-flotante");
-  if (btnWA) {
-    btnWA.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      const texto = encodeURIComponent(generarMensajeWhatsAppCarrito());
-      const url = "https://wa.me/?text=" + texto;
-      window.open(url, "_blank");
-    });
-  }
-
   const guardados = leerFiltrosGuardados();
   if (guardados) {
-    const {
-      categoria,
-      subcategoria,
-      etiqueta,
-      pagina,
-      busqueda
-    } = guardados;
+    const { categoria, subcategoria, etiqueta } = guardados;
 
     const catKey = categoria || "todas";
     const subKey = subcategoria || "todas";
     const tagKey = etiqueta || "todas";
 
-    if (typeof pagina === "number" && pagina > 0) {
-      paginaActual = pagina;
-    }
-
-    if (busqueda && buscador) {
-      buscador.value = busqueda;
-    }
-
+    // Categoría
     if (catKey && catKey !== "todas") {
       seleccionarCategoria(catKey);
     }
 
+    // Subcategoría
     if (subKey && subKey !== "todas") {
       let subLabel = null;
       const setSubs = MAPA_CAT_SUB[catKey];
@@ -1244,6 +988,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       seleccionarSubcategoria(catKey, subKey, subLabel || subKey);
     }
 
+    // Etiqueta
     if (tagKey && tagKey !== "todas") {
       let tagLabel = null;
       const tagsPorCat = MAPA_TAGS[catKey];
