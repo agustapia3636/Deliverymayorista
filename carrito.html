@@ -2,343 +2,562 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-  <title>Delivery Mayorista | Carrito</title>
-
-  <!-- Estilos principales del sitio -->
-  <link rel="stylesheet" href="css/estilos.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tu carrito - Delivery Mayorista</title>
 
   <style>
-    /* ==============================
-       ESTILOS ESPECÍFICOS DEL CARRITO
-       ============================== */
-
-    main.carrito-pagina {
-      max-width: 1200px;
-      margin: 2rem auto 4rem;
-      padding: 0 1rem;
-      display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(260px, 320px);
-      gap: 1.8rem;
+    :root {
+      --bg-body: #05030c;
+      --bg-card: #11101c;
+      --texto-principal: #ffffff;
+      --texto-secundario: #d4d4f0;
+      --texto-suave: #9b9bb5;
+      --rosa: #ff007a;
+      --rojo: #ff3b3b;
+      --verde: #00b341;
+      --gris-borde: #2b2a3a;
+      --radio-grande: 18px;
+      --fuente: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    @media (max-width: 900px) {
-      main.carrito-pagina {
-        grid-template-columns: 1fr;
-      }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    .carrito-titulo {
-      max-width: 1200px;
-      margin: 1.5rem auto 0.5rem;
-      padding: 0 1rem;
+    body {
+      font-family: var(--fuente);
+      background: radial-gradient(circle at top, #141327 0, #05030c 55%);
+      color: var(--texto-principal);
+      min-height: 100vh;
+    }
+
+    /* ---------- HEADER ---------- */
+    header {
+      background: linear-gradient(90deg, #ff007a, #ff9800);
+      padding: 16px 18px 14px;
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: center;
-      gap: 1rem;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55);
+      position: sticky;
+      top: 0;
+      z-index: 20;
     }
 
-    .carrito-titulo h1 {
-      font-size: 1.6rem;
-      letter-spacing: 0.04em;
+    .logo-texto {
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      font-size: 18px;
     }
 
-    .carrito-titulo small {
-      font-size: 0.9rem;
-      color: #9da4c4;
-    }
-
-    .carrito-volver {
-      font-size: 0.9rem;
+    .link-catalogo-header {
+      font-size: 13px;
+      font-weight: 600;
       text-decoration: none;
-      color: #ffb800;
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
-    /* LISTA DE ITEMS ------------------- */
-    #carrito-lista {
-      background: #050718;
-      border-radius: 16px;
-      padding: 1.2rem;
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4);
-      min-height: 140px;
+    main {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 18px 16px 32px;
     }
 
-    .carrito-vacio {
-      text-align: center;
-      padding: 2rem 1rem;
-      color: #cbd0e6;
+    .volver-catalogo {
+      margin: 8px 2px 10px;
     }
 
-    .carrito-vacio p {
-      margin-bottom: 1rem;
-      font-size: 0.95rem;
+    .volver-catalogo a {
+      color: #c28cff;
+      text-decoration: none;
+      font-size: 14px;
     }
 
-    .carrito-item {
-      display: grid;
-      grid-template-columns: auto minmax(0, 2fr) auto;
-      gap: 1rem;
-      align-items: center;
-      padding: 0.9rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    .volver-catalogo a:hover {
+      text-decoration: underline;
     }
 
-    .carrito-item:last-child {
-      border-bottom: none;
-    }
-
-    .carrito-item-img {
-      width: 72px;
-      height: 72px;
-      border-radius: 12px;
-      overflow: hidden;
-      background: #070817;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-      color: #ffb800;
-    }
-
-    .carrito-item-img img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .carrito-item-img-placeholder {
+    h1.carrito-titulo {
+      font-size: 26px;
+      margin: 10px 2px 18px;
       font-weight: 700;
     }
 
-    .carrito-item-info h3.carrito-item-nombre {
-      font-size: 0.98rem;
-      margin-bottom: 0.25rem;
+    /* ---------- LISTA DE ÍTEMS ---------- */
+    #carrito-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      margin-bottom: 32px;
     }
 
-    .carrito-item-codigo {
-      font-size: 0.8rem;
-      color: #9da4c4;
-      margin-bottom: 0.15rem;
+    /* ---------- CARD DEL CARRITO ---------- */
+    .carrito-item {
+      background: var(--bg-card);
+      border-radius: var(--radio-grande);
+      padding: 22px 18px 22px;  /* un poco menos de padding lateral para que entre todo */
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
+      width: 100%;
     }
 
-    .carrito-item-stock {
-      font-size: 0.8rem;
-      color: #25d366;
-      margin-bottom: 0.35rem;
+    .carrito-item-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
     }
 
-    .carrito-item-precios {
-      font-size: 0.85rem;
-      color: #cbd0e6;
+    .carrito-item-img {
+      flex-shrink: 0;
+      width: 82px;
+      height: 82px;
+      border-radius: 14px;
+      background: #05040d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
     }
 
-    .carrito-item-precios strong {
-      color: #ffb800;
+    .carrito-item-img img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .carrito-item-textos {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .carrito-item-nombre {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .carrito-item-detalle {
+      font-size: 14px;
+      color: var(--texto-secundario);
+      line-height: 1.25;
+    }
+
+    /* ---------- BOTONES / PRECIOS / ELIMINAR ---------- */
+    .carrito-item-bottom {
+      display: flex;      /* fila: controles - precios - eliminar */
+      align-items: center;
+      gap: 10px;          /* menos espacio para que todo entre bien */
+      width: 100%;
     }
 
     .carrito-item-controles {
       display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 0.4rem;
-    }
-
-    .carrito-item-cant-row {
-      display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
-      background: #070817;
-      border-radius: 999px;
-      padding: 0.25rem 0.4rem;
+      gap: 4px;           /* un poquito menos de gap */
     }
 
-    .carrito-item-cant-row .btn-cantidad {
+    .btn-cant {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
       border: none;
-      background: transparent;
+      background: var(--rosa);
       color: #fff;
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      display: inline-flex;
+      font-size: 17px;
+      font-weight: 700;
+      display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1rem;
       cursor: pointer;
     }
 
-    .carrito-item-cant-row .btn-cantidad:hover {
-      background: rgba(255, 255, 255, 0.08);
+    .btn-cant:active {
+      transform: scale(0.95);
     }
 
-    .carrito-item-cant-row .input-cantidad {
-      width: 52px;
-      background: transparent;
-      border: none;
+    .carrito-item-cantidad {
+      min-width: 32px;
+      height: 32px;
+      line-height: 32px;
       text-align: center;
-      color: #fff;
-      font-size: 0.9rem;
-      outline: none;
-      -moz-appearance: textfield;
+      font-size: 15px;
+      font-weight: 600;
+      background: #ffffff;
+      color: #111;
+      border-radius: 999px;
     }
 
-    .carrito-item-cant-row .input-cantidad::-webkit-outer-spin-button,
-    .carrito-item-cant-row .input-cantidad::-webkit-inner-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
+    .carrito-item-precios {
+      flex: 0 0 110px;    /* ancho fijo MÁS chico para que no empuje el botón */
+      width: 110px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 13px;    /* un puntito menos de tamaño */
+      color: var(--texto-secundario);
+      gap: 2px;
+      word-break: break-word;
+      white-space: nowrap;
     }
 
     .btn-eliminar {
-      border: none;
-      background: transparent;
-      color: #ff4d6a;
-      font-size: 0.8rem;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    /* RESUMEN DEL CARRITO --------------- */
-    .carrito-resumen {
-      background: #050718;
-      border-radius: 16px;
-      padding: 1.4rem 1.2rem;
-      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.4);
-      position: sticky;
-      top: 1.2rem;
-      height: fit-content;
-      display: flex;
-      flex-direction: column;
-      gap: 0.9rem;
-    }
-
-    .carrito-resumen h2 {
-      font-size: 1.1rem;
-      margin-bottom: 0.4rem;
-    }
-
-    .carrito-resumen-linea {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.9rem;
-      color: #cbd0e6;
-    }
-
-    .carrito-resumen-linea strong {
-      font-size: 1rem;
-      color: #ffb800;
-    }
-
-    .carrito-resumen small {
-      font-size: 0.78rem;
-      color: #9da4c4;
-      line-height: 1.4;
-    }
-
-    .carrito-resumen-botones {
-      margin-top: 0.6rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .carrito-resumen-botones .btn-primario,
-    .carrito-resumen-botones .btn-secundario {
+      width: 100px;       /* ancho fijo moderado */
       text-align: center;
-      width: 100%;
-    }
-
-    .carrito-resumen-botones .btn-secundario {
       border: none;
+      border-radius: 999px;
+      padding: 8px 0;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--rojo);
+      color: #fff;
       cursor: pointer;
+      flex-shrink: 0;
+      margin-left: auto;  /* pegado al borde derecho PERO dentro de la card */
     }
 
-    .btn-volver-catalogo-simple {
-      display: inline-flex;
+    .btn-eliminar:active {
+      transform: scale(0.97);
+    }
+
+    /* ---------- RESUMEN ---------- */
+    .carrito-resumen {
+      margin-top: 6px;
+      padding-bottom: 16px;
+    }
+
+    .carrito-resumen-total {
+      font-size: 22px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .carrito-resumen-aviso {
+      font-size: 13px;
+      color: var(--texto-suave);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .btn-grande-borde,
+    .btn-grande-rojo,
+    .btn-grande-verde {
+      width: 100%;
+      border-radius: 999px;
+      padding: 14px 18px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
       align-items: center;
-      gap: 0.35rem;
-      font-size: 0.85rem;
-      color: #cbd0e6;
-      text-decoration: none;
-      margin-top: 0.15rem;
+      justify-content: center;
+      margin-bottom: 14px;
     }
 
-    .btn-volver-catalogo-simple:hover {
-      color: #ffb800;
+    .btn-grande-borde {
+      background: transparent;
+      color: var(--texto-principal);
+      border: 1px solid var(--gris-borde);
+    }
+
+    .btn-grande-rojo {
+      background: var(--rojo);
+      color: #fff;
+      border: none;
+    }
+
+    .btn-grande-verde {
+      background: var(--verde);
+      color: #fff;
+      border: none;
+      box-shadow: 0 0 18px rgba(0, 179, 65, 0.6);
+    }
+
+    .btn-grande-borde:active,
+    .btn-grande-rojo:active,
+    .btn-grande-verde:active {
+      transform: scale(0.98);
+    }
+
+    /* ---------- CARRITO VACÍO ---------- */
+    .carrito-vacio {
+      background: var(--bg-card);
+      border-radius: var(--radio-grande);
+      padding: 20px 18px;
+      text-align: center;
+      color: var(--texto-secundario);
+      margin-bottom: 20px;
+    }
+
+    @media (min-width: 720px) {
+      .carrito-item {
+        padding: 24px 24px 22px;
+      }
     }
   </style>
 </head>
-
 <body>
-  <!-- ENCABEZADO SIMPLE -->
-  <header class="header">
-    <div class="logo">DELIVERY MAYORISTA</div>
-    <nav>
-      <a href="index.html" class="btn-nav">Inicio</a>
-      <a href="catalogo.html" class="btn-nav">Catálogo</a>
-      <a href="carrito.html" class="btn-nav activo">Carrito</a>
-    </nav>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo-texto">DELIVERY MAYORISTA</div>
+    <a href="catalogo.html" class="link-catalogo-header">Ver catálogo</a>
   </header>
 
-  <!-- TÍTULO Y RESUMEN SUPERIOR -->
-  <section class="carrito-titulo">
-    <div>
-      <h1>Tu carrito</h1>
-      <small>Revisá cantidades, eliminá lo que no quieras y enviá tu pedido por WhatsApp.</small>
+  <main>
+    <div class="volver-catalogo">
+      <a href="catalogo.html">&larr; Ir al catálogo</a>
     </div>
-    <a href="catalogo.html" class="carrito-volver">← Volver al catálogo</a>
-  </section>
 
-  <!-- CUERPO PRINCIPAL -->
-  <main class="carrito-pagina">
-    <!-- LISTA DE PRODUCTOS DEL CARRITO -->
-    <section id="carrito-lista">
-      <!-- El JS de carrito.js inserta aquí los items o el mensaje de carrito vacío -->
+    <h1 class="carrito-titulo">Tu carrito</h1>
+
+    <!-- LISTA DE ÍTEMS -->
+    <div id="carrito-lista"></div>
+
+    <!-- RESUMEN -->
+    <section class="carrito-resumen">
+      <p class="carrito-resumen-total">
+        Total (<span id="carrito-total-items">0</span> productos):
+        $<span id="carrito-total-precio">0</span>
+      </p>
+      <p class="carrito-resumen-aviso">
+        Total estimado sujeto a stock y últimas actualizaciones.
+      </p>
+
+      <button class="btn-grande-borde" id="btn-seguir">
+        ← Seguir comprando
+      </button>
+
+      <button class="btn-grande-rojo" id="btn-vaciar">
+        Vaciar carrito
+      </button>
+
+      <button class="btn-grande-verde" id="btn-whatsapp">
+        Enviar pedido por WhatsApp
+      </button>
     </section>
-
-    <!-- RESUMEN Y ACCIONES -->
-    <aside class="carrito-resumen">
-      <h2>Resumen</h2>
-
-      <div class="carrito-resumen-linea">
-        <span>Productos</span>
-        <span id="carrito-total-items">0</span>
-      </div>
-
-      <div class="carrito-resumen-linea">
-        <span>Total estimado</span>
-        <strong>$ <span id="carrito-total-precio">0</span></strong>
-      </div>
-
-      <small>
-        Los precios son orientativos. El total puede variar según disponibilidad y actualizaciones de lista.
-      </small>
-
-      <div class="carrito-resumen-botones">
-        <a
-          id="btn-whatsapp"
-          href="#"
-          target="_blank"
-          class="btn-primario btn-whatsapp"
-        >
-          Enviar pedido por WhatsApp
-        </a>
-
-        <button id="btn-vaciar" type="button" class="btn-secundario">
-          Vaciar carrito
-        </button>
-
-        <a href="catalogo.html" class="btn-volver-catalogo-simple">
-          ← Seguir viendo productos
-        </a>
-      </div>
-    </aside>
   </main>
 
-  <!-- LÓGICA DEL CARRITO -->
-  <script src="js/carrito.js"></script>
+  <!-- ================== LÓGICA DE CARRITO ================== -->
+  <script>
+    const CLAVE_CARRITO = "dm_carrito";
+    const TELEFONO_WHATSAPP = "5491112345678"; // TU NÚMERO
+
+    /* ---------- UTILIDADES ---------- */
+    function leerCarrito() {
+      try {
+        const raw = localStorage.getItem(CLAVE_CARRITO);
+        if (!raw) return [];
+        const arr = JSON.parse(raw);
+        return Array.isArray(arr) ? arr : [];
+      } catch (e) {
+        console.error("Error leyendo carrito", e);
+        return [];
+      }
+    }
+
+    function guardarCarrito(carrito) {
+      try {
+        localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
+      } catch (e) {
+        console.error("Error guardando carrito", e);
+      }
+    }
+
+    function formatearPrecio(valor) {
+      const num = Number(valor) || 0;
+      return Math.round(num).toLocaleString("es-AR", {
+        maximumFractionDigits: 0
+      });
+    }
+
+    /* ---------- RENDER DEL CARRITO ---------- */
+    function renderCarrito() {
+      const contenedor = document.getElementById("carrito-lista");
+      const spanTotalItems = document.getElementById("carrito-total-items");
+      const spanTotalPrecio = document.getElementById("carrito-total-precio");
+      const btnVaciar = document.getElementById("btn-vaciar");
+      const btnWhatsapp = document.getElementById("btn-whatsapp");
+
+      const carrito = leerCarrito();
+
+      if (!contenedor || !spanTotalItems || !spanTotalPrecio) return;
+
+      // si está vacío
+      if (!carrito.length) {
+        contenedor.innerHTML = `
+          <div class="carrito-vacio">
+            Tu carrito está vacío.<br/>
+            Agregá productos desde el catálogo.
+          </div>
+        `;
+        spanTotalItems.textContent = "0";
+        spanTotalPrecio.textContent = "0";
+        if (btnVaciar) btnVaciar.disabled = true;
+        if (btnWhatsapp) {
+          btnWhatsapp.disabled = true;
+        }
+        return;
+      }
+
+      if (btnVaciar) btnVaciar.disabled = false;
+      if (btnWhatsapp) btnWhatsapp.disabled = false;
+
+      contenedor.innerHTML = "";
+
+      let totalItems = 0;
+      let totalPrecio = 0;
+
+      carrito.forEach((item, idx) => {
+        const codigo = item.codigo ?? item.Codigo ?? item.cod ?? "";
+        const nombre =
+          item.nombre ?? item["Nombre Corto"] ?? item.nombreCorto ?? "Producto sin nombre";
+        const precio =
+          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
+        const stock = Number(item.stock ?? item.Stock ?? item["Stock"] ?? 0);
+        const img = item.img ?? item.imagen ?? item.Imagen ?? "";
+        const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
+
+        totalItems += cantidad;
+        totalPrecio += precio * cantidad;
+
+        const card = document.createElement("article");
+        card.classList.add("carrito-item");
+
+        card.innerHTML = `
+          <div class="carrito-item-top">
+            <div class="carrito-item-img">
+              <img src="${img || "img/sin-imagen.png"}" alt="${nombre}">
+            </div>
+
+            <div class="carrito-item-textos">
+              <p class="carrito-item-nombre">${nombre}</p>
+              <p class="carrito-item-detalle">Cod: ${codigo}</p>
+              <p class="carrito-item-detalle">Stock disponible: ${stock}</p>
+            </div>
+          </div>
+
+          <div class="carrito-item-bottom">
+            <div class="carrito-item-controles">
+              <button class="btn-cant btn-menos" data-idx="${idx}" aria-label="Restar uno">−</button>
+              <span class="carrito-item-cantidad" data-idx="${idx}">${cantidad}</span>
+              <button class="btn-cant btn-mas" data-idx="${idx}" aria-label="Sumar uno">+</button>
+            </div>
+
+            <div class="carrito-item-precios">
+              <span>Unitario: $${formatearPrecio(precio)}</span>
+              <span>Subtotal: $${formatearPrecio(precio * cantidad)}</span>
+            </div>
+
+            <button class="btn-eliminar" data-idx="${idx}">Eliminar</button>
+          </div>
+        `;
+
+        contenedor.appendChild(card);
+      });
+
+      spanTotalItems.textContent = String(totalItems);
+      spanTotalPrecio.textContent = formatearPrecio(totalPrecio);
+
+      // listeners
+      contenedor.querySelectorAll(".btn-mas").forEach((btn) => {
+        btn.addEventListener("click", () => cambiarCantidad(btn.dataset.idx, +1));
+      });
+
+      contenedor.querySelectorAll(".btn-menos").forEach((btn) => {
+        btn.addEventListener("click", () => cambiarCantidad(btn.dataset.idx, -1));
+      });
+
+      contenedor.querySelectorAll(".btn-eliminar").forEach((btn) => {
+        btn.addEventListener("click", () => eliminarItem(btn.dataset.idx));
+      });
+    }
+
+    function cambiarCantidad(idx, delta) {
+      const carrito = leerCarrito();
+      const i = Number(idx);
+      if (isNaN(i) || !carrito[i]) return;
+
+      const item = carrito[i];
+      const stock = Number(item.stock ?? item.Stock ?? item["Stock"] ?? 0);
+      let cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
+
+      cantidad += delta;
+
+      if (cantidad < 1) cantidad = 1;
+      if (stock && cantidad > stock) cantidad = stock;
+
+      item.cantidad = cantidad;
+      carrito[i] = item;
+
+      guardarCarrito(carrito);
+      renderCarrito();
+    }
+
+    function eliminarItem(idx) {
+      const carrito = leerCarrito();
+      const i = Number(idx);
+      if (isNaN(i) || !carrito[i]) return;
+      carrito.splice(i, 1);
+      guardarCarrito(carrito);
+      renderCarrito();
+    }
+
+    /* ---------- BOTONES PRINCIPALES ---------- */
+    document.getElementById("btn-seguir").addEventListener("click", () => {
+      window.location.href = "catalogo.html";
+    });
+
+    document.getElementById("btn-vaciar").addEventListener("click", () => {
+      if (!confirm("¿Vaciar carrito completo?")) return;
+      guardarCarrito([]);
+      renderCarrito();
+    });
+
+    document.getElementById("btn-whatsapp").addEventListener("click", () => {
+      const carrito = leerCarrito();
+      if (!carrito.length) return;
+
+      let texto = "Hola! Quiero hacer este pedido mayorista:%0A%0A";
+
+      carrito.forEach((item) => {
+        const codigo = item.codigo ?? item.Codigo ?? "";
+        const nombre =
+          item.nombre ?? item["Nombre Corto"] ?? "Producto sin nombre";
+        const precio =
+          Number(item.precioMayorista ?? item.precio ?? item.PrecioMayorista ?? 0);
+        const cantidad = Number(item.cantidad ?? item.Cantidad ?? 1);
+        const subtotal = precio * cantidad;
+
+        texto += `• ${codigo} - ${nombre} x ${cantidad}u = $${formatearPrecio(subtotal)}%0A`;
+      });
+
+      const total = document.getElementById("carrito-total-precio").textContent || "0";
+      texto += `%0A🔹 Total estimado: $${total}`;
+
+      const url = `https://wa.me/${TELEFONO_WHATSAPP}?text=${texto}`;
+      window.open(url, "_blank");
+    });
+
+    // Inicio
+    renderCarrito();
+  </script>
 </body>
 </html>
