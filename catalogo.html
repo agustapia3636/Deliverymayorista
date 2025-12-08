@@ -347,15 +347,25 @@
       z-index: 999;
       transition: transform 0.08s ease, filter 0.08s ease;
     }
+.btn-wa-flotante:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+}
 
-    .btn-wa-flotante:hover {
-      filter: brightness(1.06);
-      transform: translateY(-1px);
-    }
-     @media (max-width: 480px) {
-    .btn-wa-flotante {
-     bottom: 90px !important;
+@media (max-width: 480px) {
+  .btn-wa-flotante {
+    bottom: 90px !important;
   }
+}
+
+/* contorno circular premium */
+.btn-wa-flotante:focus,
+.btn-wa-flotante:active,
+.btn-wa-flotante:visited {
+  outline: none;
+  border-radius: 50% !important;
+  box-shadow: 0 0 0 3px #25d36688;
+}
 }
     /* MINI CARRITO FLOTANTE */
     .mini-carrito {
