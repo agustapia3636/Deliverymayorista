@@ -11,8 +11,9 @@ const CLAVE_CARRITO = "dm_carrito";
 // Elementos del DOM
 const grid = document.getElementById("lista-productos");      // contenedor de tarjetas
 const buscador = document.getElementById("buscador");         // input de búsqueda
-const filtroCategoria = document.getElementById("filtro-categoria"); // select de categorías
-const filtroSubcategoria = document.getElementById("filtro-subcategoria"); // select de subcategorías
+const filtroCategoria = document.getElementById("filtro-categoria");     // select categoría
+const filtroSubcategoria = document.getElementById("filtro-subcategoria"); // select subcategoría (oculto)
+const contSubMenu = document.getElementById("subcategoria-menu");        // submenú a la derecha
 
 // Mini carrito (globito abajo a la derecha)
 const miniCantidad = document.getElementById("mini-carrito-cantidad");
@@ -20,7 +21,7 @@ const miniTotal   = document.getElementById("mini-carrito-total");
 
 // Mapa: categoria (lowercase) -> Set(subcategorías originales)
 let MAPA_CAT_SUB = {};
-// Set global de todas las subcategorías (originales)
+// Conjunto global de subcategorías (por si lo necesitás después)
 let TODAS_LAS_SUBCATS = new Set();
 
 let TODOS_LOS_PRODUCTOS = [];
@@ -448,39 +449,61 @@ function aplicarFiltros() {
 }
 
 // ========================================
-// SUBCATEGORÍAS DEPENDIENTES DE CATEGORÍA
+// SUBMENÚ DE SUBCATEGORÍAS A LA DERECHA
 // ========================================
 
-function actualizarOpcionesSubcategorias(catSeleccionada) {
-  if (!filtroSubcategoria) return;
+function marcarChipActiva(chipActiva) {
+  if (!contSubMenu) return;
+  contSubMenu.querySelectorAll(".subcat-chip").forEach(ch =>
+    ch.classList.remove("activa")
+  );
+  chipActiva.classList.add("activa");
+}
 
-  const clave = (catSeleccionada || "todas").toLowerCase();
+function renderSubcategoriaMenu(catKey) {
+  if (!contSubMenu) return;
 
-  // Si se elige "todas", usamos todas las subcategorías globales
-  let listaSubs;
-  if (clave === "todas" || !MAPA_CAT_SUB[clave]) {
-    listaSubs = Array.from(TODAS_LAS_SUBCATS);
-  } else {
-    listaSubs = Array.from(MAPA_CAT_SUB[clave]);
+  const key = (catKey || "todas").toLowerCase();
+  contSubMenu.innerHTML = "";
+
+  // Si no hay categoría o es "todas", no mostramos submenú
+  if (key === "todas" || !MAPA_CAT_SUB[key] || MAPA_CAT_SUB[key].size === 0) {
+    contSubMenu.style.display = "none";
+    if (filtroSubcategoria) filtroSubcategoria.value = "todas";
+    return;
   }
 
-  listaSubs.sort((a, b) => a.localeCompare(b, "es"));
+  contSubMenu.style.display = "flex";
 
-  filtroSubcategoria.innerHTML = "";
-  const optTodasSub = document.createElement("option");
-  optTodasSub.value = "todas";
-  optTodasSub.textContent = "Todas las subcategorías";
-  filtroSubcategoria.appendChild(optTodasSub);
+  const subList = Array.from(MAPA_CAT_SUB[key]).sort(
+    (a, b) => a.localeCompare(b, "es")
+  );
 
-  listaSubs.forEach(sub => {
-    const op = document.createElement("option");
-    op.value = sub.toLowerCase();
-    op.textContent = sub;
-    filtroSubcategoria.appendChild(op);
+  // Botón "Todas"
+  const chipTodas = document.createElement("button");
+  chipTodas.className = "subcat-chip activa";
+  chipTodas.textContent = "Todas";
+  chipTodas.addEventListener("click", () => {
+    if (filtroSubcategoria) filtroSubcategoria.value = "todas";
+    marcarChipActiva(chipTodas);
+    aplicarFiltros();
   });
+  contSubMenu.appendChild(chipTodas);
 
-  // siempre volvemos a "todas" cuando cambia la categoría
-  filtroSubcategoria.value = "todas";
+  // Chips de cada subcategoría
+  subList.forEach(sub => {
+    const chip = document.createElement("button");
+    chip.className = "subcat-chip";
+    chip.textContent = sub;
+    chip.addEventListener("click", () => {
+      if (filtroSubcategoria) {
+        filtroSubcategoria.value = sub.toLowerCase();
+      }
+      marcarChipActiva(chip);
+      aplicarFiltros();
+    });
+    contSubMenu.appendChild(chip);
+  });
 }
 
 // ========================================
@@ -549,8 +572,27 @@ async function cargarProductos() {
       });
     }
 
-    // llenar combo de subcategorías (todas al principio)
-    actualizarOpcionesSubcategorias("todas");
+    // llenamos el select oculto de subcategorías con TODAS (por si se necesita)
+    if (filtroSubcategoria) {
+      const listaSubs = Array.from(TODAS_LAS_SUBCATS).sort(
+        (a, b) => a.localeCompare(b, "es")
+      );
+      filtroSubcategoria.innerHTML = "";
+      const optTodasSub = document.createElement("option");
+      optTodasSub.value = "todas";
+      optTodasSub.textContent = "Todas las subcategorías";
+      filtroSubcategoria.appendChild(optTodasSub);
+      listaSubs.forEach(sub => {
+        const op = document.createElement("option");
+        op.value = sub.toLowerCase();
+        op.textContent = sub;
+        filtroSubcategoria.appendChild(op);
+      });
+      filtroSubcategoria.value = "todas";
+    }
+
+    // al inicio: sin submenú (porque la categoría es "todas")
+    renderSubcategoriaMenu("todas");
 
     renderProductos(TODOS_LOS_PRODUCTOS);
     actualizarMiniCarrito();
@@ -571,8 +613,7 @@ if (buscador) {
 if (filtroCategoria) {
   filtroCategoria.addEventListener("change", () => {
     const seleccion = filtroCategoria.value || "todas";
-    // actualizamos subcategorías en función de la categoría
-    actualizarOpcionesSubcategorias(seleccion);
+    renderSubcategoriaMenu(seleccion);
     aplicarFiltros();
   });
 }
