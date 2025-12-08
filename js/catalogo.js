@@ -810,7 +810,6 @@ function construirMenuCategorias(categoriasUnicas) {
     megaCatList.appendChild(li);
   });
 
-  seleccionarCategoria("todas");
 }
 
 // ========= CARGA INICIAL =========
