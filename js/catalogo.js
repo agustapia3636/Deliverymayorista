@@ -4,6 +4,7 @@
 // con 3er nivel de ETIQUETAS libres + iconos
 // + memoria de filtros en localStorage
 // + botón premium "Limpiar filtros"
+// + PAGINACIÓN
 // ========================================
 
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
@@ -28,6 +29,16 @@ const megaResetBtn = document.getElementById("megaReset");
 
 const miniCantidad = document.getElementById("mini-carrito-cantidad");
 const miniTotal    = document.getElementById("mini-carrito-total");
+
+// Paginación
+const resumenResultados   = document.getElementById("resumen-resultados");
+const btnPaginaAnterior   = document.getElementById("btn-pagina-anterior");
+const btnPaginaSiguiente  = document.getElementById("btn-pagina-siguiente");
+const contenedorNumeros   = document.getElementById("paginador-numeros");
+
+const ITEMS_POR_PAGINA = 24;
+let paginaActual = 1;
+let ultimoTotalFiltrado = 0;
 
 // mapa categoría → subcategorías
 let MAPA_CAT_SUB   = {};
@@ -54,9 +65,11 @@ const CLAVE_FILTROS = "dm_filtros";
 
 function guardarFiltrosActuales() {
   const data = {
-    categoria: categoriaSeleccionada || "todas",
+    categoria:    categoriaSeleccionada || "todas",
     subcategoria: subcategoriaSeleccionada || "todas",
-    etiqueta: etiquetaSeleccionada || "todas"
+    etiqueta:     etiquetaSeleccionada || "todas",
+    pagina:       paginaActual || 1,
+    busqueda:     buscador ? buscador.value.trim().toLowerCase() : ""
   };
   try {
     localStorage.setItem(CLAVE_FILTROS, JSON.stringify(data));
@@ -507,7 +520,69 @@ function aplicarFiltros() {
     return pasaTexto && pasaCategoria && pasaSubcategoria && pasaEtiqueta;
   });
 
-  renderProductos(filtrados);
+  renderConPaginador(filtrados);
+}
+
+// ========= PAGINACIÓN =========
+
+function renderConPaginador(listaFiltrada) {
+  ultimoTotalFiltrado = listaFiltrada.length;
+
+  let totalPaginas = Math.max(
+    1,
+    Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
+  );
+
+  if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+  if (paginaActual < 1) paginaActual = 1;
+
+  const inicio = (paginaActual - 1) * ITEMS_POR_PAGINA;
+  const fin    = inicio + ITEMS_POR_PAGINA;
+
+  const paginaLista = listaFiltrada.slice(inicio, fin);
+
+  // Render de tarjetas
+  renderProductos(paginaLista);
+
+  // Resumen
+  if (resumenResultados) {
+    if (ultimoTotalFiltrado === 0) {
+      resumenResultados.textContent = "0 productos encontrados";
+    } else {
+      const desde = inicio + 1;
+      const hasta = inicio + paginaLista.length;
+      resumenResultados.textContent = `Mostrando ${desde}-${hasta} de ${ultimoTotalFiltrado} productos`;
+    }
+  }
+
+  // Paginador
+  if (contenedorNumeros) {
+    contenedorNumeros.innerHTML = "";
+
+    for (let i = 1; i <= totalPaginas; i++) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "paginador-numero";
+      if (i === paginaActual) {
+        btn.classList.add("paginador-numero--activo");
+      }
+      btn.textContent = i;
+      btn.addEventListener("click", () => {
+        paginaActual = i;
+        guardarFiltrosActuales();
+        aplicarFiltros();
+      });
+      contenedorNumeros.appendChild(btn);
+    }
+  }
+
+  // Prev / Next
+  if (btnPaginaAnterior) {
+    btnPaginaAnterior.disabled = paginaActual <= 1;
+  }
+  if (btnPaginaSiguiente) {
+    btnPaginaSiguiente.disabled = paginaActual >= totalPaginas;
+  }
 }
 
 // ========= ICONOS PARA CATEGORÍAS =========
@@ -515,14 +590,11 @@ function aplicarFiltros() {
 function iconoParaCategoria(catLabel) {
   if (!catLabel) return "•";
 
-  // Normalizamos el texto para matchear bien
   const txt = catLabel.toLowerCase().trim();
 
-  // Mapeo explícito por nombre de categoría
   const mapa = {
     "todas las categorías": "★",
 
-    // Las que se ven en tu menú
     "accesorios vehiculares": "🚗",
     "baño y cocina": "🍽️",
     "bano y cocina": "🍽️",
@@ -532,7 +604,6 @@ function iconoParaCategoria(catLabel) {
     "decoración": "🕯️",
     "decoracion": "🕯️",
 
-    // Por si tenés estas u otras similares
     "bazar": "🛍️",
     "hogar": "🏡",
     "librería": "📚",
@@ -553,7 +624,6 @@ function iconoParaCategoria(catLabel) {
 
   if (mapa[txt]) return mapa[txt];
 
-  // Fallback si agregás nuevas categorías más adelante
   if (txt.includes("vehicul")) return "🚗";
   if (txt.includes("auto") || txt.includes("motor")) return "🚙";
   if (txt.includes("baño") || txt.includes("bano") || txt.includes("cocina")) return "🍽️";
@@ -568,7 +638,6 @@ function iconoParaCategoria(catLabel) {
   if (txt.includes("bolso") || txt.includes("mochila")) return "🎒";
   if (txt.includes("bazar")) return "🛍️";
 
-  // Último recurso
   return "•";
 }
 
@@ -616,6 +685,7 @@ function seleccionarCategoria(catKey) {
   categoriaSeleccionada    = catKey || "todas";
   subcategoriaSeleccionada = "todas";
   etiquetaSeleccionada     = "todas";
+  paginaActual             = 1;
 
   if (filtroCategoria)    filtroCategoria.value    = categoriaSeleccionada;
   if (filtroSubcategoria) filtroSubcategoria.value = "todas";
@@ -643,6 +713,7 @@ function seleccionarCategoria(catKey) {
 function seleccionarSubcategoria(catKey, subKey, subLabel) {
   subcategoriaSeleccionada = subKey || "todas";
   etiquetaSeleccionada     = "todas";
+  paginaActual             = 1;
 
   if (filtroSubcategoria) filtroSubcategoria.value = subcategoriaSeleccionada;
 
@@ -663,6 +734,7 @@ function seleccionarSubcategoria(catKey, subKey, subLabel) {
 
 function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
   etiquetaSeleccionada = tagKey || "todas";
+  paginaActual         = 1;
 
   if (megaTagList) {
     megaTagList.querySelectorAll(".mega-tagitem").forEach(li => {
@@ -680,6 +752,8 @@ function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
 
 // Botón Premium: limpiar filtros
 function resetearFiltrosMega() {
+  if (buscador) buscador.value = "";
+  paginaActual = 1;
   seleccionarCategoria("todas");
   cerrarMegaMenu();
 }
@@ -914,7 +988,7 @@ async function cargarProductos() {
       filtroSubcategoria.value = "todas";
     }
 
-    renderProductos(TODOS_LOS_PRODUCTOS);
+    aplicarFiltros();
     actualizarMiniCarrito();
   } catch (err) {
     console.error(err);
@@ -925,7 +999,41 @@ async function cargarProductos() {
 // ========= EVENTOS =========
 
 if (buscador) {
-  buscador.addEventListener("input", aplicarFiltros);
+  buscador.addEventListener("input", () => {
+    paginaActual = 1;
+    aplicarFiltros();
+    guardarFiltrosActuales();
+  });
+}
+
+if (btnPaginaAnterior) {
+  btnPaginaAnterior.addEventListener("click", () => {
+    const totalPaginas = Math.max(
+      1,
+      Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
+    );
+    if (paginaActual > 1) {
+      paginaActual--;
+      if (paginaActual < 1) paginaActual = 1;
+      guardarFiltrosActuales();
+      aplicarFiltros();
+    }
+  });
+}
+
+if (btnPaginaSiguiente) {
+  btnPaginaSiguiente.addEventListener("click", () => {
+    const totalPaginas = Math.max(
+      1,
+      Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
+    );
+    if (paginaActual < totalPaginas) {
+      paginaActual++;
+      if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+      guardarFiltrosActuales();
+      aplicarFiltros();
+    }
+  });
 }
 
 if (megaToggle && megaDropdown) {
@@ -962,18 +1070,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const guardados = leerFiltrosGuardados();
   if (guardados) {
-    const { categoria, subcategoria, etiqueta } = guardados;
+    const {
+      categoria,
+      subcategoria,
+      etiqueta,
+      pagina,
+      busqueda
+    } = guardados;
 
     const catKey = categoria || "todas";
     const subKey = subcategoria || "todas";
     const tagKey = etiqueta || "todas";
 
-    // Categoría
+    if (typeof pagina === "number" && pagina > 0) {
+      paginaActual = pagina;
+    }
+
+    if (busqueda && buscador) {
+      buscador.value = busqueda;
+    }
+
     if (catKey && catKey !== "todas") {
       seleccionarCategoria(catKey);
     }
 
-    // Subcategoría
     if (subKey && subKey !== "todas") {
       let subLabel = null;
       const setSubs = MAPA_CAT_SUB[catKey];
@@ -988,7 +1108,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       seleccionarSubcategoria(catKey, subKey, subLabel || subKey);
     }
 
-    // Etiqueta
     if (tagKey && tagKey !== "todas") {
       let tagLabel = null;
       const tagsPorCat = MAPA_TAGS[catKey];
