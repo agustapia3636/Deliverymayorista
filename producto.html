@@ -237,14 +237,15 @@
 
         const prod = productos[index];
 
-        // mapeo al formato de data/productos.json
+        // datos del producto
         const codigo       = prod.codigo || "";
         const nombreCorto  = prod.nombre || "";
         const categoria    = prod.categoria || "";
         const subcategoria = prod.subcategoria || "";
         const descLarga    = prod.descripcionLarga || "";
         const precioMayor  = parsearPrecio(prod.precio);
-        const precioUsado  = precioMayor; // si luego tenés otro precio, se puede extender
+        const precioCliente = null;
+        const precioUsado  = precioMayor ?? precioCliente ?? null;
         const stock        = prod.stock ?? "";
         const stockNum     = Number(stock);
 
@@ -294,17 +295,26 @@
           stockHtml = `<p class="${cls}">Stock: ${stock} unidades</p>`;
         }
 
-        infoDiv.innerHTML = `
-          ${categoriaLinea ? `<p class="producto-categoria">${categoriaLinea}</p>` : ""}
-          <h1 class="producto-titulo">${nombreCorto}</h1>
+        // categoría + subcategoría en una sola línea
+        const categoriaHtml =
+          categoria || subcategoria
+            ? `<p class="producto-categoria">
+                 ${categoria}
+                 ${categoria && subcategoria ? " · " : ""}
+                 ${subcategoria}
+               </p>`
+            : "";
 
+        infoDiv.innerHTML = `
+          <p class="producto-codigo">${codigo}</p>
+          <h1 class="producto-titulo">${nombreCorto}</h1>
+          ${categoriaHtml}
           ${descLarga ? `<p class="producto-descripcion">${descLarga}</p>` : ""}
           ${precioTexto ? `<p class="producto-precio">${precioTexto}</p>` : ""}
           ${stockHtml}
-
           <div class="producto-acciones">
             <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
-            <a href="${armarLinkWhatsApp(prod)}" target="_blank" rel="noopener noreferrer" class="btn-whatsapp">
+            <a href="${armarLinkWhatsApp(prod)}" target="_blank" class="btn-whatsapp">
               Consultar por WhatsApp
             </a>
           </div>
@@ -360,7 +370,6 @@
         "¿Me pasás disponibilidad y cantidades mínimas?",
       ].join("\n");
 
-      // si querés que vaya a un número específico, poné: https://wa.me/549xxxxxxxxx?text=...
       return `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
     }
 
@@ -373,8 +382,8 @@
     cargarProducto();
   </script>
 
-  <!-- Opcional: si js/carrito.js no te da errores, lo podés dejar.
-       Si ves errores en consola relacionados al carrito, borra la línea de abajo -->
+  <!-- Si js/carrito.js no da errores en consola, podés dejarlo.
+       Si ves errores del carrito en esta página, borra la línea de abajo. -->
   <script src="js/carrito.js"></script>
 </body>
 </html>
