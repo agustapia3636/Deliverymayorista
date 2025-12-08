@@ -156,6 +156,22 @@
       font-weight: 600;
     }
 
+    /* Iconos en la columna de categorías */
+    .mega-item {
+      position: relative;
+      padding-left: 30px; /* espacio para el icono */
+    }
+
+    .mega-item::before {
+      content: attr(data-icon);
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      opacity: 0.95;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -454,7 +470,7 @@
       placeholder="Buscar por código o descripción"
     />
 
-    <!-- MEGA DROPDOWN DE CATEGORÍAS (tipo "Telefonía") -->
+    <!-- MEGA DROPDOWN DE CATEGORÍAS -->
     <div class="mega-dropdown" id="megaDropdown">
       <button id="categoriaToggle" class="mega-toggle">
         <span class="mega-label">Todas las categorías</span>
@@ -508,6 +524,6 @@
   </div>
 
   <!-- SCRIPT DEL CATÁLOGO + CARRITO -->
-  <script src="js/catalogo.js?v=3"></script>
+  <script src="js/catalogo.js?v=4"></script>
 </body>
 </html>
