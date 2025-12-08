@@ -188,11 +188,26 @@ function renderProductos(lista) {
 
     const titulo = `${codigo} - ${nombreBase}`;
 
+    // ============================
+    // DESCRIPCIÓN LARGA (robusta)
+    // ============================
     const descLarga = safe(
-      prod.descripcionCorta ||
+      prod.descripcionLarga ||                 // camelCase sin acento
+      prod.descripcion_larga ||                // snake case sin acento
+      prod["descripcionLarga"] ||              // bracket sin acento
+      prod["descripcion_larga"] ||             // bracket snake
+
+      prod["Descripción Larga"] ||             // con acento + espacio
+      prod["Descripcion Larga"] ||             // sin acento + espacio
+      prod["Descripción_Larga"] ||             // con acento + underscore
+      prod["Descripcion_Larga"] ||             // sin acento + underscore
+
+      prod.descripcionCorta ||                 // alternativas
       prod.descripcion_corta ||
       prod.descripcion ||
-      prod["Descripción Larga"] ||
+      prod["Descripción"] ||
+      prod["Descripcion"] ||
+
       "",
       ""
     );
