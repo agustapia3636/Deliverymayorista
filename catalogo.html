@@ -9,7 +9,8 @@
   <title>Delivery Mayorista | Catálogo</title>
 
   <style>
-    /* Ocultar el select de subcategorías (solo se usa internamente) */
+    /* Ocultamos los selects reales (se usan internamente para filtros) */
+    #filtro-categoria,
     #filtro-subcategoria {
       display: none !important;
     }
@@ -38,37 +39,115 @@
       flex-wrap: wrap;
     }
 
-    .toolbar input,
-    .toolbar select {
+    .toolbar input {
       padding: 12px 18px;
       border-radius: 30px;
       border: none;
       outline: none;
       font-size: 15px;
-      min-width: 230px;
+      min-width: 260px;
     }
 
-    /* Submenú de subcategorías pegado al select de categoría */
-    .subcat-menu {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      align-items: center;
+    /* ===========================
+       MEGA MENÚ CATEGORÍAS
+       (estilo 2da imagen)
+    ============================*/
+
+    .mega-dropdown {
+      position: relative;
+      min-width: 260px;
     }
 
-    .subcat-chip {
-      border-radius: 999px;
-      padding: 6px 12px;
+    .mega-toggle {
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: 30px;
       border: none;
-      font-size: 12px;
+      outline: none;
+      font-size: 15px;
+      background: #ffffff;
+      color: #000;
       cursor: pointer;
-      background: #202432;
-      color: #fff;
-      white-space: nowrap;
-      transition: background 0.15s ease, color 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .subcat-chip.activa {
+    .mega-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 230px;
+      text-align: left;
+    }
+
+    .mega-arrow {
+      font-size: 10px;
+      margin-left: 8px;
+    }
+
+    .mega-menu {
+      position: absolute;
+      top: 110%;
+      left: 0;
+      background: #111217;
+      color: #fff;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+      display: none;
+      min-width: 320px;
+      max-width: 480px;
+      padding: 12px 8px;
+      z-index: 999;
+      column-gap: 4px;
+    }
+
+    .mega-dropdown.open .mega-menu {
+      display: flex;
+    }
+
+    .mega-col {
+      flex: 1;
+      padding: 4px 8px;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .mega-col:last-child {
+      border-right: none;
+    }
+
+    .mega-col h4 {
+      font-size: 13px;
+      margin: 4px 4px 8px;
+      opacity: 0.75;
+    }
+
+    .mega-col ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+
+    .mega-item,
+    .mega-subitem {
+      padding: 7px 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      margin: 2px 0;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
+
+    .mega-item:hover,
+    .mega-subitem:hover {
+      background: #1f2430;
+    }
+
+    .mega-item-activo,
+    .mega-subitem-activo {
       background: #ffa400;
       color: #000;
       font-weight: 600;
@@ -267,7 +346,7 @@
       font-weight: 500;
     }
 
-    /* SOLO EN CELULAR: subir un poco el mini carrito para que no tape el botón de WhatsApp */
+    /* SOLO EN CELULAR */
     @media (max-width: 768px) {
       header {
         text-align: center;
@@ -281,16 +360,20 @@
         align-items: flex-start;
       }
 
-      .toolbar input,
-      .toolbar select {
+      .toolbar input {
         width: 100%;
         max-width: 420px;
         font-size: 14px;
       }
 
-      .subcat-menu {
+      .mega-dropdown {
         width: 100%;
-        margin-top: 4px;
+        max-width: 420px;
+      }
+
+      .mega-menu {
+        max-width: 100%;
+        min-width: 100%;
       }
 
       .grid {
@@ -373,13 +456,28 @@
       placeholder="Buscar por código o descripción"
     />
 
-    <!-- Bloque de categoría + subcategorías adentro -->
-    <div class="categoria-bloque">
-      <select id="filtro-categoria"></select>
+    <!-- MEGA DROPDOWN DE CATEGORÍAS (tipo "Telefonía") -->
+    <div class="mega-dropdown" id="megaDropdown">
+      <button id="categoriaToggle" class="mega-toggle">
+        <span class="mega-label">Todas las categorías</span>
+        <span class="mega-arrow">▾</span>
+      </button>
 
-      <!-- Submenú de subcategorías (chips) -->
-      <div id="subcategoria-menu" class="subcat-menu"></div>
+      <div id="megaMenu" class="mega-menu">
+        <div class="mega-col">
+          <h4>Categorías</h4>
+          <ul id="megaCategorias"></ul>
+        </div>
+        <div class="mega-col">
+          <h4 id="megaSubTitle">Subcategorías</h4>
+          <ul id="megaSubcategorias"></ul>
+        </div>
+      </div>
     </div>
+
+    <!-- selects ocultos para la lógica de filtros -->
+    <select id="filtro-categoria"></select>
+    <select id="filtro-subcategoria"></select>
   </div>
 
   <div id="lista-productos" class="grid"></div>
@@ -407,10 +505,7 @@
     </div>
   </div>
 
-  <!-- select oculto de subcategoría que usa el JS -->
-  <select id="filtro-subcategoria" style="display:none;"></select>
-
   <!-- SCRIPT DEL CATÁLOGO + CARRITO -->
-  <script src="js/catalogo.js?v=1"></script>
+  <script src="js/catalogo.js?v=2"></script>
 </body>
 </html>
