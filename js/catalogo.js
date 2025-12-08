@@ -6,11 +6,11 @@ const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayori
 const CLAVE_CARRITO = "dm_carrito";
 
 // DOM
-const grid = document.getElementById("lista-productos");
-const buscador = document.getElementById("buscador");
-const filtroCategoria = document.getElementById("filtro-categoria");
-const filtroSubcategoria = document.getElementById("filtro-subcategoria"); // oculto
-const contSubMenu = document.getElementById("subcategoria-menu");
+const grid             = document.getElementById("lista-productos");
+const buscador         = document.getElementById("buscador");
+const filtroCategoria  = document.getElementById("filtro-categoria");
+const filtroSubcategoria = document.getElementById("filtro-subcategoria"); // oculto por CSS
+const contSubMenu      = document.getElementById("subcategoria-menu");
 
 const miniCantidad = document.getElementById("mini-carrito-cantidad");
 const miniTotal   = document.getElementById("mini-carrito-total");
@@ -188,26 +188,16 @@ function renderProductos(lista) {
 
     const titulo = `${codigo} - ${nombreBase}`;
 
-    // ============================
-    // DESCRIPCIÓN LARGA (robusta)
-    // ============================
+    // descripción larga: aceptamos muchas variantes de nombre de campo
     const descLarga = safe(
-      prod.descripcionLarga ||                 // camelCase sin acento
-      prod.descripcion_larga ||                // snake case sin acento
-      prod["descripcionLarga"] ||              // bracket sin acento
-      prod["descripcion_larga"] ||             // bracket snake
-
-      prod["Descripción Larga"] ||             // con acento + espacio
-      prod["Descripcion Larga"] ||             // sin acento + espacio
-      prod["Descripción_Larga"] ||             // con acento + underscore
-      prod["Descripcion_Larga"] ||             // sin acento + underscore
-
-      prod.descripcionCorta ||                 // alternativas
+      prod.descripcionLarga ||
+      prod.descripcion_larga ||
+      prod["descripcionLarga"] ||
+      prod["descripcion_larga"] ||
+      prod["Descripción Larga"] ||
+      prod.descripcionCorta ||
       prod.descripcion_corta ||
       prod.descripcion ||
-      prod["Descripción"] ||
-      prod["Descripcion"] ||
-
       "",
       ""
     );
@@ -403,12 +393,20 @@ function aplicarFiltros() {
     ).toLowerCase();
 
     const categoria = safe(
-      prod.categoria || prod.rubro || prod.cat || prod["Categoria Princ"],
+      prod.categoria ||
+      prod.rubro ||
+      prod.cat ||
+      prod["Categoria Princ"] ||
+      prod["Categoria_Princ"],
       ""
     ).toLowerCase();
 
     const subcategoria = safe(
-      prod.subcategoria || prod.Subcategoria || prod["Subcategoria"],
+      prod.subcategoria ||
+      prod.Subcategoria ||
+      prod.Sub_Categoria ||
+      prod["Sub_Categoria"] ||
+      prod["Subcategoria"],
       ""
     ).toLowerCase();
 
@@ -497,12 +495,16 @@ async function cargarProductos() {
 
     TODOS_LOS_PRODUCTOS.forEach(p => {
       const catOriginal = safe(
-        p.categoria || p.rubro || p.cat || p["Categoria Princ"],
+        p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
         ""
       ).toString().trim();
 
       const subOriginal = safe(
-        p.subcategoria || p.Subcategoria || p["Subcategoria"],
+        p.subcategoria ||
+        p.Subcategoria ||
+        p.Sub_Categoria ||
+        p["Sub_Categoria"] ||
+        p["Subcategoria"],
         ""
       ).toString().trim();
 
@@ -516,12 +518,13 @@ async function cargarProductos() {
       }
     });
 
+    // Poblar select de categorías
     if (filtroCategoria) {
       const categoriasUnicas = Array.from(
         new Set(
           TODOS_LOS_PRODUCTOS.map(p =>
             safe(
-              p.categoria || p.rubro || p.cat || p["Categoria Princ"],
+              p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
               ""
             ).toString()
           ).filter(c => c !== "")
@@ -542,6 +545,7 @@ async function cargarProductos() {
       });
     }
 
+    // Poblar select oculto de subcategorías
     if (filtroSubcategoria) {
       const listaSubs = Array.from(TODAS_LAS_SUBCATS).sort(
         (a, b) => a.localeCompare(b, "es")
