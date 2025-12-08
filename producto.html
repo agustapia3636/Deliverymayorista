@@ -20,13 +20,13 @@
       justify-content: center;
       gap: 48px;
 
-      opacity:0;
-      transform:translateY(10px);
-      transition:opacity .35s ease, transform .35s ease;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .35s ease, transform .35s ease;
     }
     main.producto-pagina .producto-wrapper.visible {
-      opacity:1;
-      transform:translateY(0);
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .producto-imagen {
@@ -94,15 +94,15 @@
 
     /* COLORES DE STOCK */
     .producto-stock {
-      margin-top:6px;
+      margin-top: 6px;
     }
     .producto-stock.stock-sin {
-      color:#ff4d4f;
-      font-weight:600;
+      color: #ff4d4f;
+      font-weight: 600;
     }
     .producto-stock.stock-bajo {
-      color:#ffd666;
-      font-weight:600;
+      color: #ffd666;
+      font-weight: 600;
     }
 
     /* ====== MOBILE / TABLET ====== */
@@ -187,195 +187,204 @@
   </footer>
 
   <!-- ============ LÓGICA JS ============ -->
-<script>
-  const BASE_IMG =
-    "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
+  <script>
+    const BASE_IMG =
+      "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
-  // "1992,2" -> 1992.2
-  function parsearPrecio(valor) {
-    if (typeof valor === "number") return valor;
-    if (typeof valor === "string") {
-      const limpio = valor.replace(/\./g, "").replace(",", ".");
-      const num = Number(limpio);
-      return isNaN(num) ? null : num;
-    }
-    return null;
-  }
-
-  function obtenerCodigoDeURL() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get("codigo");
-  }
-
-  async function cargarProducto() {
-    const codigoURL = obtenerCodigoDeURL();
-    const infoDiv = document.getElementById("producto-info");
-
-    if (!codigoURL) {
-      infoDiv.innerHTML =
-        "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
-      return;
+    // "1992,2" -> 1992.2
+    function parsearPrecio(valor) {
+      if (typeof valor === "number") return valor;
+      if (typeof valor === "string") {
+        const limpio = valor.replace(/\./g, "").replace(",", ".");
+        const num = Number(limpio);
+        return isNaN(num) ? null : num;
+      }
+      return null;
     }
 
-    try {
-      // 👇 OJO: si tu archivo está en /data/productos.json, cambiá esta línea
-      const resp = await fetch("data/productos.json");
-      if (!resp.ok)
-        throw new Error("No se pudo cargar productos.json: " + resp.status);
+    function obtenerCodigoDeURL() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("codigo");
+    }
 
-      const data = await resp.json();
-      const productos = Array.isArray(data) ? data : data.productos || [];
+    async function cargarProducto() {
+      const codigoURL = obtenerCodigoDeURL();
+      const infoDiv = document.getElementById("producto-info");
 
-      // ahora buscamos por el campo "codigo"
-      const index = productos.findIndex((p) => p.codigo === codigoURL);
-
-      if (index === -1) {
+      if (!codigoURL) {
         infoDiv.innerHTML =
-          "<h2>Producto no encontrado</h2><p>Verificá el código.</p>";
+          "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
         return;
       }
 
-      const prod = productos[index];
+      try {
+        const resp = await fetch("data/productos.json");
+        if (!resp.ok) {
+          throw new Error("No se pudo cargar productos.json: " + resp.status);
+        }
 
-      // mapeo al nuevo formato de productos.json
-const codigo       = prod.codigo || "";
-const nombreCorto  = prod.nombre || "";
-const categoria    = prod.categoria || "";
-const subcategoria = prod.subcategoria || "";   // 👈 NUEVO
-const descLarga    = prod.descripcionLarga || "";
-const precioMayor  = parsearPrecio(prod.precio);
-const stock        = prod.stock ?? "";
-const stockNum     = Number(stock);
+        const data = await resp.json();
+        const productos = Array.isArray(data) ? data : data.productos || [];
 
+        // buscamos por el campo "codigo"
+        const index = productos.findIndex((p) => p.codigo === codigoURL);
 
-      /* ========== IMAGEN ========== */
-      const imgPrincipal = document.getElementById("imagen-principal");
-      if (imgPrincipal) {
-        const urls = [
-          prod.imagen, // si viene la URL directa en el JSON
-          `${BASE_IMG}/${codigo}.jpg`,
-          `${BASE_IMG}/${codigo}.JPG`,
-        ].filter(Boolean);
+        if (index === -1) {
+          infoDiv.innerHTML =
+            "<h2>Producto no encontrado</h2><p>Verificá el código.</p>";
+          return;
+        }
 
-        let intento = 0;
-        const probar = () => {
-          if (intento >= urls.length) return;
-          imgPrincipal.src = urls[intento];
-          intento++;
-        };
+        const prod = productos[index];
 
-        imgPrincipal.alt = nombreCorto || codigo;
-        imgPrincipal.loading = "lazy";
-        imgPrincipal.onerror = probar;
-        probar();
+        // mapeo al formato de data/productos.json
+        const codigo       = prod.codigo || "";
+        const nombreCorto  = prod.nombre || "";
+        const categoria    = prod.categoria || "";
+        const subcategoria = prod.subcategoria || "";
+        const descLarga    = prod.descripcionLarga || "";
+        const precioMayor  = parsearPrecio(prod.precio);
+        const precioUsado  = precioMayor; // si luego tenés otro precio, se puede extender
+        const stock        = prod.stock ?? "";
+        const stockNum     = Number(stock);
+
+        /* ========== IMAGEN ========== */
+        const imgPrincipal = document.getElementById("imagen-principal");
+        if (imgPrincipal) {
+          const urls = [
+            prod.imagen, // URL directa desde el JSON
+            `${BASE_IMG}/${codigo}.jpg`,
+            `${BASE_IMG}/${codigo}.JPG`,
+            `${BASE_IMG}/${codigo}.png`,
+            `${BASE_IMG}/${codigo}.PNG`,
+          ].filter(Boolean);
+
+          let intento = 0;
+          const probar = () => {
+            if (intento >= urls.length) return;
+            imgPrincipal.src = urls[intento];
+            intento++;
+          };
+
+          imgPrincipal.alt = nombreCorto || codigo;
+          imgPrincipal.loading = "lazy";
+          imgPrincipal.onerror = probar;
+          probar();
+        }
+
+        const miniaturasDiv = document.getElementById("miniaturas");
+        if (miniaturasDiv) miniaturasDiv.innerHTML = "";
+
+        /* ========== INFO ========== */
+        const precioTexto =
+          precioUsado != null
+            ? `$ ${precioUsado.toLocaleString("es-AR", {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+              })}`
+            : "";
+
+        let stockHtml = "";
+        if (stock !== "" && stock != null) {
+          let cls = "producto-stock";
+          if (!isNaN(stockNum)) {
+            if (stockNum === 0) cls += " stock-sin";
+            else if (stockNum > 0 && stockNum <= 5) cls += " stock-bajo";
+          }
+          stockHtml = `<p class="${cls}">Stock: ${stock} unidades</p>`;
+        }
+
+        infoDiv.innerHTML = `
+          <p class="producto-codigo">${codigo}</p>
+          <h1 class="producto-titulo">${nombreCorto}</h1>
+
+          ${
+            categoria || subcategoria
+              ? `<p class="producto-categoria">
+                   ${categoria}
+                   ${categoria && subcategoria ? " · " : ""}
+                   ${subcategoria}
+                 </p>`
+              : ""
+          }
+
+          ${descLarga ? `<p class="producto-descripcion">${descLarga}</p>` : ""}
+          ${precioTexto ? `<p class="producto-precio">${precioTexto}</p>` : ""}
+          ${stockHtml}
+
+          <div class="producto-acciones">
+            <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
+            <a href="${armarLinkWhatsApp(prod)}" target="_blank" rel="noopener noreferrer" class="btn-whatsapp">
+              Consultar por WhatsApp
+            </a>
+          </div>
+        `;
+
+        /* ========== NAVEGACIÓN ========== */
+        const nav = document.getElementById("producto-nav");
+        if (nav && productos.length > 1) {
+          const anterior =
+            productos[(index - 1 + productos.length) % productos.length];
+          const siguiente = productos[(index + 1) % productos.length];
+
+          const codAnt = (anterior && anterior.codigo) || "";
+          const codSig = (siguiente && siguiente.codigo) || "";
+
+          nav.innerHTML = `
+            <button class="btn-nav" onclick="irAProducto('${codAnt}')">← ${codAnt}</button>
+            <button class="btn-nav" onclick="window.location.href='catalogo.html'">Volver al listado</button>
+            <button class="btn-nav" onclick="irAProducto('${codSig}')">${codSig} →</button>
+          `;
+        }
+
+        // mostrar animación wrapper
+        const wrapper = document.querySelector(".producto-wrapper");
+        if (wrapper) wrapper.classList.add("visible");
+      } catch (err) {
+        console.error("Error en cargarProducto:", err);
+        const infoDiv = document.getElementById("producto-info");
+        infoDiv.innerHTML =
+          "<h2>Error</h2><p>No se pudo cargar el producto.</p>";
       }
+    }
 
-      const miniaturasDiv = document.getElementById("miniaturas");
-      if (miniaturasDiv) miniaturasDiv.innerHTML = "";
-
-      /* ========== INFO ========== */
-      const precioTexto =
-        precioUsado != null
-          ? `$ ${precioUsado.toLocaleString("es-AR", {
+    function armarLinkWhatsApp(prod) {
+      const codigo      = prod.codigo || "";
+      const nombreCorto = prod.nombre || "";
+      const precioMayor = parsearPrecio(prod.precio);
+      const precioTxt =
+        precioMayor != null
+          ? `$ ${precioMayor.toLocaleString("es-AR", {
               minimumFractionDigits: 0,
               maximumFractionDigits: 0,
             })}`
-          : "";
+          : "Consultar";
 
-      let stockHtml = "";
-      if (stock !== "" && stock != null) {
-        let cls = "producto-stock";
-        if (!isNaN(stockNum)) {
-          if (stockNum === 0) cls += " stock-sin";
-          else if (stockNum > 0 && stockNum <= 5) cls += " stock-bajo";
-        }
-        stockHtml = `<p class="${cls}">Stock: ${stock} unidades</p>`;
-      }
+      const mensaje = [
+        "Hola! Me interesa este producto:",
+        "",
+        `Código: ${codigo}`,
+        `Producto: ${nombreCorto}`,
+        `Precio mayorista: ${precioTxt}`,
+        "",
+        "¿Me pasás disponibilidad y cantidades mínimas?",
+      ].join("\n");
 
-      infoDiv.innerHTML = `
-        <p class="producto-codigo">${codigo}</p>
-        <h1 class="producto-titulo">${nombreCorto}</h1>
-        ${categoria ? `<p class="producto-categoria">${categoria}</p>` : ""}
-        ${
-          descLarga
-            ? `<p class="producto-descripcion">${descLarga}</p>`
-            : ""
-        }
-        ${precioTexto ? `<p class="producto-precio">${precioTexto}</p>` : ""}
-        ${stockHtml}
-        <div class="producto-acciones">
-          <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
-          <a href="${armarLinkWhatsApp(prod)}" target="_blank" class="btn-whatsapp">
-            Consultar por WhatsApp
-          </a>
-        </div>
-      `;
-
-      /* ========== NAVEGACIÓN ========== */
-      const nav = document.getElementById("producto-nav");
-      if (nav && productos.length > 1) {
-        const anterior =
-          productos[(index - 1 + productos.length) % productos.length];
-        const siguiente = productos[(index + 1) % productos.length];
-
-        const codAnt = (anterior && anterior.codigo) || "";
-        const codSig = (siguiente && siguiente.codigo) || "";
-
-        nav.innerHTML = `
-          <button class="btn-nav" onclick="irAProducto('${codAnt}')">← ${codAnt}</button>
-          <button class="btn-nav" onclick="window.location.href='catalogo.html'">Volver al listado</button>
-          <button class="btn-nav" onclick="irAProducto('${codSig}')">${codSig} →</button>
-        `;
-      }
-
-      // mostrar animación wrapper
-      const wrapper = document.querySelector(".producto-wrapper");
-      if (wrapper) wrapper.classList.add("visible");
-    } catch (err) {
-      console.error("Error en cargarProducto:", err);
-      const infoDiv = document.getElementById("producto-info");
-      infoDiv.innerHTML =
-        "<h2>Error</h2><p>No se pudo cargar el producto.</p>";
+      // si querés que vaya a un número específico, poné: https://wa.me/549xxxxxxxxx?text=...
+      return `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
     }
-  }
 
-  function armarLinkWhatsApp(prod) {
-    const codigo = prod.codigo || "";
-    const nombreCorto = prod.nombre || "";
-    const precioMayor = parsearPrecio(prod.precio);
-    const precioTxt =
-      precioMayor != null
-        ? `$ ${precioMayor.toLocaleString("es-AR", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          })}`
-        : "Consultar";
+    function irAProducto(codigo) {
+      window.location.href = `producto.html?codigo=${encodeURIComponent(
+        codigo
+      )}`;
+    }
 
-    const mensaje = [
-      "Hola! Me interesa este producto:",
-      "",
-      `Código: ${codigo}`,
-      `Producto: ${nombreCorto}`,
-      `Precio mayorista: ${precioTxt}`,
-      "",
-      "¿Me pasás disponibilidad y cantidades mínimas?",
-    ].join("\n");
+    cargarProducto();
+  </script>
 
-    // si querés que vaya a un número específico, poné: https://wa.me/549xxxxxxxxx?text=...
-    return `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-  }
-
-  function irAProducto(codigo) {
-    window.location.href = `producto.html?codigo=${encodeURIComponent(
-      codigo
-    )}`;
-  }
-
-  cargarProducto();
-</script>
-
-<!-- 👇 ESTE ES EL QUE TENÉS QUE AGREGAR AHORA 👇 -->
-<script src="js/carrito.js"></script>
-  
+  <!-- Opcional: si js/carrito.js no te da errores, lo podés dejar.
+       Si ves errores en consola relacionados al carrito, borra la línea de abajo -->
+  <script src="js/carrito.js"></script>
 </body>
 </html>
