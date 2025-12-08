@@ -1,364 +1,266 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
-  <title>Delivery Mayorista | Catálogo</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Delivery Mayorista | Catálogo</title>
 
-  <style>
-    /* Ocultamos los selects reales (se usan internamente para filtros) */
-    #filtro-categoria,
-    #filtro-subcategoria {
-      display: none !important;
-    }
+<style>
 
-    body {
-      background: #0f0f1a;
-      margin: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
-        sans-serif;
-      color: white;
-    }
+/* ===================== GENERAL ===================== */
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: #0e0e16;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+}
 
-    header {
-      background: linear-gradient(90deg, #ff005d, #ffa400);
-      padding: 15px 25px;
-      font-size: 20px;
-      font-weight: 700;
-    }
+/* ===================== HEADER ===================== */
+header {
+  background: linear-gradient(90deg, #ff005e, #ff9d00);
+  padding: 22px 0;
+  text-align: center;
+  font-weight: 800;
+  font-size: 22px;
+  letter-spacing: .5px;
+}
 
-    .toolbar {
-      display: flex;
-      gap: 15px;
-      padding: 25px;
-      justify-content: flex-start;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+/* ===================== CONTENEDOR DE FILTROS ===================== */
+.contenedor-filtros {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px;
+  max-width: 1400px;
+  margin: auto;
+}
 
-    .toolbar input {
-      padding: 12px 18px;
-      border-radius: 30px;
-      border: none;
-      outline: none;
-      font-size: 15px;
-      min-width: 260px;
-    }
+.busqueda-input {
+  width: 100%;
+  padding: 18px;
+  border-radius: 40px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+}
 
-    /* ===========================
-       MEGA MENÚ CATEGORÍAS
-       (3 columnas: Cat / Subcat / Etiquetas)
-    ============================*/
+.select-categorias {
+  width: 100%;
+  padding: 18px;
+  border-radius: 40px;
+  border: none;
+  font-size: 16px;
+  outline: none;
+}
 
-    .mega-dropdown {
-      position: relative;
-      min-width: 260px;
-    }
+/* ===================== GRID PRODUCTOS ===================== */
+.grid-productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 22px;
+  padding: 22px;
+  max-width: 1400px;
+  margin: auto;
+}
 
-    .mega-toggle {
-      width: 100%;
-      padding: 12px 18px;
-      border-radius: 30px;
-      border: none;
-      outline: none;
-      font-size: 15px;
-      background: #ffffff;
-      color: #000;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+.producto {
+  background: rgba(255,255,255,0.05);
+  border-radius: 22px;
+  padding: 22px;
+  text-align: center;
+}
 
-    .mega-label {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 230px;
-      text-align: left;
-    }
+.producto img {
+  width: 80%;
+  border-radius: 18px;
+  margin-bottom: 22px;
+}
 
-    .mega-arrow {
-      font-size: 10px;
-      margin-left: 8px;
-    }
+.codigo {
+  font-weight: bold;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
 
-    .mega-menu {
-      position: absolute;
-      top: 110%;
-      left: 0;
-      background: #111217;
-      color: #fff;
-      border-radius: 16px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
-      display: none;
-      min-width: 420px;
-      max-width: 720px;
-      padding: 12px 8px 40px; /* extra abajo para el botón reset */
-      z-index: 999;
-      column-gap: 4px;
-    }
+.nombre {
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
 
-    .mega-dropdown.open .mega-menu {
-      display: flex;
-    }
+.descripcion {
+  opacity: .8;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
 
-    .mega-col {
-      flex: 1;
-      padding: 4px 8px;
-      border-right: 1px solid rgba(255, 255, 255, 0.08);
-    }
+.precio {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ff9d00;
+}
 
-    .mega-col:last-child {
-      border-right: none;
-    }
+.stock {
+  opacity: .8;
+  font-size: 14px;
+  margin-bottom: 18px;
+}
 
-    .mega-col h4 {
-      font-size: 13px;
-      margin: 4px 4px 8px;
-      opacity: 0.75;
-    }
+/* ===================== BOTONES DE CANTIDAD ===================== */
+.cantidad {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
 
-    .mega-col ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      max-height: 260px;
-      overflow-y: auto;
-    }
+.cantidad button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+}
 
-    .mega-item,
-    .mega-subitem,
-    .mega-tagitem {
-      padding: 7px 10px;
-      border-radius: 10px;
-      font-size: 13px;
-      cursor: pointer;
-      white-space: nowrap;
-      margin: 2px 0;
-      transition: background 0.12s ease, color 0.12s ease;
-    }
+.cantidad input {
+  width: 60px;
+  text-align: center;
+  border-radius: 22px;
+  border: none;
+  padding: 8px;
+}
 
-    .mega-item:hover,
-    .mega-subitem:hover,
-    .mega-tagitem:hover {
-      background: #1f2430;
-    }
+/* ===================== BOTONES AL CARRITO ===================== */
+.btn-agregar-carrito {
+  background: #1870ff;
+  padding: 10px 18px;
+  border-radius: 22px;
+  border: none;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+}
 
-    .mega-item-activo,
-    .mega-subitem-activo,
-    .mega-tagitem-activo {
-      background: #ffa400;
-      color: #000;
-      font-weight: 600;
-    }
+.btn-agregar-carrito-activo {
+  background: #1ebe57;
+}
+</style></style>
+</head>
 
-    /* Iconos en la columna de categorías */
-    .mega-item {
-      position: relative;
-      padding-left: 30px; /* espacio para el icono */
-    }
+<body>
 
-    .mega-item::before {
-      content: attr(data-icon);
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 15px;
-      opacity: 0.95;
-    }
+<header>📦 Delivery Mayorista – Catálogo</header>
 
-    /* Botón premium reset filtros */
-    .mega-reset-btn {
-      position: absolute;
-      right: 14px;
-      bottom: 10px;
-      padding: 5px 12px;
-      font-size: 11px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      background: transparent;
-      color: #ffa400;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
+<!-- ================= BUSCADOR + SELECT ================= -->
+<div class="contenedor-filtros">
+  <input id="buscador" class="busqueda-input" type="text" placeholder="Buscar producto o código..." />
+  
+  <!-- select oculto para compatibilidad filtros (no se usa visualmente) -->
+  <select id="filtro-categoria" class="select-categorias" style="display:none;"></select>
+  <select id="filtro-subcategoria" class="select-categorias" style="display:none;"></select>
+</div>
 
-    .mega-reset-btn span {
-      font-size: 12px;
-    }
+<!-- ================= GRID DE PRODUCTOS ================= -->
+<div id="lista-productos" class="grid-productos"></div>
 
-    .mega-reset-btn:hover {
-      background: #ffa400;
-      color: #000;
-    }
+<!-- ================= PAGINADOR PREMIUM ================= -->
+<div class="paginador-contenedor" style="display:none; gap: 12px; align-items:center; justify-content:center; padding: 22px 0;">
+  
+  <button id="btn-pagina-anterior" class="paginador-btn">«</button>
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 25px;
-      padding: 25px;
-    }
+  <div id="paginador-numeros" style="display:flex; gap:6px;"></div>
 
-    .producto-card {
-      position: relative;
-      background: #0c0c17;
-      border-radius: 22px;
-      padding: 18px 16px 16px;
-      text-align: center;
-      min-height: 260px;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
-      text-decoration: none;
-      color: inherit;
-      opacity: 1;
-      translate: 0;
-    }
+  <button id="btn-pagina-siguiente" class="paginador-btn">»</button>
 
-    .producto-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
-    }
+</div>
 
-    .producto-imagen-wrapper {
-      width: 100%;
-      height: 160px;
-      border-radius: 18px;
-      background: #0a0a12;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      position: relative;
-      margin-bottom: 10px;
-    }
+<div id="resumen-resultados" style="text-align:center; opacity:.8; margin-bottom:40px;"></div>
 
-    .producto-imagen {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-      border-radius: 16px;
-      display: block;
-      cursor: pointer;
-    }
+<style>
+/* ========== ESTILO PAGINADOR ========== */
+.paginador-btn {
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  border: none;
+  border-radius: 18px;
+  padding: 6px 14px;
+  cursor: pointer;
+}
 
-    .producto-titulo {
-      margin-top: 2px;
-      font-size: 15px;
-      line-height: 1.15;
-      cursor: pointer;
-    }
+.paginador-btn:disabled {
+  opacity: .3;
+  cursor: not-allowed;
+}
 
-    .producto-descripcion {
-      opacity: 0.8;
-      font-size: 13px;
-      margin-top: 6px;
-      line-height: 1.25;
-      min-height: 36px;
-    }
+.paginador-numero {
+  background: rgba(255,255,255,0.12);
+  border: none;
+  color: #fff;
+  border-radius: 18px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
 
-    .producto-precio-row {
-      margin-top: 8px;
-    }
+.paginador-numero--activo {
+  background: #ff9d00;
+  color: #000;
+  font-weight: 700;
+}
 
-    .producto-precio {
-      color: #ffa400;
-      font-weight: 700;
-      margin-top: 4px;
-      font-size: 15px;
-    }
+/* ================= MINI CARRITO ================= */
+mini-carrito {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(6px);
+  padding: 12px 22px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 999;
+  box-shadow: 0 4px 18px rgba(0,0,0,.55);
+}
 
-    .producto-stock {
-      opacity: 0.8;
-      font-size: 12px;
-      margin-top: 4px;
-    }
+/* ================= BOTÓN WHATSAPP ================= */
+.btn-wa-flotante {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  background: #25d366;
+  padding: 12px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.45);
+  z-index: 999;
+  transition: transform 0.1s ease, filter 0.1s ease;
+}
 
-    .cantidad-container {
-      margin-top: 8px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-cantidad {
-      border-radius: 999px;
-      border: none;
-      width: 24px;
-      height: 24px;
-      font-size: 16px;
-      cursor: pointer;
-      background: #202432;
-      color: #fff;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .input-cantidad {
-      width: 50px;
-      text-align: center;
-      border-radius: 999px;
-      border: none;
-      padding: 4px 6px;
-      font-size: 13px;
-      outline: none;
-    }
-
-    .btn-agregar-carrito {
-      margin-top: 8px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      border: none;
-      font-size: 12px;
-      cursor: pointer;
-      background: #202432;
-      color: #fff;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-agregar-carrito-activo {
-      background: #1ebe57;
-    }
-
-    /* BOTÓN FLOTANTE WHATSAPP EN CATÁLOGO (simple, link fijo) */
-    .btn-wa-flotante {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      background: #25d366;
-      color: #fff;
-      padding: 10px 16px;
-      border-radius: 24px;
-      font-weight: 600;
-      font-size: 14px;
-      text-decoration: none;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
-      z-index: 999;
-      transition: transform 0.08s ease, filter 0.08s ease;
-    }
 .btn-wa-flotante:hover {
   filter: brightness(1.06);
   transform: translateY(-1px);
 }
 
+/* **AJUSTE MÓVIL (para no tapar paginador)** */
 @media (max-width: 480px) {
   .btn-wa-flotante {
     bottom: 90px !important;
   }
 }
 
-/* contorno circular premium */
+/* CONTORNO CIRCULAR PREMIUM */
 .btn-wa-flotante:focus,
 .btn-wa-flotante:active,
 .btn-wa-flotante:visited {
@@ -366,295 +268,19 @@
   border-radius: 50% !important;
   box-shadow: 0 0 0 3px #25d36688;
 }
-}
-    /* MINI CARRITO FLOTANTE */
-    .mini-carrito {
-      position: fixed;
-      right: 16px;
-      bottom: 100px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #ffffff;
-      padding: 8px 12px;
-      border-radius: 999px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-      cursor: pointer;
-      z-index: 9999;
-      font-size: 13px;
-      color: #000;
-    }
+</style>
 
-    .mini-carrito-icono {
-      font-size: 18px;
-    }
+<!-- ================= MINI CARRITO ================= -->
+<mini-carrito onclick="location.href='carrito.html'">
+  🛒 <span id="mini-carrito-cantidad">0</span> —
+  $<span id="mini-carrito-total">0</span>
+</mini-carrito>
 
-    .mini-carrito-texto {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.1;
-    }
-
-    .mini-carrito-linea {
-      white-space: nowrap;
-      font-weight: 500;
-    }
-
-    /* ===========================
-       PAGINADOR CATÁLOGO
-    ============================*/
-    .paginador-contenedor {
-      padding: 0 25px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .paginador-resumen {
-      font-size: 13px;
-      opacity: 0.8;
-      text-align: center;
-    }
-
-    .paginador {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .paginador-btn,
-    .paginador-numero {
-      border-radius: 999px;
-      border: none;
-      min-width: 32px;
-      height: 32px;
-      padding: 0 10px;
-      font-size: 13px;
-      cursor: pointer;
-      background: #202432;
-      color: #ffffff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.08s ease;
-    }
-
-    .paginador-btn:hover:not(:disabled),
-    .paginador-numero:hover {
-      background: #2c3244;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
-    }
-
-    .paginador-btn:disabled {
-      opacity: 0.4;
-      cursor: default;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .paginador-numero--activo {
-      background: #ffa400;
-      color: #000;
-      font-weight: 700;
-    }
-
-    .paginador-numeros {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    /* SOLO EN CELULAR */
-    @media (max-width: 768px) {
-      header {
-        text-align: center;
-        font-size: 18px;
-      }
-
-      .toolbar {
-        padding: 18px 12px 10px;
-        gap: 10px;
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .toolbar input {
-        width: 100%;
-        max-width: 420px;
-        font-size: 14px;
-      }
-
-      .mega-dropdown {
-        width: 100%;
-        max-width: 420px;
-      }
-
-      .mega-menu {
-        max-width: 100%;
-        min-width: 100%;
-      }
-
-      .grid {
-        padding: 16px 12px 12px;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 18px;
-      }
-
-      .producto-card {
-        padding: 14px 12px 14px;
-        border-radius: 18px;
-      }
-
-      .producto-imagen-wrapper {
-        height: 150px;
-      }
-
-      .producto-titulo {
-        font-size: 14px;
-      }
-
-      .producto-descripcion {
-        font-size: 12px;
-        min-height: 32px;
-      }
-
-      .producto-precio {
-        font-size: 14px;
-      }
-
-      #mini-carrito {
-        bottom: 150px !important;
-      }
-
-      .btn-wa-flotante {
-        bottom: 80px;
-        right: 12px;
-        font-size: 13px;
-        padding: 9px 14px;
-      }
-
-      .paginador-contenedor {
-        padding: 4px 12px 20px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .grid {
-        grid-template-columns: 1fr;
-        gap: 22px;
-      }
-
-      .producto-card {
-        padding: 16px 14px 16px;
-      }
-
-      .producto-imagen-wrapper {
-        height: 150px;
-      }
-
-      .producto-titulo {
-        font-size: 16px;
-      }
-
-      .producto-descripcion {
-        font-size: 13px;
-        min-height: 38px;
-      }
-
-      .producto-precio {
-        font-size: 16px;
-      }
-    }
-  </style>
-</head>
-
-<body>
-  <header>DELIVERY MAYORISTA</header>
-
-  <div class="toolbar">
-    <input
-      id="buscador"
-      type="text"
-      placeholder="Buscar por código o descripción"
-    />
-
-    <!-- MEGA DROPDOWN DE CATEGORÍAS -->
-    <div class="mega-dropdown" id="megaDropdown">
-      <button id="categoriaToggle" class="mega-toggle">
-        <span class="mega-label">Todas las categorías</span>
-        <span class="mega-arrow">▾</span>
-      </button>
-
-      <div id="megaMenu" class="mega-menu">
-        <div class="mega-col">
-          <h4>Categorías</h4>
-          <ul id="megaCategorias"></ul>
-        </div>
-        <div class="mega-col">
-          <h4 id="megaSubTitle">Subcategorías</h4>
-          <ul id="megaSubcategorias"></ul>
-        </div>
-        <div class="mega-col">
-          <h4 id="megaTagTitle">Etiquetas</h4>
-          <ul id="megaEtiquetas"></ul>
-        </div>
-
-        <!-- Botón premium reset filtros -->
-        <button id="megaReset" class="mega-reset-btn">
-          <span>🔄</span> Limpiar filtros
-        </button>
-      </div>
-    </div>
-
-    <!-- selects ocultos para la lógica de filtros -->
-    <select id="filtro-categoria"></select>
-    <select id="filtro-subcategoria"></select>
-  </div>
-
-  <div id="lista-productos" class="grid"></div>
-
-  <!-- PAGINADOR + RESUMEN -->
-  <div class="paginador-contenedor">
-    <div id="resumen-resultados" class="paginador-resumen">
-      <!-- Se completa desde catalogo.js -->
-    </div>
-    <div id="paginador" class="paginador">
-      <button
-        id="btn-pagina-anterior"
-        class="paginador-btn"
-        type="button"
-        disabled
-      >
-        ‹
-      </button>
-
-      <div id="paginador-numeros" class="paginador-numeros">
-        <!-- Botones de página generados por JS -->
-      </div>
-
-      <button
-        id="btn-pagina-siguiente"
-        class="paginador-btn"
-        type="button"
-        disabled
-      >
-        ›
-      </button>
-    </div>
-  </div>
-
-  <!-- Botón flotante de WhatsApp (mensaje simple genérico) -->
+<!-- ================= BOTÓN WHATSAPP ================= -->
 <a
   id="wa-flotante"
   class="btn-wa-flotante"
-  href="https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista."
-  target="_blank"
+  href="#"
   aria-label="WhatsApp"
 >
   <svg
@@ -668,20 +294,9 @@
   </svg>
 </a>
 
-  <!-- MINI CARRITO GLOBAL -->
-  <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
-    <div class="mini-carrito-icono">🛒</div>
-    <div class="mini-carrito-texto">
-      <span class="mini-carrito-linea">
-        <span id="mini-carrito-cantidad">0</span> productos
-      </span>
-      <span class="mini-carrito-linea">
-        $<span id="mini-carrito-total">0</span>
-      </span>
-    </div>
-  </div>
+<!-- ================= SCRIPTS ================= -->
+<script src="catalogo.js"></script>
+<script src="carrito.js"></script>
 
-  <!-- SCRIPT DEL CATÁLOGO + CARRITO -->
-  <script src="js/catalogo.js?v=5"></script>
 </body>
 </html>
