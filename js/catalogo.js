@@ -475,27 +475,86 @@ function aplicarFiltros() {
 
   renderProductos(filtrados);
 }
-
 // ========= ICONOS PARA CATEGORÍAS =========
 
 function iconoParaCategoria(catLabel) {
   if (!catLabel) return "•";
-  const txt = catLabel.toLowerCase();
 
+  // Normalizamos el texto para matchear bien
+  const txt = catLabel.toLowerCase().trim();
+
+  // Mapeo explícito por nombre de categoría
+  const mapa = {
+    "todas las categorías": "★",
+
+    // Las que se ven en tu menú
+    "accesorios vehiculares": "🚗",
+    "baño y cocina": "🍽️",
+    "bano y cocina": "🍽️",
+    "camping": "⛺",
+    "cocina": "🍳",
+    "cuidado personal": "🧴",
+    "decoración": "🕯️",
+    "decoracion": "🕯️",
+
+    // Por si tenés estas u otras similares
+    "bazar": "🛍️",
+    "hogar": "🏡",
+    "librería": "📚",
+    "libreria": "📚",
+    "oficina": "📎",
+    "electrónica": "🔌",
+    "electronica": "🔌",
+    "audio": "🎧",
+    "ferretería": "🛠",
+    "ferreteria": "🛠",
+    "herramientas": "🛠",
+    "juguetes": "🧸",
+    "regalería": "🎁",
+    "regaleria": "🎁",
+    "mochilas": "🎒",
+    "bolsos": "👜"
+  };
+
+  if (mapa[txt]) return mapa[txt];
+
+  // Fallback si agregás nuevas categorías más adelante
   if (txt.includes("vehicul")) return "🚗";
   if (txt.includes("auto") || txt.includes("motor")) return "🚙";
-  if (txt.includes("baño") || txt.includes("cocina")) return "🏠";
+  if (txt.includes("baño") || txt.includes("bano") || txt.includes("cocina")) return "🍽️";
   if (txt.includes("hogar")) return "🏡";
   if (txt.includes("camping")) return "⛺";
-  if (txt.includes("cuidado personal")) return "🧴";
-  if (txt.includes("decoración") || txt.includes("decoracion")) return "🕯️";
-  if (txt.includes("juguete") || txt.includes("regalería") || txt.includes("regaleria")) return "🧸";
-  if (txt.includes("librería") || txt.includes("libreria") || txt.includes("oficina")) return "📚";
+  if (txt.includes("cuidado")) return "🧴";
+  if (txt.includes("decor")) return "🕯️";
+  if (txt.includes("juguet") || txt.includes("regal")) return "🧸";
+  if (txt.includes("librer") || txt.includes("oficina")) return "📚";
   if (txt.includes("electr") || txt.includes("audio")) return "🔌";
   if (txt.includes("herramient") || txt.includes("ferreter")) return "🛠";
-  if (txt.includes("bolsos") || txt.includes("mochila")) return "🎒";
-  if (txt.includes("bazar")) return "🍽️";
+  if (txt.includes("bolso") || txt.includes("mochila")) return "🎒";
+  if (txt.includes("bazar")) return "🛍️";
 
+  // Último recurso
+  return "•";
+}
+
+  if (mapa[txt]) return mapa[txt];
+
+  // Fallback por si agregás nuevas categorías más adelante
+  if (txt.includes("vehicul")) return "🚗";
+  if (txt.includes("auto") || txt.includes("motor")) return "🚙";
+  if (txt.includes("baño") || txt.includes("bano") || txt.includes("cocina")) return "🍽️";
+  if (txt.includes("hogar")) return "🏡";
+  if (txt.includes("camping")) return "⛺";
+  if (txt.includes("cuidado")) return "🧴";
+  if (txt.includes("decor")) return "🕯️";
+  if (txt.includes("juguet") || txt.includes("regal")) return "🧸";
+  if (txt.includes("librer") || txt.includes("oficina")) return "📚";
+  if (txt.includes("electr") || txt.includes("audio")) return "🔌";
+  if (txt.includes("herramient") || txt.includes("ferreter")) return "🛠";
+  if (txt.includes("bolso") || txt.includes("mochila")) return "🎒";
+  if (txt.includes("bazar")) return "🛍️";
+
+  // Último recurso
   return "•";
 }
 
