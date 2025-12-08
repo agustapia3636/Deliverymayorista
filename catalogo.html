@@ -9,154 +9,263 @@
   <title>Delivery Mayorista | Catálogo</title>
 
   <style>
-    /* Ocultamos selects invisibles que usa JS para filtrado */
+    /* Ocultamos los selects reales (se usan internamente para filtros) */
     #filtro-categoria,
     #filtro-subcategoria {
       display: none !important;
     }
 
     body {
-      background: #0f0f1a;
+      background: #050510;
       margin: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
-        sans-serif;
-      color: white;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter",
+        "Segoe UI", sans-serif;
+      color: #ffffff;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --dm-rosa: #ff005e;
+      --dm-naranja: #ff9d00;
+      --dm-fondo: #050510;
+      --dm-card: #11111f;
+      --dm-borde-card: #26263b;
+      --dm-acento: #ff9d00;
+      --dm-texto-suave: #c3c3dc;
     }
 
     header {
-      background: linear-gradient(90deg, #ff005d, #ffa400);
-      padding: 15px 25px;
+      padding: 16px 16px 12px;
+      text-align: center;
+      background: radial-gradient(
+          circle at 0% 0%,
+          rgba(255, 0, 94, 0.35),
+          transparent 55%
+        ),
+        radial-gradient(
+          circle at 100% 0%,
+          rgba(255, 157, 0, 0.35),
+          transparent 55%
+        ),
+        #050510;
+      font-weight: 800;
       font-size: 20px;
-      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ffffff;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      position: sticky;
+      top: 0;
+      z-index: 50;
     }
 
-    /* ===========================
-       TOOLBAR (buscador + mega menú)
-    ============================*/
+    /* Barra superior: buscador + mega menú */
     .toolbar {
       display: flex;
-      gap: 15px;
-      padding: 25px;
-      justify-content: flex-start;
       align-items: center;
-      flex-wrap: wrap;
+      gap: 12px;
+      padding: 14px 18px 6px;
+      max-width: 1280px;
+      margin: 0 auto;
     }
 
     .toolbar input {
-      padding: 12px 18px;
-      border-radius: 30px;
-      border: none;
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      padding: 10px 14px;
+      font-size: 14px;
       outline: none;
-      font-size: 15px;
-      min-width: 260px;
+      background: rgba(10, 10, 25, 0.95);
+      color: #ffffff;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease,
+        background 0.15s ease;
     }
 
-    /* ===========================
-       MEGA MENÚ FULL
-    ============================*/
+    .toolbar input::placeholder {
+      color: rgba(255, 255, 255, 0.38);
+    }
+
+    .toolbar input:focus {
+      border-color: var(--dm-acento);
+      box-shadow: 0 0 0 1px rgba(255, 157, 0, 0.4);
+      background: rgba(15, 15, 35, 0.98);
+    }
+
+    .toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Mega dropdown contenedor */
     .mega-dropdown {
       position: relative;
-      min-width: 260px;
     }
 
     .mega-toggle {
-      width: 100%;
-      padding: 12px 18px;
-      border-radius: 30px;
-      border: none;
-      outline: none;
-      font-size: 15px;
-      background: #ffffff;
-      color: #000;
-      cursor: pointer;
-      display: flex;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: radial-gradient(
+          circle at 0% 0%,
+          rgba(255, 0, 94, 0.25),
+          transparent 60%
+        ),
+        rgba(15, 15, 35, 0.98);
+      color: #fff;
+      padding: 8px 14px;
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      text-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
     }
 
     .mega-label {
       white-space: nowrap;
+      max-width: 160px;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 230px;
-      text-align: left;
     }
 
     .mega-arrow {
-      font-size: 10px;
-      margin-left: 8px;
+      margin-left: 2px;
+      font-size: 12px;
+      opacity: 0.9;
     }
 
+    /* Panel del mega menú */
     .mega-menu {
       position: absolute;
-      top: 110%;
-      left: 0;
-      background: #111217;
-      color: #fff;
-      border-radius: 16px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+      top: calc(100% + 8px);
+      right: 0;
+      background: #050510;
+      border-radius: 18px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 12px 12px 10px;
       display: none;
-      min-width: 420px;
-      max-width: 720px;
-      padding: 12px 8px 40px;
-      z-index: 999;
-      column-gap: 4px;
+      gap: 8px;
+      min-width: 620px;
+      max-width: 780px;
+      z-index: 60;
     }
 
     .mega-dropdown.open .mega-menu {
-      display: flex;
+      display: grid;
+      grid-template-columns: 220px 200px 1fr;
+      align-items: flex-start;
+      column-gap: 10px;
     }
 
     .mega-col {
-      flex: 1;
-      padding: 4px 8px;
       border-right: 1px solid rgba(255, 255, 255, 0.08);
+      padding-right: 8px;
     }
 
     .mega-col:last-child {
       border-right: none;
+      padding-right: 0;
     }
 
     .mega-col h4 {
-      font-size: 13px;
-      margin: 4px 4px 8px;
-      opacity: 0.75;
+      margin: 0 0 6px;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(255, 255, 255, 0.7);
     }
 
     .mega-col ul {
       list-style: none;
-      margin: 0;
       padding: 0;
-      max-height: 260px;
+      margin: 0;
+      max-height: 220px;
       overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
+    }
+
+    .mega-col ul::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .mega-col ul::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 999px;
+    }
+
+    .mega-col ul::-webkit-scrollbar-track {
+      background: transparent;
     }
 
     .mega-item,
     .mega-subitem,
     .mega-tagitem {
-      padding: 7px 10px;
-      border-radius: 10px;
-      font-size: 13px;
+      padding: 6px 8px;
+      margin-bottom: 4px;
+      border-radius: 999px;
       cursor: pointer;
-      white-space: nowrap;
-      margin: 2px 0;
-      transition: background 0.12s ease, color 0.12s ease;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.86);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.12s ease, color 0.12s ease,
+        transform 0.08s ease;
     }
 
     .mega-item:hover,
     .mega-subitem:hover,
     .mega-tagitem:hover {
-      background: #1f2430;
+      background: rgba(255, 255, 255, 0.06);
+      transform: translateY(-0.5px);
     }
 
     .mega-item-activo,
     .mega-subitem-activo,
     .mega-tagitem-activo {
-      background: #ffa400;
-      color: #000;
-      font-weight: 600;
+      background: linear-gradient(90deg, #ff005e, #ff9d00);
+      color: #050510;
+      font-weight: 700;
     }
 
+    .mega-reset-btn {
+      margin-top: 8px;
+      width: 100%;
+      border-radius: 999px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: rgba(255, 255, 255, 0.9);
+      padding: 6px 10px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: background 0.12s ease, border-color 0.12s ease;
+    }
+
+    .mega-reset-btn span {
+      font-size: 12px;
+    }
+
+    .mega-reset-btn:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Iconos en la columna de categorías */
     .mega-item {
       position: relative;
       padding-left: 30px;
@@ -168,139 +277,144 @@
       left: 10px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 15px;
-      opacity: 0.95;
     }
 
-    .mega-reset-btn {
-      position: absolute;
-      right: 14px;
-      bottom: 10px;
-      padding: 5px 12px;
-      font-size: 11px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      background: transparent;
-      color: #ffa400;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .mega-reset-btn span {
-      font-size: 12px;
-    }
-
-    .mega-reset-btn:hover {
-      background: #ffa400;
-      color: #000;
-    }
-
-    /* ===========================
-       GRID PRODUCTOS
-    ============================*/
+    /* Grid de productos */
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 25px;
-      padding: 25px;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 20px;
+      padding: 10px 18px 40px;
+      max-width: 1280px;
+      margin: 0 auto 48px;
     }
 
     .producto-card {
-      position: relative;
-      background: #0c0c17;
-      border-radius: 22px;
-      padding: 18px 16px 16px;
-      text-align: center;
-      min-height: 260px;
+      background: radial-gradient(
+          circle at 0% 0%,
+          rgba(255, 0, 94, 0.12),
+          transparent 55%
+        ),
+        radial-gradient(
+          circle at 100% 0%,
+          rgba(255, 157, 0, 0.12),
+          transparent 55%
+        ),
+        #0b0b18;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 14px 16px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
-      text-decoration: none;
-      color: inherit;
-      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+      transition: transform 0.12s ease, box-shadow 0.12s ease,
+        border-color 0.12s ease;
     }
 
     .producto-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.8);
+      border-color: rgba(255, 157, 0, 0.7);
     }
 
     .producto-imagen-wrapper {
       width: 100%;
-      height: 160px;
-      border-radius: 18px;
-      background: #0a0a12;
+      height: 170px;
+      border-radius: 12px;
+      background: radial-gradient(
+          circle at 0% 0%,
+          rgba(255, 0, 94, 0.18),
+          transparent 60%
+        ),
+        radial-gradient(
+          circle at 100% 0%,
+          rgba(255, 157, 0, 0.16),
+          transparent 60%
+        ),
+        #050510;
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
       margin-bottom: 10px;
+      overflow: hidden;
     }
 
     .producto-imagen {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
-      border-radius: 16px;
-      cursor: pointer;
+      border-radius: 12px;
+      transform: translateZ(0);
+    }
+
+    .producto-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 2px;
     }
 
     .producto-titulo {
-      margin-top: 2px;
       font-size: 15px;
-      line-height: 1.15;
+      font-weight: 700;
+      margin: 0;
+      color: #ffffff;
       cursor: pointer;
     }
 
     .producto-descripcion {
-      opacity: 0.8;
+      margin: 0;
       font-size: 13px;
-      margin-top: 6px;
-      line-height: 1.25;
-      min-height: 36px;
+      color: var(--dm-texto-suave);
+      min-height: 44px;
+    }
+
+    .producto-precio-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
     }
 
     .producto-precio {
-      color: #ffa400;
+      font-size: 18px;
       font-weight: 700;
-      font-size: 15px;
-      margin-top: 4px;
+      color: var(--dm-acento);
     }
 
-    .producto-stock {
-      opacity: 0.8;
+    .stock-text {
       font-size: 12px;
-      margin-top: 4px;
+      color: rgba(255, 255, 255, 0.65);
     }
 
     .cantidad-container {
-      margin-top: 8px;
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      margin-top: 4px;
     }
 
     .btn-cantidad {
-      border-radius: 999px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
       border: none;
-      width: 24px;
-      height: 24px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
       font-size: 16px;
       cursor: pointer;
-      background: #202432;
-      color: #fff;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
     }
 
     .input-cantidad {
-      width: 50px;
+      width: 52px;
       text-align: center;
       border-radius: 999px;
-      border: none;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: rgba(5, 5, 20, 0.95);
+      color: #fff;
       padding: 4px 6px;
       font-size: 13px;
       outline: none;
@@ -308,27 +422,234 @@
 
     .btn-agregar-carrito {
       margin-top: 8px;
-      padding: 6px 12px;
       border-radius: 999px;
       border: none;
-      font-size: 12px;
-      cursor: pointer;
-      background: #202432;
+      padding: 8px 10px;
+      background: linear-gradient(90deg, #1870ff, #1ebeff);
       color: #fff;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
     }
 
     .btn-agregar-carrito-activo {
-      background: #1ebe57;
-    }</head>
+      background: linear-gradient(90deg, #1ebe57, #27d96f);
+    }
+
+    /* BOTÓN FLOTANTE WHATSAPP (icono circular premium) */
+    .btn-wa-flotante {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: #25d366;
+      padding: 12px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+      z-index: 999;
+      transition: transform 0.1s ease, filter 0.1s ease;
+    }
+
+    .btn-wa-flotante:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+
+    .btn-wa-flotante:focus,
+    .btn-wa-flotante:active,
+    .btn-wa-flotante:visited {
+      outline: none;
+      border-radius: 50% !important;
+      box-shadow: 0 0 0 3px #25d36688;
+    }
+
+    /* MINI CARRITO FLOTANTE */
+    .mini-carrito {
+      position: fixed;
+      right: 16px;
+      bottom: 100px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      padding: 8px 12px;
+      border-radius: 999px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      z-index: 9999;
+      font-size: 13px;
+      color: #000;
+    }
+
+    .mini-carrito-icono {
+      font-size: 18px;
+    }
+
+    .mini-carrito-texto {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .mini-carrito-linea {
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    /* PAGINADOR PREMIUM */
+    .paginador-contenedor {
+      display: none;
+      gap: 12px;
+      align-items: center;
+      justify-content: center;
+      padding: 22px 0;
+    }
+
+    .paginador-btn {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border: none;
+      border-radius: 18px;
+      padding: 6px 14px;
+      cursor: pointer;
+    }
+
+    .paginador-btn:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .paginador-numero {
+      background: rgba(255, 255, 255, 0.12);
+      border: none;
+      color: #fff;
+      border-radius: 18px;
+      padding: 5px 12px;
+      cursor: pointer;
+    }
+
+    .paginador-numero--activo {
+      background: #ff9d00;
+      color: #000;
+      font-weight: 700;
+    }
+
+    #resumen-resultados {
+      text-align: center;
+      opacity: 0.8;
+      margin: 8px 0 40px;
+      font-size: 13px;
+    }
+
+    /* SOLO EN CELULAR */
+    @media (max-width: 768px) {
+      header {
+        text-align: center;
+        font-size: 18px;
+      }
+
+      .toolbar {
+        padding: 18px 12px 10px;
+        gap: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .toolbar input {
+        width: 100%;
+        max-width: 420px;
+        font-size: 14px;
+      }
+
+      .mega-dropdown {
+        width: 100%;
+        max-width: 420px;
+      }
+
+      .mega-menu {
+        max-width: 100%;
+        min-width: 100%;
+      }
+
+      .grid {
+        padding: 16px 12px 28px;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 18px;
+      }
+
+      .producto-card {
+        padding: 14px 12px 14px;
+        border-radius: 18px;
+      }
+
+      .producto-imagen-wrapper {
+        height: 150px;
+      }
+
+      .producto-titulo {
+        font-size: 14px;
+      }
+
+      .producto-descripcion {
+        font-size: 12px;
+        min-height: 32px;
+      }
+
+      .producto-precio {
+        font-size: 14px;
+      }
+
+      #mini-carrito {
+        bottom: 150px !important;
+      }
+
+      .btn-wa-flotante {
+        bottom: 90px !important;
+        right: 18px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 22px;
+      }
+
+      .producto-card {
+        padding: 16px 14px 16px;
+      }
+
+      .producto-imagen-wrapper {
+        height: 150px;
+      }
+
+      .producto-titulo {
+        font-size: 16px;
+      }
+
+      .producto-descripcion {
+        font-size: 13px;
+        min-height: 38px;
+      }
+
+      .producto-precio {
+        font-size: 16px;
+      }
+    }
+  </style></head>
 
 <body>
-
   <header>DELIVERY MAYORISTA</header>
 
-  <!-- ====================== TOOLBAR (BUSCADOR + MEGA MENÚ) ====================== -->
   <div class="toolbar">
     <input
       id="buscador"
@@ -348,10 +669,12 @@
           <h4>Categorías</h4>
           <ul id="megaCategorias"></ul>
         </div>
+
         <div class="mega-col">
           <h4 id="megaSubTitle">Subcategorías</h4>
           <ul id="megaSubcategorias"></ul>
         </div>
+
         <div class="mega-col">
           <h4 id="megaTagTitle">Etiquetas</h4>
           <ul id="megaEtiquetas"></ul>
@@ -364,63 +687,25 @@
       </div>
     </div>
 
-    <!-- selects invisibles usados internamente -->
+    <!-- selects ocultos para la lógica de filtros -->
     <select id="filtro-categoria"></select>
     <select id="filtro-subcategoria"></select>
-  </div>
+  </div>  <div id="lista-productos" class="grid"></div>
 
-  <!-- ====================== GRID DE PRODUCTOS ====================== -->
-  <div id="lista-productos" class="grid"></div>
-
-  <!-- ====================== PAGINADOR PREMIUM ====================== -->
+  <!-- PAGINADOR PREMIUM -->
   <div class="paginador-contenedor">
-    
-    <!-- resumen dinámico del catálogo -->
-    <div id="resumen-resultados" class="paginador-resumen"></div>
-    
-    <div id="paginador" class="paginador">
-      <button
-        id="btn-pagina-anterior"
-        class="paginador-btn"
-        type="button"
-        disabled
-      >
-        ‹
-      </button>
-
-      <div id="paginador-numeros" class="paginador-numeros"></div>
-
-      <button
-        id="btn-pagina-siguiente"
-        class="paginador-btn"
-        type="button"
-        disabled
-      >
-        ›
-      </button>
-    </div>
-
+    <button id="btn-pagina-anterior" class="paginador-btn">«</button>
+    <div id="paginador-numeros"></div>
+    <button id="btn-pagina-siguiente" class="paginador-btn">»</button>
   </div>
 
-  <!-- ====================== MINI CARRITO GLOBAL ====================== -->
-  <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
-    <div class="mini-carrito-icono">🛒</div>
-    <div class="mini-carrito-texto">
-      <span class="mini-carrito-linea">
-        <span id="mini-carrito-cantidad">0</span> productos
-      </span>
-      <span class="mini-carrito-linea">
-        $<span id="mini-carrito-total">0</span>
-      </span>
-    </div>
-  </div>
+  <div id="resumen-resultados"></div>
 
-  <!-- ====================== BOTÓN WHATSAPP FLOTANTE (SVG PREMIUM) ====================== -->
+  <!-- Botón flotante de WhatsApp -->
   <a
     id="wa-flotante"
     class="btn-wa-flotante"
-    href="https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista."
-    target="_blank"
+    href="#"
     aria-label="WhatsApp"
   >
     <svg
@@ -434,9 +719,20 @@
     </svg>
   </a>
 
-  <!-- ====================== SCRIPTS ====================== -->
-  <script src="js/catalogo.js?v=5"></script>
-  <script src="js/carrito.js?v=1"></script>
+  <!-- MINI CARRITO GLOBAL -->
+  <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
+    <div class="mini-carrito-icono">🛒</div>
+    <div class="mini-carrito-texto">
+      <span class="mini-carrito-linea">
+        <span id="mini-carrito-cantidad">0</span> productos
+      </span>
+      <span class="mini-carrito-linea">
+        $<span id="mini-carrito-total">0</span>
+      </span>
+    </div>
+  </div>
 
+  <!-- SCRIPT DEL CATÁLOGO + CARRITO -->
+  <script src="js/catalogo.js?v=5"></script>
 </body>
 </html>
