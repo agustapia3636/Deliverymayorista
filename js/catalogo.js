@@ -3,6 +3,7 @@
 // Mega menú categorías tipo "Telefonía"
 // con 3er nivel de ETIQUETAS libres + iconos
 // + memoria de filtros en localStorage
+// + botón premium "Limpiar filtros"
 // ========================================
 
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
@@ -23,6 +24,7 @@ const megaSubList  = document.getElementById("megaSubcategorias");
 const megaTagList  = document.getElementById("megaEtiquetas");
 const megaSubTitle = document.getElementById("megaSubTitle");
 const megaTagTitle = document.getElementById("megaTagTitle");
+const megaResetBtn = document.getElementById("megaReset");
 
 const miniCantidad = document.getElementById("mini-carrito-cantidad");
 const miniTotal    = document.getElementById("mini-carrito-total");
@@ -676,6 +678,12 @@ function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
   cerrarMegaMenu();
 }
 
+// Botón Premium: limpiar filtros
+function resetearFiltrosMega() {
+  seleccionarCategoria("todas");
+  cerrarMegaMenu();
+}
+
 function construirMenuEtiquetas(catKey, subKey, catLabel, subLabel) {
   if (!megaTagList) return;
 
@@ -809,7 +817,6 @@ function construirMenuCategorias(categoriasUnicas) {
     li.addEventListener("click", () => seleccionarCategoria(key));
     megaCatList.appendChild(li);
   });
-
 }
 
 // ========= CARGA INICIAL =========
@@ -935,6 +942,15 @@ if (megaToggle && megaDropdown) {
     if (!megaDropdown.contains(e.target)) {
       cerrarMegaMenu();
     }
+  });
+}
+
+// Botón reset filtros
+if (megaResetBtn) {
+  megaResetBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    resetearFiltrosMega();
   });
 }
 
