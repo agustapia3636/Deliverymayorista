@@ -18,6 +18,11 @@ const filtroSubcategoria = document.getElementById("filtro-subcategoria"); // se
 const miniCantidad = document.getElementById("mini-carrito-cantidad");
 const miniTotal   = document.getElementById("mini-carrito-total");
 
+// Mapa: categoria (lowercase) -> Set(subcategorías originales)
+let MAPA_CAT_SUB = {};
+// Set global de todas las subcategorías (originales)
+let TODAS_LAS_SUBCATS = new Set();
+
 let TODOS_LOS_PRODUCTOS = [];
 
 // ========================================
@@ -182,7 +187,7 @@ function irAlCarrito() {
 }
 
 // ========================================
-// RENDER DE PRODUCTOS (con cantidad + stock dinámico)
+// RENDER DE PRODUCTOS
 // ========================================
 
 function renderProductos(lista) {
@@ -283,7 +288,7 @@ function renderProductos(lista) {
     const stockVisible = card.querySelector(".stock-text");
     const stockInicial = stockNum || 0;
 
-    // -------- CANTIDAD + STOCK DINÁMICO (PC + iPhone) --------
+    // -------- CANTIDAD + STOCK DINÁMICO --------
 
     function obtenerCantidadSegura() {
       let cant = parseInt(input.value, 10);
@@ -297,7 +302,6 @@ function renderProductos(lista) {
 
       const raw = input.value;
       if (raw === "" || raw == null) {
-        // si está vacío, mostramos stock completo
         stockVisible.textContent = `Stock: ${stockInicial} unidades`;
         return;
       }
@@ -339,7 +343,6 @@ function renderProductos(lista) {
     }
 
     if (input) {
-      // Manejador compartido para iPhone + PC
       const handleTyping = (ev) => {
         ev.stopPropagation();
         ev.target.value = ev.target.value.replace(/\D/g, "");
@@ -358,12 +361,10 @@ function renderProductos(lista) {
       });
     }
 
-    // estado inicial: sin cantidad → stock completo
     if (stockVisible && stockInicial > 0) {
       stockVisible.textContent = `Stock: ${stockInicial} unidades`;
     }
 
-    // 🔥 CLICK EN BOTÓN → agrega usando cantidad elegida
     btn.addEventListener("click", ev => {
       ev.preventDefault();
       ev.stopPropagation();
@@ -383,7 +384,6 @@ function renderProductos(lista) {
       agregarAlCarritoDesdeCatalogo(productoBasico, btn, cant, stockParaCarrito);
     });
 
-    // 👉 SOLO IMAGEN Y TÍTULO LLEVAN AL DETALLE
     const tituloEl = card.querySelector(".producto-titulo");
     const imgEl    = card.querySelector(".producto-imagen");
 
@@ -447,9 +447,41 @@ function aplicarFiltros() {
   renderProductos(filtrados);
 }
 
-if (buscador)           buscador.addEventListener("input",  aplicarFiltros);
-if (filtroCategoria)    filtroCategoria.addEventListener("change", aplicarFiltros);
-if (filtroSubcategoria) filtroSubcategoria.addEventListener("change", aplicarFiltros);
+// ========================================
+// SUBCATEGORÍAS DEPENDIENTES DE CATEGORÍA
+// ========================================
+
+function actualizarOpcionesSubcategorias(catSeleccionada) {
+  if (!filtroSubcategoria) return;
+
+  const clave = (catSeleccionada || "todas").toLowerCase();
+
+  // Si se elige "todas", usamos todas las subcategorías globales
+  let listaSubs;
+  if (clave === "todas" || !MAPA_CAT_SUB[clave]) {
+    listaSubs = Array.from(TODAS_LAS_SUBCATS);
+  } else {
+    listaSubs = Array.from(MAPA_CAT_SUB[clave]);
+  }
+
+  listaSubs.sort((a, b) => a.localeCompare(b, "es"));
+
+  filtroSubcategoria.innerHTML = "";
+  const optTodasSub = document.createElement("option");
+  optTodasSub.value = "todas";
+  optTodasSub.textContent = "Todas las subcategorías";
+  filtroSubcategoria.appendChild(optTodasSub);
+
+  listaSubs.forEach(sub => {
+    const op = document.createElement("option");
+    op.value = sub.toLowerCase();
+    op.textContent = sub;
+    filtroSubcategoria.appendChild(op);
+  });
+
+  // siempre volvemos a "todas" cuando cambia la categoría
+  filtroSubcategoria.value = "todas";
+}
 
 // ========================================
 // CARGA INICIAL
@@ -457,7 +489,6 @@ if (filtroSubcategoria) filtroSubcategoria.addEventListener("change", aplicarFil
 
 async function cargarProductos() {
   try {
-    // 🔴 AHORA LEE EL productos.json QUE TENÉS EN LA RAÍZ
     const resp = await fetch("productos.json");
     if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
@@ -465,6 +496,31 @@ async function cargarProductos() {
     TODOS_LOS_PRODUCTOS = Array.isArray(data)
       ? data
       : (data.productos || []);
+
+    // Construimos map categoria -> subcategorías
+    MAPA_CAT_SUB = {};
+    TODAS_LAS_SUBCATS = new Set();
+
+    TODOS_LOS_PRODUCTOS.forEach(p => {
+      const catOriginal = safe(
+        p.categoria || p.rubro || p.cat || p["Categoria Princ"],
+        ""
+      ).toString().trim();
+
+      const subOriginal = safe(
+        p.subcategoria || p.Subcategoria || p["Subcategoria"],
+        ""
+      ).toString().trim();
+
+      const catKey = catOriginal.toLowerCase();
+      if (!MAPA_CAT_SUB[catKey]) {
+        MAPA_CAT_SUB[catKey] = new Set();
+      }
+      if (subOriginal) {
+        MAPA_CAT_SUB[catKey].add(subOriginal);
+        TODAS_LAS_SUBCATS.add(subOriginal);
+      }
+    });
 
     // llenar combo de categorías
     if (filtroCategoria) {
@@ -477,7 +533,7 @@ async function cargarProductos() {
             ).toString()
           ).filter(c => c !== "")
         )
-      ).sort();
+      ).sort((a, b) => a.localeCompare(b, "es"));
 
       filtroCategoria.innerHTML = "";
       const optTodas = document.createElement("option");
@@ -493,32 +549,8 @@ async function cargarProductos() {
       });
     }
 
-    // 🚀 llenar combo de subcategorías
-    if (filtroSubcategoria) {
-      const subcatsUnicas = Array.from(
-        new Set(
-          TODOS_LOS_PRODUCTOS.map(p =>
-            safe(
-              p.subcategoria || p.Subcategoria || p["Subcategoria"],
-              ""
-            ).toString()
-          ).filter(s => s !== "")
-        )
-      ).sort();
-
-      filtroSubcategoria.innerHTML = "";
-      const optTodasSub = document.createElement("option");
-      optTodasSub.value = "todas";
-      optTodasSub.textContent = "Todas las subcategorías";
-      filtroSubcategoria.appendChild(optTodasSub);
-
-      subcatsUnicas.forEach(sub => {
-        const op = document.createElement("option");
-        op.value = sub.toLowerCase();
-        op.textContent = sub;
-        filtroSubcategoria.appendChild(op);
-      });
-    }
+    // llenar combo de subcategorías (todas al principio)
+    actualizarOpcionesSubcategorias("todas");
 
     renderProductos(TODOS_LOS_PRODUCTOS);
     actualizarMiniCarrito();
@@ -526,6 +558,27 @@ async function cargarProductos() {
     console.error(err);
     grid.innerHTML = `<p>Error cargando productos: ${err.message}</p>`;
   }
+}
+
+// ========================================
+// EVENTOS
+// ========================================
+
+if (buscador) {
+  buscador.addEventListener("input", aplicarFiltros);
+}
+
+if (filtroCategoria) {
+  filtroCategoria.addEventListener("change", () => {
+    const seleccion = filtroCategoria.value || "todas";
+    // actualizamos subcategorías en función de la categoría
+    actualizarOpcionesSubcategorias(seleccion);
+    aplicarFiltros();
+  });
+}
+
+if (filtroSubcategoria) {
+  filtroSubcategoria.addEventListener("change", aplicarFiltros);
 }
 
 document.addEventListener("DOMContentLoaded", () => {
