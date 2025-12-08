@@ -5,6 +5,7 @@
 // + memoria de filtros en localStorage
 // + botón premium "Limpiar filtros"
 // + PAGINACIÓN PREMIUM
+// + WhatsApp inteligente desde carrito
 // ========================================
 
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
@@ -246,6 +247,58 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, s
 
 function irAlCarrito() {
   window.location.href = "carrito.html";
+}
+
+// ========= MENSAJE WHATSAPP DESDE CARRITO =========
+
+function generarMensajeWhatsAppCarrito() {
+  const carrito = leerCarrito();
+
+  if (!carrito || carrito.length === 0) {
+    return "Hola! Quiero consultar por el catálogo mayorista de Delivery Mayorista.";
+  }
+
+  let lineas = [];
+  lineas.push("Hola! Quiero hacer un pedido mayorista en Delivery Mayorista:");
+  lineas.push("");
+
+  let total = 0;
+
+  carrito.forEach((item) => {
+    const codigo = item.codigo || "";
+    const nombre = item.nombre || "";
+    const cantidad = item.cantidad || 0;
+    const precioNum = Number(item.precio) || 0;
+    const subtotal = precioNum * cantidad;
+    total += subtotal;
+
+    const precioTxt = precioNum.toLocaleString("es-AR", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+
+    const subtotalTxt = subtotal.toLocaleString("es-AR", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+
+    lineas.push(
+      `• ${codigo} - ${nombre} x ${cantidad} u. ($ ${precioTxt} c/u) = $ ${subtotalTxt}`
+    );
+  });
+
+  lineas.push("");
+  lineas.push(
+    "Total aproximado: $ " +
+      total.toLocaleString("es-AR", {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+      })
+  );
+  lineas.push("");
+  lineas.push("Muchas gracias.");
+
+  return lineas.join("\n");
 }
 
 // ========= RENDER PRODUCTOS =========
@@ -1139,6 +1192,17 @@ if (megaResetBtn) {
 document.addEventListener("DOMContentLoaded", async () => {
   await cargarProductos();
   actualizarMiniCarrito();
+
+  // WhatsApp inteligente desde carrito
+  const btnWA = document.getElementById("wa-flotante");
+  if (btnWA) {
+    btnWA.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      const texto = encodeURIComponent(generarMensajeWhatsAppCarrito());
+      const url = "https://wa.me/?text=" + texto;
+      window.open(url, "_blank");
+    });
+  }
 
   const guardados = leerFiltrosGuardados();
   if (guardados) {
