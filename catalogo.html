@@ -7,9 +7,10 @@
 
   <style>
     /* Ocultar el select de subcategorías (solo se usa internamente) */
-#filtro-subcategoria {
-  display: none !important;
-}
+    #filtro-subcategoria {
+      display: none !important;
+    }
+
     body {
       background:#0f0f1a;
       margin:0;
@@ -28,7 +29,6 @@
       display:flex;
       gap:15px;
       padding:25px;
-      justify-content:center;
       align-items:center;
       flex-wrap:wrap;
     }
@@ -40,7 +40,30 @@
       border:none;
       outline:none;
       font-size:15px;
-      min-width:230px;
+    }
+
+    /* Submenú de subcategorías a la derecha del select */
+    .subcat-menu {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .subcat-chip {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #202432;
+      font-size: 12px;
+      cursor: pointer;
+      border: none;
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .subcat-chip.activa {
+      background: #ffa400;
+      color: #000;
     }
 
     .grid {
@@ -50,29 +73,21 @@
       padding:25px;
     }
 
-.producto-card {
-  position:relative;
-  background:#0c0c17;
-  border-radius:22px;
-  padding:18px 16px 16px;
-  text-align:center;
-  min-height:260px;
-  display:flex;
-  flex-direction:column;
-  justify-content:flex-start;
-  box-shadow:0 0 0 1px rgba(0,0,0,0.25);
-  text-decoration:none;
-  color:inherit;
-
-  /* SIEMPRE VISIBLES */
-  opacity:1;
-  translate:0;
-}
-
-
-    .producto-card.visible {
+    .producto-card {
+      position:relative;
+      background:#0c0c17;
+      border-radius:22px;
+      padding:18px 16px 16px;
+      text-align:center;
+      min-height:260px;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-start;
+      box-shadow:0 0 0 1px rgba(0,0,0,0.25);
+      text-decoration:none;
+      color:inherit;
       opacity:1;
-      translate:0 0;
+      translate:0;
     }
 
     .producto-card:hover {
@@ -108,22 +123,11 @@
       display: block;
     }
 
-    .sin-imagen-texto {
-      position: absolute;
-      inset: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      opacity: 0.8;
-      background: #111;
-      border-radius: 18px;
-    }
-
     .producto-titulo {
       margin-top:2px;
       font-size:15px;
       line-height:1.15;
+      cursor:pointer;
     }
 
     .producto-descripcion {
@@ -134,17 +138,50 @@
       min-height:36px;
     }
 
-    .producto-categoria {
-      opacity:0.75;
-      font-size:12px;
-      margin-top:4px;
-    }
-
     .producto-precio {
       color:#ffa400;
       font-weight:700;
       margin-top:10px;
       font-size:15px;
+    }
+
+    .producto-precio-row {
+      margin-top:8px;
+    }
+
+    .producto-stock {
+      margin-top:6px;
+      font-size:12px;
+      opacity:.8;
+    }
+
+    .cantidad-container {
+      margin-top:8px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:4px;
+    }
+
+    .btn-cantidad {
+      width:26px;
+      height:26px;
+      border-radius:50%;
+      border:none;
+      background:#202432;
+      color:#fff;
+      font-size:16px;
+      cursor:pointer;
+    }
+
+    .input-cantidad {
+      width:60px;
+      border-radius:999px;
+      border:none;
+      padding:4px 8px;
+      text-align:center;
+      font-size:13px;
+      outline:none;
     }
 
     .producto-acciones {
@@ -153,8 +190,8 @@
       justify-content:center;
     }
 
-    /* Botón agregar a carrito (usado por catalogo.js) */
     .btn-agregar-carrito {
+      margin-top:8px;
       padding:6px 12px;
       border-radius:999px;
       border:none;
@@ -187,6 +224,12 @@
         width:100%;
         max-width:420px;
         font-size:14px;
+      }
+
+      .subcat-menu {
+        width:100%;
+        justify-content:flex-start;
+        margin-left:0;
       }
 
       .grid {
@@ -279,7 +322,7 @@
     .mini-carrito {
       position: fixed;
       right: 16px;
-      bottom: 100px;            /* POSICIÓN EN ESCRITORIO */
+      bottom: 100px;            
       display: flex;
       align-items: center;
       gap: 8px;
@@ -308,7 +351,6 @@
       font-weight: 500;
     }
 
-    /* SOLO EN CELULAR: subir un poco el mini carrito para que no tape el botón de WhatsApp */
     @media (max-width: 768px) {
       #mini-carrito {
         bottom: 150px !important;
@@ -327,8 +369,12 @@
     type="text"
     placeholder="Buscar por código o descripción"
   >
+
   <select id="filtro-categoria"></select>
   <select id="filtro-subcategoria"></select>
+
+  <!-- Submenú visual de subcategorías -->
+  <div id="subcategoria-menu" class="subcat-menu"></div>
 </div>
 
 <div id="lista-productos" class="grid"></div>
