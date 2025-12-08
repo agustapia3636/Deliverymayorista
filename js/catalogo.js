@@ -4,7 +4,7 @@
 // con 3er nivel de ETIQUETAS libres + iconos
 // + memoria de filtros en localStorage
 // + botón premium "Limpiar filtros"
-// + PAGINACIÓN
+// + PAGINACIÓN PREMIUM
 // ========================================
 
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
@@ -35,6 +35,7 @@ const resumenResultados   = document.getElementById("resumen-resultados");
 const btnPaginaAnterior   = document.getElementById("btn-pagina-anterior");
 const btnPaginaSiguiente  = document.getElementById("btn-pagina-siguiente");
 const contenedorNumeros   = document.getElementById("paginador-numeros");
+const contenedorPaginador = document.querySelector(".paginador-contenedor");
 
 const ITEMS_POR_PAGINA = 24;
 let paginaActual = 1;
@@ -523,7 +524,7 @@ function aplicarFiltros() {
   renderConPaginador(filtrados);
 }
 
-// ========= PAGINACIÓN =========
+// ========= PAGINACIÓN PREMIUM =========
 
 function renderConPaginador(listaFiltrada) {
   ultimoTotalFiltrado = listaFiltrada.length;
@@ -555,26 +556,91 @@ function renderConPaginador(listaFiltrada) {
     }
   }
 
-  // Paginador
-  if (contenedorNumeros) {
-    contenedorNumeros.innerHTML = "";
-
-    for (let i = 1; i <= totalPaginas; i++) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.className = "paginador-numero";
-      if (i === paginaActual) {
-        btn.classList.add("paginador-numero--activo");
-      }
-      btn.textContent = i;
-      btn.addEventListener("click", () => {
-        paginaActual = i;
-        guardarFiltrosActuales();
-        aplicarFiltros();
-      });
-      contenedorNumeros.appendChild(btn);
+  // Configuración visual del contenedor del paginador (sticky + ocultar si 1 sola página)
+  if (contenedorPaginador) {
+    if (totalPaginas <= 1) {
+      contenedorPaginador.style.display = "none";
+    } else {
+      contenedorPaginador.style.display   = "flex";
+      contenedorPaginador.style.position  = "sticky";
+      contenedorPaginador.style.bottom    = "0";
+      contenedorPaginador.style.zIndex    = "40";
+      contenedorPaginador.style.background = "#0f0f1a";
     }
   }
+
+  if (!contenedorNumeros) return;
+
+  // Animación suave
+  contenedorNumeros.style.transition = "opacity 0.15s ease, transform 0.15s ease";
+  contenedorNumeros.style.opacity    = "0";
+  contenedorNumeros.style.transform  = "translateY(4px)";
+
+  contenedorNumeros.innerHTML = "";
+
+  // Si no hay más de una página, terminamos acá
+  if (totalPaginas <= 1) {
+    if (btnPaginaAnterior) btnPaginaAnterior.disabled = true;
+    if (btnPaginaSiguiente) btnPaginaSiguiente.disabled = true;
+    requestAnimationFrame(() => {
+      contenedorNumeros.style.opacity   = "1";
+      contenedorNumeros.style.transform = "translateY(0)";
+    });
+    return;
+  }
+
+  // Helper para crear botón numerado
+  function crearBotonPagina(num) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "paginador-numero";
+    if (num === paginaActual) {
+      btn.classList.add("paginador-numero--activo");
+    }
+    btn.textContent = num;
+    btn.addEventListener("click", () => {
+      paginaActual = num;
+      guardarFiltrosActuales();
+      aplicarFiltros();
+    });
+    contenedorNumeros.appendChild(btn);
+  }
+
+  const rango = 3;
+  const total = totalPaginas;
+
+  // 1) Primera página
+  crearBotonPagina(1);
+
+  // 2) "..." inicial
+  if (paginaActual - rango > 2) {
+    const dots = document.createElement("span");
+    dots.textContent = "…";
+    dots.style.opacity = "0.5";
+    dots.style.padding = "0 6px";
+    contenedorNumeros.appendChild(dots);
+  }
+
+  // 3) Páginas intermedias alrededor de la actual
+  for (
+    let i = Math.max(2, paginaActual - rango);
+    i <= Math.min(total - 1, paginaActual + rango);
+    i++
+  ) {
+    crearBotonPagina(i);
+  }
+
+  // 4) "..." final
+  if (paginaActual + rango < total - 1) {
+    const dots2 = document.createElement("span");
+    dots2.textContent = "…";
+    dots2.style.opacity = "0.5";
+    dots2.style.padding = "0 6px";
+    contenedorNumeros.appendChild(dots2);
+  }
+
+  // 5) Última página
+  if (total > 1) crearBotonPagina(total);
 
   // Prev / Next
   if (btnPaginaAnterior) {
@@ -583,6 +649,12 @@ function renderConPaginador(listaFiltrada) {
   if (btnPaginaSiguiente) {
     btnPaginaSiguiente.disabled = paginaActual >= totalPaginas;
   }
+
+  // Terminar animación
+  requestAnimationFrame(() => {
+    contenedorNumeros.style.opacity   = "1";
+    contenedorNumeros.style.transform = "translateY(0)";
+  });
 }
 
 // ========= ICONOS PARA CATEGORÍAS =========
