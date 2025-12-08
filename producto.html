@@ -295,18 +295,8 @@
         }
 
         infoDiv.innerHTML = `
-          <p class="producto-codigo">${codigo}</p>
+          ${categoriaLinea ? `<p class="producto-categoria">${categoriaLinea}</p>` : ""}
           <h1 class="producto-titulo">${nombreCorto}</h1>
-
-          ${
-            categoria || subcategoria
-              ? `<p class="producto-categoria">
-                   ${categoria}
-                   ${categoria && subcategoria ? " · " : ""}
-                   ${subcategoria}
-                 </p>`
-              : ""
-          }
 
           ${descLarga ? `<p class="producto-descripcion">${descLarga}</p>` : ""}
           ${precioTexto ? `<p class="producto-precio">${precioTexto}</p>` : ""}
