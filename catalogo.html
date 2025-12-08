@@ -16,259 +16,150 @@
     }
 
     body {
-      background: #050510;
+      background: #0f0f1a;
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Inter",
-        "Segoe UI", sans-serif;
-      color: #ffffff;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    :root {
-      --dm-rosa: #ff005e;
-      --dm-naranja: #ff9d00;
-      --dm-fondo: #050510;
-      --dm-card: #11111f;
-      --dm-borde-card: #26263b;
-      --dm-acento: #ff9d00;
-      --dm-texto-suave: #c3c3dc;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
+        sans-serif;
+      color: white;
     }
 
     header {
-      padding: 16px 16px 12px;
-      text-align: center;
-      background: radial-gradient(
-          circle at 0% 0%,
-          rgba(255, 0, 94, 0.35),
-          transparent 55%
-        ),
-        radial-gradient(
-          circle at 100% 0%,
-          rgba(255, 157, 0, 0.35),
-          transparent 55%
-        ),
-        #050510;
-      font-weight: 800;
+      background: linear-gradient(90deg, #ff005d, #ffa400);
+      padding: 15px 25px;
       font-size: 20px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #ffffff;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-      position: sticky;
-      top: 0;
-      z-index: 50;
+      font-weight: 700;
     }
 
-    /* Barra superior: buscador + mega menú */
     .toolbar {
       display: flex;
+      gap: 15px;
+      padding: 25px;
+      justify-content: flex-start;
       align-items: center;
-      gap: 12px;
-      padding: 14px 18px 6px;
-      max-width: 1280px;
-      margin: 0 auto;
+      flex-wrap: wrap;
     }
 
     .toolbar input {
-      flex: 1;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      padding: 10px 14px;
-      font-size: 14px;
+      padding: 12px 18px;
+      border-radius: 30px;
+      border: none;
       outline: none;
-      background: rgba(10, 10, 25, 0.95);
-      color: #ffffff;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease,
-        background 0.15s ease;
+      font-size: 15px;
+      min-width: 260px;
     }
 
-    .toolbar input::placeholder {
-      color: rgba(255, 255, 255, 0.38);
-    }
+    /* ===========================
+       MEGA MENÚ CATEGORÍAS
+       (3 columnas: Cat / Subcat / Etiquetas)
+    ============================*/
 
-    .toolbar input:focus {
-      border-color: var(--dm-acento);
-      box-shadow: 0 0 0 1px rgba(255, 157, 0, 0.4);
-      background: rgba(15, 15, 35, 0.98);
-    }
-
-    .toolbar-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    /* Mega dropdown contenedor */
     .mega-dropdown {
       position: relative;
+      min-width: 260px;
     }
 
     .mega-toggle {
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: radial-gradient(
-          circle at 0% 0%,
-          rgba(255, 0, 94, 0.25),
-          transparent 60%
-        ),
-        rgba(15, 15, 35, 0.98);
-      color: #fff;
-      padding: 8px 14px;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      background: #ffffff;
+      color: #000;
       cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      text-shadow: 0 0 6px rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
     .mega-label {
       white-space: nowrap;
-      max-width: 160px;
       overflow: hidden;
       text-overflow: ellipsis;
+      max-width: 230px;
+      text-align: left;
     }
 
     .mega-arrow {
-      margin-left: 2px;
-      font-size: 12px;
-      opacity: 0.9;
+      font-size: 10px;
+      margin-left: 8px;
     }
 
-    /* Panel del mega menú */
     .mega-menu {
       position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
-      background: #050510;
-      border-radius: 18px;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 12px 12px 10px;
+      top: 110%;
+      left: 0;
+      background: #111217;
+      color: #fff;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
       display: none;
-      gap: 8px;
-      min-width: 620px;
-      max-width: 780px;
-      z-index: 60;
+      min-width: 420px;
+      max-width: 720px;
+      padding: 12px 8px 40px; /* extra abajo para el botón reset */
+      z-index: 999;
+      column-gap: 4px;
     }
 
     .mega-dropdown.open .mega-menu {
-      display: grid;
-      grid-template-columns: 220px 200px 1fr;
-      align-items: flex-start;
-      column-gap: 10px;
+      display: flex;
     }
 
     .mega-col {
+      flex: 1;
+      padding: 4px 8px;
       border-right: 1px solid rgba(255, 255, 255, 0.08);
-      padding-right: 8px;
     }
 
     .mega-col:last-child {
       border-right: none;
-      padding-right: 0;
     }
 
     .mega-col h4 {
-      margin: 0 0 6px;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: rgba(255, 255, 255, 0.7);
+      font-size: 13px;
+      margin: 4px 4px 8px;
+      opacity: 0.75;
     }
 
     .mega-col ul {
       list-style: none;
-      padding: 0;
       margin: 0;
-      max-height: 220px;
+      padding: 0;
+      max-height: 260px;
       overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(255, 255, 255, 0.28) transparent;
-    }
-
-    .mega-col ul::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .mega-col ul::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 999px;
-    }
-
-    .mega-col ul::-webkit-scrollbar-track {
-      background: transparent;
     }
 
     .mega-item,
     .mega-subitem,
     .mega-tagitem {
-      padding: 6px 8px;
-      margin-bottom: 4px;
-      border-radius: 999px;
-      cursor: pointer;
+      padding: 7px 10px;
+      border-radius: 10px;
       font-size: 13px;
-      color: rgba(255, 255, 255, 0.86);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: background 0.12s ease, color 0.12s ease,
-        transform 0.08s ease;
+      cursor: pointer;
+      white-space: nowrap;
+      margin: 2px 0;
+      transition: background 0.12s ease, color 0.12s ease;
     }
 
     .mega-item:hover,
     .mega-subitem:hover,
     .mega-tagitem:hover {
-      background: rgba(255, 255, 255, 0.06);
-      transform: translateY(-0.5px);
+      background: #1f2430;
     }
 
     .mega-item-activo,
     .mega-subitem-activo,
     .mega-tagitem-activo {
-      background: linear-gradient(90deg, #ff005e, #ff9d00);
-      color: #050510;
-      font-weight: 700;
-    }
-
-    .mega-reset-btn {
-      margin-top: 8px;
-      width: 100%;
-      border-radius: 999px;
-      background: transparent;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      color: rgba(255, 255, 255, 0.9);
-      padding: 6px 10px;
-      font-size: 12px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      cursor: pointer;
-      transition: background 0.12s ease, border-color 0.12s ease;
-    }
-
-    .mega-reset-btn span {
-      font-size: 12px;
-    }
-
-    .mega-reset-btn:hover {
-      background: rgba(255, 255, 255, 0.06);
-      border-color: rgba(255, 255, 255, 0.3);
+      background: #ffa400;
+      color: #000;
+      font-weight: 600;
     }
 
     /* Iconos en la columna de categorías */
     .mega-item {
       position: relative;
-      padding-left: 30px;
+      padding-left: 30px; /* espacio para el icono */
     }
 
     .mega-item::before {
@@ -277,144 +168,146 @@
       left: 10px;
       top: 50%;
       transform: translateY(-50%);
+      font-size: 15px;
+      opacity: 0.95;
     }
 
-    /* Grid de productos */
+    /* Botón premium reset filtros */
+    .mega-reset-btn {
+      position: absolute;
+      right: 14px;
+      bottom: 10px;
+      padding: 5px 12px;
+      font-size: 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: transparent;
+      color: #ffa400;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mega-reset-btn span {
+      font-size: 12px;
+    }
+
+    .mega-reset-btn:hover {
+      background: #ffa400;
+      color: #000;
+    }
+
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      gap: 20px;
-      padding: 10px 18px 40px;
-      max-width: 1280px;
-      margin: 0 auto 48px;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 25px;
+      padding: 25px;
     }
 
     .producto-card {
-      background: radial-gradient(
-          circle at 0% 0%,
-          rgba(255, 0, 94, 0.12),
-          transparent 55%
-        ),
-        radial-gradient(
-          circle at 100% 0%,
-          rgba(255, 157, 0, 0.12),
-          transparent 55%
-        ),
-        #0b0b18;
-      border-radius: 18px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 14px 14px 16px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+      position: relative;
+      background: #0c0c17;
+      border-radius: 22px;
+      padding: 18px 16px 16px;
+      text-align: center;
+      min-height: 260px;
       display: flex;
       flex-direction: column;
-      transition: transform 0.12s ease, box-shadow 0.12s ease,
-        border-color 0.12s ease;
+      justify-content: flex-start;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+      text-decoration: none;
+      color: inherit;
+      opacity: 1;
+      translate: 0;
     }
 
     .producto-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.8);
-      border-color: rgba(255, 157, 0, 0.7);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
     }
 
     .producto-imagen-wrapper {
       width: 100%;
-      height: 170px;
-      border-radius: 12px;
-      background: radial-gradient(
-          circle at 0% 0%,
-          rgba(255, 0, 94, 0.18),
-          transparent 60%
-        ),
-        radial-gradient(
-          circle at 100% 0%,
-          rgba(255, 157, 0, 0.16),
-          transparent 60%
-        ),
-        #050510;
+      height: 160px;
+      border-radius: 18px;
+      background: #0a0a12;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 10px;
       overflow: hidden;
+      position: relative;
+      margin-bottom: 10px;
     }
 
     .producto-imagen {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
-      border-radius: 12px;
-      transform: translateZ(0);
-    }
-
-    .producto-info {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-top: 2px;
+      border-radius: 16px;
+      display: block;
+      cursor: pointer;
     }
 
     .producto-titulo {
+      margin-top: 2px;
       font-size: 15px;
-      font-weight: 700;
-      margin: 0;
-      color: #ffffff;
+      line-height: 1.15;
       cursor: pointer;
     }
 
     .producto-descripcion {
-      margin: 0;
+      opacity: 0.8;
       font-size: 13px;
-      color: var(--dm-texto-suave);
-      min-height: 44px;
+      margin-top: 6px;
+      line-height: 1.25;
+      min-height: 36px;
     }
 
     .producto-precio-row {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 8px;
+      margin-top: 8px;
     }
 
     .producto-precio {
-      font-size: 18px;
+      color: #ffa400;
       font-weight: 700;
-      color: var(--dm-acento);
+      margin-top: 4px;
+      font-size: 15px;
     }
 
-    .stock-text {
+    .producto-stock {
+      opacity: 0.8;
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.65);
-    }
-
-    .cantidad-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
       margin-top: 4px;
     }
 
+    .cantidad-container {
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
     .btn-cantidad {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
+      border-radius: 999px;
       border: none;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
+      width: 24px;
+      height: 24px;
       font-size: 16px;
       cursor: pointer;
-      display: inline-flex;
+      background: #202432;
+      color: #fff;
+      line-height: 1;
+      display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .input-cantidad {
-      width: 52px;
+      width: 50px;
       text-align: center;
       border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      background: rgba(5, 5, 20, 0.95);
-      color: #fff;
+      border: none;
       padding: 4px 6px;
       font-size: 13px;
       outline: none;
@@ -422,54 +315,42 @@
 
     .btn-agregar-carrito {
       margin-top: 8px;
+      padding: 6px 12px;
       border-radius: 999px;
       border: none;
-      padding: 8px 10px;
-      background: linear-gradient(90deg, #1870ff, #1ebeff);
-      color: #fff;
-      font-weight: 600;
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
+      background: #202432;
+      color: #fff;
       display: inline-flex;
       align-items: center;
-      justify-content: center;
       gap: 6px;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
     }
 
     .btn-agregar-carrito-activo {
-      background: linear-gradient(90deg, #1ebe57, #27d96f);
+      background: #1ebe57;
     }
 
-    /* BOTÓN FLOTANTE WHATSAPP (icono circular premium) */
+    /* BOTÓN FLOTANTE WHATSAPP EN CATÁLOGO (simple, link fijo) */
     .btn-wa-flotante {
       position: fixed;
       right: 18px;
       bottom: 18px;
       background: #25d366;
-      padding: 12px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
+      color: #fff;
+      padding: 10px 16px;
+      border-radius: 24px;
+      font-weight: 600;
+      font-size: 14px;
       text-decoration: none;
       box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
       z-index: 999;
-      transition: transform 0.1s ease, filter 0.1s ease;
+      transition: transform 0.08s ease, filter 0.08s ease;
     }
 
     .btn-wa-flotante:hover {
       filter: brightness(1.06);
       transform: translateY(-1px);
-    }
-
-    .btn-wa-flotante:focus,
-    .btn-wa-flotante:active,
-    .btn-wa-flotante:visited {
-      outline: none;
-      border-radius: 50% !important;
-      box-shadow: 0 0 0 3px #25d36688;
     }
 
     /* MINI CARRITO FLOTANTE */
@@ -503,51 +384,6 @@
     .mini-carrito-linea {
       white-space: nowrap;
       font-weight: 500;
-    }
-
-    /* PAGINADOR PREMIUM */
-    .paginador-contenedor {
-      display: none;
-      gap: 12px;
-      align-items: center;
-      justify-content: center;
-      padding: 22px 0;
-    }
-
-    .paginador-btn {
-      background: rgba(255, 255, 255, 0.15);
-      color: #fff;
-      border: none;
-      border-radius: 18px;
-      padding: 6px 14px;
-      cursor: pointer;
-    }
-
-    .paginador-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    .paginador-numero {
-      background: rgba(255, 255, 255, 0.12);
-      border: none;
-      color: #fff;
-      border-radius: 18px;
-      padding: 5px 12px;
-      cursor: pointer;
-    }
-
-    .paginador-numero--activo {
-      background: #ff9d00;
-      color: #000;
-      font-weight: 700;
-    }
-
-    #resumen-resultados {
-      text-align: center;
-      opacity: 0.8;
-      margin: 8px 0 40px;
-      font-size: 13px;
     }
 
     /* SOLO EN CELULAR */
@@ -613,8 +449,10 @@
       }
 
       .btn-wa-flotante {
-        bottom: 90px !important;
-        right: 18px;
+        bottom: 80px;
+        right: 12px;
+        font-size: 13px;
+        padding: 9px 14px;
       }
     }
 
@@ -645,7 +483,8 @@
         font-size: 16px;
       }
     }
-  </style></head>
+  </style>
+</head>
 
 <body>
   <header>DELIVERY MAYORISTA</header>
@@ -669,12 +508,10 @@
           <h4>Categorías</h4>
           <ul id="megaCategorias"></ul>
         </div>
-
         <div class="mega-col">
           <h4 id="megaSubTitle">Subcategorías</h4>
           <ul id="megaSubcategorias"></ul>
         </div>
-
         <div class="mega-col">
           <h4 id="megaTagTitle">Etiquetas</h4>
           <ul id="megaEtiquetas"></ul>
@@ -690,33 +527,18 @@
     <!-- selects ocultos para la lógica de filtros -->
     <select id="filtro-categoria"></select>
     <select id="filtro-subcategoria"></select>
-  </div>  <div id="lista-productos" class="grid"></div>
-
-  <!-- PAGINADOR PREMIUM -->
-  <div class="paginador-contenedor">
-    <button id="btn-pagina-anterior" class="paginador-btn">«</button>
-    <div id="paginador-numeros"></div>
-    <button id="btn-pagina-siguiente" class="paginador-btn">»</button>
   </div>
 
-  <div id="resumen-resultados"></div>
+  <div id="lista-productos" class="grid"></div>
 
-  <!-- Botón flotante de WhatsApp -->
+  <!-- Botón flotante de WhatsApp (mensaje simple genérico) -->
   <a
     id="wa-flotante"
     class="btn-wa-flotante"
-    href="#"
-    aria-label="WhatsApp"
+    href="https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista."
+    target="_blank"
   >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="26"
-      height="26"
-      fill="#ffffff"
-      viewBox="0 0 32 32"
-    >
-      <path d="M16.019 2.594c-7.453 0-13.438 6.063-13.438 13.531 0 2.375.625 4.656 1.844 6.719l-1.969 7.219 7.453-1.969c1.969 1.063 4.219 1.625 6.375 1.625h.031c7.438 0 13.438-6.063 13.438-13.531 0-3.594-1.406-6.938-3.969-9.469-2.531-2.531-5.906-4.125-9.656-4.125zm0 24.844h-.031c-1.938 0-3.813-.5-5.469-1.406l-.406-.219-4.438 1.188 1.188-4.344-.25-.406c-1.188-1.906-1.813-4.094-1.813-6.375 0-6.563 5.344-11.906 11.906-11.906 3.188 0 6.156 1.25 8.406 3.5 2.25 2.25 3.5 5.219 3.5 8.406-.031 6.531-5.375 11.875-11.906 11.875zm6.344-8.531c-.344-.188-2.031-1-2.344-1.094-.313-.094-.531-.156-.75.188-.219.344-.875 1.094-1.063 1.313-.188.188-.375.219-.719.031-.344-.188-1.438-.531-2.75-1.656-1-.875-1.656-1.938-1.844-2.281-.188-.344-.016-.531.156-.719.156-.156.344-.406.5-.594.156-.188.219-.313.344-.531.094-.219.031-.406-.031-.594-.063-.188-.75-1.844-1.031-2.5-.281-.656-.563-.563-.75-.563h-.656c-.219 0-.594.094-.906.438-.313.344-1.188 1.156-1.188 2.813s1.219 3.25 1.406 3.469c.188.219 2.406 3.656 5.844 5 3.438 1.344 3.438.875 4.063.813.625-.063 2.031-.813 2.313-1.594.281-.781.281-1.438.219-1.594-.063-.156-.281-.25-.625-.438z"/>
-    </svg>
+    WhatsApp Mayorista
   </a>
 
   <!-- MINI CARRITO GLOBAL -->
@@ -733,7 +555,6 @@
   </div>
 
   <!-- SCRIPT DEL CATÁLOGO + CARRITO -->
-<script src="js/catalogo.js?v=5"></script>
-<script src="js/carrito.js?v=5"></script>
+  <script src="js/catalogo.js?v=5"></script>
 </body>
 </html>
