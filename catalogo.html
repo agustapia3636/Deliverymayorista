@@ -1,302 +1,442 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Delivery Mayorista | Catálogo</title>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+  <title>Delivery Mayorista | Catálogo</title>
 
-<style>
+  <style>
+    /* Ocultamos selects invisibles que usa JS para filtrado */
+    #filtro-categoria,
+    #filtro-subcategoria {
+      display: none !important;
+    }
 
-/* ===================== GENERAL ===================== */
-body {
-  margin: 0;
-  font-family: 'Inter', sans-serif;
-  background: #0e0e16;
-  color: #fff;
-  -webkit-font-smoothing: antialiased;
-}
+    body {
+      background: #0f0f1a;
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont,
+        sans-serif;
+      color: white;
+    }
 
-/* ===================== HEADER ===================== */
-header {
-  background: linear-gradient(90deg, #ff005e, #ff9d00);
-  padding: 22px 0;
-  text-align: center;
-  font-weight: 800;
-  font-size: 22px;
-  letter-spacing: .5px;
-}
+    header {
+      background: linear-gradient(90deg, #ff005d, #ffa400);
+      padding: 15px 25px;
+      font-size: 20px;
+      font-weight: 700;
+    }
 
-/* ===================== CONTENEDOR DE FILTROS ===================== */
-.contenedor-filtros {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  padding: 18px;
-  max-width: 1400px;
-  margin: auto;
-}
+    /* ===========================
+       TOOLBAR (buscador + mega menú)
+    ============================*/
+    .toolbar {
+      display: flex;
+      gap: 15px;
+      padding: 25px;
+      justify-content: flex-start;
+      align-items: center;
+      flex-wrap: wrap;
+    }
 
-.busqueda-input {
-  width: 100%;
-  padding: 18px;
-  border-radius: 40px;
-  border: none;
-  font-size: 16px;
-  outline: none;
-}
+    .toolbar input {
+      padding: 12px 18px;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      min-width: 260px;
+    }
 
-.select-categorias {
-  width: 100%;
-  padding: 18px;
-  border-radius: 40px;
-  border: none;
-  font-size: 16px;
-  outline: none;
-}
+    /* ===========================
+       MEGA MENÚ FULL
+    ============================*/
+    .mega-dropdown {
+      position: relative;
+      min-width: 260px;
+    }
 
-/* ===================== GRID PRODUCTOS ===================== */
-.grid-productos {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 22px;
-  padding: 22px;
-  max-width: 1400px;
-  margin: auto;
-}
+    .mega-toggle {
+      width: 100%;
+      padding: 12px 18px;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      background: #ffffff;
+      color: #000;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-.producto {
-  background: rgba(255,255,255,0.05);
-  border-radius: 22px;
-  padding: 22px;
-  text-align: center;
-}
+    .mega-label {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 230px;
+      text-align: left;
+    }
 
-.producto img {
-  width: 80%;
-  border-radius: 18px;
-  margin-bottom: 22px;
-}
+    .mega-arrow {
+      font-size: 10px;
+      margin-left: 8px;
+    }
 
-.codigo {
-  font-weight: bold;
-  font-size: 14px;
-  margin-bottom: 4px;
-}
+    .mega-menu {
+      position: absolute;
+      top: 110%;
+      left: 0;
+      background: #111217;
+      color: #fff;
+      border-radius: 16px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+      display: none;
+      min-width: 420px;
+      max-width: 720px;
+      padding: 12px 8px 40px;
+      z-index: 999;
+      column-gap: 4px;
+    }
 
-.nombre {
-  font-size: 17px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
+    .mega-dropdown.open .mega-menu {
+      display: flex;
+    }
 
-.descripcion {
-  opacity: .8;
-  font-size: 14px;
-  margin-bottom: 12px;
-}
+    .mega-col {
+      flex: 1;
+      padding: 4px 8px;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+    }
 
-.precio {
-  font-size: 20px;
-  font-weight: 700;
-  color: #ff9d00;
-}
+    .mega-col:last-child {
+      border-right: none;
+    }
 
-.stock {
-  opacity: .8;
-  font-size: 14px;
-  margin-bottom: 18px;
-}
+    .mega-col h4 {
+      font-size: 13px;
+      margin: 4px 4px 8px;
+      opacity: 0.75;
+    }
 
-/* ===================== BOTONES DE CANTIDAD ===================== */
-.cantidad {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
+    .mega-col ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 260px;
+      overflow-y: auto;
+    }
 
-.cantidad button {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-}
+    .mega-item,
+    .mega-subitem,
+    .mega-tagitem {
+      padding: 7px 10px;
+      border-radius: 10px;
+      font-size: 13px;
+      cursor: pointer;
+      white-space: nowrap;
+      margin: 2px 0;
+      transition: background 0.12s ease, color 0.12s ease;
+    }
 
-.cantidad input {
-  width: 60px;
-  text-align: center;
-  border-radius: 22px;
-  border: none;
-  padding: 8px;
-}
+    .mega-item:hover,
+    .mega-subitem:hover,
+    .mega-tagitem:hover {
+      background: #1f2430;
+    }
 
-/* ===================== BOTONES AL CARRITO ===================== */
-.btn-agregar-carrito {
-  background: #1870ff;
-  padding: 10px 18px;
-  border-radius: 22px;
-  border: none;
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
+    .mega-item-activo,
+    .mega-subitem-activo,
+    .mega-tagitem-activo {
+      background: #ffa400;
+      color: #000;
+      font-weight: 600;
+    }
 
-.btn-agregar-carrito-activo {
-  background: #1ebe57;
-}
-</style></style>
-</head>
+    .mega-item {
+      position: relative;
+      padding-left: 30px;
+    }
+
+    .mega-item::before {
+      content: attr(data-icon);
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 15px;
+      opacity: 0.95;
+    }
+
+    .mega-reset-btn {
+      position: absolute;
+      right: 14px;
+      bottom: 10px;
+      padding: 5px 12px;
+      font-size: 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: transparent;
+      color: #ffa400;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .mega-reset-btn span {
+      font-size: 12px;
+    }
+
+    .mega-reset-btn:hover {
+      background: #ffa400;
+      color: #000;
+    }
+
+    /* ===========================
+       GRID PRODUCTOS
+    ============================*/
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 25px;
+      padding: 25px;
+    }
+
+    .producto-card {
+      position: relative;
+      background: #0c0c17;
+      border-radius: 22px;
+      padding: 18px 16px 16px;
+      text-align: center;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
+    }
+
+    .producto-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
+    }
+
+    .producto-imagen-wrapper {
+      width: 100%;
+      height: 160px;
+      border-radius: 18px;
+      background: #0a0a12;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .producto-imagen {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 16px;
+      cursor: pointer;
+    }
+
+    .producto-titulo {
+      margin-top: 2px;
+      font-size: 15px;
+      line-height: 1.15;
+      cursor: pointer;
+    }
+
+    .producto-descripcion {
+      opacity: 0.8;
+      font-size: 13px;
+      margin-top: 6px;
+      line-height: 1.25;
+      min-height: 36px;
+    }
+
+    .producto-precio {
+      color: #ffa400;
+      font-weight: 700;
+      font-size: 15px;
+      margin-top: 4px;
+    }
+
+    .producto-stock {
+      opacity: 0.8;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .cantidad-container {
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-cantidad {
+      border-radius: 999px;
+      border: none;
+      width: 24px;
+      height: 24px;
+      font-size: 16px;
+      cursor: pointer;
+      background: #202432;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .input-cantidad {
+      width: 50px;
+      text-align: center;
+      border-radius: 999px;
+      border: none;
+      padding: 4px 6px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .btn-agregar-carrito {
+      margin-top: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: none;
+      font-size: 12px;
+      cursor: pointer;
+      background: #202432;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-agregar-carrito-activo {
+      background: #1ebe57;
+    }</head>
 
 <body>
 
-<header>📦 Delivery Mayorista – Catálogo</header>
+  <header>DELIVERY MAYORISTA</header>
 
-<!-- ================= BUSCADOR + SELECT ================= -->
-<div class="contenedor-filtros">
-  <input id="buscador" class="busqueda-input" type="text" placeholder="Buscar producto o código..." />
-  
-  <!-- select oculto para compatibilidad filtros (no se usa visualmente) -->
-  <select id="filtro-categoria" class="select-categorias" style="display:none;"></select>
-  <select id="filtro-subcategoria" class="select-categorias" style="display:none;"></select>
-</div>
+  <!-- ====================== TOOLBAR (BUSCADOR + MEGA MENÚ) ====================== -->
+  <div class="toolbar">
+    <input
+      id="buscador"
+      type="text"
+      placeholder="Buscar por código o descripción"
+    />
 
-<!-- ================= GRID DE PRODUCTOS ================= -->
-<div id="lista-productos" class="grid-productos"></div>
+    <!-- MEGA DROPDOWN DE CATEGORÍAS -->
+    <div class="mega-dropdown" id="megaDropdown">
+      <button id="categoriaToggle" class="mega-toggle">
+        <span class="mega-label">Todas las categorías</span>
+        <span class="mega-arrow">▾</span>
+      </button>
 
-<!-- ================= PAGINADOR PREMIUM ================= -->
-<div class="paginador-contenedor" style="display:none; gap: 12px; align-items:center; justify-content:center; padding: 22px 0;">
-  
-  <button id="btn-pagina-anterior" class="paginador-btn">«</button>
+      <div id="megaMenu" class="mega-menu">
+        <div class="mega-col">
+          <h4>Categorías</h4>
+          <ul id="megaCategorias"></ul>
+        </div>
+        <div class="mega-col">
+          <h4 id="megaSubTitle">Subcategorías</h4>
+          <ul id="megaSubcategorias"></ul>
+        </div>
+        <div class="mega-col">
+          <h4 id="megaTagTitle">Etiquetas</h4>
+          <ul id="megaEtiquetas"></ul>
+        </div>
 
-  <div id="paginador-numeros" style="display:flex; gap:6px;"></div>
+        <!-- Botón premium reset filtros -->
+        <button id="megaReset" class="mega-reset-btn">
+          <span>🔄</span> Limpiar filtros
+        </button>
+      </div>
+    </div>
 
-  <button id="btn-pagina-siguiente" class="paginador-btn">»</button>
+    <!-- selects invisibles usados internamente -->
+    <select id="filtro-categoria"></select>
+    <select id="filtro-subcategoria"></select>
+  </div>
 
-</div>
+  <!-- ====================== GRID DE PRODUCTOS ====================== -->
+  <div id="lista-productos" class="grid"></div>
 
-<div id="resumen-resultados" style="text-align:center; opacity:.8; margin-bottom:40px;"></div>
+  <!-- ====================== PAGINADOR PREMIUM ====================== -->
+  <div class="paginador-contenedor">
+    
+    <!-- resumen dinámico del catálogo -->
+    <div id="resumen-resultados" class="paginador-resumen"></div>
+    
+    <div id="paginador" class="paginador">
+      <button
+        id="btn-pagina-anterior"
+        class="paginador-btn"
+        type="button"
+        disabled
+      >
+        ‹
+      </button>
 
-<style>
-/* ========== ESTILO PAGINADOR ========== */
-.paginador-btn {
-  background: rgba(255,255,255,0.15);
-  color: #fff;
-  border: none;
-  border-radius: 18px;
-  padding: 6px 14px;
-  cursor: pointer;
-}
+      <div id="paginador-numeros" class="paginador-numeros"></div>
 
-.paginador-btn:disabled {
-  opacity: .3;
-  cursor: not-allowed;
-}
+      <button
+        id="btn-pagina-siguiente"
+        class="paginador-btn"
+        type="button"
+        disabled
+      >
+        ›
+      </button>
+    </div>
 
-.paginador-numero {
-  background: rgba(255,255,255,0.12);
-  border: none;
-  color: #fff;
-  border-radius: 18px;
-  padding: 5px 12px;
-  cursor: pointer;
-}
+  </div>
 
-.paginador-numero--activo {
-  background: #ff9d00;
-  color: #000;
-  font-weight: 700;
-}
+  <!-- ====================== MINI CARRITO GLOBAL ====================== -->
+  <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
+    <div class="mini-carrito-icono">🛒</div>
+    <div class="mini-carrito-texto">
+      <span class="mini-carrito-linea">
+        <span id="mini-carrito-cantidad">0</span> productos
+      </span>
+      <span class="mini-carrito-linea">
+        $<span id="mini-carrito-total">0</span>
+      </span>
+    </div>
+  </div>
 
-/* ================= MINI CARRITO ================= */
-mini-carrito {
-  position: fixed;
-  left: 18px;
-  bottom: 18px;
-  background: rgba(0,0,0,.55);
-  backdrop-filter: blur(6px);
-  padding: 12px 22px;
-  border-radius: 50px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-  z-index: 999;
-  box-shadow: 0 4px 18px rgba(0,0,0,.55);
-}
-
-/* ================= BOTÓN WHATSAPP ================= */
-.btn-wa-flotante {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  background: #25d366;
-  padding: 12px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  text-decoration: none;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.45);
-  z-index: 999;
-  transition: transform 0.1s ease, filter 0.1s ease;
-}
-
-.btn-wa-flotante:hover {
-  filter: brightness(1.06);
-  transform: translateY(-1px);
-}
-
-/* **AJUSTE MÓVIL (para no tapar paginador)** */
-@media (max-width: 480px) {
-  .btn-wa-flotante {
-    bottom: 90px !important;
-  }
-}
-
-/* CONTORNO CIRCULAR PREMIUM */
-.btn-wa-flotante:focus,
-.btn-wa-flotante:active,
-.btn-wa-flotante:visited {
-  outline: none;
-  border-radius: 50% !important;
-  box-shadow: 0 0 0 3px #25d36688;
-}
-</style>
-
-<!-- ================= MINI CARRITO ================= -->
-<mini-carrito onclick="location.href='carrito.html'">
-  🛒 <span id="mini-carrito-cantidad">0</span> —
-  $<span id="mini-carrito-total">0</span>
-</mini-carrito>
-
-<!-- ================= BOTÓN WHATSAPP ================= -->
-<a
-  id="wa-flotante"
-  class="btn-wa-flotante"
-  href="#"
-  aria-label="WhatsApp"
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="26"
-    height="26"
-    fill="#ffffff"
-    viewBox="0 0 32 32"
+  <!-- ====================== BOTÓN WHATSAPP FLOTANTE (SVG PREMIUM) ====================== -->
+  <a
+    id="wa-flotante"
+    class="btn-wa-flotante"
+    href="https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista."
+    target="_blank"
+    aria-label="WhatsApp"
   >
-    <path d="M16.019 2.594c-7.453 0-13.438 6.063-13.438 13.531 0 2.375.625 4.656 1.844 6.719l-1.969 7.219 7.453-1.969c1.969 1.063 4.219 1.625 6.375 1.625h.031c7.438 0 13.438-6.063 13.438-13.531 0-3.594-1.406-6.938-3.969-9.469-2.531-2.531-5.906-4.125-9.656-4.125zm0 24.844h-.031c-1.938 0-3.813-.5-5.469-1.406l-.406-.219-4.438 1.188 1.188-4.344-.25-.406c-1.188-1.906-1.813-4.094-1.813-6.375 0-6.563 5.344-11.906 11.906-11.906 3.188 0 6.156 1.25 8.406 3.5 2.25 2.25 3.5 5.219 3.5 8.406-.031 6.531-5.375 11.875-11.906 11.875zm6.344-8.531c-.344-.188-2.031-1-2.344-1.094-.313-.094-.531-.156-.75.188-.219.344-.875 1.094-1.063 1.313-.188.188-.375.219-.719.031-.344-.188-1.438-.531-2.75-1.656-1-.875-1.656-1.938-1.844-2.281-.188-.344-.016-.531.156-.719.156-.156.344-.406.5-.594.156-.188.219-.313.344-.531.094-.219.031-.406-.031-.594-.063-.188-.75-1.844-1.031-2.5-.281-.656-.563-.563-.75-.563h-.656c-.219 0-.594.094-.906.438-.313.344-1.188 1.156-1.188 2.813s1.219 3.25 1.406 3.469c.188.219 2.406 3.656 5.844 5 3.438 1.344 3.438.875 4.063.813.625-.063 2.031-.813 2.313-1.594.281-.781.281-1.438.219-1.594-.063-.156-.281-.25-.625-.438z"/>
-  </svg>
-</a>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="26"
+      height="26"
+      fill="#ffffff"
+      viewBox="0 0 32 32"
+    >
+      <path d="M16.019 2.594c-7.453 0-13.438 6.063-13.438 13.531 0 2.375.625 4.656 1.844 6.719l-1.969 7.219 7.453-1.969c1.969 1.063 4.219 1.625 6.375 1.625h.031c7.438 0 13.438-6.063 13.438-13.531 0-3.594-1.406-6.938-3.969-9.469-2.531-2.531-5.906-4.125-9.656-4.125zm0 24.844h-.031c-1.938 0-3.813-.5-5.469-1.406l-.406-.219-4.438 1.188 1.188-4.344-.25-.406c-1.188-1.906-1.813-4.094-1.813-6.375 0-6.563 5.344-11.906 11.906-11.906 3.188 0 6.156 1.25 8.406 3.5 2.25 2.25 3.5 5.219 3.5 8.406-.031 6.531-5.375 11.875-11.906 11.875zm6.344-8.531c-.344-.188-2.031-1-2.344-1.094-.313-.094-.531-.156-.75.188-.219.344-.875 1.094-1.063 1.313-.188.188-.375.219-.719.031-.344-.188-1.438-.531-2.75-1.656-1-.875-1.656-1.938-1.844-2.281-.188-.344-.016-.531.156-.719.156-.156.344-.406.5-.594.156-.188.219-.313.344-.531.094-.219.031-.406-.031-.594-.063-.188-.75-1.844-1.031-2.5-.281-.656-.563-.563-.75-.563h-.656c-.219 0-.594.094-.906.438-.313.344-1.188 1.156-1.188 2.813s1.219 3.25 1.406 3.469c.188.219 2.406 3.656 5.844 5 3.438 1.344 3.438.875 4.063.813.625-.063 2.031-.813 2.313-1.594.281-.781.281-1.438.219-1.594-.063-.156-.281-.25-.625-.438z"/>
+    </svg>
+  </a>
 
-<!-- ================= SCRIPTS ================= -->
-<script src="catalogo.js"></script>
-<script src="carrito.js"></script>
+  <!-- ====================== SCRIPTS ====================== -->
+  <script src="js/catalogo.js?v=5"></script>
+  <script src="js/carrito.js?v=1"></script>
 
 </body>
 </html>
