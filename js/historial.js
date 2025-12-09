@@ -6,31 +6,18 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import {
   collection,
-  getDocs,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// ==============================
-// PARÁMETROS DE LA URL
-// ==============================
-const params = new URLSearchParams(window.location.search);
-
-// Acepta ?clienteId=... o ?cliente=...
-const clienteIdFromUrl =
-  params.get("clienteId") || params.get("cliente") || "";
-
-// Acepta ?clienteNombre=... o ?nombre=...
-const nombreCliente =
-  params.get("clienteNombre") || params.get("nombre") || "";
-
-// ==============================
+// --------------------
 // DOM
-// ==============================
+// --------------------
 const btnLogout = document.getElementById("logoutBtn");
+
 const tituloCliente = document.getElementById("tituloCliente");
 const subtituloCliente = document.getElementById("subtituloCliente");
 
-// Contenedor de tarjetas
-const listaHistorial = document.getElementById("listaHistorial");
+const tbody = document.getElementById("tablaHistorial");
 
 // Filtros
 const inputDesde = document.getElementById("filtroDesde");
@@ -38,27 +25,40 @@ const inputHasta = document.getElementById("filtroHasta");
 const inputProducto = document.getElementById("filtroProducto");
 const selectEstado = document.getElementById("filtroEstado");
 
-// Resumen de totales (un solo bloque)
-const resumenTotales = document.getElementById("resumenTotales");
+// Totales (opcionales)
+const lblTotalCliente  = document.getElementById("totalCliente");
+const lblTotalFiltrado = document.getElementById("totalFiltrado");
+const lblResumenConteo = document.getElementById("resumenConteo");
 
-// ==============================
-// ESTADO EN MEMORIA
-// ==============================
-let ventasCliente = [];   // ventas base (todas o del cliente)
-let ventasFiltradas = []; // ventas luego de aplicar filtros
+// --------------------
+// Estado en memoria
+// --------------------
+let ventasCliente   = [];  // todas las ventas del cliente (o todas si no hay cliente)
+let ventasFiltradas = [];  // ventas luego de los filtros
 
-// ==============================
-// TÍTULO INICIAL
-// ==============================
-if (nombreCliente && tituloCliente) {
+// --------------------
+// Query string helper
+// --------------------
+function getQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    nombre: params.get("clienteNombre") || params.get("nombre") || "",
+    clienteId: params.get("clienteId") || ""
+  };
+}
+
+const { nombre: nombreCliente } = getQueryParams();
+
+// Título base
+if (nombreCliente) {
   tituloCliente.textContent = `Historial de compras - ${nombreCliente}`;
-} else if (tituloCliente) {
+} else {
   tituloCliente.textContent = "Historial de compras";
 }
 
-// ==============================
+// --------------------
 // SESIÓN
-// ==============================
+// --------------------
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "login.html";
@@ -72,38 +72,9 @@ btnLogout?.addEventListener("click", async () => {
   window.location.href = "login.html";
 });
 
-// ==============================
-// UTILS
-// ==============================
-function getDateFromInput(value, endOfDay = false) {
-  if (!value) return null; // value viene como "YYYY-MM-DD"
-  const suffix = endOfDay ? "T23:59:59" : "T00:00:00";
-  const d = new Date(value + suffix);
-  if (isNaN(d.getTime())) return null;
-  return d;
-}
-
-function formatearFecha(fecha) {
-  if (!fecha) return "-";
-  const f = fecha.toDate ? fecha.toDate() : new Date(fecha);
-  const dia = String(f.getDate()).padStart(2, "0");
-  const mes = String(f.getMonth() + 1).padStart(2, "0");
-  const anio = f.getFullYear();
-  const hora = String(f.getHours()).padStart(2, "0");
-  const min = String(f.getMinutes()).padStart(2, "0");
-  return `${dia}/${mes}/${anio} ${hora}:${min}`;
-}
-
-function estadoCssClass(estadoRaw) {
-  const e = (estadoRaw || "").toLowerCase();
-  if (e === "completado" || e === "pagado") return "estado-completado";
-  if (e === "cancelado") return "estado-cancelado";
-  return "estado-pendiente";
-}
-
-// ==============================
-// CARGAR HISTORIAL
-// ==============================
+// --------------------
+// Cargar ventas de Firestore
+// --------------------
 async function cargarHistorial() {
   try {
     const ventasRef = collection(db, "ventas");
@@ -111,35 +82,21 @@ async function cargarHistorial() {
 
     const todasLasVentas = snap.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data(),
+      ...doc.data()
     }));
 
-    // Si hay nombre o clienteId en la URL → filtramos solo ese cliente.
-    if (nombreCliente || clienteIdFromUrl) {
+    if (nombreCliente) {
+      // Filtramos solo las ventas de ese cliente
       ventasCliente = todasLasVentas.filter((v) => {
         const nombreVenta = (v.clienteNombre || v.cliente || "").trim();
-        const idVenta =
-          (v.clienteId || v.idCliente || "").toString().trim();
-
-        const coincideNombre =
-          nombreCliente && nombreVenta === nombreCliente;
-        const coincideId =
-          clienteIdFromUrl && idVenta === clienteIdFromUrl;
-
-        return coincideNombre || coincideId;
+        return nombreVenta === nombreCliente;
       });
-
       if (subtituloCliente) {
-        if (ventasCliente.length > 0) {
-          subtituloCliente.textContent =
-            "Mostrando las compras del cliente seleccionado.";
-        } else {
-          subtituloCliente.textContent =
-            "No se encontraron ventas para este cliente.";
-        }
+        subtituloCliente.textContent =
+          "Mostrando las compras del cliente seleccionado.";
       }
     } else {
-      // Sin cliente específico → historial completo
+      // Sin nombre → todas las ventas
       ventasCliente = todasLasVentas;
       if (subtituloCliente) {
         subtituloCliente.textContent =
@@ -150,19 +107,33 @@ async function cargarHistorial() {
     aplicarFiltros();
   } catch (error) {
     console.error("Error al cargar historial:", error);
-    listaHistorial.innerHTML = `
-      <p class="sin-resultados">Ocurrió un error al cargar el historial.</p>
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">Ocurrió un error al cargar el historial.</td>
+      </tr>
     `;
-    if (resumenTotales) resumenTotales.innerHTML = "";
   }
 }
 
-// ==============================
-// APLICAR FILTROS
-// ==============================
+// --------------------
+// Filtros
+// --------------------
+function parseFechaFiltro(valor) {
+  // dd/mm/aaaa -> Date
+  if (!valor) return null;
+  const [d, m, y] = valor.split("/");
+  if (!d || !m || !y) return null;
+  return new Date(`${y}-${m}-${d}T00:00:00`);
+}
+
 function aplicarFiltros() {
-  const desdeDate = getDateFromInput(inputDesde?.value || "", false);
-  const hastaDate = getDateFromInput(inputHasta?.value || "", true);
+  const desdeDate = parseFechaFiltro(inputDesde?.value.trim());
+  const hastaDateRaw = parseFechaFiltro(inputHasta?.value.trim());
+  let hastaDate = hastaDateRaw;
+  if (hastaDateRaw) {
+    hastaDate = new Date(hastaDateRaw.getTime());
+    hastaDate.setHours(23, 59, 59, 999);
+  }
 
   const textoProducto = (inputProducto?.value || "").toLowerCase();
   const estadoSeleccionado = (selectEstado?.value || "todas").toLowerCase();
@@ -182,18 +153,8 @@ function aplicarFiltros() {
 
     // Producto (código o nombre)
     if (textoProducto) {
-      const codigo = (
-        venta.productoCodigo ||
-        venta.codigoProducto ||
-        ""
-      ).toLowerCase();
-      const nombreProd = (
-        venta.productoNombre ||
-        venta.nombreProducto ||
-        venta.producto ||
-        ""
-      ).toLowerCase();
-
+      const codigo = (venta.productoCodigo || venta.codigoProducto || "").toLowerCase();
+      const nombreProd = (venta.productoNombre || venta.nombreProducto || "").toLowerCase();
       if (!codigo.includes(textoProducto) && !nombreProd.includes(textoProducto)) {
         ok = false;
       }
@@ -208,106 +169,71 @@ function aplicarFiltros() {
     return ok;
   });
 
-  renderHistorial(ventasFiltradas);
+  renderTabla(ventasFiltradas);
   recalcularTotales();
 }
 
-// ==============================
-// RENDER TARJETAS PREMIUM
-// ==============================
-function renderHistorial(lista) {
-  listaHistorial.innerHTML = "";
+// --------------------
+// Render tabla
+// --------------------
+function formatearFecha(fecha) {
+  if (!fecha) return "-";
+  const f = fecha.toDate ? fecha.toDate() : new Date(fecha);
+  const dia  = String(f.getDate()).padStart(2, "0");
+  const mes  = String(f.getMonth() + 1).padStart(2, "0");
+  const anio = f.getFullYear();
+  const hora = String(f.getHours()).padStart(2, "0");
+  const min  = String(f.getMinutes()).padStart(2, "0");
+  return `${dia}/${mes}/${anio} ${hora}:${min}`;
+}
+
+function renderTabla(lista) {
+  tbody.innerHTML = "";
 
   if (!lista || lista.length === 0) {
-    listaHistorial.innerHTML = `
-      <p class="sin-resultados">No hay ventas registradas para este cliente con los filtros seleccionados.</p>
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">No hay ventas registradas para este cliente.</td>
+      </tr>
     `;
     return;
   }
 
   lista.forEach((venta) => {
+    const tr = document.createElement("tr");
+
     const fechaTexto = formatearFecha(venta.fecha);
-
-    const codigoProd =
-      venta.productoCodigo || venta.codigoProducto || "";
-
     const nombreProd =
-      venta.productoNombre ||
-      venta.nombreProducto ||
-      venta.producto ||
-      "-";
-
-    const imgProd =
-      venta.imagenUrl ||
-      venta.imagen ||
-      "https://via.placeholder.com/52x52?text=%F0%9F%9A%9A";
-
-    const categoriaProd = venta.categoria || "-";
-    const subcategoriaProd = venta.subcategoria || "-";
-
+      venta.productoNombre || venta.nombreProducto || venta.producto || "-";
     const cantidad = venta.cantidad || venta.cant || 0;
     const total = venta.total || 0;
-    const precioUnit = venta.precioUnitario || venta.precio || 0;
     const estado = venta.estado || "-";
-    const notas = venta.notas || "";
+    const notas = venta.notas || "-";
 
-    const estadoClass = estadoCssClass(estado);
+    const estadoLower = estado.toLowerCase();
+    let claseEstado = "badge-neutral";
+    if (estadoLower === "pendiente") claseEstado = "badge-warning";
+    else if (estadoLower === "pagado" || estadoLower === "completado") claseEstado = "badge-success";
+    else if (estadoLower === "cancelado") claseEstado = "badge-danger";
 
-    const card = document.createElement("div");
-    card.className = "hist-card";
-
-    card.innerHTML = `
-      <div class="hist-card-left">
-        <img src="${imgProd}" alt="${nombreProd}">
-      </div>
-
-      <div class="hist-card-main">
-        <div>
-          <div class="hist-prod-nombre">${nombreProd}</div>
-          <div class="hist-prod-codigo">${codigoProd || "Sin código"}</div>
-        </div>
-
-        <div class="hist-detalles-row">
-          <span>📅 ${fechaTexto}</span>
-          <span>🧮 Cant: <strong>${cantidad}</strong></span>
-          <span>💲 Unit: $${precioUnit.toLocaleString("es-AR")}</span>
-          <span>📦 ${categoriaProd} / ${subcategoriaProd}</span>
-        </div>
-
-        ${
-          notas
-            ? `<div class="hist-notas">📝 ${notas}</div>`
-            : ""
-        }
-      </div>
-
-      <div class="hist-card-right">
-        <span class="estado-badge ${estadoClass}">
-          ${estado}
-        </span>
-        <span class="total-tag">
-          Total: $${total.toLocaleString("es-AR")}
-        </span>
-        ${
-          codigoProd
-            ? `<button class="btn-mini-link"
-                  onclick="window.location.href='admin.html?codigo=${encodeURIComponent(
-                    codigoProd
-                  )}'">
-                  Ver producto
-               </button>`
-            : ""
-        }
-      </div>
+    tr.innerHTML = `
+      <td data-label="Fecha">${fechaTexto}</td>
+      <td data-label="Producto">${nombreProd}</td>
+      <td data-label="Cantidad">${cantidad}</td>
+      <td data-label="Total">$${total.toLocaleString("es-AR")}</td>
+      <td data-label="Estado">
+        <span class="badge ${claseEstado}">${estado}</span>
+      </td>
+      <td data-label="Notas">${notas}</td>
     `;
 
-    listaHistorial.appendChild(card);
+    tbody.appendChild(tr);
   });
 }
 
-// ==============================
-// TOTALES
-// ==============================
+// --------------------
+// Totales
+// --------------------
 function recalcularTotales() {
   const totalCliente = ventasCliente.reduce(
     (acc, v) => acc + (v.total || 0),
@@ -318,34 +244,20 @@ function recalcularTotales() {
     0
   );
 
-  const cantHistorica = ventasCliente.length;
-  const cantFiltrada = ventasFiltradas.length;
-
-  const formato = (n) =>
-    n.toLocaleString("es-AR", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
-
-  if (resumenTotales) {
-    resumenTotales.innerHTML = `
-      <span>
-        Total gastado (todas las compras de este contexto): 
-        <span class="monto">$${formato(totalCliente)}</span>
-        (${cantHistorica} venta${cantHistorica !== 1 ? "s" : ""})
-      </span>
-      <span>
-        Total en resultados filtrados: 
-        <span class="monto">$${formato(totalFiltrado)}</span>
-        (${cantFiltrada} venta${cantFiltrada !== 1 ? "s" : ""})
-      </span>
-    `;
+  if (lblTotalCliente) {
+    lblTotalCliente.textContent = `$${totalCliente.toLocaleString("es-AR")}`;
+  }
+  if (lblTotalFiltrado) {
+    lblTotalFiltrado.textContent = `$${totalFiltrado.toLocaleString("es-AR")}`;
+  }
+  if (lblResumenConteo) {
+    lblResumenConteo.textContent = `${ventasFiltradas.length} venta(s) en el resultado.`;
   }
 }
 
-// ==============================
-// EVENTOS DE FILTROS
-// ==============================
+// --------------------
+// Listeners de filtros
+// --------------------
 [inputDesde, inputHasta, inputProducto, selectEstado].forEach((el) => {
   if (!el) return;
   el.addEventListener("input", aplicarFiltros);
