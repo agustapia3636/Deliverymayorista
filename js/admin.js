@@ -1,3 +1,4 @@
+// js/admin.js
 import { auth, db } from './firebase-init.js';
 import {
   onAuthStateChanged,
@@ -24,13 +25,11 @@ const btnLogout = document.getElementById("logoutBtn");
 // -----------------------------
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    // Si no está logueado → volver al login
     window.location.href = "login.html";
     return;
   }
 
   console.log("Usuario activo:", user.email);
-
   await cargarProductos();
 });
 
@@ -46,13 +45,14 @@ btnLogout.addEventListener("click", async () => {
 // ABRIR FORMULARIO NUEVO PRODUCTO
 // -----------------------------
 btnNuevo.addEventListener("click", () => {
-  alert("Acá pronto abrimos el formulario de 'Nuevo producto' 🛠️🔥");
+  // sin id => modo CREAR
+  window.location.href = "editor.html";
 });
 
 // -----------------------------
 // CARGAR PRODUCTOS DESDE FIRESTORE
 // -----------------------------
-let productos = []; // memoria interna
+let productos = [];
 
 async function cargarProductos() {
   tablaProductos.innerHTML = "<tr><td colspan='6'>Cargando...</td></tr>";
@@ -60,16 +60,16 @@ async function cargarProductos() {
   const ref = collection(db, "productos");
   const snap = await getDocs(ref);
 
-  productos = snap.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
+  productos = snap.docs.map(d => ({
+    id: d.id,        // normalmente el código (N0001, etc.)
+    ...d.data()
   }));
 
   mostrarProductos(productos);
 }
 
 // -----------------------------
-// MOSTRAR PRODUCTOS EN TABLA
+// MOSTRAR PRODUCTOS EN LA TABLA
 // -----------------------------
 function mostrarProductos(lista) {
   tablaProductos.innerHTML = "";
@@ -82,20 +82,20 @@ function mostrarProductos(lista) {
   }
 
   lista.forEach(p => {
-    const fila = document.createElement("tr");
+    const codigo = p.codigo ?? p.id ?? ""; // ← acá evitamos el "undefined"
 
+    const fila = document.createElement("tr");
     fila.innerHTML = `
-      <td>${p.codigo}</td>
-      <td>${p.nombre}</td>
-      <td>$${p.precio}</td>
-      <td>${p.stock}</td>
-      <td>${p.categoria}</td>
+      <td>${codigo}</td>
+      <td>${p.nombre || ""}</td>
+      <td>$${p.precio ?? ""}</td>
+      <td>${p.stock ?? ""}</td>
+      <td>${p.categoria || ""}</td>
       <td>
-        <button class="btn-editar" data-id="${p.id}">Editar</button>
-        <button class="btn-eliminar" data-id="${p.id}">Eliminar</button>
+        <button class="btn-editar" data-id="${codigo}">Editar</button>
+        <button class="btn-eliminar" data-id="${codigo}">Eliminar</button>
       </td>
     `;
-
     tablaProductos.appendChild(fila);
   });
 
@@ -108,10 +108,11 @@ function mostrarProductos(lista) {
 buscador.addEventListener("input", () => {
   const q = buscador.value.toLowerCase();
 
-  const filtrados = productos.filter(p =>
-    p.nombre.toLowerCase().includes(q) ||
-    p.codigo.toLowerCase().includes(q)
-  );
+  const filtrados = productos.filter(p => {
+    const codigo = (p.codigo ?? p.id ?? "").toLowerCase();
+    const nombre = (p.nombre || "").toLowerCase();
+    return nombre.includes(q) || codigo.includes(q);
+  });
 
   mostrarProductos(filtrados);
 });
@@ -120,22 +121,23 @@ buscador.addEventListener("input", () => {
 // BOTONES EDITAR & ELIMINAR
 // -----------------------------
 function activarBotones() {
+  // EDITAR
   document.querySelectorAll(".btn-editar").forEach(btn => {
     btn.addEventListener("click", (e) => {
-      const id = e.target.dataset.id;
-      alert("Editar producto: " + id + " (pronto habilitado)");
+      const codigo = e.target.dataset.id;
+      window.location.href = `editor.html?id=${encodeURIComponent(codigo)}`;
     });
   });
 
+  // ELIMINAR
   document.querySelectorAll(".btn-eliminar").forEach(btn => {
     btn.addEventListener("click", async (e) => {
-      const id = e.target.dataset.id;
+      const codigo = e.target.dataset.id;
 
-      if (!confirm("¿Seguro que querés eliminar este producto?")) return;
+      if (!confirm(`¿Seguro que querés eliminar el producto ${codigo}?`)) return;
 
-      await deleteDoc(doc(db, "productos", id));
+      await deleteDoc(doc(db, "productos", codigo));
       alert("Producto eliminado 👍");
-
       cargarProductos();
     });
   });
