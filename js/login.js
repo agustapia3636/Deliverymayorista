@@ -15,7 +15,7 @@ const form = document.getElementById("loginForm");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const btnLogin = document.getElementById("btnLogin");
-const msgBox = document.getElementById("loginMessage");
+const msgBox = document.getElementById("loginError");   // <— coincide con login.html
 const togglePassword = document.getElementById("togglePassword");
 const rememberCheckbox = document.getElementById("rememberMe");
 
@@ -24,7 +24,7 @@ const rememberCheckbox = document.getElementById("rememberMe");
 // -------------------------
 function setMessage(text, type = "error") {
   if (!msgBox) {
-    console.warn("[login.js] loginMessage no existe en el HTML. Mensaje:", text);
+    console.warn("[login.js] loginError no existe en el HTML. Mensaje:", text);
     return;
   }
   msgBox.textContent = text || "";
@@ -41,10 +41,9 @@ if (togglePassword && passwordInput) {
 
     passwordInput.setAttribute("type", esPassword ? "text" : "password");
 
-    // Opcional: cambiar estilo/emoji/icono del botón
+    // Cambiamos el emoji del botón
+    togglePassword.textContent = esPassword ? "🙈" : "👁";
     togglePassword.classList.toggle("active", esPassword);
-    // Si usás un emoji dentro del botón, podés cambiarlo así:
-    // togglePassword.textContent = esPassword ? "🙉" : "🙈";
   });
 }
 
@@ -53,7 +52,7 @@ if (togglePassword && passwordInput) {
 // -------------------------
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Ya hay sesión → directo al panel, sin mensajes ni alerts
+    // Ya hay sesión → directo al panel, sin alerts
     window.location.href = "admin.html";
   }
 });
