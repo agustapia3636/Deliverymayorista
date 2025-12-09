@@ -62,6 +62,17 @@
       padding: 0 16px 30px;
     }
 
+    h1 {
+      font-size: 1.35rem;
+      margin: 0 0 4px;
+    }
+
+    .sub {
+      font-size: 0.85rem;
+      color: #a3a3d5;
+      margin-bottom: 18px;
+    }
+
     .acciones {
       display: flex;
       gap: 10px;
@@ -70,8 +81,7 @@
       align-items: center;
     }
 
-    .acciones input,
-    .acciones select {
+    .acciones input {
       padding: 8px 10px;
       border-radius: 999px;
       border: 1px solid #2b2b44;
@@ -249,6 +259,9 @@
     <button class="btn-secundario" onclick="window.location.href='clientes.html'">
       Clientes
     </button>
+    <button class="btn-secundario" onclick="window.location.href='ventas.html'">
+      Ventas
+    </button>
     <button id="logoutBtn" class="btn-sesion">
       Cerrar sesión
     </button>
@@ -256,9 +269,13 @@
 </header>
 
 <div class="contenedor">
+  <h1>Ventas</h1>
+  <div class="sub" id="subTituloVentas">
+    Registro de ventas. Usá el buscador para filtrar por cliente, producto o estado.
+  </div>
 
   <div class="acciones">
-    <input type="text" id="buscarVenta" placeholder="Buscar por cliente o estado...">
+    <input type="text" id="buscarVenta" placeholder="Buscar por cliente, producto o estado...">
     <button id="btnNuevaVenta" class="btn-primario">+ Registrar venta</button>
   </div>
 
@@ -267,6 +284,8 @@
       <tr>
         <th>Fecha</th>
         <th>Cliente</th>
+        <th>Producto</th>
+        <th>Cant.</th>
         <th>Total</th>
         <th>Estado</th>
         <th>Notas</th>
@@ -287,8 +306,11 @@
     <label for="ventaCliente">Cliente</label>
     <select id="ventaCliente"></select>
 
-    <label for="ventaTotal">Total (AR$)</label>
-    <input type="number" id="ventaTotal" min="0" step="0.01">
+    <label for="ventaCodigo">Código de producto</label>
+    <input type="text" id="ventaCodigo" placeholder="Ej: N0001">
+
+    <label for="ventaCantidad">Cantidad</label>
+    <input type="number" id="ventaCantidad" min="1" step="1" value="1">
 
     <label for="ventaEstado">Estado</label>
     <select id="ventaEstado">
@@ -298,7 +320,7 @@
     </select>
 
     <label for="ventaNotas">Notas</label>
-    <textarea id="ventaNotas" placeholder="Ej: Pago en efectivo, envío en camino, etc."></textarea>
+    <textarea id="ventaNotas" placeholder="Ej: pago en efectivo, envío, etc."></textarea>
 
     <div class="modal-botones">
       <button id="btnCancelarVenta" class="btn-sec">Cancelar</button>
