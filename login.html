@@ -2,99 +2,371 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Panel Delivery Mayorista - Login</title>
+  <title>Iniciar sesión - Delivery Mayorista</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <style>
+    :root {
+      --grad-1: #ff005d;
+      --grad-2: #ffa400;
+      --bg-main: #050510;
+      --card-bg: rgba(10, 10, 25, 0.92);
+      --card-border: rgba(255, 255, 255, 0.06);
+      --accent: #28d48c;
+      --accent-soft: #21bcb4;
+      --text-muted: #a7a7c7;
+      --danger: #ff6b81;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: radial-gradient(circle at top, #ff005d 0, #0b0b16 45%, #05050a 100%);
-      min-height: 100vh;
       margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #fff;
+      min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      background:
+        radial-gradient(circle at top left, rgba(255,0,93,0.18), transparent 60%),
+        radial-gradient(circle at bottom right, rgba(255,164,0,0.18), transparent 60%),
+        #050510;
     }
-    .login-wrapper {
-      background: rgba(5,5,15,0.9);
-      border-radius: 20px;
-      padding: 32px 24px;
+
+    .login-shell {
       width: 100%;
-      max-width: 420px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+      max-width: 430px;
+      padding: 18px;
     }
-    .login-title {
-      font-size: 1.6rem;
-      margin: 0 0 4px;
+
+    .login-card {
+      position: relative;
+      border-radius: 22px;
+      padding: 26px 24px 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow:
+        0 26px 60px rgba(0, 0, 0, 0.75),
+        0 0 0 1px rgba(255,255,255,0.02);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      overflow: hidden;
     }
-    .login-sub {
+
+    .login-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.08), transparent 55%);
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .login-header {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       font-size: 0.9rem;
-      color: #b4b4d4;
-      margin-bottom: 24px;
     }
-    .login-label {
-      font-size: 0.85rem;
-      margin-bottom: 4px;
+
+    .brand-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 3px 10px;
+      font-size: 0.7rem;
+      background: linear-gradient(90deg, rgba(255,0,93,0.7), rgba(255,164,0,0.7));
+    }
+
+    .brand-pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .login-badge {
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.06);
+      color: var(--text-muted);
+    }
+
+    .login-title {
+      position: relative;
+      margin: 0 0 4px;
+      font-size: 1.2rem;
+    }
+
+    .login-subtitle {
+      position: relative;
+      margin: 0 0 16px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    form {
+      position: relative;
+      margin-top: 6px;
+    }
+
+    label {
       display: block;
+      font-size: 0.78rem;
+      margin-bottom: 4px;
+      color: #d6d6f4;
     }
-    .login-input {
+
+    .field {
+      margin-bottom: 12px;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    input[type="email"],
+    input[type="password"] {
       width: 100%;
-      padding: 10px 12px;
-      border-radius: 10px;
+      padding: 9px 12px;
+      padding-right: 38px;
+      border-radius: 12px;
       border: 1px solid #2b2b44;
-      background: #11111f;
+      background: #111123;
       color: #fff;
+      font-size: 0.9rem;
       outline: none;
-      font-size: 0.95rem;
-      margin-bottom: 16px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
-    .login-input:focus {
-      border-color: #ff7a3c;
-      box-shadow: 0 0 0 1px rgba(255,122,60,0.3);
+
+    input::placeholder {
+      color: #656587;
     }
-    .login-btn {
+
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px rgba(40,212,140,0.4);
+      background: #15152a;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border: none;
+      background: transparent;
+      color: #8a8ab5;
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0;
+    }
+
+    .login-footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .remember input {
+      width: 14px;
+      height: 14px;
+      margin: 0;
+    }
+
+    .link-muted {
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .link-muted:hover {
+      color: #d0d0ff;
+    }
+
+    #loginBtn {
       width: 100%;
       border: none;
       border-radius: 999px;
-      padding: 12px;
-      font-size: 1rem;
+      padding: 10px 16px;
       font-weight: 600;
-      background: linear-gradient(90deg,#ff005d,#ffa400);
-      color: #fff;
       cursor: pointer;
-      margin-top: 4px;
+      font-size: 0.95rem;
+      background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+      color: #051312;
+      box-shadow: 0 14px 32px rgba(0,0,0,0.6);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
     }
-    .login-btn:disabled {
-      opacity: .6;
+
+    #loginBtn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+    }
+
+    #loginBtn:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 24px rgba(0,0,0,0.7);
+    }
+
+    #loginBtn:disabled {
+      opacity: 0.6;
       cursor: default;
+      box-shadow: none;
     }
-    .login-msg {
+
+    #loginError {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      min-height: 14px;
+      color: var(--danger);
+    }
+
+    .login-meta {
+      position: relative;
       margin-top: 14px;
-      font-size: 0.85rem;
-      min-height: 18px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
     }
-    .login-msg.error { color: #ff6b81; }
-    .login-msg.ok { color: #7dffb4; }
+
+    .pill-env {
+      border-radius: 999px;
+      padding: 2px 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 22px 18px 20px;
+      }
+      .login-title {
+        font-size: 1.1rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <div class="login-wrapper">
-    <h1 class="login-title">Panel Delivery Mayorista</h1>
-    <p class="login-sub">Acceso exclusivo para administradores y empleados autorizados.</p>
+  <div class="login-shell">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="brand">
+          <span class="brand-title">Delivery Mayorista</span>
+          <span class="brand-pill">
+            <span class="brand-pill-dot"></span>
+            Panel administrativo
+          </span>
+        </div>
+        <div class="login-badge">
+          Acceso seguro
+        </div>
+      </div>
 
-    <form id="login-form">
-      <label class="login-label" for="email">Correo electrónico</label>
-      <input class="login-input" type="email" id="email" name="email" required />
+      <h1 class="login-title">Iniciar sesión</h1>
+      <p class="login-subtitle">
+        Entrá al panel para administrar productos, clientes, ventas e historial.
+      </p>
 
-      <label class="login-label" for="password">Contraseña</label>
-      <input class="login-input" type="password" id="password" name="password" required />
+      <form id="loginForm">
+        <div class="field">
+          <label for="email">Correo electrónico</label>
+          <div class="input-wrapper">
+            <input
+              id="email"
+              type="email"
+              placeholder="ejemplo@correo.com"
+              autocomplete="email"
+              required
+            />
+          </div>
+        </div>
 
-      <button class="login-btn" type="submit" id="login-btn">Ingresar</button>
+        <div class="field">
+          <label for="password">Contraseña</label>
+          <div class="input-wrapper">
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+            />
+            <button type="button" class="toggle-password" id="togglePassword">
+              👁
+            </button>
+          </div>
+        </div>
 
-      <div id="login-message" class="login-msg"></div>
-    </form>
+        <div class="login-footer-row">
+          <label class="remember">
+            <input type="checkbox" id="remember" />
+            <span>Mantener sesión iniciada</span>
+          </label>
+          <a class="link-muted">Olvidé mi contraseña</a>
+        </div>
+
+        <button type="submit" id="loginBtn">
+          Entrar al panel
+        </button>
+
+        <div id="loginError"></div>
+      </form>
+
+      <div class="login-meta">
+        <span class="pill-env">Modo administrador</span>
+        <span>Protegido con Firebase Auth</span>
+      </div>
+    </div>
   </div>
 
+  <!-- Toggle de contraseña (no toca Firebase, solo UI) -->
+  <script>
+    const pwdInput = document.getElementById('password');
+    const toggleBtn = document.getElementById('togglePassword');
+
+    if (pwdInput && toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        const isPwd = pwdInput.type === 'password';
+        pwdInput.type = isPwd ? 'text' : 'password';
+        toggleBtn.textContent = isPwd ? '🙈' : '👁';
+      });
+    }
+  </script>
+
+  <!-- Tu lógica de login con Firebase -->
   <script type="module" src="js/login.js"></script>
 </body>
 </html>
