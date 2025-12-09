@@ -1,8 +1,8 @@
 // js/clientes.js
-import { auth, db } from "./firebase-init.js";
+import { auth, db } from './firebase-init.js';
 import {
   onAuthStateChanged,
-  signOut,
+  signOut
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
 import {
@@ -11,7 +11,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
-  doc,
+  doc
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 // ----------------------
@@ -60,9 +60,9 @@ async function cargarClientes() {
   const ref = collection(db, "clientes");
   const snap = await getDocs(ref);
 
-  clientes = snap.docs.map((d) => ({
+  clientes = snap.docs.map(d => ({
     id: d.id,
-    ...d.data(),
+    ...d.data()
   }));
 
   renderClientes(clientes);
@@ -76,12 +76,13 @@ function renderClientes(lista) {
     return;
   }
 
-  lista.forEach((c) => {
+  lista.forEach(c => {
     const tr = document.createElement("tr");
 
-    const contacto = [c.telefono || "", c.email || ""]
-      .filter(Boolean)
-      .join(" · ");
+    const contacto = [
+      c.telefono || "",
+      c.email || ""
+    ].filter(Boolean).join(" · ");
 
     tr.innerHTML = `
       <td>${c.nombre || ""}</td>
@@ -91,9 +92,19 @@ function renderClientes(lista) {
         ${c.notas ? `<span class="badge">${c.notas}</span>` : "-"}
       </td>
       <td>
-        <button class="btn-mini editar" data-id="${c.id}">Editar</button>
-        <button class="btn-mini eliminar" data-id="${c.id}">Eliminar</button>
-        <a href="historial.html?cliente=${c.id}" class="btn-mini historial">Historial</a>
+        <button
+          class="btn-mini historial"
+          data-id="${c.id}"
+          data-nombre="${c.nombre || ""}"
+        >
+          Historial
+        </button>
+        <button class="btn-mini editar" data-id="${c.id}">
+          Editar
+        </button>
+        <button class="btn-mini eliminar" data-id="${c.id}">
+          Eliminar
+        </button>
       </td>
     `;
 
@@ -108,7 +119,7 @@ function renderClientes(lista) {
 // ----------------------
 buscarCliente.addEventListener("input", () => {
   const q = buscarCliente.value.toLowerCase();
-  const filtrados = clientes.filter((c) => {
+  const filtrados = clientes.filter(c => {
     const nombre = (c.nombre || "").toLowerCase();
     const tel = (c.telefono || "").toLowerCase();
     const mail = (c.email || "").toLowerCase();
@@ -128,7 +139,7 @@ formCliente.addEventListener("submit", async (e) => {
     telefono: cliTelefono.value.trim(),
     email: cliEmail.value.trim(),
     direccion: cliDireccion.value.trim(),
-    notas: cliNotas.value.trim(),
+    notas: cliNotas.value.trim()
   };
 
   if (!data.nombre) {
@@ -176,13 +187,14 @@ function resetForm() {
 }
 
 // ----------------------
-// BOTONES EDITAR / ELIMINAR
+// BOTONES (EDITAR / ELIMINAR / HISTORIAL)
 // ----------------------
 function activarBotonesFila() {
-  document.querySelectorAll(".btn-mini.editar").forEach((btn) => {
+  // EDITAR
+  document.querySelectorAll(".btn-mini.editar").forEach(btn => {
     btn.addEventListener("click", (e) => {
       const id = e.target.dataset.id;
-      const c = clientes.find((x) => x.id === id);
+      const c = clientes.find(x => x.id === id);
       if (!c) return;
 
       editandoId = id;
@@ -199,10 +211,11 @@ function activarBotonesFila() {
     });
   });
 
-  document.querySelectorAll(".btn-mini.eliminar").forEach((btn) => {
+  // ELIMINAR
+  document.querySelectorAll(".btn-mini.eliminar").forEach(btn => {
     btn.addEventListener("click", async (e) => {
       const id = e.target.dataset.id;
-      const c = clientes.find((x) => x.id === id);
+      const c = clientes.find(x => x.id === id);
       if (!c) return;
 
       if (!confirm(`¿Eliminar al cliente "${c.nombre}"?`)) return;
@@ -210,6 +223,18 @@ function activarBotonesFila() {
       await deleteDoc(doc(db, "clientes", id));
       setMsg("Cliente eliminado.", "ok");
       await cargarClientes();
+    });
+  });
+
+  // HISTORIAL
+  document.querySelectorAll(".btn-mini.historial").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      const id = e.target.dataset.id;
+      const nombre = e.target.dataset.nombre || "";
+
+      // Redirige a historial.html con los parámetros correctos
+      const url = `historial.html?clienteId=${encodeURIComponent(id)}&clienteNombre=${encodeURIComponent(nombre)}`;
+      window.location.href = url;
     });
   });
 }
