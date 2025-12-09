@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editor de Producto</title>
+
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0d0d17;
+      margin: 0;
+      padding: 0;
+      color: white;
+    }
+
+    header {
+      background: linear-gradient(90deg, #ff005d, #ffa400);
+      padding: 16px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .contenedor {
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #151525;
+      color: white;
+    }
+
+    textarea {
+      height: 120px;
+      resize: vertical;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      background: #28d48c;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    .btn-eliminar {
+      background: #ff5a5a;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    Editor de Producto
+    <button onclick="window.location.href='admin.html'">Volver</button>
+  </header>
+
+  <div class="contenedor">
+    <form id="formProducto">
+      <label>Código</label>
+      <input type="text" id="codigo" required>
+
+      <label>Nombre</label>
+      <input type="text" id="nombre" required>
+
+      <label>Precio</label>
+      <input type="number" id="precio" required>
+
+      <label>Stock</label>
+      <input type="number" id="stock" required>
+
+      <label>Categoría</label>
+      <input type="text" id="categoria" required>
+
+      <label>Subcategoría</label>
+      <input type="text" id="subcategoria">
+
+      <label>Descripción</label>
+      <textarea id="descripcion"></textarea>
+
+      <label>Imagen (URL)</label>
+      <input type="text" id="imagen">
+
+      <button type="submit">Guardar producto</button>
+      <button type="button" id="btnEliminar" class="btn-eliminar" style="display:none">Eliminar producto</button>
+    </form>
+  </div>
+
+  <script type="module" src="js/editor.js"></script>
+</body>
+</html>
