@@ -235,13 +235,6 @@ body {
   font-weight: 600;
   margin-bottom: 0.8rem;
 }
-.producto-meta-cat {
-  font-size: 0.8rem;
-  color: #9fa6c0;
-  margin-top: 0.15rem;
-  margin-bottom: 0.4rem;
-  opacity: 0.85;
-}
 
 .producto-info .producto-descripcion {
   margin: 1rem 0;
