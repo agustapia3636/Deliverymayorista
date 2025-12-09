@@ -2,41 +2,35 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Delivery Mayorista - Catálogo</title>
+  <title>Delivery Mayorista</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Estilos principales -->
-  <link rel="stylesheet" href="estilos.css" />
+  <!-- Redirección inmediata a catalogo.html -->
+  <meta http-equiv="refresh" content="0; url=catalogo.html" />
+
+  <script>
+    // Redirección de respaldo por JavaScript
+    window.location.href = "catalogo.html";
+  </script>
+
+  <style>
+    body {
+      background: #0f0f1a;
+      color: #ffffff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      text-align: center;
+      padding-top: 60px;
+    }
+    a {
+      color: #ffa400;
+      font-weight: bold;
+      text-decoration: none;
+    }
+  </style>
 </head>
+
 <body>
-  <!-- ENCABEZADO -->
-  <header class="header">
-    <h1>DELIVERY MAYORISTA</h1>
-    <p class="header-subtitle">Catálogo mayorista con stock visible y carrito</p>
-  </header>
-
-  <!-- CONTENEDOR PRINCIPAL -->
-  <main class="contenedor">
-    <!-- CATÁLOGO: las tarjetas se generan desde app.js -->
-    <section id="catalogo" class="catalogo">
-      <!-- Aquí JS va a inyectar las cards de productos -->
-    </section>
-  </main>
-
-  <!-- BOTÓN FLOTANTE CARRITO (RESUMEN UNIDADES) -->
-  <a href="carrito.html" class="carrito-flotante">
-    🛒 <span id="carrito-total-items">0</span>
-  </a>
-
-  <!-- BOTÓN FLOTANTE WHATSAPP -->
-  <!-- Cambiá el número por el tuyo -->
-  <a
-    href="https://wa.me/5491112345678"
-    target="_blank"
-    class="whatsapp-flotante"
-    aria-label="WhatsApp"
-  >
-    💬
-  </a>
+  <h1>Redirigiendo al Catálogo...</h1>
+  <p>Si no se abre automáticamente, <a href="catalogo.html">hacé clic aquí</a>.</p>
 </body>
 </html>
