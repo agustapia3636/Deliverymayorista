@@ -6,7 +6,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import {
   collection,
-  getDocs
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 // --------------------
@@ -25,25 +25,25 @@ const inputHasta = document.getElementById("filtroHasta");
 const inputProducto = document.getElementById("filtroProducto");
 const selectEstado = document.getElementById("filtroEstado");
 
-// Totales (opcionales)
-const lblTotalCliente  = document.getElementById("totalCliente");
+// Totales
+const lblTotalCliente = document.getElementById("totalCliente");
 const lblTotalFiltrado = document.getElementById("totalFiltrado");
 const lblResumenConteo = document.getElementById("resumenConteo");
 
 // --------------------
 // Estado en memoria
 // --------------------
-let ventasCliente   = [];  // todas las ventas del cliente (o todas si no hay cliente)
-let ventasFiltradas = [];  // ventas luego de los filtros
+let ventasCliente = [];   // todas las ventas del cliente (o globales)
+let ventasFiltradas = []; // ventas después de filtros
 
 // --------------------
-// Query string helper
+// Helper: query string
 // --------------------
 function getQueryParams() {
   const params = new URLSearchParams(window.location.search);
   return {
     nombre: params.get("clienteNombre") || params.get("nombre") || "",
-    clienteId: params.get("clienteId") || ""
+    clienteId: params.get("clienteId") || "",
   };
 }
 
@@ -82,21 +82,21 @@ async function cargarHistorial() {
 
     const todasLasVentas = snap.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     }));
 
     if (nombreCliente) {
-      // Filtramos solo las ventas de ese cliente
+      // Filtrar solo ventas de ese cliente por nombre
       ventasCliente = todasLasVentas.filter((v) => {
         const nombreVenta = (v.clienteNombre || v.cliente || "").trim();
         return nombreVenta === nombreCliente;
       });
+
       if (subtituloCliente) {
         subtituloCliente.textContent =
           "Mostrando las compras del cliente seleccionado.";
       }
     } else {
-      // Sin nombre → todas las ventas
       ventasCliente = todasLasVentas;
       if (subtituloCliente) {
         subtituloCliente.textContent =
@@ -153,8 +153,16 @@ function aplicarFiltros() {
 
     // Producto (código o nombre)
     if (textoProducto) {
-      const codigo = (venta.productoCodigo || venta.codigoProducto || "").toLowerCase();
-      const nombreProd = (venta.productoNombre || venta.nombreProducto || "").toLowerCase();
+      const codigo = (
+        venta.productoCodigo ||
+        venta.codigoProducto ||
+        ""
+      ).toLowerCase();
+      const nombreProd = (
+        venta.productoNombre ||
+        venta.nombreProducto ||
+        ""
+      ).toLowerCase();
       if (!codigo.includes(textoProducto) && !nombreProd.includes(textoProducto)) {
         ok = false;
       }
@@ -174,16 +182,16 @@ function aplicarFiltros() {
 }
 
 // --------------------
-// Render tabla
+// Render tabla / tarjetas
 // --------------------
 function formatearFecha(fecha) {
   if (!fecha) return "-";
   const f = fecha.toDate ? fecha.toDate() : new Date(fecha);
-  const dia  = String(f.getDate()).padStart(2, "0");
-  const mes  = String(f.getMonth() + 1).padStart(2, "0");
+  const dia = String(f.getDate()).padStart(2, "0");
+  const mes = String(f.getMonth() + 1).padStart(2, "0");
   const anio = f.getFullYear();
   const hora = String(f.getHours()).padStart(2, "0");
-  const min  = String(f.getMinutes()).padStart(2, "0");
+  const min = String(f.getMinutes()).padStart(2, "0");
   return `${dia}/${mes}/${anio} ${hora}:${min}`;
 }
 
@@ -210,19 +218,19 @@ function renderTabla(lista) {
     const estado = venta.estado || "-";
     const notas = venta.notas || "-";
 
-    const estadoLower = estado.toLowerCase();
-    let claseEstado = "badge-neutral";
-    if (estadoLower === "pendiente") claseEstado = "badge-warning";
-    else if (estadoLower === "pagado" || estadoLower === "completado") claseEstado = "badge-success";
-    else if (estadoLower === "cancelado") claseEstado = "badge-danger";
+    const totalTexto = `$${total.toLocaleString("es-AR")}`;
 
     tr.innerHTML = `
       <td data-label="Fecha">${fechaTexto}</td>
       <td data-label="Producto">${nombreProd}</td>
       <td data-label="Cantidad">${cantidad}</td>
-      <td data-label="Total">$${total.toLocaleString("es-AR")}</td>
+      <td data-label="Total">${totalTexto}</td>
       <td data-label="Estado">
-        <span class="badge ${claseEstado}">${estado}</span>
+        ${
+          estado && estado !== "-"
+            ? `<span class="estado-pill">${estado}</span>`
+            : "-"
+        }
       </td>
       <td data-label="Notas">${notas}</td>
     `;
