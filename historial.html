@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="css/estilos.css" />
 
     <style>
-        /* Mejora visual para separar celdas */
         table th, table td {
             padding: 10px 14px;
             text-align: left;
@@ -16,6 +15,33 @@
         table {
             width: 100%;
             border-collapse: collapse;
+        }
+
+        .filtros {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0 10px;
+        }
+
+        .filtros .filtro-item {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.85rem;
+        }
+
+        .filtros .filtro-item label {
+            margin-bottom: 3px;
+            opacity: 0.8;
+        }
+
+        .filtros input,
+        .filtros select {
+            padding: 6px 8px;
+            border-radius: 6px;
+            border: none;
+            background: #141422;
+            color: #fff;
         }
     </style>
 </head>
@@ -55,6 +81,38 @@
                 <button class="btn-secundario" onclick="window.location.href='clientes.html'">
                     ← Volver a clientes
                 </button>
+            </div>
+
+            <!-- 🔍 FILTROS -->
+            <div class="filtros">
+                <div class="filtro-item">
+                    <label for="filtroDesde">Desde</label>
+                    <input type="date" id="filtroDesde">
+                </div>
+
+                <div class="filtro-item">
+                    <label for="filtroHasta">Hasta</label>
+                    <input type="date" id="filtroHasta">
+                </div>
+
+                <div class="filtro-item" style="flex: 1 1 200px;">
+                    <label for="filtroProducto">Producto (código o nombre)</label>
+                    <input
+                        type="text"
+                        id="filtroProducto"
+                        placeholder="Ej: N0001, llavero, estéreo..."
+                    >
+                </div>
+
+                <div class="filtro-item">
+                    <label for="filtroEstado">Estado</label>
+                    <select id="filtroEstado">
+                        <option value="todas">Todas</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="completado">Completado</option>
+                        <option value="cancelado">Cancelado</option>
+                    </select>
+                </div>
             </div>
 
             <table>
