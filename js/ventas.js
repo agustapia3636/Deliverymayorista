@@ -22,17 +22,22 @@ const buscarVenta    = document.getElementById("buscarVenta");
 const btnNuevaVenta  = document.getElementById("btnNuevaVenta");
 const tablaVentas    = document.getElementById("tablaVentas");
 const msgVentas      = document.getElementById("msgVentas");
+const subTitulo      = document.getElementById("subTituloVentas");
 
+// Modal
 const modalVenta     = document.getElementById("modalVenta");
 const selCliente     = document.getElementById("ventaCliente");
-const inpTotal       = document.getElementById("ventaTotal");
+const inpCodigo      = document.getElementById("ventaCodigo");
+const inpCantidad    = document.getElementById("ventaCantidad");
 const selEstado      = document.getElementById("ventaEstado");
 const txtNotas       = document.getElementById("ventaNotas");
 const btnCancelar    = document.getElementById("btnCancelarVenta");
 const btnGuardar     = document.getElementById("btnGuardarVenta");
 
-let ventas   = [];
-let clientes = [];
+// Datos en memoria
+let ventas    = [];
+let clientes  = [];
+let productos = [];
 
 // SESIÓN
 onAuthStateChanged(auth, (user) => {
@@ -51,7 +56,9 @@ logoutBtn.addEventListener("click", async () => {
 // INIT
 async function init() {
   await cargarClientesSelect();
+  await cargarProductos();
   await cargarVentas();
+  aplicarFiltroPorURL();
 }
 
 // CARGAR CLIENTES PARA EL SELECT
@@ -74,9 +81,15 @@ async function cargarClientesSelect() {
   });
 }
 
+// CARGAR PRODUCTOS A MEMORIA
+async function cargarProductos() {
+  const snap = await getDocs(collection(db, "productos"));
+  productos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
 // CARGAR VENTAS
 async function cargarVentas() {
-  tablaVentas.innerHTML = `<tr><td colspan="6">Cargando...</td></tr>`;
+  tablaVentas.innerHTML = `<tr><td colspan="8">Cargando...</td></tr>`;
 
   const qVentas = query(collection(db, "ventas"), orderBy("fecha", "desc"));
   const snap = await getDocs(qVentas);
@@ -93,7 +106,7 @@ function renderVentas(lista) {
   tablaVentas.innerHTML = "";
 
   if (lista.length === 0) {
-    tablaVentas.innerHTML = `<tr><td colspan="6">No hay ventas registradas.</td></tr>`;
+    tablaVentas.innerHTML = `<tr><td colspan="8">No hay ventas registradas.</td></tr>`;
     return;
   }
 
@@ -106,6 +119,8 @@ function renderVentas(lista) {
     fila.innerHTML = `
       <td>${fecha}</td>
       <td>${v.clienteNombre || "-"}</td>
+      <td>${v.productoCodigo || ""} - ${v.productoNombre || "-"}</td>
+      <td>${v.cantidad ?? "-"}</td>
       <td>$${(v.total ?? 0).toLocaleString("es-AR")}</td>
       <td><span class="badge">${v.estado || "pendiente"}</span></td>
       <td>${v.notas || "-"}</td>
@@ -120,13 +135,20 @@ function renderVentas(lista) {
   activarBotonesFila();
 }
 
-// BUSCADOR
+// BUSCADOR → esto te da "historial" del cliente si escribís su nombre
 buscarVenta.addEventListener("input", () => {
   const q = buscarVenta.value.toLowerCase();
   const filtradas = ventas.filter(v => {
-    const cliente = (v.clienteNombre || "").toLowerCase();
-    const estado  = (v.estado || "").toLowerCase();
-    return cliente.includes(q) || estado.includes(q);
+    const cliente  = (v.clienteNombre  || "").toLowerCase();
+    const producto = (v.productoNombre || "").toLowerCase();
+    const codigo   = (v.productoCodigo || "").toLowerCase();
+    const estado   = (v.estado         || "").toLowerCase();
+    return (
+      cliente.includes(q)  ||
+      producto.includes(q) ||
+      codigo.includes(q)   ||
+      estado.includes(q)
+    );
   });
   renderVentas(filtradas);
 });
@@ -168,9 +190,10 @@ btnNuevaVenta.addEventListener("click", () => {
     alert("Primero debes cargar al menos un cliente.");
     return;
   }
-  inpTotal.value = "";
-  selEstado.value = "pendiente";
-  txtNotas.value = "";
+  inpCodigo.value   = "";
+  inpCantidad.value = "1";
+  selEstado.value   = "pendiente";
+  txtNotas.value    = "";
   modalVenta.style.display = "flex";
 });
 
@@ -182,35 +205,84 @@ btnGuardar.addEventListener("click", async () => {
   const clienteId = selCliente.value;
   const cliente = clientes.find(c => c.id === clienteId);
 
-  const total = parseFloat(inpTotal.value || "0");
-  const estado = selEstado.value;
-  const notas  = txtNotas.value.trim();
+  const codigo   = (inpCodigo.value || "").trim();
+  const cantidad = parseInt(inpCantidad.value, 10);
+  const estado   = selEstado.value;
+  const notas    = txtNotas.value.trim();
 
   if (!cliente) {
     alert("Seleccioná un cliente.");
     return;
   }
-  if (isNaN(total) || total <= 0) {
-    alert("Ingresá un total válido.");
+  if (!codigo) {
+    alert("Ingresá el código del producto.");
+    return;
+  }
+  if (isNaN(cantidad) || cantidad <= 0) {
+    alert("Ingresá una cantidad válida.");
     return;
   }
 
+  // Buscar producto por código (campo "codigo" en productos)
+  const producto = productos.find(p =>
+    (p.codigo || p.id || "").toString().toLowerCase() === codigo.toLowerCase()
+  );
+
+  if (!producto) {
+    alert("No se encontró ningún producto con ese código.");
+    return;
+  }
+
+  const stockActual = producto.stock ?? 0;
+  if (stockActual < cantidad) {
+    alert(`No hay stock suficiente. Stock actual: ${stockActual}`);
+    return;
+  }
+
+  const precioUnitario = producto.precio ?? 0;  // usamos el campo "precio"
+  const total = precioUnitario * cantidad;
+
+  // Guardar venta
   await addDoc(collection(db, "ventas"), {
     clienteId,
     clienteNombre: cliente.nombre || cliente.email || "",
+    productoId: producto.id,
+    productoCodigo: producto.codigo || producto.id,
+    productoNombre: producto.nombre || "",
+    cantidad,
     total,
     estado,
     notas,
     fecha: serverTimestamp()
   });
 
+  // Descontar stock automáticamente
+  await updateDoc(doc(db, "productos", producto.id), {
+    stock: stockActual - cantidad
+  });
+  // Actualizamos también en memoria
+  producto.stock = stockActual - cantidad;
+
   modalVenta.style.display = "none";
-  setMsg("Venta registrada correctamente.");
+  setMsg("Venta registrada y stock actualizado.");
   await cargarVentas();
 });
 
 // UTILIDAD
 function setMsg(texto) {
   msgVentas.textContent = texto;
-  setTimeout(() => msgVentas.textContent = "", 4000);
+  setTimeout(() => (msgVentas.textContent = ""), 4000);
+}
+
+// Permite que en el futuro llames ventas.html?cliente=ID&nombre=Juan
+// y te muestre ese cliente en el subtítulo y podés filtrar con su nombre.
+function aplicarFiltroPorURL() {
+  const params = new URLSearchParams(window.location.search);
+  const nombreCliente = params.get("nombre");
+
+  if (nombreCliente) {
+    subTitulo.textContent = `Historial de compras de: ${nombreCliente}`;
+    buscarVenta.value = nombreCliente;
+    buscarVenta.dispatchEvent(new Event("input"));
+  }
 }
