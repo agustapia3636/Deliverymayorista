@@ -1,72 +1,75 @@
 // js/login.js
-import { auth, db } from './firebase-init.js';
+import { auth } from "./firebase-init.js";
 import {
   signInWithEmailAndPassword,
   onAuthStateChanged,
-  signOut
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-import {
-  doc,
-  getDoc
-} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-const form = document.getElementById('login-form');
-const btn = document.getElementById('login-btn');
-const msg = document.getElementById('login-message');
+// DOM
+const form = document.getElementById("loginForm");
+const emailInput = document.getElementById("email");
+const passInput = document.getElementById("password");
+const rememberInput = document.getElementById("rememberMe"); // por ahora no lo usamos, pero ya queda
+const btnLogin = document.getElementById("btnLogin");
+const msgBox = document.getElementById("loginMessage");
+const togglePassword = document.getElementById("togglePassword");
 
-function setMessage(text, type = 'error') {
-  msg.textContent = text;
-  msg.className = 'login-msg ' + (type === 'ok' ? 'ok' : 'error');
-}
-
-async function checkRoleAndEnter(user) {
-  const ref = doc(db, 'usuarios', user.uid);
-  const snap = await getDoc(ref);
-
-  if (!snap.exists()) {
-    await signOut(auth);
-    setMessage('Tu usuario no está registrado en el sistema.', 'error');
-    return;
-  }
-
-  const data = snap.data();
-  if (data.rol === 'admin' || data.rol === 'empleado') {
-    window.location.href = 'admin.html';
-  } else {
-    await signOut(auth);
-    setMessage('No tenés permiso para acceder al panel.', 'error');
-  }
-}
-
+// Si ya está logueado → directo al panel
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    checkRoleAndEnter(user).catch(console.error);
+    window.location.href = "admin.html";
   }
 });
 
-form.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = form.email.value.trim();
-  const password = form.password.value;
+// Mostrar / ocultar contraseña
+if (togglePassword && passInput) {
+  togglePassword.addEventListener("click", () => {
+    const isPassword = passInput.type === "password";
+    passInput.type = isPassword ? "text" : "password";
+  });
+}
 
-  btn.disabled = true;
-  setMessage('Ingresando...', 'ok');
+function setMsg(text, type = "error") {
+  if (!msgBox) return;
+  msgBox.textContent = text;
+  msgBox.className = "login-msg " + (type === "ok" ? "ok" : "error");
+}
 
-  try {
-    const cred = await signInWithEmailAndPassword(auth, email, password);
-    await checkRoleAndEnter(cred.user);
-  } catch (error) {
-    console.error(error);
-    let text = 'No se pudo iniciar sesión.';
+if (form) {
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-    if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
-      text = 'Email o contraseña incorrectos.';
-    } else if (error.code === 'auth/too-many-requests') {
-      text = 'Demasiados intentos. Esperá un momento e intentá de nuevo.';
+    const email = (emailInput?.value || "").trim();
+    const password = passInput?.value || "";
+
+    if (!email || !password) {
+      setMsg("Completá correo y contraseña.", "error");
+      return;
     }
 
-    setMessage(text, 'error');
-  } finally {
-    btn.disabled = false;
-  }
-});
+    btnLogin.disabled = true;
+    btnLogin.textContent = "Ingresando...";
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      // onAuthStateChanged se encarga de redirigir
+      setMsg("Ingreso correcto, redirigiendo...", "ok");
+    } catch (err) {
+      console.error(err);
+      let msg = "Error al iniciar sesión.";
+
+      if (err.code === "auth/invalid-credential" ||
+          err.code === "auth/wrong-password") {
+        msg = "Correo o contraseña incorrectos.";
+      } else if (err.code === "auth/user-not-found") {
+        msg = "No existe un usuario con ese correo.";
+      } else if (err.code === "auth/too-many-requests") {
+        msg = "Demasiados intentos. Probá de nuevo más tarde.";
+      }
+
+      setMsg(msg, "error");
+      btnLogin.disabled = false;
+      btnLogin.textContent = "Entrar al panel";
+    }
+  });
+}
