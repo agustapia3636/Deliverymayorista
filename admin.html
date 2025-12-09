@@ -24,14 +24,40 @@
       color: white;
     }
 
-    header button {
-      background: rgba(0,0,0,0.25);
+    .titulo {
+      font-size: 1.4rem;
+    }
+
+    .nav-panel {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* Botones de la barra superior */
+    .btn-secundario {
+      background: rgba(0, 0, 0, 0.25);
       border: none;
       padding: 8px 16px;
-      border-radius: 8px;
+      border-radius: 999px;
       font-size: 0.9rem;
       color: white;
       cursor: pointer;
+    }
+
+    .btn-secundario:hover {
+      background: rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-sesion {
+      background: #ffb24f;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      color: #1b1305;
+      cursor: pointer;
+      font-weight: 600;
     }
 
     .contenedor {
@@ -43,11 +69,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
     }
 
     .acciones input {
       padding: 10px;
-      width: 60%;
+      flex: 1;
       border-radius: 8px;
       border: 1px solid #333;
       background: #151525;
@@ -62,6 +89,7 @@
       border-radius: 8px;
       cursor: pointer;
       font-weight: bold;
+      white-space: nowrap;
     }
 
     table {
@@ -78,7 +106,7 @@
     }
 
     tr:hover {
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.05);
     }
 
     .btn-editar {
@@ -102,23 +130,28 @@
 </head>
 
 <body>
-<header>
+  <header>
     <div class="titulo">Panel Administrativo</div>
 
     <div class="nav-panel">
-        <button class="btn-secundario" onclick="window.location.href='clientes.html'">
-            Clientes
-        </button>
+      <button class="btn-secundario" onclick="window.location.href='clientes.html'">
+        Clientes
+      </button>
 
-        <button class="btn-secundario" onclick="window.location.href='ventas.html'">
-            Ventas
-        </button>
+      <button class="btn-secundario" onclick="window.location.href='ventas.html'">
+        Ventas
+      </button>
 
-        <button id="logoutBtn" class="btn-sesion">
-            Cerrar sesión
-        </button>
+      <button class="btn-secundario" onclick="window.location.href='historial.html'">
+        Historial
+      </button>
+
+      <button id="logoutBtn" class="btn-sesion">
+        Cerrar sesión
+      </button>
     </div>
-</header>
+  </header>
+
   <div class="contenedor">
     <div class="acciones">
       <input type="text" id="buscar" placeholder="Buscar por nombre o código...">
