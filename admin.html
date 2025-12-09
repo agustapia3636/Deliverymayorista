@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Panel Administrativo - Delivery Mayorista</title>
+
   <style>
     body {
       font-family: system-ui, sans-serif;
       background: #0d0d17;
       margin: 0;
       padding: 0;
-      color: white;
+      color: #ffffff;
     }
 
+    /* HEADER --------------------------------------------------- */
     header {
       background: linear-gradient(90deg, #ff005d, #ffa400);
       padding: 20px;
@@ -21,7 +23,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      color: white;
+      color: #ffffff;
     }
 
     .titulo {
@@ -34,14 +36,13 @@
       align-items: center;
     }
 
-    /* Botones de la barra superior */
     .btn-secundario {
       background: rgba(0, 0, 0, 0.25);
       border: none;
       padding: 8px 16px;
       border-radius: 999px;
       font-size: 0.9rem;
-      color: white;
+      color: #ffffff;
       cursor: pointer;
     }
 
@@ -60,8 +61,11 @@
       font-weight: 600;
     }
 
+    /* CONTENEDOR & ACCIONES ------------------------------------ */
     .contenedor {
       padding: 20px;
+      max-width: 1300px;
+      margin: 0 auto;
     }
 
     .acciones {
@@ -75,56 +79,173 @@
     .acciones input {
       padding: 10px;
       flex: 1;
-      border-radius: 8px;
-      border: 1px solid #333;
+      border-radius: 10px;
+      border: 1px solid #333344;
       background: #151525;
-      color: white;
+      color: #ffffff;
+      font-size: 0.9rem;
+    }
+
+    .acciones input::placeholder {
+      color: #6b6b8e;
     }
 
     .acciones button {
       background: #28d48c;
       border: none;
-      padding: 12px 20px;
-      font-size: 1rem;
-      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      border-radius: 999px;
       cursor: pointer;
-      font-weight: bold;
+      font-weight: 600;
       white-space: nowrap;
+      color: #041712;
+      box-shadow: 0 10px 25px rgba(40, 212, 140, 0.25);
     }
 
-    table {
+    .acciones button:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    /* TABLA PREMIUM ESCRITORIO -------------------------------- */
+    .tabla-admin-wrapper {
+      margin-top: 10px;
+      background: #111121;
+      border-radius: 18px;
+      padding: 12px 16px 6px;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
+      overflow-x: auto;
+    }
+
+    .tabla-admin {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 15px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      color: #f5f5ff;
+      min-width: 750px;
     }
 
-    th, td {
-      padding: 12px;
-      border-bottom: 1px solid #333;
+    .tabla-admin thead {
+      background: #181828;
+    }
+
+    .tabla-admin th,
+    .tabla-admin td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #26263b;
       text-align: left;
     }
 
-    tr:hover {
-      background: rgba(255, 255, 255, 0.05);
+    .tabla-admin th {
+      font-weight: 600;
+      color: #c5c5e2;
+      font-size: 0.85rem;
     }
 
+    .tabla-admin tbody tr:hover {
+      background: #17172a;
+    }
+
+    /* Botones de acciones dentro de la tabla */
     .btn-editar {
       background: #ffa726;
       padding: 6px 12px;
-      border-radius: 6px;
+      border-radius: 999px;
       border: none;
-      color: black;
+      color: #1b1305;
       cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
     }
 
     .btn-eliminar {
       background: #ff5a5a;
       padding: 6px 12px;
-      border-radius: 6px;
+      border-radius: 999px;
       border: none;
-      color: white;
+      color: #ffffff;
       cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .btn-editar:hover,
+    .btn-eliminar:hover {
+      filter: brightness(1.05);
+    }
+
+    /* TARJETAS AUTOMÁTICAS EN MÓVIL --------------------------- */
+    @media (max-width: 768px) {
+      .contenedor {
+        padding: 16px 12px 24px;
+      }
+
+      .acciones {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .tabla-admin-wrapper {
+        padding: 0;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .tabla-admin {
+        border-collapse: separate;
+        border-spacing: 0 10px;
+        min-width: 0;
+      }
+
+      .tabla-admin thead {
+        display: none;
+      }
+
+      .tabla-admin tbody tr {
+        display: block;
+        background: #141425;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+        margin-bottom: 12px;
+        padding: 8px 10px;
+      }
+
+      .tabla-admin td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 10px;
+        border-bottom: 1px solid #1f1f35;
+        font-size: 0.85rem;
+      }
+
+      .tabla-admin td:last-child {
+        border-bottom: none;
+        padding-bottom: 4px;
+      }
+
+      .tabla-admin td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #a7a7d0;
+        margin-right: 8px;
+        text-align: left;
+      }
+
+      /* Etiquetas por columna (sin tocar JS) */
+      .tabla-admin td:nth-child(1)::before { content: "Código"; }
+      .tabla-admin td:nth-child(2)::before { content: "Nombre"; }
+      .tabla-admin td:nth-child(3)::before { content: "Precio"; }
+      .tabla-admin td:nth-child(4)::before { content: "Stock"; }
+      .tabla-admin td:nth-child(5)::before { content: "Categoría"; }
+      .tabla-admin td:nth-child(6)::before { content: "Acciones"; }
+
+      .btn-editar,
+      .btn-eliminar {
+        padding: 5px 10px;
+        font-size: 0.75rem;
+      }
     }
   </style>
 </head>
@@ -154,23 +275,31 @@
 
   <div class="contenedor">
     <div class="acciones">
-      <input type="text" id="buscar" placeholder="Buscar por nombre o código...">
+      <input
+        type="text"
+        id="buscar"
+        placeholder="Buscar por nombre o código..."
+      />
       <button id="btnNuevo">➕ Agregar producto</button>
     </div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Nombre</th>
-          <th>Precio</th>
-          <th>Stock</th>
-          <th>Categoría</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="tablaProductos"></tbody>
-    </table>
+    <div class="tabla-admin-wrapper">
+      <table class="tabla-admin tabla-productos">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Categoría</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaProductos">
+          <!-- filas dinámicas -->
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <script type="module" src="js/admin.js"></script>
