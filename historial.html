@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Historial de compras - Delivery Mayorista</title>
+    <link rel="stylesheet" href="css/estilos.css" />
+</head>
+<body>
+    <header>
+        <div class="titulo">Historial de compras</div>
+
+        <div class="nav-panel">
+            <button class="btn-secundario" onclick="window.location.href='admin.html'">
+                Productos
+            </button>
+
+            <button class="btn-secundario" onclick="window.location.href='clientes.html'">
+                Clientes
+            </button>
+
+            <button class="btn-secundario" onclick="window.location.href='ventas.html'">
+                Ventas
+            </button>
+
+            <button id="logoutBtn" class="btn-sesion">
+                Cerrar sesión
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <section class="contenedor">
+            <div class="acciones">
+                <div>
+                    <h2 id="tituloCliente">Historial de compras</h2>
+                    <p id="subtituloCliente">Seleccioná un cliente desde el panel de Clientes.</p>
+                </div>
+
+                <button class="btn-secundario" onclick="window.location.href='clientes.html'">
+                    ← Volver a clientes
+                </button>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Notas</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaHistorial">
+                    <!-- Filas dinámicas -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script type="module" src="js/historial.js"></script>
+</body>
+</html>
