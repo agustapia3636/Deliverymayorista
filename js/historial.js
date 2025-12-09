@@ -25,38 +25,35 @@ const inputHasta = document.getElementById("filtroHasta");
 const inputProducto = document.getElementById("filtroProducto");
 const selectEstado = document.getElementById("filtroEstado");
 
-// Totales
-const lblTotalCliente = document.getElementById("totalCliente");     // total gastado por el cliente
-const lblTotalFiltrado = document.getElementById("totalFiltrado");   // total en resultados filtrados
-const lblResumenConteo = document.getElementById("resumenConteo");   // ej: "2 ventas encontradas"
+// Totales (si existen en el HTML, si no, quedan en null y no pasa nada)
+const lblTotalCliente   = document.getElementById("totalCliente");
+const lblTotalFiltrado  = document.getElementById("totalFiltrado");
+const lblResumenConteo  = document.getElementById("resumenConteo");
 
 // --------------------
 // Estado en memoria
 // --------------------
-let ventasCliente = [];      // todas las ventas del cliente
-let ventasFiltradas = [];    // ventas luego de aplicar filtros
+let ventasCliente   = [];  // ventas base (todas o de un cliente)
+let ventasFiltradas = [];  // ventas luego de aplicar filtros
 
 // --------------------
-// Helper: leer query string
+// Helper: query string
 // --------------------
 function getQueryParams() {
   const params = new URLSearchParams(window.location.search);
   return {
-    nombre: params.get("nombre") || "",
-    clienteId: params.get("clienteId") || ""
+    nombre: params.get("nombre") || "",      // nombre del cliente (opcional)
+    clienteId: params.get("clienteId") || "" // por si después lo usás
   };
 }
 
 const { nombre: nombreCliente } = getQueryParams();
 
-// Ajustar textos de cabecera
+// Título base
 if (nombreCliente) {
   tituloCliente.textContent = `Historial de compras - ${nombreCliente}`;
-  subtituloCliente.textContent = "Seleccioná un cliente desde el panel de Clientes.";
 } else {
   tituloCliente.textContent = "Historial de compras";
-  subtituloCliente.textContent =
-    "No se encontró un cliente en la URL. Volvé al panel de Clientes y elegí uno.";
 }
 
 // --------------------
@@ -80,7 +77,6 @@ btnLogout?.addEventListener("click", async () => {
 // --------------------
 async function cargarHistorial() {
   try {
-    // 1) Traemos TODAS las ventas
     const ventasRef = collection(db, "ventas");
     const snap = await getDocs(ventasRef);
 
@@ -89,18 +85,26 @@ async function cargarHistorial() {
       ...doc.data()
     }));
 
-    // 2) Nos quedamos solo con las del cliente actual
-    //    Intentamos usar el campo que tengas en la colección:
-    //      - clienteNombre  ó
-    //      - cliente        (ajusta estos nombres si hiciera falta)
-    ventasCliente = todasLasVentas.filter((v) => {
-      const nombreVenta = (v.clienteNombre || v.cliente || "").trim();
-      return nombreVenta === nombreCliente;
-    });
+    // Si hay un nombre en la URL → filtramos solo ese cliente.
+    // Si NO hay nombre → usamos TODAS las ventas.
+    if (nombreCliente) {
+      ventasCliente = todasLasVentas.filter((v) => {
+        const nombreVenta = (v.clienteNombre || v.cliente || "").trim();
+        return nombreVenta === nombreCliente;
+      });
+      if (subtituloCliente) {
+        subtituloCliente.textContent =
+          "Mostrando las compras del cliente seleccionado.";
+      }
+    } else {
+      ventasCliente = todasLasVentas;
+      if (subtituloCliente) {
+        subtituloCliente.textContent =
+          "Mostrando el historial completo de ventas.";
+      }
+    }
 
-    // 3) Aplicamos filtros iniciales (sin nada escrito debería mostrar todo)
     aplicarFiltros();
-
   } catch (error) {
     console.error("Error al cargar historial:", error);
     tbody.innerHTML = `
@@ -127,7 +131,6 @@ function aplicarFiltros() {
   const hastaDateRaw = parseFechaFiltro(inputHasta?.value.trim());
   let hastaDate = hastaDateRaw;
   if (hastaDateRaw) {
-    // Hacemos que el "hasta" incluya todo el día
     hastaDate = new Date(hastaDateRaw.getTime());
     hastaDate.setHours(23, 59, 59, 999);
   }
@@ -148,7 +151,7 @@ function aplicarFiltros() {
       if (hastaDate && fechaJs > hastaDate) ok = false;
     }
 
-    // Producto (código o nombre, según cómo lo guardaste)
+    // Producto (código o nombre)
     if (textoProducto) {
       const codigo = (venta.productoCodigo || venta.codigoProducto || "").toLowerCase();
       const nombreProd = (venta.productoNombre || venta.nombreProducto || "").toLowerCase();
@@ -176,11 +179,11 @@ function aplicarFiltros() {
 function formatearFecha(fecha) {
   if (!fecha) return "-";
   const f = fecha.toDate ? fecha.toDate() : new Date(fecha);
-  const dia = String(f.getDate()).padStart(2, "0");
-  const mes = String(f.getMonth() + 1).padStart(2, "0");
+  const dia  = String(f.getDate()).padStart(2, "0");
+  const mes  = String(f.getMonth() + 1).padStart(2, "0");
   const anio = f.getFullYear();
   const hora = String(f.getHours()).padStart(2, "0");
-  const min = String(f.getMinutes()).padStart(2, "0");
+  const min  = String(f.getMinutes()).padStart(2, "0");
   return `${dia}/${mes}/${anio} ${hora}:${min}`;
 }
 
@@ -190,7 +193,7 @@ function renderTabla(lista) {
   if (!lista || lista.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6">No hay ventas registradas para este cliente.</td>
+        <td colspan="6">No hay ventas registradas.</td>
       </tr>
     `;
     return;
