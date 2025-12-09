@@ -43,6 +43,22 @@
             background: #141422;
             color: #fff;
         }
+
+        .resumen-totales {
+            margin: 10px 0 5px;
+            font-size: 0.95rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .resumen-totales span {
+            opacity: 0.9;
+        }
+
+        .resumen-totales .monto {
+            font-weight: 600;
+        }
     </style>
 </head>
 
@@ -113,6 +129,11 @@
                         <option value="cancelado">Cancelado</option>
                     </select>
                 </div>
+            </div>
+
+            <!-- 💰 RESUMEN DE TOTALES -->
+            <div id="resumenTotales" class="resumen-totales">
+                <!-- Se completa desde JS -->
             </div>
 
             <table>
