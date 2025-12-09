@@ -1,5 +1,6 @@
 // js/historial.js
-import { auth, db } from "./firebase-init.js";
+import { auth, db } from './firebase-init.js';
+
 import {
   onAuthStateChanged,
   signOut
@@ -9,37 +10,25 @@ import {
   collection,
   query,
   where,
+  orderBy,
   getDocs
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 // ----------------------
 // DOM
 // ----------------------
-const tituloCliente = document.getElementById("tituloCliente"); // puede ser null
+const tituloCliente = document.getElementById("tituloCliente");
+const subtituloCliente = document.getElementById("subtituloCliente");
 const tablaHistorial = document.getElementById("tablaHistorial");
 const btnLogout = document.getElementById("logoutBtn");
 
-// ----------------------
-// OBTENER ID CLIENTE DESDE LA URL
-// ----------------------
-const urlParams = new URLSearchParams(window.location.search);
+// Filtros
+const filtroDesde = document.getElementById("filtroDesde");
+const filtroHasta = document.getElementById("filtroHasta");
+const filtroProducto = document.getElementById("filtroProducto");
+const filtroEstado = document.getElementById("filtroEstado");
 
-// aceptamos ?cliente= o ?clienteId=
-const clienteId =
-  urlParams.get("cliente") ||
-  urlParams.get("clienteId");
-
-const clienteNombreParam = urlParams.get("nombre");
-
-// si hay un título y viene el nombre por la URL, lo ponemos
-if (tituloCliente && clienteNombreParam) {
-  tituloCliente.textContent = `Historial de compras - ${clienteNombreParam}`;
-}
-
-if (!clienteId && tablaHistorial) {
-  tablaHistorial.innerHTML =
-    "<tr><td colspan='6'>ID de cliente no válido.</td></tr>";
-}
+let ventasCliente = []; // todas las ventas del cliente (sin filtrar)
 
 // ----------------------
 // SESIÓN
@@ -50,92 +39,171 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  if (clienteId) {
-    await cargarHistorial();
+  const params = new URLSearchParams(window.location.search);
+  const clienteId = params.get("clienteId");
+  const clienteNombre = params.get("clienteNombre");
+
+  if (!clienteId) {
+    tituloCliente.textContent = "Historial de compras";
+    subtituloCliente.textContent = "Seleccioná un cliente desde el panel de Clientes.";
+    renderHistorial([]);
+    return;
   }
+
+  tituloCliente.textContent = `Historial de compras - ${clienteNombre || ""}`;
+  subtituloCliente.textContent = `Cliente: ${clienteNombre || ""}`;
+
+  await cargarHistorial(clienteId);
 });
 
-if (btnLogout) {
-  btnLogout.addEventListener("click", async () => {
-    await signOut(auth);
-    window.location.href = "login.html";
-  });
-}
+btnLogout.addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "login.html";
+});
 
 // ----------------------
 // CARGAR HISTORIAL
 // ----------------------
-async function cargarHistorial() {
-  if (!tablaHistorial) return;
-
-  tablaHistorial.innerHTML =
-    "<tr><td colspan='6'>Cargando...</td></tr>";
+async function cargarHistorial(clienteId) {
+  tablaHistorial.innerHTML = `
+    <tr>
+      <td colspan="6">Cargando historial...</td>
+    </tr>
+  `;
 
   try {
     const ref = collection(db, "ventas");
-    const q = query(ref, where("clienteId", "==", clienteId));
+    const q = query(
+      ref,
+      where("clienteId", "==", clienteId),
+      orderBy("fecha", "desc")
+    );
 
     const snap = await getDocs(q);
 
-    if (snap.empty) {
-      tablaHistorial.innerHTML =
-        "<tr><td colspan='6'>Este cliente no tiene compras registradas.</td></tr>";
-      return;
-    }
-
-    let rows = "";
-    let nombreDetectado = clienteNombreParam || null;
-
-    snap.forEach((docSnap) => {
-      const v = docSnap.data();
-
-      // -----------------------------------
-      // Fecha legible (Timestamp o string)
-      // -----------------------------------
-      let fechaLegible = "-";
-      if (v.fecha) {
-        let d = null;
-
-        // Caso Timestamp de Firestore (tiene método toDate)
-        if (typeof v.fecha === "object" && typeof v.fecha.toDate === "function") {
-          d = v.fecha.toDate();
-        }
-        // Caso string o número
-        else if (typeof v.fecha === "string" || typeof v.fecha === "number") {
-          const tmp = new Date(v.fecha);
-          if (!isNaN(tmp.getTime())) d = tmp;
-        }
-
-        if (d) {
-          fechaLegible = d.toLocaleString();
-        }
-      }
-
-      rows += `
-        <tr>
-          <td>${fechaLegible}</td>
-          <td>${v.productoCodigo || ""} - ${v.productoNombre || ""}</td>
-          <td>${v.cantidad || 0}</td>
-          <td>$${v.total || 0}</td>
-          <td>${v.estado || "-"}</td>
-          <td>${v.notas || "-"}</td>
-        </tr>
-      `;
-
-      if (!nombreDetectado && v.clienteNombre) {
-        nombreDetectado = v.clienteNombre;
-      }
+    ventasCliente = snap.docs.map(d => {
+      const data = d.data();
+      return {
+        id: d.id,
+        ...data
+      };
     });
 
-    tablaHistorial.innerHTML = rows;
-
-    // actualizar título si existe el h1/h2 y encontramos nombre
-    if (tituloCliente && nombreDetectado) {
-      tituloCliente.textContent = `Historial de compras - ${nombreDetectado}`;
-    }
-  } catch (e) {
-    console.error("Error al cargar historial:", e);
-    tablaHistorial.innerHTML =
-      "<tr><td colspan='6'>Ocurrió un error al cargar el historial.</td></tr>";
+    aplicarFiltros();
+  } catch (err) {
+    console.error(err);
+    tablaHistorial.innerHTML = `
+      <tr>
+        <td colspan="6">Ocurrió un error al cargar el historial.</td>
+      </tr>
+    `;
   }
 }
+
+// ----------------------
+// RENDER
+// ----------------------
+function renderHistorial(lista) {
+  tablaHistorial.innerHTML = "";
+
+  if (!lista || lista.length === 0) {
+    tablaHistorial.innerHTML = `
+      <tr>
+        <td colspan="6">No hay ventas registradas para este cliente.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  lista.forEach(v => {
+    const tr = document.createElement("tr");
+
+    // Fecha formateada
+    let fechaTxt = "-";
+    if (v.fecha && typeof v.fecha.toDate === "function") {
+      const f = v.fecha.toDate();
+      fechaTxt = f.toLocaleDateString("es-AR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric"
+      }) + " " + f.toLocaleTimeString("es-AR", {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    // Producto: "N0001 - Producto de prueba"
+    const productoTxt = `${v.productoCodigo || ""} - ${v.productoNombre || ""}`.trim();
+
+    const cantidad = v.cantidad || 0;
+    const total = v.total || 0;
+    const estado = (v.estado || "").toLowerCase();
+    const notas = v.notas || "-";
+
+    tr.innerHTML = `
+      <td>${fechaTxt}</td>
+      <td>${productoTxt}</td>
+      <td>${cantidad}</td>
+      <td>$${total}</td>
+      <td>
+        <span class="badge-estado badge-${estado || "pendiente"}">
+          ${estado || "pendiente"}
+        </span>
+      </td>
+      <td>${notas}</td>
+    `;
+
+    tablaHistorial.appendChild(tr);
+  });
+}
+
+// ----------------------
+// FILTROS
+// ----------------------
+function aplicarFiltros() {
+  let lista = [...ventasCliente];
+
+  // Filtro por fecha desde
+  const desdeVal = filtroDesde.value;
+  if (desdeVal) {
+    const desde = new Date(desdeVal + "T00:00:00");
+    lista = lista.filter(v => {
+      if (!v.fecha || typeof v.fecha.toDate !== "function") return false;
+      return v.fecha.toDate() >= desde;
+    });
+  }
+
+  // Filtro por fecha hasta
+  const hastaVal = filtroHasta.value;
+  if (hastaVal) {
+    const hasta = new Date(hastaVal + "T23:59:59");
+    lista = lista.filter(v => {
+      if (!v.fecha || typeof v.fecha.toDate !== "function") return false;
+      return v.fecha.toDate() <= hasta;
+    });
+  }
+
+  // Filtro por producto (código o nombre)
+  const prodQ = filtroProducto.value.trim().toLowerCase();
+  if (prodQ) {
+    lista = lista.filter(v => {
+      const cod = (v.productoCodigo || "").toLowerCase();
+      const nom = (v.productoNombre || "").toLowerCase();
+      return cod.includes(prodQ) || nom.includes(prodQ);
+    });
+  }
+
+  // Filtro por estado
+  const estadoVal = filtroEstado.value;
+  if (estadoVal && estadoVal !== "todas") {
+    lista = lista.filter(v => (v.estado || "").toLowerCase() === estadoVal);
+  }
+
+  renderHistorial(lista);
+}
+
+// Eventos de filtros
+[filtroDesde, filtroHasta, filtroProducto, filtroEstado].forEach(ctrl => {
+  ctrl.addEventListener("input", aplicarFiltros);
+  ctrl.addEventListener("change", aplicarFiltros);
+});
