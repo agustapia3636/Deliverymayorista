@@ -6,12 +6,25 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import {
   collection,
-  getDocs
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// --------------------
+// ==============================
+// PARÁMETROS DE LA URL
+// ==============================
+const params = new URLSearchParams(window.location.search);
+
+// Acepta ?clienteId=... o ?cliente=...
+const clienteIdFromUrl =
+  params.get("clienteId") || params.get("cliente") || "";
+
+// Acepta ?clienteNombre=... o ?nombre=...
+const nombreCliente =
+  params.get("clienteNombre") || params.get("nombre") || "";
+
+// ==============================
 // DOM
-// --------------------
+// ==============================
 const btnLogout = document.getElementById("logoutBtn");
 
 const tituloCliente = document.getElementById("tituloCliente");
@@ -25,40 +38,29 @@ const inputHasta = document.getElementById("filtroHasta");
 const inputProducto = document.getElementById("filtroProducto");
 const selectEstado = document.getElementById("filtroEstado");
 
-// Totales (si existen en el HTML, si no, quedan en null y no pasa nada)
-const lblTotalCliente   = document.getElementById("totalCliente");
-const lblTotalFiltrado  = document.getElementById("totalFiltrado");
-const lblResumenConteo  = document.getElementById("resumenConteo");
+// Totales (si no existen en el HTML, quedan en null y no pasa nada)
+const lblTotalCliente = document.getElementById("totalCliente");
+const lblTotalFiltrado = document.getElementById("totalFiltrado");
+const lblResumenConteo = document.getElementById("resumenConteo");
 
-// --------------------
-// Estado en memoria
-// --------------------
-let ventasCliente   = [];  // ventas base (todas o de un cliente)
-let ventasFiltradas = [];  // ventas luego de aplicar filtros
+// ==============================
+// ESTADO EN MEMORIA
+// ==============================
+let ventasCliente = [];   // ventas base (todas o del cliente)
+let ventasFiltradas = []; // ventas luego de aplicar filtros
 
-// --------------------
-// Helper: query string
-// --------------------
-function getQueryParams() {
-  const params = new URLSearchParams(window.location.search);
-  return {
-    nombre: params.get("nombre") || "",      // nombre del cliente (opcional)
-    clienteId: params.get("clienteId") || "" // por si después lo usás
-  };
-}
-
-const { nombre: nombreCliente } = getQueryParams();
-
-// Título base
-if (nombreCliente) {
+// ==============================
+// TÍTULO INICIAL
+// ==============================
+if (nombreCliente && tituloCliente) {
   tituloCliente.textContent = `Historial de compras - ${nombreCliente}`;
-} else {
+} else if (tituloCliente) {
   tituloCliente.textContent = "Historial de compras";
 }
 
-// --------------------
+// ==============================
 // SESIÓN
-// --------------------
+// ==============================
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "login.html";
@@ -72,9 +74,9 @@ btnLogout?.addEventListener("click", async () => {
   window.location.href = "login.html";
 });
 
-// --------------------
-// Cargar ventas de Firestore
-// --------------------
+// ==============================
+// CARGAR VENTAS DESDE FIRESTORE
+// ==============================
 async function cargarHistorial() {
   try {
     const ventasRef = collection(db, "ventas");
@@ -82,21 +84,36 @@ async function cargarHistorial() {
 
     const todasLasVentas = snap.docs.map((doc) => ({
       id: doc.id,
-      ...doc.data()
+      ...doc.data(),
     }));
 
-    // Si hay un nombre en la URL → filtramos solo ese cliente.
-    // Si NO hay nombre → usamos TODAS las ventas.
-    if (nombreCliente) {
+    // Si hay nombre o clienteId en la URL → filtramos solo ese cliente.
+    if (nombreCliente || clienteIdFromUrl) {
       ventasCliente = todasLasVentas.filter((v) => {
         const nombreVenta = (v.clienteNombre || v.cliente || "").trim();
-        return nombreVenta === nombreCliente;
+        const idVenta =
+          (v.clienteId || v.idCliente || "").toString().trim();
+
+        const coincideNombre =
+          nombreCliente && nombreVenta === nombreCliente;
+        const coincideId =
+          clienteIdFromUrl && idVenta === clienteIdFromUrl;
+
+        // Coincide por nombre o por id
+        return coincideNombre || coincideId;
       });
+
       if (subtituloCliente) {
-        subtituloCliente.textContent =
-          "Mostrando las compras del cliente seleccionado.";
+        if (ventasCliente.length > 0) {
+          subtituloCliente.textContent =
+            "Mostrando las compras del cliente seleccionado.";
+        } else {
+          subtituloCliente.textContent =
+            "No se encontraron ventas para este cliente.";
+        }
       }
     } else {
+      // Sin cliente en URL → mostrar todas las ventas
       ventasCliente = todasLasVentas;
       if (subtituloCliente) {
         subtituloCliente.textContent =
@@ -115,9 +132,9 @@ async function cargarHistorial() {
   }
 }
 
-// --------------------
-// Filtros
-// --------------------
+// ==============================
+// FILTROS
+// ==============================
 function parseFechaFiltro(valor) {
   // dd/mm/aaaa -> Date
   if (!valor) return null;
@@ -141,7 +158,7 @@ function aplicarFiltros() {
   ventasFiltradas = ventasCliente.filter((venta) => {
     let ok = true;
 
-    // Fecha
+    // ----- Fecha -----
     if (venta.fecha) {
       const fechaJs = venta.fecha.toDate
         ? venta.fecha.toDate()
@@ -151,16 +168,24 @@ function aplicarFiltros() {
       if (hastaDate && fechaJs > hastaDate) ok = false;
     }
 
-    // Producto (código o nombre)
+    // ----- Producto (código o nombre) -----
     if (textoProducto) {
-      const codigo = (venta.productoCodigo || venta.codigoProducto || "").toLowerCase();
-      const nombreProd = (venta.productoNombre || venta.nombreProducto || "").toLowerCase();
+      const codigo = (
+        venta.productoCodigo ||
+        venta.codigoProducto ||
+        ""
+      ).toLowerCase();
+      const nombreProd = (
+        venta.productoNombre ||
+        venta.nombreProducto ||
+        ""
+      ).toLowerCase();
       if (!codigo.includes(textoProducto) && !nombreProd.includes(textoProducto)) {
         ok = false;
       }
     }
 
-    // Estado
+    // ----- Estado -----
     if (estadoSeleccionado !== "todas") {
       const estadoVenta = (venta.estado || "").toLowerCase();
       if (estadoVenta !== estadoSeleccionado) ok = false;
@@ -173,17 +198,17 @@ function aplicarFiltros() {
   recalcularTotales();
 }
 
-// --------------------
-// Render tabla
-// --------------------
+// ==============================
+// RENDER TABLA
+// ==============================
 function formatearFecha(fecha) {
   if (!fecha) return "-";
   const f = fecha.toDate ? fecha.toDate() : new Date(fecha);
-  const dia  = String(f.getDate()).padStart(2, "0");
-  const mes  = String(f.getMonth() + 1).padStart(2, "0");
+  const dia = String(f.getDate()).padStart(2, "0");
+  const mes = String(f.getMonth() + 1).padStart(2, "0");
   const anio = f.getFullYear();
   const hora = String(f.getHours()).padStart(2, "0");
-  const min  = String(f.getMinutes()).padStart(2, "0");
+  const min = String(f.getMinutes()).padStart(2, "0");
   return `${dia}/${mes}/${anio} ${hora}:${min}`;
 }
 
@@ -193,7 +218,7 @@ function renderTabla(lista) {
   if (!lista || lista.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6">No hay ventas registradas.</td>
+        <td colspan="6">No hay ventas registradas para este cliente.</td>
       </tr>
     `;
     return;
@@ -204,7 +229,10 @@ function renderTabla(lista) {
 
     const fechaTexto = formatearFecha(venta.fecha);
     const nombreProd =
-      venta.productoNombre || venta.nombreProducto || venta.producto || "-";
+      venta.productoNombre ||
+      venta.nombreProducto ||
+      venta.producto ||
+      "-";
     const cantidad = venta.cantidad || venta.cant || 0;
     const total = venta.total || 0;
     const estado = venta.estado || "-";
@@ -223,9 +251,9 @@ function renderTabla(lista) {
   });
 }
 
-// --------------------
-// Totales
-// --------------------
+// ==============================
+// TOTALES
+// ==============================
 function recalcularTotales() {
   const totalCliente = ventasCliente.reduce(
     (acc, v) => acc + (v.total || 0),
@@ -247,9 +275,9 @@ function recalcularTotales() {
   }
 }
 
-// --------------------
-// Listeners de filtros
-// --------------------
+// ==============================
+// LISTENERS DE FILTROS
+// ==============================
 [inputDesde, inputHasta, inputProducto, selectEstado].forEach((el) => {
   if (!el) return;
   el.addEventListener("input", aplicarFiltros);
