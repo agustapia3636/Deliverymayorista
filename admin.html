@@ -102,11 +102,19 @@
 </head>
 
 <body>
-  <header>
-    Panel Administrativo
-    <button id="logoutBtn">Cerrar sesión</button>
-  </header>
+<header>
+    <div class="titulo">Panel Administrativo</div>
 
+    <div class="nav-panel">
+        <button class="btn-secundario" onclick="window.location.href='clientes.html'">
+            Clientes
+        </button>
+
+        <button id="logoutBtn" class="btn-sesion">
+            Cerrar sesión
+        </button>
+    </div>
+</header>
   <div class="contenedor">
     <div class="acciones">
       <input type="text" id="buscar" placeholder="Buscar por nombre o código...">
