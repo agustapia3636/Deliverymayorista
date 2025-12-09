@@ -28,6 +28,9 @@ const filtroHasta = document.getElementById("filtroHasta");
 const filtroProducto = document.getElementById("filtroProducto");
 const filtroEstado = document.getElementById("filtroEstado");
 
+// Resumen de totales
+const resumenTotales = document.getElementById("resumenTotales");
+
 let ventasCliente = []; // todas las ventas del cliente (sin filtrar)
 
 // ----------------------
@@ -46,6 +49,8 @@ onAuthStateChanged(auth, async (user) => {
   if (!clienteId) {
     tituloCliente.textContent = "Historial de compras";
     subtituloCliente.textContent = "Seleccioná un cliente desde el panel de Clientes.";
+    ventasCliente = [];
+    actualizarTotales([]);
     renderHistorial([]);
     return;
   }
@@ -97,11 +102,13 @@ async function cargarHistorial(clienteId) {
         <td colspan="6">Ocurrió un error al cargar el historial.</td>
       </tr>
     `;
+    ventasCliente = [];
+    actualizarTotales([]);
   }
 }
 
 // ----------------------
-// RENDER
+// RENDER TABLA
 // ----------------------
 function renderHistorial(lista) {
   tablaHistorial.innerHTML = "";
@@ -122,18 +129,23 @@ function renderHistorial(lista) {
     let fechaTxt = "-";
     if (v.fecha && typeof v.fecha.toDate === "function") {
       const f = v.fecha.toDate();
-      fechaTxt = f.toLocaleDateString("es-AR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric"
-      }) + " " + f.toLocaleTimeString("es-AR", {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
+      fechaTxt =
+        f.toLocaleDateString("es-AR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric"
+        }) +
+        " " +
+        f.toLocaleTimeString("es-AR", {
+          hour: "2-digit",
+          minute: "2-digit"
+        });
     }
 
     // Producto: "N0001 - Producto de prueba"
-    const productoTxt = `${v.productoCodigo || ""} - ${v.productoNombre || ""}`.trim();
+    const productoTxt = `${v.productoCodigo || ""} - ${
+      v.productoNombre || ""
+    }`.trim();
 
     const cantidad = v.cantidad || 0;
     const total = v.total || 0;
@@ -155,6 +167,46 @@ function renderHistorial(lista) {
 
     tablaHistorial.appendChild(tr);
   });
+}
+
+// ----------------------
+// RESUMEN DE TOTALES
+// ----------------------
+function actualizarTotales(listaFiltrada) {
+  // Total histórico del cliente (sin importar filtros)
+  const totalHistorico = ventasCliente.reduce((acc, v) => {
+    const monto = typeof v.total === "number" ? v.total : parseFloat(v.total) || 0;
+    return acc + monto;
+  }, 0);
+
+  // Total de las ventas que pasan los filtros actuales
+  const totalFiltrado = listaFiltrada.reduce((acc, v) => {
+    const monto = typeof v.total === "number" ? v.total : parseFloat(v.total) || 0;
+    return acc + monto;
+  }, 0);
+
+  // Cantidad de ventas
+  const cantHistorica = ventasCliente.length;
+  const cantFiltrada = listaFiltrada.length;
+
+  const formato = (n) =>
+    n.toLocaleString("es-AR", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+  resumenTotales.innerHTML = `
+    <span>
+      Total gastado (todas las compras): 
+      <span class="monto">$${formato(totalHistorico)}</span>
+      (${cantHistorica} venta${cantHistorica !== 1 ? "s" : ""})
+    </span>
+    <span>
+      Total en resultados filtrados: 
+      <span class="monto">$${formato(totalFiltrado)}</span>
+      (${cantFiltrada} venta${cantFiltrada !== 1 ? "s" : ""})
+    </span>
+  `;
 }
 
 // ----------------------
@@ -196,10 +248,14 @@ function aplicarFiltros() {
   // Filtro por estado
   const estadoVal = filtroEstado.value;
   if (estadoVal && estadoVal !== "todas") {
-    lista = lista.filter(v => (v.estado || "").toLowerCase() === estadoVal);
+    lista = lista.filter(
+      v => (v.estado || "").toLowerCase() === estadoVal
+    );
   }
 
+  // Actualizo tabla + totales
   renderHistorial(lista);
+  actualizarTotales(lista);
 }
 
 // Eventos de filtros
