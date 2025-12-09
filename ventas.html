@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ventas - Panel Delivery Mayorista</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #050510;
+      color: #fff;
+    }
+
+    header {
+      background: linear-gradient(90deg, #ff005d, #ffa400);
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+
+    .titulo {
+      font-size: 1.2rem;
+    }
+
+    .nav-panel {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn-secundario {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: rgba(0,0,0,0.1);
+      color: #fff;
+    }
+
+    .btn-secundario:hover {
+      background: rgba(0,0,0,0.25);
+    }
+
+    .btn-sesion {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background: #ffb24f;
+      color: #1b1305;
+      font-weight: 600;
+    }
+
+    .contenedor {
+      max-width: 1100px;
+      margin: 20px auto;
+      padding: 0 16px 30px;
+    }
+
+    .acciones {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .acciones input,
+    .acciones select {
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid #2b2b44;
+      background: #121221;
+      color: #fff;
+      font-size: 0.9rem;
+      outline: none;
+    }
+
+    .acciones input::placeholder {
+      color: #77779a;
+    }
+
+    .btn-primario {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      cursor: pointer;
+      background: linear-gradient(90deg,#28d48c,#21bcb4);
+      color: #051312;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    thead {
+      background: #181828;
+    }
+
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #26263a;
+      text-align: left;
+    }
+
+    th {
+      font-weight: 600;
+      color: #c5c5e2;
+    }
+
+    tr:hover td {
+      background: #17172a;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      background: #26263c;
+      color: #d8d8ff;
+    }
+
+    .btn-mini {
+      border: none;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      margin-right: 4px;
+    }
+
+    .btn-mini.estado {
+      background: #ffb24f;
+      color: #1b1305;
+    }
+
+    .btn-mini.eliminar {
+      background: #ff5a5a;
+      color: #fff;
+    }
+
+    .msg {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      min-height: 14px;
+      color: #7dffb4;
+    }
+
+    /* Modal simple */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+    }
+
+    .modal {
+      background: #11111f;
+      border-radius: 18px;
+      padding: 18px 18px 20px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.5);
+    }
+
+    .modal h2 {
+      margin: 0 0 8px;
+      font-size: 1rem;
+    }
+
+    .modal label {
+      display: block;
+      font-size: 0.8rem;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      color: #d6d6f4;
+    }
+
+    .modal input,
+    .modal select,
+    .modal textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #2b2b44;
+      background: #151525;
+      color: #fff;
+      outline: none;
+      font-size: 0.9rem;
+    }
+
+    .modal textarea {
+      min-height: 70px;
+      resize: vertical;
+    }
+
+    .modal-botones {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      justify-content: flex-end;
+    }
+
+    .btn-sec {
+      border-radius: 999px;
+      padding: 7px 14px;
+      border: 1px solid #3a3a52;
+      background: transparent;
+      color: #d0d0f0;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+
+    .btn-pri {
+      border-radius: 999px;
+      padding: 7px 16px;
+      border: none;
+      background: linear-gradient(90deg,#28d48c,#21bcb4);
+      color: #051312;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="titulo">Panel de Ventas</div>
+
+  <div class="nav-panel">
+    <button class="btn-secundario" onclick="window.location.href='admin.html'">
+      Productos
+    </button>
+    <button class="btn-secundario" onclick="window.location.href='clientes.html'">
+      Clientes
+    </button>
+    <button id="logoutBtn" class="btn-sesion">
+      Cerrar sesión
+    </button>
+  </div>
+</header>
+
+<div class="contenedor">
+
+  <div class="acciones">
+    <input type="text" id="buscarVenta" placeholder="Buscar por cliente o estado...">
+    <button id="btnNuevaVenta" class="btn-primario">+ Registrar venta</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Fecha</th>
+        <th>Cliente</th>
+        <th>Total</th>
+        <th>Estado</th>
+        <th>Notas</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody id="tablaVentas"></tbody>
+  </table>
+
+  <div id="msgVentas" class="msg"></div>
+</div>
+
+<!-- Modal nueva venta -->
+<div id="modalVenta" class="modal-backdrop">
+  <div class="modal">
+    <h2>Registrar venta</h2>
+
+    <label for="ventaCliente">Cliente</label>
+    <select id="ventaCliente"></select>
+
+    <label for="ventaTotal">Total (AR$)</label>
+    <input type="number" id="ventaTotal" min="0" step="0.01">
+
+    <label for="ventaEstado">Estado</label>
+    <select id="ventaEstado">
+      <option value="pendiente">Pendiente</option>
+      <option value="pagado">Pagado</option>
+      <option value="entregado">Entregado</option>
+    </select>
+
+    <label for="ventaNotas">Notas</label>
+    <textarea id="ventaNotas" placeholder="Ej: Pago en efectivo, envío en camino, etc."></textarea>
+
+    <div class="modal-botones">
+      <button id="btnCancelarVenta" class="btn-sec">Cancelar</button>
+      <button id="btnGuardarVenta" class="btn-pri">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/firebase-init.js"></script>
+<script type="module" src="js/ventas.js"></script>
+</body>
+</html>
