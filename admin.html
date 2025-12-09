@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Panel Administrativo - Delivery Mayorista</title>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      background: #0d0d17;
+      margin: 0;
+      padding: 0;
+      color: white;
+    }
+
+    header {
+      background: linear-gradient(90deg, #ff005d, #ffa400);
+      padding: 20px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+    }
+
+    header button {
+      background: rgba(0,0,0,0.25);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: white;
+      cursor: pointer;
+    }
+
+    .contenedor {
+      padding: 20px;
+    }
+
+    .acciones {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .acciones input {
+      padding: 10px;
+      width: 60%;
+      border-radius: 8px;
+      border: 1px solid #333;
+      background: #151525;
+      color: white;
+    }
+
+    .acciones button {
+      background: #28d48c;
+      border: none;
+      padding: 12px 20px;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #333;
+      text-align: left;
+    }
+
+    tr:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .btn-editar {
+      background: #ffa726;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: none;
+      color: black;
+      cursor: pointer;
+    }
+
+    .btn-eliminar {
+      background: #ff5a5a;
+      padding: 6px 12px;
+      border-radius: 6px;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    Panel Administrativo
+    <button id="logoutBtn">Cerrar sesión</button>
+  </header>
+
+  <div class="contenedor">
+    <div class="acciones">
+      <input type="text" id="buscar" placeholder="Buscar por nombre o código...">
+      <button id="btnNuevo">➕ Agregar producto</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Precio</th>
+          <th>Stock</th>
+          <th>Categoría</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tablaProductos"></tbody>
+    </table>
+  </div>
+
+  <script type="module" src="js/admin.js"></script>
+</body>
+</html>
