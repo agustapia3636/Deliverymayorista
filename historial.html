@@ -2,133 +2,375 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Historial de compras - Delivery Mayorista</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Historial de compras - Delivery Mayorista</title>
   <link rel="stylesheet" href="css/estilos.css" />
+  <style>
+    /* Contenedor general */
+    main {
+      padding: 30px 16px 40px;
+    }
+
+    .historial-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .historial-card {
+      background: #0f0f1c;
+      border-radius: 18px;
+      padding: 22px 22px 26px;
+      box-shadow: 0 26px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    /* Títulos */
+    .historial-header {
+      margin-bottom: 18px;
+    }
+
+    .historial-header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+
+    .historial-header p {
+      margin: 4px 0 0;
+      font-size: 0.85rem;
+      color: #a6a6d4;
+    }
+
+    /* Filtros */
+    .filtros-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+      align-items: end;
+    }
+
+    .filtro-block label {
+      display: block;
+      font-size: 0.78rem;
+      color: #c3c3ec;
+      margin-bottom: 4px;
+    }
+
+    .filtro-input,
+    .filtro-select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #26263d;
+      background: #151526;
+      color: #fff;
+      font-size: 0.86rem;
+      outline: none;
+    }
+
+    .filtro-input:focus,
+    .filtro-select:focus {
+      border-color: #ff8a4a;
+      box-shadow: 0 0 0 1px rgba(255, 138, 74, 0.35);
+    }
+
+    /* Botón volver */
+    .top-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 18px;
+    }
+
+    .btn-volver {
+      background: #16162a;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 8px 18px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: #f5f5ff;
+    }
+
+    .btn-volver:hover {
+      background: #1d1d33;
+    }
+
+    /* Resúmenes */
+    .resumen-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .resumen-card {
+      background: #141427;
+      border-radius: 14px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .resumen-label {
+      font-size: 0.75rem;
+      color: #a0a0d4;
+      margin-bottom: 4px;
+    }
+
+    .resumen-value {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .resumen-extra {
+      font-size: 0.75rem;
+      color: #8c8cb5;
+      margin-top: 2px;
+    }
+
+    /* Tabla desktop */
+    .tabla-historial-wrapper {
+      margin-top: 6px;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #121224;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    .tabla-historial {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.86rem;
+    }
+
+    .tabla-historial thead {
+      background: #181832;
+    }
+
+    .tabla-historial th,
+    .tabla-historial td {
+      padding: 10px 14px;
+      border-bottom: 1px solid #20203a;
+      text-align: left;
+    }
+
+    .tabla-historial th {
+      font-weight: 600;
+      color: #d0d0f6;
+      font-size: 0.8rem;
+    }
+
+    .tabla-historial tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .tabla-historial tbody tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Estado pill */
+    .estado-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      background: #26263c;
+      color: #ffd08a;
+    }
+
+    /* --------- MÓVIL: tabla -> tarjetas --------- */
+    @media (max-width: 768px) {
+      .historial-card {
+        padding: 18px 14px 22px;
+      }
+
+      .filtros-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .resumen-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .tabla-historial-wrapper {
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .tabla-historial,
+      .tabla-historial thead,
+      .tabla-historial tbody,
+      .tabla-historial tr,
+      .tabla-historial th,
+      .tabla-historial td {
+        display: block;
+        width: 100%;
+      }
+
+      .tabla-historial thead {
+        display: none;
+      }
+
+      .tabla-historial tbody {
+        margin-top: 10px;
+      }
+
+      .tabla-historial tbody tr {
+        background: #111121;
+        border-radius: 14px;
+        padding: 10px 12px;
+        margin-bottom: 10px;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+      }
+
+      .tabla-historial tbody tr td {
+        border-bottom: none;
+        padding: 4px 0;
+        font-size: 0.83rem;
+      }
+
+      .tabla-historial tbody tr td::before {
+        content: attr(data-label);
+        display: inline-block;
+        min-width: 90px;
+        margin-right: 6px;
+        font-size: 0.74rem;
+        font-weight: 500;
+        color: #9b9bcb;
+      }
+
+      .tabla-historial tbody tr td[data-label="Total"] {
+        margin-top: 4px;
+        font-weight: 600;
+      }
+    }
+  </style>
 </head>
 <body>
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <div class="topbar-title">Historial de compras</div>
-    <nav class="topbar-nav">
-      <button class="topbar-btn" onclick="window.location.href='admin.html'">
+  <header>
+    <div class="titulo">Historial de compras</div>
+
+    <div class="nav-panel">
+      <button class="btn-secundario" onclick="window.location.href='admin.html'">
         Productos
       </button>
-      <button class="topbar-btn" onclick="window.location.href='clientes.html'">
+
+      <button class="btn-secundario" onclick="window.location.href='clientes.html'">
         Clientes
       </button>
-      <button class="topbar-btn" onclick="window.location.href='ventas.html'">
+
+      <button class="btn-secundario" onclick="window.location.href='ventas.html'">
         Ventas
       </button>
-      <button id="logoutBtn" class="topbar-btn topbar-btn-logout">
+
+      <button id="logoutBtn" class="btn-sesion">
         Cerrar sesión
       </button>
-    </nav>
+    </div>
   </header>
 
-  <main class="hist-main">
-    <section class="hist-layout">
-      <!-- TÍTULO + VOLVER -->
-      <div class="hist-header-row">
-        <div>
-          <h1 id="tituloCliente" class="hist-title">Historial de compras</h1>
-          <p id="subtituloCliente" class="hist-subtitle">
-            Seleccioná un cliente desde el panel de Clientes.
-          </p>
-        </div>
-
-        <button class="btn-secondary" onclick="window.location.href='clientes.html'">
+  <main>
+    <div class="historial-wrapper">
+      <div class="top-actions">
+        <button class="btn-volver" onclick="window.location.href='clientes.html'">
           ← Volver a clientes
         </button>
       </div>
 
-      <!-- FILTROS -->
-      <div class="hist-toolbar">
-        <div class="hist-field">
-          <label for="filtroDesde">Desde</label>
-          <div class="hist-input-icon">
+      <section class="historial-card">
+        <!-- Títulos -->
+        <div class="historial-header">
+          <h1 id="tituloCliente">Historial de compras</h1>
+          <p id="subtituloCliente">
+            Seleccioná un cliente desde el panel de Clientes.
+          </p>
+        </div>
+
+        <!-- Filtros -->
+        <div class="filtros-grid">
+          <div class="filtro-block">
+            <label for="filtroDesde">Desde</label>
             <input
               id="filtroDesde"
               type="text"
+              class="filtro-input"
               placeholder="dd/mm/aaaa"
-              autocomplete="off"
             />
-            <span class="hist-input-icon-symbol">📅</span>
           </div>
-        </div>
 
-        <div class="hist-field">
-          <label for="filtroHasta">Hasta</label>
-          <div class="hist-input-icon">
+          <div class="filtro-block">
+            <label for="filtroHasta">Hasta</label>
             <input
               id="filtroHasta"
               type="text"
+              class="filtro-input"
               placeholder="dd/mm/aaaa"
-              autocomplete="off"
             />
-            <span class="hist-input-icon-symbol">📅</span>
+          </div>
+
+          <div class="filtro-block">
+            <label for="filtroProducto">Producto (código o nombre)</label>
+            <input
+              id="filtroProducto"
+              type="text"
+              class="filtro-input"
+              placeholder="Ej: N0001, llavero..."
+            />
+          </div>
+
+          <div class="filtro-block">
+            <label for="filtroEstado">Estado</label>
+            <select id="filtroEstado" class="filtro-select">
+              <option value="todas">Todas</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="pagado">Pagado</option>
+              <option value="cancelado">Cancelado</option>
+            </select>
           </div>
         </div>
 
-        <div class="hist-field hist-field-wide">
-          <label for="filtroProducto">Producto (código o nombre)</label>
-          <input
-            id="filtroProducto"
-            type="text"
-            placeholder="Ej: N0001, llavero, estéreo..."
-            autocomplete="off"
-          />
+        <!-- Resúmenes -->
+        <div class="resumen-grid">
+          <div class="resumen-card">
+            <div class="resumen-label">Total gastado (cliente)</div>
+            <div class="resumen-value" id="totalCliente">$0,00</div>
+            <div class="resumen-extra">Sumando todas las compras del cliente.</div>
+          </div>
+
+          <div class="resumen-card">
+            <div class="resumen-label">Total en resultados filtrados</div>
+            <div class="resumen-value" id="totalFiltrado">$0,00</div>
+            <div class="resumen-extra">Lo que ves en la tabla / tarjetas.</div>
+          </div>
+
+          <div class="resumen-card">
+            <div class="resumen-label">Resumen de registros</div>
+            <div class="resumen-value" id="resumenConteo">0 ventas</div>
+            <div class="resumen-extra">Cantidad de ventas en el listado.</div>
+          </div>
         </div>
 
-        <div class="hist-field hist-field-sm">
-          <label for="filtroEstado">Estado</label>
-          <select id="filtroEstado">
-            <option value="todas">Todas</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="pagado">Pagado</option>
-            <option value="cancelado">Cancelado</option>
-          </select>
+        <!-- Tabla / tarjetas -->
+        <div class="tabla-historial-wrapper">
+          <table class="tabla-historial">
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Notas</th>
+              </tr>
+            </thead>
+            <tbody id="tablaHistorial">
+              <!-- Filas dinámicas -->
+            </tbody>
+          </table>
         </div>
-      </div>
-
-      <!-- RESUMEN / TOTALES -->
-      <div class="hist-summary">
-        <div class="summary-card">
-          <span class="summary-label">Total gastado (cliente)</span>
-          <span id="totalCliente" class="summary-value">$0,00</span>
-        </div>
-        <div class="summary-card">
-          <span class="summary-label">Total en resultados filtrados</span>
-          <span id="totalFiltrado" class="summary-value">$0,00</span>
-        </div>
-        <div class="summary-card summary-card-small">
-          <span id="resumenConteo" class="summary-resumen">
-            0 venta(s) en el resultado.
-          </span>
-        </div>
-      </div>
-
-      <!-- TABLA PREMIUM / CARDS RESPONSIVE -->
-      <div class="hist-table-wrapper">
-        <table class="table-premium">
-          <thead>
-            <tr>
-              <th>Fecha</th>
-              <th>Producto</th>
-              <th>Cantidad</th>
-              <th>Total</th>
-              <th>Estado</th>
-              <th>Notas</th>
-            </tr>
-          </thead>
-          <tbody id="tablaHistorial">
-            <!-- Filas dinámicas desde historial.js -->
-          </tbody>
-        </table>
-      </div>
-    </section>
+      </section>
+    </div>
   </main>
 
+  <script type="module" src="js/firebase-init.js"></script>
   <script type="module" src="js/historial.js"></script>
 </body>
 </html>
