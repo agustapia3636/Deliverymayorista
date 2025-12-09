@@ -19,11 +19,12 @@ const msgBox = document.getElementById("loginMessage");
 const togglePassword = document.getElementById("togglePassword");
 const rememberCheckbox = document.getElementById("rememberMe");
 
-// Helper para mensajes
+// -------------------------
+// Helper para mensajes (sin alerts)
+// -------------------------
 function setMessage(text, type = "error") {
   if (!msgBox) {
-    // Si por alguna razón no existe el mensaje en el HTML:
-    if (text) alert(text);
+    console.warn("[login.js] loginMessage no existe en el HTML. Mensaje:", text);
     return;
   }
   msgBox.textContent = text || "";
@@ -36,10 +37,14 @@ function setMessage(text, type = "error") {
 if (togglePassword && passwordInput) {
   togglePassword.addEventListener("click", () => {
     const tipoActual = passwordInput.getAttribute("type");
-    passwordInput.setAttribute(
-      "type",
-      tipoActual === "password" ? "text" : "password"
-    );
+    const esPassword = tipoActual === "password";
+
+    passwordInput.setAttribute("type", esPassword ? "text" : "password");
+
+    // Opcional: cambiar estilo/emoji/icono del botón
+    togglePassword.classList.toggle("active", esPassword);
+    // Si usás un emoji dentro del botón, podés cambiarlo así:
+    // togglePassword.textContent = esPassword ? "🙉" : "🙈";
   });
 }
 
@@ -48,7 +53,7 @@ if (togglePassword && passwordInput) {
 // -------------------------
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Ya hay sesión → directo al panel
+    // Ya hay sesión → directo al panel, sin mensajes ni alerts
     window.location.href = "admin.html";
   }
 });
@@ -86,12 +91,13 @@ if (form && emailInput && passwordInput) {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       console.log("Login OK:", cred.user.uid);
 
-      setMessage("¡Bienvenido! Redirigiendo al panel...", "ok");
+      // Mensaje suave en la tarjeta (sin alert, sin botón de aceptar)
+      setMessage("Entrando al panel...", "ok");
 
-      // Pequeño delay para que se vea el mensaje
+      // Pequeño delay para que se vea el mensaje y luego redirigir
       setTimeout(() => {
         window.location.href = "admin.html";
-      }, 400);
+      }, 300);
     } catch (error) {
       console.error("Error de login:", error);
       let texto = "No se pudo iniciar sesión.";
