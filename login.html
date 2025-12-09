@@ -214,7 +214,7 @@
       color: #d0d0ff;
     }
 
-    #loginBtn {
+    #btnLogin {
       width: 100%;
       border: none;
       border-radius: 999px;
@@ -228,18 +228,18 @@
       transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
     }
 
-    #loginBtn:hover {
+    #btnLogin:hover {
       transform: translateY(-1px);
       filter: brightness(1.03);
       box-shadow: 0 18px 40px rgba(0,0,0,0.7);
     }
 
-    #loginBtn:active {
+    #btnLogin:active {
       transform: translateY(0);
       box-shadow: 0 10px 24px rgba(0,0,0,0.7);
     }
 
-    #loginBtn:disabled {
+    #btnLogin:disabled {
       opacity: 0.6;
       cursor: default;
       box-shadow: none;
@@ -332,13 +332,13 @@
 
         <div class="login-footer-row">
           <label class="remember">
-            <input type="checkbox" id="remember" />
+            <input type="checkbox" id="rememberMe" />
             <span>Mantener sesión iniciada</span>
           </label>
           <a class="link-muted">Olvidé mi contraseña</a>
         </div>
 
-        <button type="submit" id="loginBtn">
+        <button type="submit" id="btnLogin">
           Entrar al panel
         </button>
 
@@ -352,21 +352,7 @@
     </div>
   </div>
 
-  <!-- Toggle de contraseña (no toca Firebase, solo UI) -->
-  <script>
-    const pwdInput = document.getElementById('password');
-    const toggleBtn = document.getElementById('togglePassword');
-
-    if (pwdInput && toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        const isPwd = pwdInput.type === 'password';
-        pwdInput.type = isPwd ? 'text' : 'password';
-        toggleBtn.textContent = isPwd ? '🙈' : '👁';
-      });
-    }
-  </script>
-
-  <!-- Tu lógica de login con Firebase -->
+  <!-- Lógica de login con Firebase (maneja también el ojito de contraseña) -->
   <script type="module" src="js/login.js"></script>
 </body>
 </html>
