@@ -15,64 +15,100 @@ const grid               = document.getElementById("lista-productos");
 const buscador           = document.getElementById("buscador");
 const filtroCategoria    = document.getElementById("filtro-categoria");     // select oculto
 const filtroSubcategoria = document.getElementById("filtro-subcategoria");  // select oculto
-const filtroEtiqueta     = document.getElementById("filtro-etiqueta");      // select oculto
-const badgeActivos       = document.getElementById("badge-filtros-activos");
 
-const megaToggle     = document.querySelector(".mega-toggle");
-const megaDropdown   = document.querySelector(".mega-dropdown");
-const megaCatBody    = document.getElementById("mega-cat-body");
-const megaSubBody    = document.getElementById("mega-sub-body");
-const megaTagBody    = document.getElementById("mega-tag-body");
-const megaClose      = document.getElementById("mega-close");
-const megaLimpiarBtn = document.getElementById("mega-limpiar");
+// Mega menú
+const megaDropdown = document.getElementById("megaDropdown");
+const megaToggle   = document.getElementById("categoriaToggle");
+const megaMenu     = document.getElementById("megaMenu");
+const megaCatList  = document.getElementById("megaCategorias");
+const megaSubList  = document.getElementById("megaSubcategorias");
+const megaTagList  = document.getElementById("megaEtiquetas");
+const megaSubTitle = document.getElementById("megaSubTitle");
+const megaTagTitle = document.getElementById("megaTagTitle");
+const megaResetBtn = document.getElementById("megaReset");
 
-// Texto del toggle principal
-const megaLabelSpan = document.querySelector(".mega-label span");
+const miniCantidad = document.getElementById("mini-carrito-cantidad");
+const miniTotal    = document.getElementById("mini-carrito-total");
 
 // Paginación
-const paginador      = document.getElementById("paginador");
-const paginaActualEl = document.getElementById("pagina-actual");
+const resumenResultados   = document.getElementById("resumen-resultados");
+const btnPaginaAnterior   = document.getElementById("btn-pagina-anterior");
+const btnPaginaSiguiente  = document.getElementById("btn-pagina-siguiente");
+const contenedorNumeros   = document.getElementById("paginador-numeros");
+const contenedorPaginador = document.querySelector(".paginador-contenedor");
 
-// ===== ESTADO GLOBAL =====
-let TODOS_LOS_PRODUCTOS = [];
-let FILTROS = {
-  texto: "",
-  categoria: "",     // key interna de categoría
-  subcategoria: "",  // key interna de subcategoría
-  etiqueta: ""       // key interna de etiqueta
-};
-
-// Mapa: categoriaKey -> { label, subcategorias: { subKey: { label, tags: Set() } } }
-let MAPA_CAT_SUB = {};
-
-// PAGINACIÓN
+const ITEMS_POR_PAGINA = 24;
 let paginaActual = 1;
-const TAMANIO_PAGINA = 24;
+let ultimoTotalFiltrado = 0;
 
-// ====== UTILIDADES GENERALES ======
+// mapa categoría → subcategorías
+let MAPA_CAT_SUB   = {};
+let MAPA_CAT_LABEL = {};
 
-function safe(value, defaultValue = "") {
-  if (value === null || value === undefined) return defaultValue;
-  return value;
+// mapa etiquetas: catKey -> subKey -> Set(etiquetas)
+let MAPA_TAGS = {};
+
+let TODOS_LOS_PRODUCTOS = [];
+
+let categoriaSeleccionada    = "todas";
+let subcategoriaSeleccionada = "todas";
+let etiquetaSeleccionada     = "todas";
+
+let labelCategoriaActual    = "Todas las categorías";
+let labelSubcategoriaActual = null;
+let labelEtiquetaActual     = null;
+
+// ========================
+// GUARDAR / LEER FILTROS
+// ========================
+
+const CLAVE_FILTROS = "dm_filtros";
+
+function guardarFiltrosActuales() {
+  const data = {
+    categoria:    categoriaSeleccionada || "todas",
+    subcategoria: subcategoriaSeleccionada || "todas",
+    etiqueta:     etiquetaSeleccionada || "todas",
+    pagina:       paginaActual || 1,
+    busqueda:     buscador ? buscador.value.trim().toLowerCase() : ""
+  };
+  try {
+    localStorage.setItem(CLAVE_FILTROS, JSON.stringify(data));
+  } catch (e) {
+    console.error("Error guardando filtros", e);
+  }
 }
 
-function normalizarClaveCategoria(nombre) {
-  return (nombre || "")
-    .toString()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
+function leerFiltrosGuardados() {
+  try {
+    const raw = localStorage.getItem(CLAVE_FILTROS);
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    return data;
+  } catch (e) {
+    console.error("Error leyendo filtros", e);
+    return null;
+  }
+}
+
+// ========= UTILIDADES =========
+
+function safe(value, fallback = "") {
+  return (value === undefined || value === null) ? fallback : value;
 }
 
 function parsearPrecio(valor) {
   if (typeof valor === "number") return valor;
-  if (!valor) return null;
-  let str = String(valor).trim();
-  str = str.replace(/\./g, "").replace(",", ".");
-  const num = Number(str);
-  return isNaN(num) ? null : num;
+
+  if (typeof valor === "string") {
+    const limpio = valor
+      .toString()
+      .replace(/\./g, "")
+      .replace(",", ".");
+    const num = Number(limpio);
+    return Number.isFinite(num) ? num : null;
+  }
+  return null;
 }
 
 function formatearPrecio(valor) {
@@ -89,522 +125,130 @@ function normalizarEtiquetasCampo(campo) {
   if (!campo) return [];
   if (Array.isArray(campo)) {
     return campo
-      .map(t => String(t).trim())
-      .filter(t => t.length > 0);
+      .map(t => t && t.toString().trim())
+      .filter(t => t)
+      .map(t => t.toLowerCase());
   }
-  if (typeof campo === "string") {
-    const partes = campo.split(/[;,\/|]+/);
-    return partes
-      .map(t => t.trim())
-      .filter(t => t.length > 0);
-  }
-  return [];
+  const comoStr = campo.toString();
+  return comoStr
+    .split(",")
+    .map(t => t && t.trim())
+    .filter(t => t)
+    .map(t => t.toLowerCase());
 }
 
-// ====== CARRITO (localStorage) ======
+function setImagenProducto(imgElement, codigo) {
+  if (!imgElement || !codigo) {
+    if (imgElement) imgElement.style.display = "none";
+    return;
+  }
+
+  const urls = [
+    `${BASE_IMG}/${codigo}.jpg`,
+    `${BASE_IMG}/${codigo}.JPG`,
+  ];
+  let intento = 0;
+
+  const probar = () => {
+    if (intento >= urls.length) {
+      imgElement.style.display = "none";
+      return;
+    }
+    imgElement.src = urls[intento];
+    intento++;
+  };
+
+  imgElement.onload = () => {
+    imgElement.dataset.srcOk = imgElement.src;
+  };
+  imgElement.onerror = probar;
+
+  probar();
+}
+
+// ========= CARRITO =========
 
 function leerCarrito() {
   try {
-    const str = localStorage.getItem(CLAVE_CARRITO);
-    if (!str) return [];
-    const arr = JSON.parse(str);
-    if (!Array.isArray(arr)) return [];
-    return arr;
+    const raw = localStorage.getItem(CLAVE_CARRITO);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
   } catch (e) {
-    console.error("Error leyendo carrito:", e);
+    console.error("Error leyendo carrito", e);
     return [];
   }
 }
 
-function guardarCarrito(arr) {
+function guardarCarrito(carrito) {
   try {
-    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(arr));
+    localStorage.setItem(CLAVE_CARRITO, JSON.stringify(carrito));
   } catch (e) {
-    console.error("Error guardando carrito:", e);
+    console.error("Error guardando carrito", e);
   }
 }
 
-function agregarAlCarrito(codigo, cantidad, precioUnitario, nombre) {
+function actualizarMiniCarrito() {
   const carrito = leerCarrito();
-  const idx = carrito.findIndex(item => item.codigo === codigo);
+
+  const totalProductos = carrito.reduce(
+    (acc, p) => acc + (p.cantidad || 0),
+    0
+  );
+
+  const totalPrecio = carrito.reduce((acc, p) => {
+    const precio = Number(p.precio) || 0;
+    return acc + precio * (p.cantidad || 0);
+  }, 0);
+
+  if (miniCantidad) miniCantidad.textContent = totalProductos;
+  if (miniTotal) {
+    miniTotal.textContent = totalPrecio.toLocaleString("es-AR", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+  }
+}
+
+function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, stockDisponible) {
+  let carrito = leerCarrito();
+  const idx = carrito.findIndex(p => p.codigo === productoBasico.codigo);
+  let cantidad = Number(cantidadElegida) || 1;
 
   if (idx >= 0) {
-    carrito[idx].cantidad += cantidad;
+    const item = carrito[idx];
+    if (stockDisponible && item.cantidad + cantidad > stockDisponible) {
+      alert("No hay más stock disponible de este producto.");
+      return;
+    }
+    item.cantidad += cantidad;
   } else {
+    if (stockDisponible && cantidad > stockDisponible) cantidad = stockDisponible;
     carrito.push({
-      codigo,
+      codigo:  productoBasico.codigo,
+      nombre:  productoBasico.nombre,
+      precio:  productoBasico.precio,
       cantidad,
-      precioUnitario,
-      nombre
+      img:     productoBasico.img || null,
+      stock:   stockDisponible,
     });
   }
 
   guardarCarrito(carrito);
-}
+  actualizarMiniCarrito();
 
-function calcularTotalItemsCarrito() {
-  const carrito = leerCarrito();
-  return carrito.reduce((acc, item) => acc + (item.cantidad || 0), 0);
-}
-
-// ====== MEMORIA DE FILTROS (localStorage) ======
-
-const CLAVE_FILTROS = "dm_filtros_catalogo";
-
-function guardarFiltros() {
-  try {
-    localStorage.setItem(CLAVE_FILTROS, JSON.stringify(FILTROS));
-  } catch (e) {
-    console.warn("No se pudieron guardar filtros:", e);
+  const item = carrito.find(p => p.codigo === productoBasico.codigo);
+  if (boton && item) {
+    boton.textContent = `En carrito (${item.cantidad})`;
+    boton.classList.add("btn-agregar-carrito-activo");
   }
 }
 
-function cargarFiltrosGuardados() {
-  try {
-    const str = localStorage.getItem(CLAVE_FILTROS);
-    if (!str) return;
-    const obj = JSON.parse(str);
-    if (typeof obj !== "object" || obj === null) return;
-
-    FILTROS.texto       = obj.texto       || "";
-    FILTROS.categoria   = obj.categoria   || "";
-    FILTROS.subcategoria= obj.subcategoria|| "";
-    FILTROS.etiqueta    = obj.etiqueta    || "";
-  } catch (e) {
-    console.warn("No se pudieron cargar filtros guardados:", e);
-  }
+function irAlCarrito() {
+  window.location.href = "carrito.html";
 }
 
-// ====== CONSTRUCCIÓN DEL MAPA CATEGORÍAS / SUBCATEGORÍAS / TAGS ======
-
-function construirMapaCatSub(productos) {
-  MAPA_CAT_SUB = {};
-
-  productos.forEach(prod => {
-    const catBruta = safe(
-      prod.categoria ||
-      prod.rubro ||
-      prod.cat ||
-      prod["Categoria Princ"] ||
-      prod["Categoria_Princ"],
-      "Sin categoría"
-    );
-
-    const catLabel = String(catBruta).trim() || "Sin categoría";
-    const catKey   = normalizarClaveCategoria(catLabel) || "sin_categoria";
-
-    if (!MAPA_CAT_SUB[catKey]) {
-      MAPA_CAT_SUB[catKey] = {
-        label: catLabel,
-        subcategorias: {}
-      };
-    }
-
-    const subBruta = safe(
-      prod.subcategoria ||
-      prod.Subcategoria ||
-      prod.Sub_Categoria ||
-      prod["Sub_Categoria"] ||
-      prod["Subcategoria"],
-      "General"
-    );
-
-    const subLabel = String(subBruta).trim() || "General";
-    const subKey   = normalizarClaveCategoria(subLabel) || "general";
-
-    if (!MAPA_CAT_SUB[catKey].subcategorias[subKey]) {
-      MAPA_CAT_SUB[catKey].subcategorias[subKey] = {
-        label: subLabel,
-        tags: new Set()
-      };
-    }
-
-    const etiquetasCrudas =
-      prod.etiquetas ||
-      prod.tags ||
-      prod["Etiquetas"] ||
-      prod["Tags"];
-
-    const listaTags = normalizarEtiquetasCampo(etiquetasCrudas);
-
-    listaTags.forEach(tag => {
-      MAPA_CAT_SUB[catKey].subcategorias[subKey].tags.add(tag);
-    });
-  });
-
-  Object.values(MAPA_CAT_SUB).forEach(catObj => {
-    Object.values(catObj.subcategorias).forEach(subObj => {
-      if (!subObj.tags || !(subObj.tags instanceof Set)) {
-        subObj.tags = new Set();
-      }
-    });
-  });
-}
-
-function crearBotonCat(catKey, catLabel) {
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "mega-cat-btn";
-  btn.dataset.catKey = catKey;
-  btn.textContent = catLabel;
-
-  if (FILTROS.categoria === catKey) {
-    btn.classList.add("activo");
-  }
-
-  btn.addEventListener("click", () => {
-    seleccionarCategoria(catKey);
-  });
-
-  return btn;
-}
-
-function crearBotonSub(catKey, subKey, subLabel) {
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "mega-sub-btn";
-  btn.dataset.catKey = catKey;
-  btn.dataset.subKey = subKey;
-  btn.textContent = subLabel;
-
-  if (FILTROS.categoria === catKey && FILTROS.subcategoria === subKey) {
-    btn.classList.add("activo");
-  }
-
-  btn.addEventListener("click", () => {
-    seleccionarSubcategoria(catKey, subKey);
-  });
-
-  return btn;
-}
-
-function crearBotonTag(catKey, subKey, tagKey, tagLabel) {
-  const btn = document.createElement("button");
-  btn.type = "button";
-  btn.className = "mega-tag-btn";
-  btn.dataset.catKey = catKey;
-  btn.dataset.subKey = subKey;
-  btn.dataset.tagKey = tagKey;
-  btn.textContent = tagLabel;
-
-  if (
-    FILTROS.categoria === catKey &&
-    FILTROS.subcategoria === subKey &&
-    FILTROS.etiqueta === tagKey
-  ) {
-    btn.classList.add("activo");
-  }
-
-  btn.addEventListener("click", () => {
-    seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel);
-  });
-
-  return btn;
-}
-
-// ====== ACTUALIZAR MEGA MENÚ ======
-
-function renderizarMegaMenu() {
-  megaCatBody.innerHTML = "";
-  megaSubBody.innerHTML = "";
-  megaTagBody.innerHTML = "";
-
-  const entriesCat = Object.entries(MAPA_CAT_SUB)
-    .sort((a, b) => a[1].label.localeCompare(b[1].label, "es"));
-
-  entriesCat.forEach(([catKey, catObj]) => {
-    const btnCat = crearBotonCat(catKey, catObj.label);
-    megaCatBody.appendChild(btnCat);
-
-    if (FILTROS.categoria === catKey) {
-      const subEntries = Object.entries(catObj.subcategorias)
-        .sort((a, b) => a[1].label.localeCompare(b[1].label, "es"));
-
-      subEntries.forEach(([subKey, subObj]) => {
-        const btnSub = crearBotonSub(catKey, subKey, subObj.label);
-        megaSubBody.appendChild(btnSub);
-
-        if (FILTROS.subcategoria === subKey) {
-          const tagsArray = Array.from(subObj.tags).sort((a, b) =>
-            a.localeCompare(b, "es")
-          );
-
-          tagsArray.forEach(tag => {
-            const tagKey = normalizarClaveCategoria(tag);
-            const btnTag = crearBotonTag(catKey, subKey, tagKey, tag);
-            megaTagBody.appendChild(btnTag);
-          });
-        }
-      });
-    }
-  });
-
-  actualizarTextoToggle();
-}
-
-// ====== SELECCIÓN DESDE MEGA MENÚ ======
-
-function seleccionarCategoria(catKey) {
-  FILTROS.categoria    = catKey;
-  FILTROS.subcategoria = "";
-  FILTROS.etiqueta     = "";
-  paginaActual = 1;
-
-  renderizarMegaMenu();
-  aplicarFiltros();
-  guardarFiltros();
-}
-
-function seleccionarSubcategoria(catKey, subKey) {
-  FILTROS.categoria    = catKey;
-  FILTROS.subcategoria = subKey;
-  FILTROS.etiqueta     = "";
-  paginaActual = 1;
-
-  renderizarMegaMenu();
-  aplicarFiltros();
-  guardarFiltros();
-}
-
-function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
-  FILTROS.categoria    = catKey;
-  FILTROS.subcategoria = subKey;
-  FILTROS.etiqueta     = tagKey;
-  paginaActual = 1;
-
-  const actualTexto = megaLabelSpan.textContent || "";
-  const baseTexto   = actualTexto.split(" · ")[0];
-
-  if (tagLabel) {
-    megaLabelSpan.textContent = `${baseTexto} · ${tagLabel}`;
-  }
-
-  renderizarMegaMenu();
-  aplicarFiltros();
-  guardarFiltros();
-}
-
-function limpiarFiltrosMega() {
-  FILTROS.texto       = "";
-  FILTROS.categoria   = "";
-  FILTROS.subcategoria= "";
-  FILTROS.etiqueta    = "";
-  paginaActual        = 1;
-
-  if (buscador) buscador.value = "";
-
-  filterSelectReset(filtroCategoria);
-  filterSelectReset(filtroSubcategoria);
-  filterSelectReset(filtroEtiqueta);
-
-  renderizarMegaMenu();
-  aplicarFiltros();
-  guardarFiltros();
-}
-
-function filterSelectReset(select) {
-  if (!select) return;
-  select.value = "";
-}
-
-// ====== TEXTO DEL TOGGLE ======
-
-function actualizarTextoToggle() {
-  const catKey = FILTROS.categoria;
-  const subKey = FILTROS.subcategoria;
-  const tagKey = FILTROS.etiqueta;
-
-  let texto = "Categoría";
-
-  if (catKey && MAPA_CAT_SUB[catKey]) {
-    texto = MAPA_CAT_SUB[catKey].label;
-
-    if (subKey && MAPA_CAT_SUB[catKey].subcategorias[subKey]) {
-      texto += " · " + MAPA_CAT_SUB[catKey].subcategorias[subKey].label;
-
-      if (tagKey) {
-        let tagEncontrada = null;
-        const subObj = MAPA_CAT_SUB[catKey].subcategorias[subKey];
-        subObj.tags.forEach(t => {
-          if (!tagEncontrada) {
-            if (normalizarClaveCategoria(t) === tagKey) {
-              tagEncontrada = t;
-            }
-          }
-        });
-
-        if (tagEncontrada) {
-          texto += " · " + tagEncontrada;
-        }
-      }
-    }
-  }
-
-  megaLabelSpan.textContent = texto;
-}
-
-// ====== FILTRADO DE PRODUCTOS ======
-
-function aplicarFiltros() {
-  if (!Array.isArray(TODOS_LOS_PRODUCTOS)) return;
-
-  let lista = [...TODOS_LOS_PRODUCTOS];
-
-  const texto = (FILTROS.texto || "").toLowerCase().trim();
-  if (texto) {
-    lista = lista.filter(prod => {
-      const codigo = safe(
-        prod.codigo || prod.cod || prod.Code || prod.Codigo,
-        ""
-      ).toString().toLowerCase();
-
-      const nombre = safe(
-        prod.nombre || prod.descripcion || prod.titulo || prod["Nombre Corto"],
-        ""
-      ).toLowerCase();
-
-      const categoria = safe(
-        prod.categoria ||
-        prod.rubro ||
-        prod.cat ||
-        prod["Categoria Princ"] ||
-        prod["Categoria_Princ"],
-        ""
-      ).toLowerCase();
-
-      const subcategoria = safe(
-        prod.subcategoria ||
-        prod.Subcategoria ||
-        prod.Sub_Categoria ||
-        prod["Sub_Categoria"] ||
-        prod["Subcategoria"],
-        ""
-      ).toLowerCase();
-
-      const etiquetasCrudas =
-        prod.etiquetas ||
-        prod.tags ||
-        prod["Etiquetas"] ||
-        prod["Tags"] ||
-        "";
-
-      const etiquetasTexto = Array.isArray(etiquetasCrudas)
-        ? etiquetasCrudas.join(" ").toLowerCase()
-        : String(etiquetasCrudas).toLowerCase();
-
-      return (
-        codigo.includes(texto) ||
-        nombre.includes(texto) ||
-        categoria.includes(texto) ||
-        subcategoria.includes(texto) ||
-        etiquetasTexto.includes(texto)
-      );
-    });
-  }
-
-  const catKey = FILTROS.categoria;
-  if (catKey) {
-    lista = lista.filter(prod => {
-      const catBruta = safe(
-        prod.categoria ||
-        prod.rubro ||
-        prod.cat ||
-        prod["Categoria Princ"] ||
-        prod["Categoria_Princ"],
-        "Sin categoría"
-      );
-      const catLabel = String(catBruta).trim() || "Sin categoría";
-      const catKeyProd = normalizarClaveCategoria(catLabel) || "sin_categoria";
-
-      return catKeyProd === catKey;
-    });
-  }
-
-  const subKey = FILTROS.subcategoria;
-  if (subKey) {
-    lista = lista.filter(prod => {
-      const subBruta = safe(
-        prod.subcategoria ||
-        prod.Subcategoria ||
-        prod.Sub_Categoria ||
-        prod["Sub_Categoria"] ||
-        prod["Subcategoria"],
-        "General"
-      );
-      const subLabel = String(subBruta).trim() || "General";
-      const subKeyProd = normalizarClaveCategoria(subLabel) || "general";
-      return subKeyProd === subKey;
-    });
-  }
-
-  const tagKey = FILTROS.etiqueta;
-  if (tagKey) {
-    lista = lista.filter(prod => {
-      const etiquetasCrudas =
-        prod.etiquetas ||
-        prod.tags ||
-        prod["Etiquetas"] ||
-        prod["Tags"];
-
-      const listaTags = normalizarEtiquetasCampo(etiquetasCrudas);
-
-      return listaTags.some(t => normalizarClaveCategoria(t) === tagKey);
-    });
-  }
-
-  const totalFiltrados = lista.length;
-  actualizarBadgeFiltros();
-  paginaActual = Math.min(paginaActual, Math.max(1, Math.ceil(totalFiltrados / TAMANIO_PAGINA))) || 1;
-
-  renderPaginacion(lista);
-  const desde = (paginaActual - 1) * TAMANIO_PAGINA;
-  const hasta = desde + TAMANIO_PAGINA;
-  const paginaProductos = lista.slice(desde, hasta);
-
-  renderProductos(paginaProductos);
-}
-
-function actualizarBadgeFiltros() {
-  if (!badgeActivos) return;
-
-  let count = 0;
-
-  if ((FILTROS.texto || "").trim()) count++;
-  if (FILTROS.categoria) count++;
-  if (FILTROS.subcategoria) count++;
-  if (FILTROS.etiqueta) count++;
-
-  if (count > 0) {
-    badgeActivos.style.display = "inline-flex";
-    badgeActivos.textContent = String(count);
-  } else {
-    badgeActivos.style.display = "none";
-  }
-}
-
-// ====== RENDER DE PRODUCTOS ======
-
-function setImagenProducto(imgElement, prod) {
-  if (!imgElement || !prod) return;
-
-  let ruta = safe(prod.imagen || prod.img || prod.foto, "");
-  if (!ruta) {
-    const codigo = safe(
-      prod.codigo || prod.cod || prod.Code || prod.Codigo,
-      ""
-    );
-
-    if (codigo) {
-      ruta = `${BASE_IMG}/productos/${encodeURIComponent(codigo)}.jpg`;
-    } else {
-      ruta = `${BASE_IMG}/otros/no-image.png`;
-    }
-  } else if (!ruta.startsWith("http")) {
-    ruta = `${BASE_IMG}/${ruta.replace(/^\/+/, "")}`;
-  }
-
-  imgElement.src = ruta;
-}
+// ========= RENDER PRODUCTOS =========
 
 function renderProductos(lista) {
   grid.innerHTML = "";
@@ -661,28 +305,8 @@ function renderProductos(lista) {
       ? `Stock: ${stockNum} unidades`
       : (stockBruto ? `Stock: ${stockBruto}` : "");
 
-    const categoriaLabel = safe(
-      prod.categoria ||
-      prod.rubro ||
-      prod.cat ||
-      prod["Categoria Princ"] ||
-      prod["Categoria_Princ"],
-      ""
-    ).toString().trim();
-
-    const subcategoriaLabel = safe(
-      prod.subcategoria ||
-      prod.Subcategoria ||
-      prod.Sub_Categoria ||
-      prod["Sub_Categoria"] ||
-      prod["Subcategoria"],
-      ""
-    ).toString().trim();
-
     const card = document.createElement("article");
     card.classList.add("producto-card");
-    card.dataset.categoria   = (categoriaLabel || "sin-categoria").toLowerCase();
-    card.dataset.subcategoria = (subcategoriaLabel || "sin-subcategoria").toLowerCase();
 
     const itemCarrito = carritoActual.find(p => p.codigo === codigo);
     const textoBoton = itemCarrito
@@ -696,12 +320,6 @@ function renderProductos(lista) {
 
       <div class="producto-info">
         <h3 class="producto-titulo">${titulo}</h3>
-
-        <p class="producto-meta-cat">
-          ${categoriaLabel || "Sin categoría"}
-          ${subcategoriaLabel ? " · " + subcategoriaLabel : ""}
-        </p>
-
         <p class="producto-descripcion">${descLarga}</p>
 
         <div class="producto-precio-row">
@@ -723,51 +341,38 @@ function renderProductos(lista) {
     `;
 
     const img = card.querySelector(".producto-imagen");
-    setImagenProducto(img, prod);
+    setImagenProducto(img, codigo);
 
-    const input = card.querySelector(".input-cantidad");
-    if (input) {
-      input.value = "1";
-      if (stockNum > 0) {
-        input.max = stockNum;
+    const btn = card.querySelector(".btn-agregar-carrito");
+    if (itemCarrito) {
+      btn.classList.add("btn-agregar-carrito-activo");
+    }
+
+    const input        = card.querySelector(".input-cantidad");
+    const stockVisible = card.querySelector(".stock-text");
+    const stockInicial = stockNum || 0;
+
+    function obtenerCantidadSegura() {
+      let cant = parseInt(input.value, 10);
+      if (!Number.isFinite(cant) || cant < 1) cant = 1;
+      if (stockInicial > 0 && cant > stockInicial) cant = stockInicial;
+      return cant;
+    }
+
+    function actualizarStockVisible() {
+      if (!stockVisible || stockInicial <= 0) return;
+
+      const raw = input.value;
+      if (raw === "" || raw == null) {
+        stockVisible.textContent = `Stock: ${stockInicial} unidades`;
+        return;
       }
-    }
 
-    const btnAgregar = card.querySelector(".btn-agregar-carrito");
-    if (btnAgregar) {
-      btnAgregar.addEventListener("click", (ev) => {
-        ev.stopPropagation();
+      let cant = parseInt(raw, 10);
+      if (!Number.isFinite(cant) || cant < 1) cant = 1;
+      if (stockInicial > 0 && cant > stockInicial) cant = stockInicial;
 
-        let cantidad = parseInt(input?.value || "1", 10);
-        if (!Number.isFinite(cantidad) || cantidad < 1) {
-          cantidad = 1;
-        }
-        if (stockNum > 0 && cantidad > stockNum) {
-          cantidad = stockNum;
-        }
-        if (input) input.value = String(cantidad);
-
-        agregarAlCarrito(codigo, cantidad, precioNum, nombreBase);
-
-        btnAgregar.textContent = `En carrito (${(itemCarrito?.cantidad || 0) + cantidad})`;
-        btnAgregar.classList.add("en-carrito");
-
-        const stockVisible = card.querySelector(".producto-stock");
-        if (stockVisible && stockNum > 0) {
-          const carritoTotal = leerCarrito()
-            .filter(x => x.codigo === codigo)
-            .reduce((acc, x) => acc + (x.cantidad || 0), 0);
-
-          let restante = stockNum - carritoTotal;
-          if (restante < 0) restante = 0;
-          stockVisible.textContent = `Stock: ${restante} unidades`;
-        }
-      });
-    }
-
-    const stockVisible = card.querySelector(".producto-stock");
-    if (stockVisible && stockNum > 0 && itemCarrito?.cantidad) {
-      let restante = stockNum - itemCarrito.cantidad;
+      let restante = stockInicial - cant;
       if (restante < 0) restante = 0;
 
       stockVisible.textContent = `Stock: ${restante} unidades`;
@@ -781,9 +386,10 @@ function renderProductos(lista) {
         ev.stopPropagation();
         let v = parseInt(input.value, 10);
         if (!Number.isFinite(v) || v < 1) v = 1;
-        v++;
-        if (stockNum > 0 && v > stockNum) v = stockNum;
+        else v += 1;
+        if (stockInicial > 0 && v > stockInicial) v = stockInicial;
         input.value = String(v);
+        actualizarStockVisible();
       });
     }
 
@@ -791,12 +397,52 @@ function renderProductos(lista) {
       btnMenos.addEventListener("click", (ev) => {
         ev.stopPropagation();
         let v = parseInt(input.value, 10);
-        if (!Number.isFinite(v) || v < 1) v = 1;
-        v--;
-        if (v < 1) v = 1;
+        if (!Number.isFinite(v) || v <= 1) v = 1;
+        else v -= 1;
         input.value = String(v);
+        actualizarStockVisible();
       });
     }
+
+    if (input) {
+      const handleTyping = (ev) => {
+        ev.stopPropagation();
+        ev.target.value = ev.target.value.replace(/\D/g, "");
+        actualizarStockVisible();
+      };
+      ["input", "keyup", "change"].forEach(evt =>
+        input.addEventListener(evt, handleTyping)
+      );
+      input.addEventListener("blur", (ev) => {
+        ev.stopPropagation();
+        const cant = obtenerCantidadSegura();
+        input.value = String(cant);
+        actualizarStockVisible();
+      });
+    }
+
+    if (stockVisible && stockInicial > 0) {
+      stockVisible.textContent = `Stock: ${stockInicial} unidades`;
+    }
+
+    btn.addEventListener("click", ev => {
+      ev.preventDefault();
+      ev.stopPropagation();
+
+      const cant = obtenerCantidadSegura();
+      input.value = String(cant);
+      actualizarStockVisible();
+
+      const productoBasico = {
+        codigo,
+        nombre: nombreBase,
+        precio: precioNum,
+        img: (img && (img.dataset.srcOk || img.src)) || null
+      };
+
+      const stockParaCarrito = stockInicial || 9999;
+      agregarAlCarritoDesdeCatalogo(productoBasico, btn, cant, stockParaCarrito);
+    });
 
     const tituloEl = card.querySelector(".producto-titulo");
     const imgEl    = card.querySelector(".producto-imagen");
@@ -814,65 +460,168 @@ function renderProductos(lista) {
   });
 }
 
-// ====== PAGINACIÓN ======
+// ========= FILTROS (BUSCADOR + CAT + SUBCAT + TAG) =========
 
-function renderPaginacion(listaCompleta) {
-  if (!paginador || !Array.isArray(listaCompleta)) return;
+function aplicarFiltros() {
+  const texto = buscador ? buscador.value.trim().toLowerCase() : "";
+  const cat   = filtroCategoria ? filtroCategoria.value : "";
+  const sub   = filtroSubcategoria ? filtroSubcategoria.value : "";
+  const tag   = etiquetaSeleccionada || "todas";
 
-  paginador.innerHTML = "";
+  const filtrados = TODOS_LOS_PRODUCTOS.filter(prod => {
+    const codigo = safe(
+      prod.codigo || prod.cod || prod.Code || prod.Codigo,
+      ""
+    ).toString().toLowerCase();
 
-  const total = Math.ceil(listaCompleta.length / TAMANIO_PAGINA);
-  if (total <= 1) {
-    paginador.style.display = "none";
+    const nombre = safe(
+      prod.nombre || prod.descripcion || prod.titulo || prod["Nombre Corto"],
+      ""
+    ).toLowerCase();
+
+    const categoria = safe(
+      prod.categoria ||
+      prod.rubro ||
+      prod.cat ||
+      prod["Categoria Princ"] ||
+      prod["Categoria_Princ"],
+      ""
+    ).toLowerCase();
+
+    const subcategoria = safe(
+      prod.subcategoria ||
+      prod.Subcategoria ||
+      prod.Sub_Categoria ||
+      prod["Sub_Categoria"] ||
+      prod["Subcategoria"],
+      ""
+    ).toLowerCase();
+
+    const etiquetasRaw =
+      prod.etiquetas ||
+      prod.tags ||
+      prod.tag ||
+      prod["Etiquetas"] ||
+      prod["etiquetas"];
+
+    const etiquetasNormalizadas = normalizarEtiquetasCampo(etiquetasRaw);
+
+    const pasaTexto =
+      !texto || codigo.includes(texto) || nombre.includes(texto);
+
+    const pasaCategoria =
+      !cat || cat === "todas" || categoria === cat.toLowerCase();
+
+    const pasaSubcategoria =
+      !sub || sub === "todas" || subcategoria === sub.toLowerCase();
+
+    const pasaEtiqueta =
+      !tag || tag === "todas" || etiquetasNormalizadas.includes(tag.toLowerCase());
+
+    return pasaTexto && pasaCategoria && pasaSubcategoria && pasaEtiqueta;
+  });
+
+  renderConPaginador(filtrados);
+}
+
+// ========= PAGINACIÓN PREMIUM =========
+
+function renderConPaginador(listaFiltrada) {
+  ultimoTotalFiltrado = listaFiltrada.length;
+
+  let totalPaginas = Math.max(
+    1,
+    Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
+  );
+
+  if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+  if (paginaActual < 1) paginaActual = 1;
+
+  const inicio = (paginaActual - 1) * ITEMS_POR_PAGINA;
+  const fin    = inicio + ITEMS_POR_PAGINA;
+
+  const paginaLista = listaFiltrada.slice(inicio, fin);
+
+  // Render de tarjetas
+  renderProductos(paginaLista);
+
+  // Resumen
+  if (resumenResultados) {
+    if (ultimoTotalFiltrado === 0) {
+      resumenResultados.textContent = "0 productos encontrados";
+    } else {
+      const desde = inicio + 1;
+      const hasta = inicio + paginaLista.length;
+      resumenResultados.textContent = `Mostrando ${desde}-${hasta} de ${ultimoTotalFiltrado} productos`;
+    }
+  }
+
+  // Configuración visual del contenedor del paginador (sticky + ocultar si 1 sola página)
+  if (contenedorPaginador) {
+    if (totalPaginas <= 1) {
+      contenedorPaginador.style.display = "none";
+    } else {
+      contenedorPaginador.style.display   = "flex";
+      contenedorPaginador.style.position  = "sticky";
+      contenedorPaginador.style.bottom    = "0";
+      contenedorPaginador.style.zIndex    = "40";
+      contenedorPaginador.style.background = "#0f0f1a";
+    }
+  }
+
+  if (!contenedorNumeros) return;
+
+  // Animación suave
+  contenedorNumeros.style.transition = "opacity 0.15s ease, transform 0.15s ease";
+  contenedorNumeros.style.opacity    = "0";
+  contenedorNumeros.style.transform  = "translateY(4px)";
+
+  contenedorNumeros.innerHTML = "";
+
+  // Si no hay más de una página, terminamos acá
+  if (totalPaginas <= 1) {
+    if (btnPaginaAnterior) btnPaginaAnterior.disabled = true;
+    if (btnPaginaSiguiente) btnPaginaSiguiente.disabled = true;
+    requestAnimationFrame(() => {
+      contenedorNumeros.style.opacity   = "1";
+      contenedorNumeros.style.transform = "translateY(0)";
+    });
     return;
   }
 
-  paginador.style.display = "flex";
-
+  // Helper para crear botón numerado
   function crearBotonPagina(num) {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.textContent = String(num);
-    btn.className = "page-btn";
+    btn.className = "paginador-numero";
     if (num === paginaActual) {
-      btn.classList.add("activo");
+      btn.classList.add("paginador-numero--activo");
     }
+    btn.textContent = num;
     btn.addEventListener("click", () => {
       paginaActual = num;
+      guardarFiltrosActuales();
       aplicarFiltros();
     });
-    paginador.appendChild(btn);
+    contenedorNumeros.appendChild(btn);
   }
 
-  function crearBotonFlecha(label, delta) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.textContent = label;
-    btn.className = "page-btn flecha";
-    btn.addEventListener("click", () => {
-      paginaActual = Math.min(Math.max(1, paginaActual + delta), total);
-      aplicarFiltros();
-    });
-    paginador.appendChild(btn);
-  }
+  const rango = 3;
+  const total = totalPaginas;
 
-  if (paginaActual > total) {
-    paginaActual = total;
-  }
-
-  crearBotonFlecha("«", -1);
-
-  const rango = 2;
-
+  // 1) Primera página
   crearBotonPagina(1);
 
+  // 2) "..." inicial
   if (paginaActual - rango > 2) {
     const dots = document.createElement("span");
-    dots.className = "page-dots";
-    dots.textContent = "...";
-    paginador.appendChild(dots);
+    dots.textContent = "…";
+    dots.style.opacity = "0.5";
+    dots.style.padding = "0 6px";
+    contenedorNumeros.appendChild(dots);
   }
 
+  // 3) Páginas intermedias alrededor de la actual
   for (
     let i = Math.max(2, paginaActual - rango);
     i <= Math.min(total - 1, paginaActual + rango);
@@ -881,142 +630,579 @@ function renderPaginacion(listaCompleta) {
     crearBotonPagina(i);
   }
 
+  // 4) "..." final
   if (paginaActual + rango < total - 1) {
     const dots2 = document.createElement("span");
-    dots2.className = "page-dots";
-    dots2.textContent = "...";
-    paginador.appendChild(dots2);
+    dots2.textContent = "…";
+    dots2.style.opacity = "0.5";
+    dots2.style.padding = "0 6px";
+    contenedorNumeros.appendChild(dots2);
   }
 
-  if (total > 1) {
-    crearBotonPagina(total);
+  // 5) Última página
+  if (total > 1) crearBotonPagina(total);
+
+  // Prev / Next
+  if (btnPaginaAnterior) {
+    btnPaginaAnterior.disabled = paginaActual <= 1;
+  }
+  if (btnPaginaSiguiente) {
+    btnPaginaSiguiente.disabled = paginaActual >= totalPaginas;
   }
 
-  crearBotonFlecha("»", +1);
-
-  if (paginaActualEl) {
-    paginaActualEl.textContent = `Página ${paginaActual} de ${total}`;
-  }
+  // Terminar animación
+  requestAnimationFrame(() => {
+    contenedorNumeros.style.opacity   = "1";
+    contenedorNumeros.style.transform = "translateY(0)";
+  });
 }
 
-// ====== CARGA DE PRODUCTOS ======
+// ========= ICONOS PARA CATEGORÍAS =========
+
+function iconoParaCategoria(catLabel) {
+  if (!catLabel) return "•";
+
+  const txt = catLabel.toLowerCase().trim();
+
+  const mapa = {
+    "todas las categorías": "★",
+
+    "accesorios vehiculares": "🚗",
+    "baño y cocina": "🍽️",
+    "bano y cocina": "🍽️",
+    "camping": "⛺",
+    "cocina": "🍳",
+    "cuidado personal": "🧴",
+    "decoración": "🕯️",
+    "decoracion": "🕯️",
+
+    "bazar": "🛍️",
+    "hogar": "🏡",
+    "librería": "📚",
+    "libreria": "📚",
+    "oficina": "📎",
+    "electrónica": "🔌",
+    "electronica": "🔌",
+    "audio": "🎧",
+    "ferretería": "🛠",
+    "ferreteria": "🛠",
+    "herramientas": "🛠",
+    "juguetes": "🧸",
+    "regalería": "🎁",
+    "regaleria": "🎁",
+    "mochilas": "🎒",
+    "bolsos": "👜"
+  };
+
+  if (mapa[txt]) return mapa[txt];
+
+  if (txt.includes("vehicul")) return "🚗";
+  if (txt.includes("auto") || txt.includes("motor")) return "🚙";
+  if (txt.includes("baño") || txt.includes("bano") || txt.includes("cocina")) return "🍽️";
+  if (txt.includes("hogar")) return "🏡";
+  if (txt.includes("camping")) return "⛺";
+  if (txt.includes("cuidado")) return "🧴";
+  if (txt.includes("decor")) return "🕯️";
+  if (txt.includes("juguet") || txt.includes("regal")) return "🧸";
+  if (txt.includes("librer") || txt.includes("oficina")) return "📚";
+  if (txt.includes("electr")) return "🔌";
+  if (txt.includes("herramient") || txt.includes("ferreter")) return "🛠";
+  if (txt.includes("bolso") || txt.includes("mochila")) return "🎒";
+  if (txt.includes("bazar")) return "🛍️";
+
+  return "•";
+}
+
+// ========= MEGA MENÚ: CATEGORÍAS / SUBCATEGORÍAS / ETIQUETAS =========
+
+function cerrarMegaMenu() {
+  if (megaDropdown) megaDropdown.classList.remove("open");
+}
+
+function abrirMegaMenu() {
+  if (megaDropdown) megaDropdown.classList.add("open");
+}
+
+function actualizarTextoToggle() {
+  let partes = [];
+
+  if (labelCategoriaActual) {
+    if (labelCategoriaActual !== "Todas las categorías") {
+      partes.push(labelCategoriaActual);
+    }
+  }
+
+  if (labelSubcategoriaActual && labelSubcategoriaActual !== "Todas") {
+    partes.push(labelSubcategoriaActual);
+  }
+
+  if (labelEtiquetaActual && labelEtiquetaActual !== "Todas") {
+    partes.push(labelEtiquetaActual);
+  }
+
+  let texto;
+  if (partes.length === 0) {
+    texto = "Todas las categorías";
+  } else {
+    texto = partes.join(" › ");
+  }
+
+  megaToggle.innerHTML = `
+    <span class="mega-label">${texto}</span>
+    <span class="mega-arrow">▾</span>
+  `;
+}
+
+function seleccionarCategoria(catKey) {
+  categoriaSeleccionada    = catKey || "todas";
+  subcategoriaSeleccionada = "todas";
+  etiquetaSeleccionada     = "todas";
+  paginaActual             = 1;
+
+  if (filtroCategoria)    filtroCategoria.value    = categoriaSeleccionada;
+  if (filtroSubcategoria) filtroSubcategoria.value = "todas";
+
+  if (megaCatList) {
+    megaCatList.querySelectorAll(".mega-item").forEach(li => {
+      li.classList.toggle("mega-item-activo", li.dataset.catKey === categoriaSeleccionada);
+    });
+  }
+
+  labelCategoriaActual   = categoriaSeleccionada === "todas"
+    ? "Todas las categorías"
+    : (MAPA_CAT_LABEL[categoriaSeleccionada] || "Categoría");
+  labelSubcategoriaActual = null;
+  labelEtiquetaActual     = null;
+
+  construirMenuSubcategorias(categoriaSeleccionada, labelCategoriaActual);
+  construirMenuEtiquetas(categoriaSeleccionada, "todas", labelCategoriaActual, null);
+
+  actualizarTextoToggle();
+  aplicarFiltros();
+  guardarFiltrosActuales();
+}
+
+function seleccionarSubcategoria(catKey, subKey, subLabel) {
+  subcategoriaSeleccionada = subKey || "todas";
+  etiquetaSeleccionada     = "todas";
+  paginaActual             = 1;
+
+  if (filtroSubcategoria) filtroSubcategoria.value = subcategoriaSeleccionada;
+
+  if (megaSubList) {
+    megaSubList.querySelectorAll(".mega-subitem").forEach(li => {
+      li.classList.toggle("mega-subitem-activo", li.dataset.subKey === subcategoriaSeleccionada);
+    });
+  }
+
+  labelSubcategoriaActual = subKey === "todas" ? null : (subLabel || subKey);
+  labelEtiquetaActual     = null;
+
+  construirMenuEtiquetas(catKey, subKey, labelCategoriaActual, labelSubcategoriaActual);
+  actualizarTextoToggle();
+  aplicarFiltros();
+  guardarFiltrosActuales();
+}
+
+function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
+  etiquetaSeleccionada = tagKey || "todas";
+  paginaActual         = 1;
+
+  if (megaTagList) {
+    megaTagList.querySelectorAll(".mega-tagitem").forEach(li => {
+      li.classList.toggle("mega-tagitem-activo", li.dataset.tagKey === etiquetaSeleccionada);
+    });
+  }
+
+  labelEtiquetaActual = tagKey === "todas" ? null : (tagLabel || tagKey);
+
+  actualizarTextoToggle();
+  aplicarFiltros();
+  guardarFiltrosActuales();
+  cerrarMegaMenu();
+}
+
+// Botón Premium: limpiar filtros
+function resetearFiltrosMega() {
+  if (buscador) buscador.value = "";
+  paginaActual = 1;
+  seleccionarCategoria("todas");
+  cerrarMegaMenu();
+}
+
+function construirMenuEtiquetas(catKey, subKey, catLabel, subLabel) {
+  if (!megaTagList) return;
+
+  megaTagList.innerHTML = "";
+
+  const ck = (catKey || "todas").toLowerCase();
+  const sk = (subKey || "todas").toLowerCase();
+
+  let setTags = null;
+
+  if (ck === "todas") {
+    setTags = null;
+  } else if (MAPA_TAGS[ck]) {
+    if (MAPA_TAGS[ck][sk]) {
+      setTags = MAPA_TAGS[ck][sk];
+    } else {
+      const temp = new Set();
+      Object.values(MAPA_TAGS[ck]).forEach(s => {
+        s.forEach(t => temp.add(t));
+      });
+      setTags = temp;
+    }
+  }
+
+  if (megaTagTitle) {
+    if (!subLabel || sk === "todas") {
+      megaTagTitle.textContent = "Etiquetas";
+    } else {
+      megaTagTitle.textContent = `Etiquetas de ${subLabel}`;
+    }
+  }
+
+  const liTodas = document.createElement("li");
+  liTodas.className = "mega-tagitem mega-tagitem-activo";
+  liTodas.textContent = "Todas";
+  liTodas.dataset.tagKey = "todas";
+  liTodas.addEventListener("click", () =>
+    seleccionarEtiqueta(ck, sk, "todas", "Todas")
+  );
+  megaTagList.appendChild(liTodas);
+
+  if (!setTags || setTags.size === 0) {
+    return;
+  }
+
+  Array.from(setTags)
+    .sort((a, b) => a.localeCompare(b, "es"))
+    .forEach(tagLabel => {
+      const tagKey = tagLabel.toLowerCase();
+      const li = document.createElement("li");
+      li.className = "mega-tagitem";
+      li.textContent = tagLabel;
+      li.dataset.tagKey = tagKey;
+      li.addEventListener("click", () =>
+        seleccionarEtiqueta(ck, sk, tagKey, tagLabel)
+      );
+      megaTagList.appendChild(li);
+    });
+}
+
+function construirMenuSubcategorias(catKey, catLabel) {
+  if (!megaSubList) return;
+
+  megaSubList.innerHTML = "";
+
+  const key = (catKey || "todas").toLowerCase();
+  const subSet = MAPA_CAT_SUB[key];
+
+  if (!subSet || subSet.size === 0 || key === "todas") {
+    if (megaSubTitle) megaSubTitle.textContent = "Subcategorías";
+
+    const li = document.createElement("li");
+    li.className = "mega-subitem mega-subitem-activo";
+    li.textContent = "Todas";
+    li.dataset.subKey = "todas";
+    li.addEventListener("click", () => {
+      seleccionarSubcategoria("todas", "todas", "Todas");
+    });
+    megaSubList.appendChild(li);
+    return;
+  }
+
+  if (megaSubTitle) megaSubTitle.textContent = catLabel || "Subcategorías";
+
+  const liTodas = document.createElement("li");
+  liTodas.className = "mega-subitem mega-subitem-activo";
+  liTodas.textContent = "Todas";
+  liTodas.dataset.subKey = "todas";
+  liTodas.addEventListener("click", () => {
+    seleccionarSubcategoria(catKey, "todas", "Todas");
+  });
+  megaSubList.appendChild(liTodas);
+
+  Array.from(subSet)
+    .sort((a, b) => a.localeCompare(b, "es"))
+    .forEach(sub => {
+      const subKey = sub.toLowerCase();
+      const li = document.createElement("li");
+      li.className = "mega-subitem";
+      li.textContent = sub;
+      li.dataset.subKey = subKey;
+      li.addEventListener("click", () => {
+        seleccionarSubcategoria(catKey, subKey, sub);
+      });
+      megaSubList.appendChild(li);
+    });
+}
+
+function construirMenuCategorias(categoriasUnicas) {
+  if (!megaCatList) return;
+
+  megaCatList.innerHTML = "";
+
+  const liTodas = document.createElement("li");
+  liTodas.className = "mega-item mega-item-activo";
+  liTodas.textContent = "Todas las categorías";
+  liTodas.dataset.catKey = "todas";
+  liTodas.dataset.icon   = "★";
+  liTodas.addEventListener("click", () => seleccionarCategoria("todas"));
+  megaCatList.appendChild(liTodas);
+
+  categoriasUnicas.forEach(cat => {
+    const key = cat.toLowerCase();
+    MAPA_CAT_LABEL[key] = cat;
+
+    const li = document.createElement("li");
+    li.className = "mega-item";
+    li.textContent = cat;
+    li.dataset.catKey = key;
+    li.dataset.icon   = iconoParaCategoria(cat);
+    li.addEventListener("click", () => seleccionarCategoria(key));
+    megaCatList.appendChild(li);
+  });
+}
+
+// ========= CARGA INICIAL =========
+
 async function cargarProductos() {
   try {
-    let data = null;
+    const resp = await fetch("data/productos.json");
+    if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
-    // 1) Si vienen productos embebidos (no lo estás usando ahora, pero lo dejamos)
-    if (window.PRODUCTOS_EMBEBIDOS && Array.isArray(window.PRODUCTOS_EMBEBIDOS)) {
-      data = window.PRODUCTOS_EMBEBIDOS;
-    } else {
-      // 2) Ruta normal desde catalogo.html → /data/productos.json
-      const resp = await fetch("data/productos.json", { cache: "no-store" });
-      if (!resp.ok) {
-        throw new Error("No se pudo cargar data/productos.json");
+    const data = await resp.json();
+    TODOS_LOS_PRODUCTOS = Array.isArray(data)
+      ? data
+      : (data.productos || []);
+
+    MAPA_CAT_SUB   = {};
+    MAPA_CAT_LABEL = {};
+    MAPA_TAGS      = {};
+
+    TODOS_LOS_PRODUCTOS.forEach(p => {
+      const catOriginal = safe(
+        p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
+        ""
+      ).toString().trim();
+
+      const subOriginal = safe(
+        p.subcategoria ||
+        p.Subcategoria ||
+        p.Sub_Categoria ||
+        p["Sub_Categoria"] ||
+        p["Subcategoria"],
+        ""
+      ).toString().trim();
+
+      const catKey = (catOriginal.toLowerCase() || "sin-categoria");
+      const subKey = (subOriginal.toLowerCase() || "sin-subcategoria");
+
+      if (!MAPA_CAT_SUB[catKey]) {
+        MAPA_CAT_SUB[catKey] = new Set();
       }
-      data = await resp.json();
-      console.log("Productos cargados desde data/productos.json");
+      if (subOriginal) {
+        MAPA_CAT_SUB[catKey].add(subOriginal);
+      }
+
+      const etiquetasRaw =
+        p.etiquetas ||
+        p.tags ||
+        p.tag ||
+        p["Etiquetas"] ||
+        p["etiquetas"];
+
+      const etiquetasNorm = normalizarEtiquetasCampo(etiquetasRaw);
+      if (etiquetasNorm.length) {
+        if (!MAPA_TAGS[catKey]) MAPA_TAGS[catKey] = {};
+        if (!MAPA_TAGS[catKey][subKey]) MAPA_TAGS[catKey][subKey] = new Set();
+        etiquetasNorm.forEach(t => MAPA_TAGS[catKey][subKey].add(
+          t.charAt(0).toUpperCase() + t.slice(1)
+        ));
+      }
+    });
+
+    if (filtroCategoria) {
+      const categoriasUnicas = Array.from(
+        new Set(
+          TODOS_LOS_PRODUCTOS.map(p =>
+            safe(
+              p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
+              ""
+            ).toString()
+          ).filter(c => c !== "")
+        )
+      ).sort((a, b) => a.localeCompare(b, "es"));
+
+      filtroCategoria.innerHTML = "";
+      const optTodas = document.createElement("option");
+      optTodas.value = "todas";
+      optTodas.textContent = "Todas las categorías";
+      filtroCategoria.appendChild(optTodas);
+
+      categoriasUnicas.forEach(cat => {
+        const op = document.createElement("option");
+        op.value = cat.toLowerCase();
+        op.textContent = cat;
+        filtroCategoria.appendChild(op);
+      });
+
+      construirMenuCategorias(categoriasUnicas);
     }
 
-    // 3) Aseguramos que sea un ARRAY
-    if (!Array.isArray(data)) {
-      console.error("El JSON de productos no es un array.");
-      return;
+    if (filtroSubcategoria) {
+      filtroSubcategoria.innerHTML = "";
+      const optTodasSub = document.createElement("option");
+      optTodasSub.value = "todas";
+      optTodasSub.textContent = "Todas las subcategorías";
+      filtroSubcategoria.appendChild(optTodasSub);
+      filtroSubcategoria.value = "todas";
     }
 
-    TODOS_LOS_PRODUCTOS = data;
-
-    // 4) Construimos categorías / subcategorías / etiquetas
-    construirMapaCatSub(TODOS_LOS_PRODUCTOS);
-    cargarFiltrosGuardados();
-
-    // 5) Render inicial
-    renderizarMegaMenu();
     aplicarFiltros();
+    actualizarMiniCarrito();
   } catch (err) {
-    console.error("Error cargando productos:", err);
-    if (grid) {
-      grid.innerHTML = `<p>Error al cargar productos. Intenta más tarde.</p>`;
-    }
+    console.error(err);
+    grid.innerHTML = `<p>Error cargando productos: ${err.message}</p>`;
   }
 }
-// ====== EVENTOS BUSCADOR Y TOGGLE ======
+
+// ========= EVENTOS =========
 
 if (buscador) {
   buscador.addEventListener("input", () => {
-    FILTROS.texto = buscador.value;
     paginaActual = 1;
     aplicarFiltros();
-    guardarFiltros();
+    guardarFiltrosActuales();
+  });
+}
+
+if (btnPaginaAnterior) {
+  btnPaginaAnterior.addEventListener("click", () => {
+    const totalPaginas = Math.max(
+      1,
+      Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
+    );
+    if (paginaActual > 1) {
+      paginaActual--;
+      if (paginaActual < 1) paginaActual = 1;
+      guardarFiltrosActuales();
+      aplicarFiltros();
+    }
+  });
+}
+
+if (btnPaginaSiguiente) {
+  btnPaginaSiguiente.addEventListener("click", () => {
+    const totalPaginas = Math.max(
+      1,
+      Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
+    );
+    if (paginaActual < totalPaginas) {
+      paginaActual++;
+      if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+      guardarFiltrosActuales();
+      aplicarFiltros();
+    }
   });
 }
 
 if (megaToggle && megaDropdown) {
-  megaToggle.addEventListener("click", (ev) => {
-    ev.stopPropagation();
-    megaDropdown.classList.toggle("abierto");
+  megaToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (megaDropdown.classList.contains("open")) {
+      cerrarMegaMenu();
+    } else {
+      abrirMegaMenu();
+    }
   });
 
-  document.addEventListener("click", (ev) => {
-    if (!megaDropdown.contains(ev.target) && !megaToggle.contains(ev.target)) {
-      megaDropdown.classList.remove("abierto");
+  document.addEventListener("click", (e) => {
+    if (!megaDropdown.contains(e.target)) {
+      cerrarMegaMenu();
     }
   });
 }
 
-if (megaClose) {
-  megaClose.addEventListener("click", () => {
-    megaDropdown.classList.remove("abierto");
+// Botón reset filtros
+if (megaResetBtn) {
+  megaResetBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    resetearFiltrosMega();
   });
 }
 
-if (megaLimpiarBtn) {
-  megaLimpiarBtn.addEventListener("click", () => {
-    limpiarFiltrosMega();
-  });
-}
+// ========= INICIO: CARGA + RESTAURAR FILTROS =========
 
-window.addEventListener("DOMContentLoaded", () => {
-  cargarProductos();
+document.addEventListener("DOMContentLoaded", async () => {
+  await cargarProductos();
+  actualizarMiniCarrito();
 
-  if (FILTROS.texto && buscador) {
-    buscador.value = FILTROS.texto;
-  }
+  const guardados = leerFiltrosGuardados();
+  if (guardados) {
+    const {
+      categoria,
+      subcategoria,
+      etiqueta,
+      pagina,
+      busqueda
+    } = guardados;
 
-  if (FILTROS.categoria) {
-    const catKey = FILTROS.categoria;
-    const subKey = FILTROS.subcategoria;
-    const tagKey = FILTROS.etiqueta;
+    const catKey = categoria || "todas";
+    const subKey = subcategoria || "todas";
+    const tagKey = etiqueta || "todas";
 
-    if (MAPA_CAT_SUB[catKey]) {
-      if (subKey && MAPA_CAT_SUB[catKey].subcategorias[subKey]) {
-        if (tagKey) {
-          const subObj = MAPA_CAT_SUB[catKey].subcategorias[subKey];
-          let tagLabel = null;
-          subObj.tags.forEach(t => {
-            if (!tagLabel) {
-              if (normalizarClaveCategoria(t) === tagKey) {
-                tagLabel = t;
-              }
-            }
-          });
-          if (tagLabel) {
-            seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel);
+    if (typeof pagina === "number" && pagina > 0) {
+      paginaActual = pagina;
+    }
+
+    if (busqueda && buscador) {
+      buscador.value = busqueda;
+    }
+
+    if (catKey && catKey !== "todas") {
+      seleccionarCategoria(catKey);
+    }
+
+    if (subKey && subKey !== "todas") {
+      let subLabel = null;
+      const setSubs = MAPA_CAT_SUB[catKey];
+      if (setSubs) {
+        for (const s of setSubs) {
+          if (s.toLowerCase() === subKey) {
+            subLabel = s;
+            break;
           }
-        } else {
-          seleccionarSubcategoria(catKey, subKey);
         }
-      } else {
-        seleccionarCategoria(catKey);
       }
+      seleccionarSubcategoria(catKey, subKey, subLabel || subKey);
     }
-  }
 
-  if (!FILTROS.categoria && !FILTROS.subcategoria && !FILTROS.etiqueta) {
+    if (tagKey && tagKey !== "todas") {
+      let tagLabel = null;
+      const tagsPorCat = MAPA_TAGS[catKey];
+      if (tagsPorCat) {
+        let setTags = tagsPorCat[subKey];
+        if (!setTags) {
+          const tmp = new Set();
+          Object.values(tagsPorCat).forEach(st => st.forEach(t => tmp.add(t)));
+          setTags = tmp;
+        }
+        if (setTags) {
+          for (const t of setTags) {
+            if (t.toLowerCase() === tagKey) {
+              tagLabel = t;
+              break;
+            }
+          }
+        }
+      }
+      seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel || tagKey);
+    }
+
     actualizarTextoToggle();
     aplicarFiltros();
   }
-
-  if (filtroCategoria) filtroCategoria.value = FILTROS.categoria || "";
-  if (filtroSubcategoria) filtroSubcategoria.value = FILTROS.subcategoria || "";
-  if (filtroEtiqueta) filtroEtiqueta.value = FILTROS.etiqueta || "";
 });
