@@ -31,6 +31,12 @@
       font-size: 1.2rem;
     }
 
+    .header-nav {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
     .header-nav-btn {
       border: none;
       border-radius: 999px;
@@ -43,6 +49,10 @@
 
     .header-nav-btn:hover {
       background: rgba(0,0,0,0.25);
+    }
+
+    .header-nav-btn.active {
+      background: rgba(0,0,0,0.4);
     }
 
     .btn-logout {
@@ -236,6 +246,11 @@
       color: #fff;
     }
 
+    .btn-mini.historial {
+      background: #4c6fff;
+      color: #fff;
+    }
+
     .msg {
       margin-top: 6px;
       font-size: 0.78rem;
@@ -250,11 +265,19 @@
   <header>
     <div class="header-left">
       <span class="header-title">Panel de clientes</span>
-      <button class="header-nav-btn" onclick="window.location.href='admin.html'">
-        ← Volver a productos
-      </button>
     </div>
-    <button id="logoutBtn" class="btn-logout">Cerrar sesión</button>
+    <div class="header-nav">
+      <button class="header-nav-btn" onclick="window.location.href='admin.html'">
+        Productos
+      </button>
+      <button class="header-nav-btn active" onclick="window.location.href='clientes.html'">
+        Clientes
+      </button>
+      <button class="header-nav-btn" onclick="window.location.href='ventas.html'">
+        Ventas
+      </button>
+      <button id="logoutBtn" class="btn-logout">Cerrar sesión</button>
+    </div>
   </header>
 
   <main>
@@ -330,7 +353,7 @@
     </div>
   </main>
 
-    <script type="module" src="js/firebase-init.js"></script>
-    <script type="module" src="js/clientes.js"></script>
+  <!-- Solo un módulo: dentro de clientes.js se importa firebase-init.js -->
+  <script type="module" src="js/clientes.js"></script>
 </body>
 </html>
