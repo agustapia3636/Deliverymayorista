@@ -88,15 +88,9 @@ function renderClientes(lista) {
       <td>${c.nombre || ""}</td>
       <td>${contacto || "-"}</td>
       <td>${c.direccion || "-"}</td>
+      <td>${c.notas ? `<span class="badge">${c.notas}</span>` : "-"}</td>
       <td>
-        ${c.notas ? `<span class="badge">${c.notas}</span>` : "-"}
-      </td>
-      <td>
-        <button
-          class="btn-mini historial"
-          data-id="${c.id}"
-          data-nombre="${c.nombre || ""}"
-        >
+        <button class="btn-mini historial" data-id="${c.id}" data-nombre="${c.nombre || ""}">
           Historial
         </button>
         <button class="btn-mini editar" data-id="${c.id}">
@@ -190,6 +184,7 @@ function resetForm() {
 // BOTONES (EDITAR / ELIMINAR / HISTORIAL)
 // ----------------------
 function activarBotonesFila() {
+
   // EDITAR
   document.querySelectorAll(".btn-mini.editar").forEach(btn => {
     btn.addEventListener("click", (e) => {
@@ -232,9 +227,10 @@ function activarBotonesFila() {
       const id = e.target.dataset.id;
       const nombre = e.target.dataset.nombre || "";
 
-      // Redirige a historial.html con los parámetros correctos
-      const url = `historial.html?clienteId=${encodeURIComponent(id)}&clienteNombre=${encodeURIComponent(nombre)}`;
+      // URL CORRECTA QUE ESPERA historial.js
+      const url = `historial.html?clienteId=${encodeURIComponent(id)}&nombre=${encodeURIComponent(nombre)}`;
       window.location.href = url;
     });
   });
 }
+
