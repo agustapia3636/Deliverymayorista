@@ -110,7 +110,8 @@
       color: #d6d6f4;
     }
 
-    input, textarea {
+    input,
+    textarea {
       width: 100%;
       padding: 8px 10px;
       border-radius: 10px;
@@ -121,7 +122,8 @@
       font-size: 0.9rem;
     }
 
-    input:focus, textarea:focus {
+    input:focus,
+    textarea:focus {
       border-color: #ff7a3c;
       box-shadow: 0 0 0 1px rgba(255,122,60,0.25);
     }
@@ -203,7 +205,8 @@
       background: #181828;
     }
 
-    th, td {
+    th,
+    td {
       padding: 8px 10px;
       border-bottom: 1px solid #26263a;
       text-align: left;
@@ -275,6 +278,9 @@
       </button>
       <button class="header-nav-btn" onclick="window.location.href='ventas.html'">
         Ventas
+      </button>
+      <button class="header-nav-btn" onclick="window.location.href='historial.html'">
+        Historial
       </button>
       <button id="logoutBtn" class="btn-logout">Cerrar sesión</button>
     </div>
@@ -353,7 +359,7 @@
     </div>
   </main>
 
-  <!-- Solo un módulo: dentro de clientes.js se importa firebase-init.js -->
+  <!-- Solo un módulo: clientes.js ya importa firebase-init.js -->
   <script type="module" src="js/clientes.js"></script>
 </body>
 </html>
