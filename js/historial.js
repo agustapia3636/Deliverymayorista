@@ -15,16 +15,30 @@ import {
 // ----------------------
 // DOM
 // ----------------------
-const tituloCliente = document.getElementById("tituloCliente");
+const tituloCliente = document.getElementById("tituloCliente"); // puede ser null
 const tablaHistorial = document.getElementById("tablaHistorial");
 const btnLogout = document.getElementById("logoutBtn");
 
-// Obtener ID del cliente desde la URL
+// ----------------------
+// OBTENER ID CLIENTE DESDE LA URL
+// ----------------------
 const urlParams = new URLSearchParams(window.location.search);
-const clienteId = urlParams.get("cliente");
 
-if (!clienteId) {
-  tablaHistorial.innerHTML = "<tr><td colspan='6'>ID de cliente no válido.</td></tr>";
+// aceptamos ?cliente= o ?clienteId=
+const clienteId =
+  urlParams.get("cliente") ||
+  urlParams.get("clienteId");
+
+const clienteNombreParam = urlParams.get("nombre");
+
+// si hay un título y viene el nombre por la URL, lo ponemos
+if (tituloCliente && clienteNombreParam) {
+  tituloCliente.textContent = `Historial de compras - ${clienteNombreParam}`;
+}
+
+if (!clienteId && tablaHistorial) {
+  tablaHistorial.innerHTML =
+    "<tr><td colspan='6'>ID de cliente no válido.</td></tr>";
 }
 
 // ----------------------
@@ -36,19 +50,26 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  await cargarHistorial();
+  if (clienteId) {
+    await cargarHistorial();
+  }
 });
 
-btnLogout.addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "login.html";
-});
+if (btnLogout) {
+  btnLogout.addEventListener("click", async () => {
+    await signOut(auth);
+    window.location.href = "login.html";
+  });
+}
 
 // ----------------------
 // CARGAR HISTORIAL
 // ----------------------
 async function cargarHistorial() {
-  tablaHistorial.innerHTML = "<tr><td colspan='6'>Cargando...</td></tr>";
+  if (!tablaHistorial) return;
+
+  tablaHistorial.innerHTML =
+    "<tr><td colspan='6'>Cargando...</td></tr>";
 
   try {
     const ref = collection(db, "ventas");
@@ -57,39 +78,64 @@ async function cargarHistorial() {
     const snap = await getDocs(q);
 
     if (snap.empty) {
-      tablaHistorial.innerHTML = "<tr><td colspan='6'>Este cliente no tiene compras registradas.</td></tr>";
+      tablaHistorial.innerHTML =
+        "<tr><td colspan='6'>Este cliente no tiene compras registradas.</td></tr>";
       return;
     }
 
     let rows = "";
-    snap.forEach((doc) => {
-      const v = doc.data();
+    let nombreDetectado = clienteNombreParam || null;
 
-      // Convertir fecha legible
+    snap.forEach((docSnap) => {
+      const v = docSnap.data();
+
+      // -----------------------------------
+      // Fecha legible (Timestamp o string)
+      // -----------------------------------
       let fechaLegible = "-";
       if (v.fecha) {
-        fechaLegible = new Date(v.fecha).toLocaleString();
+        let d = null;
+
+        // Caso Timestamp de Firestore (tiene método toDate)
+        if (typeof v.fecha === "object" && typeof v.fecha.toDate === "function") {
+          d = v.fecha.toDate();
+        }
+        // Caso string o número
+        else if (typeof v.fecha === "string" || typeof v.fecha === "number") {
+          const tmp = new Date(v.fecha);
+          if (!isNaN(tmp.getTime())) d = tmp;
+        }
+
+        if (d) {
+          fechaLegible = d.toLocaleString();
+        }
       }
 
       rows += `
         <tr>
           <td>${fechaLegible}</td>
-          <td>${v.productoCodigo} - ${v.productoNombre}</td>
-          <td>${v.cantidad}</td>
-          <td>$${v.total}</td>
-          <td>${v.estado}</td>
+          <td>${v.productoCodigo || ""} - ${v.productoNombre || ""}</td>
+          <td>${v.cantidad || 0}</td>
+          <td>$${v.total || 0}</td>
+          <td>${v.estado || "-"}</td>
           <td>${v.notas || "-"}</td>
         </tr>
       `;
 
-      // mostrar título
-      tituloCliente.textContent = v.clienteNombre || "Cliente";
+      if (!nombreDetectado && v.clienteNombre) {
+        nombreDetectado = v.clienteNombre;
+      }
     });
 
     tablaHistorial.innerHTML = rows;
 
+    // actualizar título si existe el h1/h2 y encontramos nombre
+    if (tituloCliente && nombreDetectado) {
+      tituloCliente.textContent = `Historial de compras - ${nombreDetectado}`;
+    }
   } catch (e) {
-    console.error("Error historial:", e);
-    tablaHistorial.innerHTML = "<tr><td colspan='6'>Ocurrió un error al cargar el historial.</td></tr>";
+    console.error("Error al cargar historial:", e);
+    tablaHistorial.innerHTML =
+      "<tr><td colspan='6'>Ocurrió un error al cargar el historial.</td></tr>";
   }
 }
