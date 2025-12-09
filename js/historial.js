@@ -1,179 +1,254 @@
 // js/historial.js
 import { auth, db } from "./firebase-init.js";
-
 import {
-    onAuthStateChanged,
-    signOut
+  onAuthStateChanged,
+  signOut,
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-
 import {
-    collection,
-    getDocs,
-    doc,
-    getDoc
+  collection,
+  getDocs
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-const logoutBtn = document.getElementById("logoutBtn");
-const tablaHistorial = document.getElementById("tablaHistorial");
+// --------------------
+// DOM
+// --------------------
+const btnLogout = document.getElementById("logoutBtn");
+
+const tituloCliente = document.getElementById("tituloCliente");
+const subtituloCliente = document.getElementById("subtituloCliente");
+
+const tbody = document.getElementById("tablaHistorial");
 
 // Filtros
-const filtroDesde = document.getElementById("filtroDesde");
-const filtroHasta = document.getElementById("filtroHasta");
-const filtroProducto = document.getElementById("filtroProducto");
-const filtroEstado = document.getElementById("filtroEstado");
+const inputDesde = document.getElementById("filtroDesde");
+const inputHasta = document.getElementById("filtroHasta");
+const inputProducto = document.getElementById("filtroProducto");
+const selectEstado = document.getElementById("filtroEstado");
 
 // Totales
-const totalGastado = document.getElementById("totalGastado");
-const totalFiltrado = document.getElementById("totalFiltrado");
+const lblTotalCliente = document.getElementById("totalCliente");     // total gastado por el cliente
+const lblTotalFiltrado = document.getElementById("totalFiltrado");   // total en resultados filtrados
+const lblResumenConteo = document.getElementById("resumenConteo");   // ej: "2 ventas encontradas"
 
-let ventas = [];
-let ventasFiltradas = [];
-let clienteId = null;
+// --------------------
+// Estado en memoria
+// --------------------
+let ventasCliente = [];      // todas las ventas del cliente
+let ventasFiltradas = [];    // ventas luego de aplicar filtros
 
-// Obtener ID del cliente desde la URL
-const params = new URLSearchParams(window.location.search);
-clienteId = params.get("cliente");
+// --------------------
+// Helper: leer query string
+// --------------------
+function getQueryParams() {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    nombre: params.get("nombre") || "",
+    clienteId: params.get("clienteId") || ""
+  };
+}
 
-// ----------------------
+const { nombre: nombreCliente } = getQueryParams();
+
+// Ajustar textos de cabecera
+if (nombreCliente) {
+  tituloCliente.textContent = `Historial de compras - ${nombreCliente}`;
+  subtituloCliente.textContent = "Seleccioná un cliente desde el panel de Clientes.";
+} else {
+  tituloCliente.textContent = "Historial de compras";
+  subtituloCliente.textContent =
+    "No se encontró un cliente en la URL. Volvé al panel de Clientes y elegí uno.";
+}
+
+// --------------------
 // SESIÓN
-// ----------------------
+// --------------------
 onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        window.location.href = "login.html";
-        return;
-    }
-
-    if (!clienteId) {
-        tablaHistorial.innerHTML = `<tr><td colspan="6">No se seleccionó un cliente.</td></tr>`;
-        return;
-    }
-
-    await cargarCliente();
-    await cargarVentas();
-});
-
-// Logout
-logoutBtn.addEventListener("click", async () => {
-    await signOut(auth);
+  if (!user) {
     window.location.href = "login.html";
+    return;
+  }
+  await cargarHistorial();
 });
 
-// ----------------------
-// CARGAR CLIENTE
-// ----------------------
-async function cargarCliente() {
-    const ref = doc(db, "clientes", clienteId);
-    const snap = await getDoc(ref);
+btnLogout?.addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "login.html";
+});
 
-    if (!snap.exists()) {
-        document.getElementById("tituloCliente").textContent = "Cliente no encontrado";
-        return;
-    }
+// --------------------
+// Cargar ventas de Firestore
+// --------------------
+async function cargarHistorial() {
+  try {
+    // 1) Traemos TODAS las ventas
+    const ventasRef = collection(db, "ventas");
+    const snap = await getDocs(ventasRef);
 
-    const data = snap.data();
-    document.getElementById("tituloCliente").textContent =
-        `Historial de compras - ${data.nombre}`;
-}
+    const todasLasVentas = snap.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    }));
 
-// ----------------------
-// CARGAR VENTAS
-// ----------------------
-async function cargarVentas() {
-    const ref = collection(db, "ventas");
-    const snap = await getDocs(ref);
+    // 2) Nos quedamos solo con las del cliente actual
+    //    Intentamos usar el campo que tengas en la colección:
+    //      - clienteNombre  ó
+    //      - cliente        (ajusta estos nombres si hiciera falta)
+    ventasCliente = todasLasVentas.filter((v) => {
+      const nombreVenta = (v.clienteNombre || v.cliente || "").trim();
+      return nombreVenta === nombreCliente;
+    });
 
-    ventas = snap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
-        .filter(v => v.clienteId === clienteId);
-
-    calcularTotalGeneral();
+    // 3) Aplicamos filtros iniciales (sin nada escrito debería mostrar todo)
     aplicarFiltros();
+
+  } catch (error) {
+    console.error("Error al cargar historial:", error);
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">Ocurrió un error al cargar el historial.</td>
+      </tr>
+    `;
+  }
 }
 
-// ----------------------
-// FILTROS
-// ----------------------
-[filtroDesde, filtroHasta, filtroProducto, filtroEstado].forEach(f => {
-    f.addEventListener("input", aplicarFiltros);
-});
+// --------------------
+// Filtros
+// --------------------
+function parseFechaFiltro(valor) {
+  // dd/mm/aaaa -> Date
+  if (!valor) return null;
+  const [d, m, y] = valor.split("/");
+  if (!d || !m || !y) return null;
+  return new Date(`${y}-${m}-${d}T00:00:00`);
+}
 
 function aplicarFiltros() {
-    ventasFiltradas = ventas.filter(v => {
+  const desdeDate = parseFechaFiltro(inputDesde?.value.trim());
+  const hastaDateRaw = parseFechaFiltro(inputHasta?.value.trim());
+  let hastaDate = hastaDateRaw;
+  if (hastaDateRaw) {
+    // Hacemos que el "hasta" incluya todo el día
+    hastaDate = new Date(hastaDateRaw.getTime());
+    hastaDate.setHours(23, 59, 59, 999);
+  }
 
-        // Filtro por fecha
-        let fecha = new Date(v.fecha);
-        if (filtroDesde.value) {
-            let desde = new Date(filtroDesde.value);
-            if (fecha < desde) return false;
-        }
-        if (filtroHasta.value) {
-            let hasta = new Date(filtroHasta.value);
-            if (fecha > hasta) return false;
-        }
+  const textoProducto = (inputProducto?.value || "").toLowerCase();
+  const estadoSeleccionado = (selectEstado?.value || "todas").toLowerCase();
 
-        // Filtro por producto
-        if (filtroProducto.value.trim() !== "") {
-            const txt = filtroProducto.value.toLowerCase();
-            if (
-                !v.producto.toLowerCase().includes(txt) &&
-                !v.codigo.toLowerCase().includes(txt)
-            ) return false;
-        }
+  ventasFiltradas = ventasCliente.filter((venta) => {
+    let ok = true;
 
-        // Filtro por estado
-        if (filtroEstado.value !== "todas") {
-            if (v.estado !== filtroEstado.value) return false;
-        }
+    // Fecha
+    if (venta.fecha) {
+      const fechaJs = venta.fecha.toDate
+        ? venta.fecha.toDate()
+        : new Date(venta.fecha);
 
-        return true;
-    });
-
-    renderTabla();
-    calcularTotalFiltrado();
-}
-
-// ----------------------
-// RENDER TABLA
-// ----------------------
-function renderTabla() {
-    tablaHistorial.innerHTML = "";
-
-    if (ventasFiltradas.length === 0) {
-        tablaHistorial.innerHTML =
-            `<tr><td colspan="6">No hay ventas registradas para este cliente.</td></tr>`;
-        return;
+      if (desdeDate && fechaJs < desdeDate) ok = false;
+      if (hastaDate && fechaJs > hastaDate) ok = false;
     }
 
-    ventasFiltradas.forEach(v => {
-        const tr = document.createElement("tr");
+    // Producto (código o nombre, según cómo lo guardaste)
+    if (textoProducto) {
+      const codigo = (venta.productoCodigo || venta.codigoProducto || "").toLowerCase();
+      const nombreProd = (venta.productoNombre || venta.nombreProducto || "").toLowerCase();
+      if (!codigo.includes(textoProducto) && !nombreProd.includes(textoProducto)) {
+        ok = false;
+      }
+    }
 
-        const fecha = new Date(v.fecha).toLocaleString("es-AR");
+    // Estado
+    if (estadoSeleccionado !== "todas") {
+      const estadoVenta = (venta.estado || "").toLowerCase();
+      if (estadoVenta !== estadoSeleccionado) ok = false;
+    }
 
-        tr.innerHTML = `
-            <td>${fecha}</td>
-            <td>${v.codigo} - ${v.producto}</td>
-            <td>${v.cantidad}</td>
-            <td>$${v.total}</td>
-            <td>${v.estado}</td>
-            <td>${v.notas || "-"}</td>
-        `;
+    return ok;
+  });
 
-        tablaHistorial.appendChild(tr);
-    });
+  renderTabla(ventasFiltradas);
+  recalcularTotales();
 }
 
-// ----------------------
-// TOTAL GENERAL
-// ----------------------
-function calcularTotalGeneral() {
-    const total = ventas.reduce((sum, v) => sum + v.total, 0);
-    totalGastado.textContent = `$${total}`;
+// --------------------
+// Render tabla
+// --------------------
+function formatearFecha(fecha) {
+  if (!fecha) return "-";
+  const f = fecha.toDate ? fecha.toDate() : new Date(fecha);
+  const dia = String(f.getDate()).padStart(2, "0");
+  const mes = String(f.getMonth() + 1).padStart(2, "0");
+  const anio = f.getFullYear();
+  const hora = String(f.getHours()).padStart(2, "0");
+  const min = String(f.getMinutes()).padStart(2, "0");
+  return `${dia}/${mes}/${anio} ${hora}:${min}`;
 }
 
-// ----------------------
-// TOTAL FILTRADO
-// ----------------------
-function calcularTotalFiltrado() {
-    const total = ventasFiltradas.reduce((sum, v) => sum + v.total, 0);
-    totalFiltrado.textContent = `$${total}`;
+function renderTabla(lista) {
+  tbody.innerHTML = "";
+
+  if (!lista || lista.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6">No hay ventas registradas para este cliente.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  lista.forEach((venta) => {
+    const tr = document.createElement("tr");
+
+    const fechaTexto = formatearFecha(venta.fecha);
+    const nombreProd =
+      venta.productoNombre || venta.nombreProducto || venta.producto || "-";
+    const cantidad = venta.cantidad || venta.cant || 0;
+    const total = venta.total || 0;
+    const estado = venta.estado || "-";
+    const notas = venta.notas || "-";
+
+    tr.innerHTML = `
+      <td>${fechaTexto}</td>
+      <td>${nombreProd}</td>
+      <td>${cantidad}</td>
+      <td>$${total.toLocaleString("es-AR")}</td>
+      <td>${estado}</td>
+      <td>${notas}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
 }
+
+// --------------------
+// Totales
+// --------------------
+function recalcularTotales() {
+  const totalCliente = ventasCliente.reduce(
+    (acc, v) => acc + (v.total || 0),
+    0
+  );
+  const totalFiltrado = ventasFiltradas.reduce(
+    (acc, v) => acc + (v.total || 0),
+    0
+  );
+
+  if (lblTotalCliente) {
+    lblTotalCliente.textContent = `$${totalCliente.toLocaleString("es-AR")}`;
+  }
+  if (lblTotalFiltrado) {
+    lblTotalFiltrado.textContent = `$${totalFiltrado.toLocaleString("es-AR")}`;
+  }
+  if (lblResumenConteo) {
+    lblResumenConteo.textContent = `${ventasFiltradas.length} venta(s) en el resultado.`;
+  }
+}
+
+// --------------------
+// Listeners de filtros
+// --------------------
+[inputDesde, inputHasta, inputProducto, selectEstado].forEach((el) => {
+  if (!el) return;
+  el.addEventListener("input", aplicarFiltros);
+  el.addEventListener("change", aplicarFiltros);
+});
