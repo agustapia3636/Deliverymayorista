@@ -1,161 +1,365 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Historial de compras - Delivery Mayorista</title>
-    <link rel="stylesheet" href="css/estilos.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Historial de compras - Delivery Mayorista</title>
+  <link rel="stylesheet" href="css/estilos.css" />
 
-    <style>
-        table th, table td {
-            padding: 10px 14px;
-            text-align: left;
-        }
+  <style>
+    body {
+      background: #050510;
+      color: #fff;
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
+    header {
+      background: linear-gradient(90deg, #ff005d, #ffa400);
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+    }
 
-        .filtros {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 15px 0 10px;
-        }
+    .titulo {
+      font-size: 1.2rem;
+    }
 
-        .filtros .filtro-item {
-            display: flex;
-            flex-direction: column;
-            font-size: 0.85rem;
-        }
+    .nav-panel {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
-        .filtros .filtro-item label {
-            margin-bottom: 3px;
-            opacity: 0.8;
-        }
+    .btn-secundario {
+      background: rgba(0, 0, 0, 0.25);
+      border: none;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      color: #fff;
+      cursor: pointer;
+    }
 
-        .filtros input,
-        .filtros select {
-            padding: 6px 8px;
-            border-radius: 6px;
-            border: none;
-            background: #141422;
-            color: #fff;
-        }
+    .btn-secundario:hover {
+      background: rgba(0, 0, 0, 0.4);
+    }
 
-        .resumen-totales {
-            margin: 10px 0 5px;
-            font-size: 0.95rem;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
+    .btn-sesion {
+      background: #ffb24f;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      color: #1b1305;
+      cursor: pointer;
+      font-weight: 600;
+    }
 
-        .resumen-totales span {
-            opacity: 0.9;
-        }
+    main {
+      padding: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
 
-        .resumen-totales .monto {
-            font-weight: 600;
-        }
-    </style>
+    .contenedor {
+      background: #101020;
+      border-radius: 18px;
+      padding: 18px 18px 22px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.5);
+    }
+
+    .acciones {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .acciones h2 {
+      margin: 0;
+      font-size: 1.05rem;
+    }
+
+    .acciones p {
+      margin: 2px 0 0;
+      font-size: 0.8rem;
+      color: #a7a7c7;
+    }
+
+    .filtros {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0 12px;
+    }
+
+    .filtro-item {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.8rem;
+      min-width: 140px;
+    }
+
+    .filtro-item label {
+      margin-bottom: 3px;
+      opacity: 0.8;
+    }
+
+    .filtro-item input,
+    .filtro-item select {
+      padding: 6px 8px;
+      border-radius: 8px;
+      border: 1px solid #2b2b44;
+      background: #151525;
+      color: #fff;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .filtro-item input:focus,
+    .filtro-item select:focus {
+      border-color: #ff7a3c;
+      box-shadow: 0 0 0 1px rgba(255,122,60,0.35);
+    }
+
+    .resumen-totales {
+      margin: 6px 0 10px;
+      font-size: 0.85rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      color: #d0d0ff;
+    }
+
+    .resumen-totales span {
+      opacity: 0.95;
+    }
+
+    .resumen-totales .monto {
+      font-weight: 600;
+    }
+
+    /* GRID TARJETAS */
+    .historial-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .hist-card {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: radial-gradient(circle at top left, #1b1b3a, #0b0b18);
+      border: 1px solid rgba(255,255,255,0.06);
+      box-shadow: 0 14px 30px rgba(0,0,0,0.6);
+      align-items: center;
+    }
+
+    .hist-card-left img {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .hist-card-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 0.83rem;
+    }
+
+    .hist-prod-nombre {
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .hist-prod-codigo {
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+
+    .hist-detalles-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: 0.78rem;
+      opacity: 0.85;
+    }
+
+    .hist-detalles-row span {
+      white-space: nowrap;
+    }
+
+    .hist-notas {
+      font-size: 0.78rem;
+      opacity: 0.75;
+    }
+
+    .hist-card-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 6px;
+      font-size: 0.8rem;
+    }
+
+    .estado-badge {
+      padding: 4px 9px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      text-transform: capitalize;
+      font-weight: 600;
+    }
+
+    .estado-pendiente {
+      background: rgba(255, 193, 7, 0.15);
+      color: #ffd76a;
+      border: 1px solid rgba(255, 193, 7, 0.4);
+    }
+
+    .estado-completado {
+      background: rgba(40, 212, 140, 0.15);
+      color: #8bffc9;
+      border: 1px solid rgba(40, 212, 140, 0.5);
+    }
+
+    .estado-cancelado {
+      background: rgba(255, 90, 90, 0.15);
+      color: #ff9b9b;
+      border: 1px solid rgba(255, 90, 90, 0.5);
+    }
+
+    .total-tag {
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .btn-mini-link {
+      border-radius: 999px;
+      border: 1px solid #3a3a52;
+      background: transparent;
+      color: #d0d0ff;
+      padding: 4px 9px;
+      font-size: 0.75rem;
+      cursor: pointer;
+    }
+
+    .btn-mini-link:hover {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .sin-resultados {
+      font-size: 0.85rem;
+      opacity: 0.8;
+      padding-top: 4px;
+    }
+
+    @media (max-width: 700px) {
+      .hist-card {
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto auto;
+      }
+      .hist-card-right {
+        grid-column: 1 / -1;
+        align-items: flex-start;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <header>
-        <div class="titulo">Historial de compras</div>
+  <header>
+    <div class="titulo">Historial de compras</div>
 
-        <div class="nav-panel">
-            <button class="btn-secundario" onclick="window.location.href='admin.html'">
-                Productos
-            </button>
+    <div class="nav-panel">
+      <button class="btn-secundario" onclick="window.location.href='admin.html'">
+        Productos
+      </button>
 
-            <button class="btn-secundario" onclick="window.location.href='clientes.html'">
-                Clientes
-            </button>
+      <button class="btn-secundario" onclick="window.location.href='clientes.html'">
+        Clientes
+      </button>
 
-            <button class="btn-secundario" onclick="window.location.href='ventas.html'">
-                Ventas
-            </button>
+      <button class="btn-secundario" onclick="window.location.href='ventas.html'">
+        Ventas
+      </button>
 
-            <button id="logoutBtn" class="btn-sesion">
-                Cerrar sesión
-            </button>
+      <button id="logoutBtn" class="btn-sesion">
+        Cerrar sesión
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="contenedor">
+      <div class="acciones">
+        <div>
+          <h2 id="tituloCliente">Historial de compras</h2>
+          <p id="subtituloCliente">Seleccioná un cliente desde el panel de Clientes.</p>
         </div>
-    </header>
 
-    <main>
-        <section class="contenedor">
+        <button
+          class="btn-secundario"
+          onclick="window.location.href='clientes.html'">
+          ← Volver a clientes
+        </button>
+      </div>
 
-            <div class="acciones" style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <h2 id="tituloCliente">Historial de compras</h2>
-                    <p id="subtituloCliente">Seleccioná un cliente desde el panel de Clientes.</p>
-                </div>
+      <!-- FILTROS -->
+      <div class="filtros">
+        <div class="filtro-item">
+          <label for="filtroDesde">Desde</label>
+          <input type="date" id="filtroDesde" />
+        </div>
 
-                <button class="btn-secundario" onclick="window.location.href='clientes.html'">
-                    ← Volver a clientes
-                </button>
-            </div>
+        <div class="filtro-item">
+          <label for="filtroHasta">Hasta</label>
+          <input type="date" id="filtroHasta" />
+        </div>
 
-            <!-- 🔍 FILTROS -->
-            <div class="filtros">
-                <div class="filtro-item">
-                    <label for="filtroDesde">Desde</label>
-                    <input type="date" id="filtroDesde">
-                </div>
+        <div class="filtro-item" style="flex: 1 1 200px;">
+          <label for="filtroProducto">Producto (código o nombre)</label>
+          <input
+            type="text"
+            id="filtroProducto"
+            placeholder="Ej: N0001, parlante, cargador..."
+          />
+        </div>
 
-                <div class="filtro-item">
-                    <label for="filtroHasta">Hasta</label>
-                    <input type="date" id="filtroHasta">
-                </div>
+        <div class="filtro-item">
+          <label for="filtroEstado">Estado</label>
+          <select id="filtroEstado">
+            <option value="todas">Todas</option>
+            <option value="pendiente">Pendiente</option>
+            <option value="completado">Completado</option>
+            <option value="cancelado">Cancelado</option>
+          </select>
+        </div>
+      </div>
 
-                <div class="filtro-item" style="flex: 1 1 200px;">
-                    <label for="filtroProducto">Producto (código o nombre)</label>
-                    <input
-                        type="text"
-                        id="filtroProducto"
-                        placeholder="Ej: N0001, llavero, estéreo..."
-                    >
-                </div>
+      <!-- RESUMEN TOTALES -->
+      <div id="resumenTotales" class="resumen-totales">
+        <!-- Se completa desde JS -->
+      </div>
 
-                <div class="filtro-item">
-                    <label for="filtroEstado">Estado</label>
-                    <select id="filtroEstado">
-                        <option value="todas">Todas</option>
-                        <option value="pendiente">Pendiente</option>
-                        <option value="completado">Completado</option>
-                        <option value="cancelado">Cancelado</option>
-                    </select>
-                </div>
-            </div>
+      <!-- TARJETAS DEL HISTORIAL -->
+      <div id="listaHistorial" class="historial-grid">
+        <!-- Tarjetas dinámicas -->
+      </div>
+    </section>
+  </main>
 
-            <!-- 💰 RESUMEN DE TOTALES -->
-            <div id="resumenTotales" class="resumen-totales">
-                <!-- Se completa desde JS -->
-            </div>
-
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Producto</th>
-                        <th>Cantidad</th>
-                        <th>Total</th>
-                        <th>Estado</th>
-                        <th>Notas</th>
-                    </tr>
-                </thead>
-
-                <tbody id="tablaHistorial">
-                    <!-- Filas dinámicas -->
-                </tbody>
-            </table>
-
-        </section>
-    </main>
-
-    <script type="module" src="js/historial.js"></script>
+  <script type="module" src="js/historial.js"></script>
 </body>
 </html>
