@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Clientes - Panel Delivery Mayorista</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #050510;
+      color: #fff;
+    }
+
+    header {
+      background: linear-gradient(90deg, #ff005d, #ffa400);
+      padding: 14px 22px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 600;
+    }
+
+    .header-left {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .header-title {
+      font-size: 1.2rem;
+    }
+
+    .header-nav-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      background: rgba(0,0,0,0.1);
+      color: #fff;
+    }
+
+    .header-nav-btn:hover {
+      background: rgba(0,0,0,0.25);
+    }
+
+    .btn-logout {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      background: #ffb24f;
+      color: #1b1305;
+      font-weight: 600;
+    }
+
+    main {
+      padding: 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.4fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: #11111f;
+      border-radius: 18px;
+      padding: 18px 18px 20px;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.5);
+    }
+
+    .card h2 {
+      margin: 0 0 6px;
+      font-size: 1.05rem;
+    }
+
+    .card-sub {
+      margin: 0 0 14px;
+      font-size: 0.8rem;
+      color: #a7a7c7;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      margin-top: 10px;
+      margin-bottom: 4px;
+      color: #d6d6f4;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1px solid #2b2b44;
+      background: #151525;
+      color: #fff;
+      outline: none;
+      font-size: 0.9rem;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #ff7a3c;
+      box-shadow: 0 0 0 1px rgba(255,122,60,0.25);
+    }
+
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .btn-primary {
+      margin-top: 14px;
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      background: linear-gradient(90deg,#28d48c,#21bcb4);
+      color: #051312;
+    }
+
+    .btn-secondary {
+      margin-top: 8px;
+      width: 100%;
+      border-radius: 999px;
+      padding: 8px 14px;
+      border: 1px solid #3a3a52;
+      background: transparent;
+      color: #d0d0f0;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    .btn-secondary:hover {
+      background: #1b1b2b;
+    }
+
+    .table-tools {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .search-input {
+      flex: 1;
+      border-radius: 999px;
+      padding: 8px 12px;
+      border: 1px solid #2b2b44;
+      background: #121221;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+
+    .search-input::placeholder {
+      color: #656587;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+
+    thead {
+      background: #181828;
+    }
+
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #26263a;
+      text-align: left;
+    }
+
+    th {
+      font-weight: 600;
+      color: #c5c5e2;
+    }
+
+    tr:hover td {
+      background: #17172a;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      background: #26263c;
+      color: #d8d8ff;
+    }
+
+    .btn-mini {
+      border: none;
+      border-radius: 999px;
+      padding: 5px 9px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      margin-right: 4px;
+    }
+
+    .btn-mini.editar {
+      background: #ffb24f;
+      color: #1b1305;
+    }
+
+    .btn-mini.eliminar {
+      background: #ff5a5a;
+      color: #fff;
+    }
+
+    .msg {
+      margin-top: 6px;
+      font-size: 0.78rem;
+      min-height: 14px;
+    }
+
+    .msg.ok { color: #7dffb4; }
+    .msg.error { color: #ff6b81; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <span class="header-title">Panel de clientes</span>
+      <button class="header-nav-btn" onclick="window.location.href='admin.html'">
+        ← Volver a productos
+      </button>
+    </div>
+    <button id="logoutBtn" class="btn-logout">Cerrar sesión</button>
+  </header>
+
+  <main>
+    <div class="layout">
+      <!-- Formulario -->
+      <section class="card">
+        <h2>Ficha de cliente</h2>
+        <p class="card-sub">Alta y edición rápida de clientes frecuentes.</p>
+
+        <form id="formCliente">
+          <input type="hidden" id="clienteId" />
+
+          <label for="cliNombre">Nombre completo</label>
+          <input id="cliNombre" type="text" required />
+
+          <div class="form-row">
+            <div>
+              <label for="cliTelefono">Teléfono</label>
+              <input id="cliTelefono" type="text" />
+            </div>
+            <div>
+              <label for="cliEmail">Email</label>
+              <input id="cliEmail" type="email" />
+            </div>
+          </div>
+
+          <label for="cliDireccion">Dirección</label>
+          <input id="cliDireccion" type="text" />
+
+          <label for="cliNotas">Notas internas</label>
+          <textarea id="cliNotas" placeholder="Ej: Cliente mayorista, pedir seña, etc."></textarea>
+
+          <button type="submit" class="btn-primary" id="btnGuardarCliente">
+            Guardar cliente
+          </button>
+          <button type="button" class="btn-secondary" id="btnCancelarEdicion" style="display:none;">
+            Cancelar edición
+          </button>
+
+          <div id="msgCliente" class="msg"></div>
+        </form>
+      </section>
+
+      <!-- Tabla -->
+      <section class="card">
+        <h2>Listado de clientes</h2>
+        <p class="card-sub">Buscá por nombre, teléfono o email.</p>
+
+        <div class="table-tools">
+          <input
+            type="text"
+            id="buscarCliente"
+            class="search-input"
+            placeholder="Buscar cliente..."
+          />
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Contacto</th>
+              <th>Dirección</th>
+              <th>Notas</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaClientes">
+            <!-- filas dinámicas -->
+          </tbody>
+        </table>
+      </section>
+    </div>
+  </main>
+
+  <script type="module" src="js/clientes.js"></script>
+</body>
+</html>
