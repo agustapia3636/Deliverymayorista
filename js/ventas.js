@@ -1,6 +1,6 @@
 // js/ventas.js
-// Panel de ventas PRO: listado, filtros, estados y alta rápida de ventas
-// con buscador de producto por nombre o código.
+// Panel de ventas PRO: listado, filtros, estados y alta de ventas
+// con soporte para varios productos por venta (mini carrito en el modal).
 
 import { auth, db } from "./firebase-init.js";
 import {
@@ -42,6 +42,9 @@ const selEstado        = document.getElementById("ventaEstado");
 const txtNotas         = document.getElementById("ventaNotas");
 const btnCancelarVenta = document.getElementById("btnCancelarVenta");
 const btnGuardarVenta  = document.getElementById("btnGuardarVenta");
+const btnAgregarProd   = document.getElementById("btnAgregarProductoVenta");
+const tablaProdBody    = document.getElementById("ventaProductosTabla");
+const labelTotalPrev   = document.getElementById("ventaTotalPreview");
 
 // ---------------------------------------------------------------------------
 // Estado en memoria
@@ -49,7 +52,8 @@ const btnGuardarVenta  = document.getElementById("btnGuardarVenta");
 
 let ventas            = [];   // todas las ventas cargadas
 let clientes          = [];   // clientes para el combo
-let productosCatalogo = [];   // productos para autocomplete (codigo + nombre)
+let productosCatalogo = [];   // productos para autocomplete
+let ventaProductosTmp = [];   // productos de la venta actual {codigo, nombre, precio, cantidad}
 
 // ---------------------------------------------------------------------------
 // Auth y carga inicial
@@ -123,7 +127,7 @@ function crearBadgeEstado(estadoRaw) {
 }
 
 // ---------------------------------------------------------------------------
-// Carga de CLIENTES para el selector
+// Carga de CLIENTES
 // ---------------------------------------------------------------------------
 
 async function cargarClientes() {
@@ -157,7 +161,7 @@ async function cargarClientes() {
 }
 
 // ---------------------------------------------------------------------------
-// Carga de productos para el autocomplete
+// Carga de productos para autocomplete
 // ---------------------------------------------------------------------------
 
 async function cargarProductosCatalogo() {
@@ -254,12 +258,10 @@ function aplicarFiltros() {
   const estadoFiltro = (filtroEstado?.value || "").toLowerCase();
 
   const filtradas = ventas.filter((v) => {
-    // estado
     if (estadoFiltro && v.estado.toLowerCase() !== estadoFiltro) {
       return false;
     }
 
-    // texto
     if (texto) {
       const cliente = (v.clienteNombre || v.clienteId || "").toLowerCase();
       const estado  = (v.estado || "").toLowerCase();
@@ -410,7 +412,7 @@ async function eliminarVenta(v) {
 }
 
 // ---------------------------------------------------------------------------
-// Modal NUEVA VENTA
+// Modal NUEVA VENTA (multi-producto)
 // ---------------------------------------------------------------------------
 
 async function abrirModalVenta() {
@@ -431,7 +433,10 @@ async function abrirModalVenta() {
   if (selEstado)   selEstado.value = "pendiente";
   if (txtNotas)    txtNotas.value = "";
 
-  // cargar catálogo si aún no se cargó (para autocomplete)
+  ventaProductosTmp = [];
+  renderProductosModal();
+
+  // cargar catálogo si aún no está
   if (!productosCatalogo.length) {
     await cargarProductosCatalogo();
   }
@@ -444,7 +449,6 @@ function cerrarModalVenta() {
 
 if (btnNuevaVenta) {
   btnNuevaVenta.addEventListener("click", () => {
-    // función async
     abrirModalVenta();
   });
 }
@@ -456,58 +460,173 @@ if (btnGuardarVenta) {
   btnGuardarVenta.addEventListener("click", guardarVenta);
 }
 
+// Agregar producto al mini-carrito
+if (btnAgregarProd) {
+  btnAgregarProd.addEventListener("click", () => {
+    agregarProductoALaVenta();
+  });
+}
+
+function agregarProductoALaVenta() {
+  if (!inpProducto || !inpCantidad) return;
+
+  const codigoReal = (inpProducto.dataset.codigoReal || "").trim().toUpperCase();
+  const cantidad   = parseInt(inpCantidad.value || "1", 10) || 1;
+
+  if (!codigoReal || cantidad <= 0) {
+    mostrarMensaje("Elegí un producto del buscador y poné una cantidad válida.", true);
+    return;
+  }
+
+  const prod = productosCatalogo.find((p) => p.codigo === codigoReal);
+  if (!prod) {
+    mostrarMensaje("El producto seleccionado no existe en el catálogo.", true);
+    return;
+  }
+
+  // Si ya está en la lista, sumamos cantidades
+  const existente = ventaProductosTmp.find((p) => p.codigo === codigoReal);
+  if (existente) {
+    existente.cantidad += cantidad;
+  } else {
+    ventaProductosTmp.push({
+      codigo: prod.codigo,
+      nombre: prod.nombre || "",
+      precio: prod.precio || 0,
+      cantidad,
+    });
+  }
+
+  // limpiar inputs
+  inpProducto.value = "";
+  inpProducto.dataset.codigoReal = "";
+  inpCantidad.value = "1";
+  if (listaProducto) {
+    listaProducto.style.display = "none";
+    listaProducto.innerHTML = "";
+  }
+
+  renderProductosModal();
+}
+
+function quitarProductoDeVenta(codigo) {
+  ventaProductosTmp = ventaProductosTmp.filter((p) => p.codigo !== codigo);
+  renderProductosModal();
+}
+
+function renderProductosModal() {
+  if (!tablaProdBody) return;
+
+  if (!ventaProductosTmp.length) {
+    tablaProdBody.innerHTML = `
+      <tr>
+        <td colspan="6" class="texto-centro">Todavía no agregaste productos.</td>
+      </tr>
+    `;
+    if (labelTotalPrev) labelTotalPrev.textContent = "$0";
+    return;
+  }
+
+  tablaProdBody.innerHTML = "";
+
+  let total = 0;
+
+  ventaProductosTmp.forEach((p) => {
+    const subtotal = (p.precio || 0) * (p.cantidad || 0);
+    total += subtotal;
+
+    const tr = document.createElement("tr");
+
+    const tdCod = document.createElement("td");
+    tdCod.textContent = p.codigo;
+
+    const tdNom = document.createElement("td");
+    tdNom.textContent = p.nombre || "-";
+
+    const tdCant = document.createElement("td");
+    tdCant.textContent = p.cantidad;
+
+    const tdPrecio = document.createElement("td");
+    tdPrecio.classList.add("texto-derecha");
+    tdPrecio.textContent = "$ " + (p.precio || 0).toLocaleString("es-AR");
+
+    const tdSub = document.createElement("td");
+    tdSub.classList.add("texto-derecha");
+    tdSub.textContent = "$ " + subtotal.toLocaleString("es-AR");
+
+    const tdAcc = document.createElement("td");
+    tdAcc.classList.add("texto-centro");
+    const btnQuitar = document.createElement("button");
+    btnQuitar.textContent = "X";
+    btnQuitar.classList.add("btn-mini-quitar");
+    btnQuitar.addEventListener("click", () => quitarProductoDeVenta(p.codigo));
+    tdAcc.appendChild(btnQuitar);
+
+    tr.appendChild(tdCod);
+    tr.appendChild(tdNom);
+    tr.appendChild(tdCant);
+    tr.appendChild(tdPrecio);
+    tr.appendChild(tdSub);
+    tr.appendChild(tdAcc);
+
+    tablaProdBody.appendChild(tr);
+  });
+
+  if (labelTotalPrev) {
+    labelTotalPrev.textContent = "$ " + total.toLocaleString("es-AR");
+  }
+}
+
+// Guardar venta completa
 async function guardarVenta() {
   try {
     const clienteId = selCliente?.value || "";
-    // si se usó autocomplete, el código real va en dataset
-    let codigo = (inpProducto?.dataset.codigoReal || "").trim().toUpperCase();
+    const estado    = selEstado?.value || "pendiente";
+    const notas     = txtNotas?.value.trim() || "";
 
-    // fallback por si todavía usás <input id="ventaCodigo">
-    if (!codigo) {
-      const oldInput = document.getElementById("ventaCodigo");
-      if (oldInput) {
-        codigo = oldInput.value.trim().toUpperCase();
-      }
-    }
-
-    const cantidad = parseInt(inpCantidad?.value || "1", 10) || 1;
-    const estado   = selEstado?.value || "pendiente";
-    const notas    = txtNotas?.value.trim() || "";
-
-    if (!clienteId || !codigo || cantidad <= 0) {
-      mostrarMensaje(
-        "Completá cliente, elegí un producto y poné una cantidad válida.",
-        true
-      );
+    if (!clienteId) {
+      mostrarMensaje("Seleccioná un cliente.", true);
       return;
     }
 
-    // Buscar info del cliente
+    if (!ventaProductosTmp.length) {
+      mostrarMensaje("Agregá al menos un producto a la venta.", true);
+      return;
+    }
+
     const cliente = clientes.find((c) => c.id === clienteId);
     const clienteNombre = cliente ? cliente.nombre : "";
 
-    // Buscar producto en Firestore (precio actualizado)
-    const prodRef  = doc(db, "productos", codigo);
-    const prodSnap = await getDoc(prodRef);
+    // por seguridad, volvemos a buscar precios actuales desde Firestore
+    // (pero usamos lo que tenemos en memoria si falla algo).
+    const productosFinal = [];
+    let total = 0;
 
-    if (!prodSnap.exists()) {
-      mostrarMensaje(`No existe producto con código ${codigo}.`, true);
-      return;
+    for (const p of ventaProductosTmp) {
+      let precioUnit = p.precio || 0;
+
+      try {
+        const prodRef  = doc(db, "productos", p.codigo);
+        const prodSnap = await getDoc(prodRef);
+        if (prodSnap.exists()) {
+          const data = prodSnap.data();
+          const precioDoc =
+            Number(data.precio ?? data.PrecioMayorista ?? 0) || 0;
+          if (precioDoc) precioUnit = precioDoc;
+        }
+      } catch {
+        // si falla, usamos el precio que ya teníamos
+      }
+
+      const subtotal = precioUnit * p.cantidad;
+      total += subtotal;
+
+      productosFinal.push({
+        codigo: p.codigo,
+        cantidad: p.cantidad,
+        precio: precioUnit,
+      });
     }
-
-    const prodData   = prodSnap.data();
-    const precioUnit =
-      Number(prodData.precio ?? prodData.PrecioMayorista ?? 0) || 0;
-
-    if (!precioUnit) {
-      mostrarMensaje(
-        "El producto no tiene precio mayorista configurado.",
-        true
-      );
-      return;
-    }
-
-    const total = precioUnit * cantidad;
 
     const ventaData = {
       fecha: serverTimestamp(),
@@ -516,13 +635,7 @@ async function guardarVenta() {
       estado,
       notas,
       total,
-      productos: [
-        {
-          codigo,
-          cantidad,
-          precio: precioUnit,
-        },
-      ],
+      productos: productosFinal,
     };
 
     await addDoc(collection(db, "ventas"), ventaData);
@@ -544,7 +657,6 @@ if (inpProducto && listaProducto) {
   inpProducto.addEventListener("input", () => {
     const texto = inpProducto.value.trim().toLowerCase();
 
-    // limpiar el código real cuando escribe
     inpProducto.dataset.codigoReal = "";
 
     if (!texto || !productosCatalogo.length) {
