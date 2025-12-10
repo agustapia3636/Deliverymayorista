@@ -158,6 +158,34 @@
       border-bottom: none;
     }
 
+    /* Gráficos */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-top: 18px;
+    }
+
+    .chart-card {
+      background: rgba(6, 6, 22, 0.95);
+      border-radius: 14px;
+      padding: 10px 12px 14px;
+      border: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.8rem;
+    }
+
+    .chart-card h3 {
+      margin: 0 0 6px;
+      font-size: 0.82rem;
+      color: #d8d8ff;
+      font-weight: 500;
+    }
+
+    .chart-card canvas {
+      width: 100%;
+      min-height: 220px;
+    }
+
     /* ======================
        TOOLBAR / TABLA
        ====================== */
@@ -258,7 +286,8 @@
       text-align: center;
     }
 
-    /* STOCK BADGES, IMÁGENES, ACCIONES — (igual que tu admin original) */
+    /* STOCK BADGES, IMÁGENES, ACCIONES */
+
     .badge-stock {
       display: inline-block;
       padding: 0.2rem 0.6rem;
@@ -384,7 +413,7 @@
     =========================== -->
     <div class="panel-estadisticas">
       <h2>📊 Estadísticas generales</h2>
-      <p>Resumen generado automáticamente desde Firestore (ventas).</p>
+      <p>Resumen generado automáticamente desde Firestore (colección <strong>ventas</strong>).</p>
 
       <div class="stats-grid">
         <div class="stats-box">
@@ -413,6 +442,17 @@
       <ul id="stats-ranking" class="stats-ranking">
         <!-- dinámico -->
       </ul>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>📈 Ventas recientes por día</h3>
+          <canvas id="chart-ventas-dias"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>🍩 Top productos (unidades)</h3>
+          <canvas id="chart-productos-top"></canvas>
+        </div>
+      </div>
     </div>
 
     <!-- ==========================
@@ -477,6 +517,9 @@
   </div>
 
   <!-- Scripts -->
+  <!-- Chart.js CDN (global Chart) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <script type="module" src="js/auth-guard.js"></script>
   <script type="module" src="js/admin.js"></script>
 </body>
