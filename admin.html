@@ -16,19 +16,41 @@
 
     header {
       background: linear-gradient(90deg, #ff005d, #ffa400);
-      padding: 20px;
-      font-size: 1.4rem;
-      font-weight: bold;
+      padding: 18px 22px;
+      font-size: 1.2rem;
+      font-weight: 600;
       display: flex;
       justify-content: space-between;
       align-items: center;
       color: #ffffff;
     }
 
+    .titulo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .titulo-principal {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .titulo-sub {
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
+
     .nav-panel {
       display: flex;
       gap: 10px;
       align-items: center;
+    }
+
+    .nav-panel span {
+      font-size: 0.8rem;
+      opacity: 0.9;
     }
 
     .btn-secundario {
@@ -58,29 +80,74 @@
       margin: 0 auto;
     }
 
-    .acciones {
-      margin-bottom: 20px;
+    /* TOOLBAR ADMIN PRO */
+
+    .admin-toolbar {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      gap: 10px;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
     }
 
-    .acciones input {
-      padding: 10px;
-      flex: 1;
-      border-radius: 10px;
-      border: 1px solid #333344;
-      background: #151525;
-      color: #ffffff;
+    .admin-toolbar-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .admin-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .input-buscador-admin,
+    .select-admin {
+      padding: 0.45rem 0.8rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(10, 10, 25, 0.9);
+      color: #fff;
       font-size: 0.9rem;
+      min-width: 180px;
+    }
+
+    .input-buscador-admin {
+      min-width: 260px;
+      flex: 1;
+    }
+
+    .chk-admin {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      color: #c9c9ff;
+    }
+
+    .chk-admin input {
+      accent-color: #ff5ca8;
+    }
+
+    .btn-primario {
+      background: linear-gradient(90deg, #ff007a, #ffa400);
+      color: #fff;
+      padding: 0.55rem 1.2rem;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 600;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
     }
 
     .tabla-admin-wrapper {
       margin-top: 10px;
       background: #111121;
       border-radius: 18px;
-      padding: 12px 16px 6px;
+      padding: 12px 16px 8px;
       box-shadow: 0 20px 45px rgba(0, 0, 0, 0.55);
       overflow-x: auto;
     }
@@ -90,7 +157,7 @@
       border-collapse: collapse;
       font-size: 0.9rem;
       color: #f5f5ff;
-      min-width: 750px;
+      min-width: 900px;
     }
 
     .tabla-admin th,
@@ -100,65 +167,207 @@
       text-align: left;
     }
 
-    .btn-editar {
-      background: #ffa726;
-      padding: 6px 12px;
-      border-radius: 999px;
-      border: none;
-      color: #1b1305;
-      cursor: pointer;
+    .tabla-admin thead th {
       font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #b3b3ff;
+    }
+
+    .texto-centro {
+      text-align: center;
+    }
+
+    /* STOCK BADGES */
+
+    .badge-stock {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
       font-weight: 600;
     }
 
-    .btn-eliminar {
-      background: #ff5a5a;
-      padding: 6px 12px;
+    .badge-stock.stock-ok {
+      background: rgba(0, 200, 120, 0.15);
+      color: #7cffb5;
+    }
+
+    .badge-stock.stock-bajo {
+      background: rgba(255, 180, 0, 0.15);
+      color: #ffdd7c;
+    }
+
+    .badge-stock.stock-cero {
+      background: rgba(255, 0, 80, 0.15);
+      color: #ff7a9c;
+    }
+
+    .fila-sin-stock {
+      opacity: 0.7;
+    }
+
+    /* THUMBNAILS */
+
+    .thumb-contenedor {
+      width: 52px;
+      height: 52px;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      background: #1a1927;
+      color: #b3b3d0;
+      text-align: center;
+    }
+
+    .thumb-img-admin {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .thumb-vacio {
+      background: #1b1a25;
+      color: #7777a7;
+    }
+
+    .thumb-error {
+      background: #3b1320;
+      color: #ff9ab7;
+    }
+
+    .badge-destacado {
+      display: inline-block;
+      margin-right: 0.3rem;
+      color: #ffd966;
+      font-size: 0.9rem;
+    }
+
+    /* BOTONES ACCIONES */
+
+    .btn-accion {
+      padding: 0.25rem 0.7rem;
       border-radius: 999px;
       border: none;
-      color: #ffffff;
+      font-size: 0.75rem;
       cursor: pointer;
-      font-size: 0.8rem;
-      font-weight: 600;
+      margin-right: 0.3rem;
+      white-space: nowrap;
+    }
+
+    .btn-editar {
+      background: linear-gradient(90deg, #3b82f6, #22d3ee);
+      color: white;
+    }
+
+    .btn-eliminar {
+      background: rgba(255, 99, 132, 0.18);
+      color: #ff8ba3;
+    }
+
+    .col-acciones {
+      white-space: nowrap;
+    }
+
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+      }
+
+      .nav-panel {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+      }
+
+      .admin-toolbar-left {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .input-buscador-admin {
+        min-width: 100%;
+      }
     }
   </style>
 </head>
 
 <body>
   <header>
-    <div class="titulo">Panel Administrativo</div>
+    <div class="titulo">
+      <div class="titulo-principal">DELIVERY MAYORISTA · Admin</div>
+      <div class="titulo-sub" id="subTituloHeader">
+        Gestión de productos y stock
+      </div>
+    </div>
 
     <div class="nav-panel">
+      <span>Sesión: <strong id="nombreUsuario">Cargando...</strong></span>
+      <button class="btn-secundario" onclick="window.location.href='index.html'">Ver sitio</button>
       <button class="btn-secundario" onclick="window.location.href='clientes.html'">Clientes</button>
       <button class="btn-secundario" onclick="window.location.href='ventas.html'">Ventas</button>
       <button class="btn-secundario" onclick="window.location.href='historial.html'">Historial</button>
-      <button id="logoutBtn" class="btn-sesion">Cerrar sesión</button>
+      <button id="btnLogout" class="btn-sesion">Cerrar sesión</button>
     </div>
   </header>
 
   <div class="contenedor">
-    <div class="acciones">
-      <input
-        type="text"
-        id="buscar"
-        placeholder="Buscar por nombre o código..."
-      />
-      <button id="btnNuevo">➕ Agregar producto</button>
+    <h1 style="margin: 0 0 4px; font-size: 1.35rem;">Productos</h1>
+    <p style="margin: 0 0 16px; font-size: 0.85rem; opacity: 0.8;">
+      Administrá todos los productos del catálogo: precio, stock, imágenes y categorías.
+    </p>
+
+    <!-- TOOLBAR DE FILTROS Y ACCIONES -->
+    <div class="admin-toolbar">
+      <div class="admin-toolbar-left">
+        <input
+          id="buscadorProductos"
+          type="text"
+          placeholder="Buscar por código, nombre o categoría..."
+          class="input-buscador-admin"
+        />
+
+        <select id="filtroCategoria" class="select-admin">
+          <option value="">Todas las categorías</option>
+        </select>
+
+        <select id="filtroSubcategoria" class="select-admin">
+          <option value="">Todas las subcategorías</option>
+        </select>
+
+        <label class="chk-admin">
+          <input type="checkbox" id="filtroSoloSinStock" />
+          Solo sin stock
+        </label>
+      </div>
+
+      <div class="admin-toolbar-right">
+        <button id="btnNuevoProducto" class="btn-primario">
+          + Nuevo producto
+        </button>
+      </div>
     </div>
 
+    <!-- TABLA DE PRODUCTOS -->
     <div class="tabla-admin-wrapper">
-      <table class="tabla-admin tabla-productos">
+      <table class="tabla-admin">
         <thead>
           <tr>
             <th>Código</th>
             <th>Nombre</th>
-            <th>Precio</th>
-            <th>Stock</th>
             <th>Categoría</th>
+            <th>Subcategoría</th>
+            <th>Precio mayorista</th>
+            <th>Stock</th>
+            <th>Imagen</th>
             <th>Acciones</th>
           </tr>
         </thead>
-        <tbody id="tablaProductos">
+        <tbody id="tablaProductosBody">
           <!-- filas dinámicas -->
         </tbody>
       </table>
