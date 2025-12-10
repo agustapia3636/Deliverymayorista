@@ -1,6 +1,7 @@
 // js/ventas.js
 // Panel de ventas PRO: listado, filtros, estados y alta de ventas
-// con soporte para varios productos por venta (mini carrito en el modal).
+// con soporte para varios productos por venta (mini carrito en el modal)
+// y DESCUENTO AUTOMÁTICO DE STOCK en Firestore.
 
 import { auth, db } from "./firebase-init.js";
 import {
@@ -577,7 +578,10 @@ function renderProductosModal() {
   }
 }
 
-// Guardar venta completa
+// ---------------------------------------------------------------------------
+// Guardar venta + DESCUENTO DE STOCK
+// ---------------------------------------------------------------------------
+
 async function guardarVenta() {
   try {
     const clienteId = selCliente?.value || "";
@@ -597,10 +601,11 @@ async function guardarVenta() {
     const cliente = clientes.find((c) => c.id === clienteId);
     const clienteNombre = cliente ? cliente.nombre : "";
 
-    // por seguridad, volvemos a buscar precios actuales desde Firestore
-    // (pero usamos lo que tenemos en memoria si falla algo).
     const productosFinal = [];
     let total = 0;
+
+    // Vamos a acumular aquí las refs y nuevos stocks
+    const stockUpdates = [];
 
     for (const p of ventaProductosTmp) {
       let precioUnit = p.precio || 0;
@@ -613,9 +618,23 @@ async function guardarVenta() {
           const precioDoc =
             Number(data.precio ?? data.PrecioMayorista ?? 0) || 0;
           if (precioDoc) precioUnit = precioDoc;
+
+          const stockActual =
+            Number(data.stock ?? data.Stock ?? 0) || 0;
+          let nuevoStock = stockActual - p.cantidad;
+          if (nuevoStock < 0) nuevoStock = 0;
+
+          stockUpdates.push({
+            ref: prodRef,
+            nuevoStock,
+          });
+        } else {
+          // Si por algún motivo no existe el doc, igual registramos la venta
+          console.warn("Producto no encontrado al actualizar stock:", p.codigo);
         }
-      } catch {
-        // si falla, usamos el precio que ya teníamos
+      } catch (err) {
+        console.error("Error leyendo producto para stock:", p.codigo, err);
+        // Si falla, seguimos con el precio que ya teníamos y no tocamos stockUpdates para ese producto
       }
 
       const subtotal = precioUnit * p.cantidad;
@@ -638,9 +657,20 @@ async function guardarVenta() {
       productos: productosFinal,
     };
 
+    // 1) Registramos la venta
     await addDoc(collection(db, "ventas"), ventaData);
 
-    mostrarMensaje("Venta registrada correctamente.");
+    // 2) Actualizamos el stock de cada producto
+    for (const u of stockUpdates) {
+      try {
+        await updateDoc(u.ref, { stock: u.nuevoStock });
+      } catch (err) {
+        console.error("Error actualizando stock para producto:", err);
+        // No frenamos todo por un error de stock, pero queda en consola
+      }
+    }
+
+    mostrarMensaje("Venta registrada y stock actualizado 👍");
     cerrarModalVenta();
     cargarVentas();
   } catch (err) {
