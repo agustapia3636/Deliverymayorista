@@ -1,11 +1,8 @@
 // js/editor.js
 // Editor de producto: crear / editar documentos en la colección "productos"
+// Adaptado para editor.html (ids: formProducto, codigo, nombre, precio, etc.)
 
-import { auth, db } from "./firebase-init.js";
-import {
-  onAuthStateChanged,
-} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
-
+import { db } from "./firebase-init.js";
 import {
   doc,
   getDoc,
@@ -14,258 +11,78 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// --------- DOM --------- //
-const inputCodigo       = document.getElementById("prod-codigo");
-const inputNombre       = document.getElementById("prod-nombre");
-const inputDescripcion  = document.getElementById("prod-descripcion");
-const inputPrecio       = document.getElementById("prod-precio");
-const inputStock        = document.getElementById("prod-stock");
-const inputCategoria    = document.getElementById("prod-categoria");
-const inputSubcategoria = document.getElementById("prod-subcategoria");
-const inputImagen       = document.getElementById("prod-imagen");
-const inputEtiquetas    = document.getElementById("prod-etiquetas");
-const checkDestacado    = document.getElementById("prod-destacado");
+// ---------- DOM (coinciden con editor.html) ----------
+const inputCodigo       = document.getElementById("codigo");
+const inputNombre       = document.getElementById("nombre");
+const inputCategoria    = document.getElementById("categoria");
+const inputSubcategoria = document.getElementById("subcategoria");
+const inputPrecio       = document.getElementById("precio");
+const inputStock        = document.getElementById("stock");
+const inputImagen       = document.getElementById("imagen");
+const inputEtiquetas    = document.getElementById("etiquetas");
+const inputDescripcion  = document.getElementById("descripcion");
+const checkDestacado    = document.getElementById("destacado");
 
-const form          = document.getElementById("form-producto");
-const btnCancelar   = document.getElementById("btn-cancelar");
-const lblTitulo     = document.getElementById("titulo-editor");
-const crumbModo     = document.getElementById("crumb-modo");
-const textoEstado   = document.getElementById("texto-estado");
-const alertaForm    = document.getElementById("alerta-form");
-const spanUserEmail = document.getElementById("user-email");
+const form              = document.getElementById("formProducto");
+const btnGuardar        = document.getElementById("btnGuardar");
+const lblTitulo         = document.getElementById("tituloFormulario");
+const subTituloHeader   = document.getElementById("subTituloHeader");
+const modoTexto         = document.getElementById("modoTexto");
+const mensaje           = document.getElementById("mensaje");
+const previewImagenTag  = document.getElementById("previewImagenTag");
 
 // Modo actual
-let codigoOriginal = null; // cuando editamos, guardamos el código original
+let codigoOriginal = null; // cuando editamos, guardamos el código original (id documento)
 
-function mostrarAlerta(msg) {
-  if (!alertaForm) return;
-  alertaForm.textContent = msg;
-  alertaForm.classList.add("visible");
+// ---------- Helpers de mensaje ----------
+function limpiarMensaje() {
+  if (!mensaje) return;
+  mensaje.textContent = "";
+  mensaje.classList.remove("mensaje-ok", "mensaje-error");
 }
 
-function limpiarAlerta() {
-  if (!alertaForm) return;
-  alertaForm.textContent = "";
-  alertaForm.classList.remove("visible");
+function mostrarMensaje(texto, tipo = "info") {
+  if (!mensaje) return;
+  mensaje.textContent = texto;
+  mensaje.classList.remove("mensaje-ok", "mensaje-error");
+  if (tipo === "ok") {
+    mensaje.classList.add("mensaje-ok");
+  } else if (tipo === "error") {
+    mensaje.classList.add("mensaje-error");
+  }
 }
 
-// --------- AUTENTICACIÓN --------- //
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
+// ---------- Vista previa de imagen ----------
+function actualizarPreviewImagen(url) {
+  if (!previewImagenTag) return;
+
+  if (url && url.trim() !== "") {
+    previewImagenTag.src = url.trim();
+    previewImagenTag.style.display = "block";
+  } else {
+    previewImagenTag.src = "";
+    previewImagenTag.style.display = "none";
   }
+}
 
-  if (spanUserEmail) {
-    spanUserEmail.textContent = user.email || "";
-  }
+if (inputImagen) {
+  inputImagen.addEventListener("input", () => {
+    actualizarPreviewImagen(inputImagen.value);
+  });
+}
 
-  await iniciarEditor();
-});
-
-// --------- INICIO (DETECTAR SI ES NUEVO O EDICIÓN) --------- //
+// ---------- Inicio: detectar si es nuevo o edición ----------
 async function iniciarEditor() {
   const params = new URLSearchParams(window.location.search);
-  const id = params.get("id");
+  const id = params.get("id"); // en tu admin.js usás editor.html?id=N0001
 
   if (id) {
-    // Modo edición
+    // MODO EDICIÓN
     codigoOriginal = id;
-    if (lblTitulo) lblTitulo.textContent = `Editar producto ${id}`;
-    if (crumbModo) crumbModo.textContent = "Editar";
-    if (textoEstado) textoEstado.textContent = `Editando ${id}`;
+
+    if (lblTitulo)       lblTitulo.textContent = `Editar producto`;
+    if (subTituloHeader) subTituloHeader.textContent = `Editando código ${id}`;
+    if (modoTexto)       modoTexto.textContent = "Modo edición";
     if (inputCodigo) {
       inputCodigo.value = id;
-      inputCodigo.disabled = true; // no permitimos cambiar el código (id documento)
-    }
-
-    await cargarProducto(id);
-  } else {
-    // Modo nuevo
-    codigoOriginal = null;
-    if (lblTitulo) lblTitulo.textContent = "Nuevo producto";
-    if (crumbModo) crumbModo.textContent = "Nuevo";
-    if (textoEstado) textoEstado.textContent = "Modo creación";
-  }
-}
-
-// --------- CARGAR PRODUCTO EXISTENTE --------- //
-async function cargarProducto(codigo) {
-  try {
-    const ref = doc(db, "productos", codigo);
-    const snap = await getDoc(ref);
-
-    if (!snap.exists()) {
-      mostrarAlerta("No se encontró el producto en Firestore.");
-      return;
-    }
-
-    const p = snap.data();
-
-    // rellenar campos (usamos fallbacks por si vienen de import JSON)
-    if (inputNombre) {
-      inputNombre.value =
-        p.nombre ||
-        p.Nombre ||
-        "";
-    }
-
-    if (inputDescripcion) {
-      inputDescripcion.value =
-        p.descripcionLarga ||
-        p.descripcion ||
-        p["Descripcion"] ||
-        "";
-    }
-
-    if (inputPrecio) {
-      inputPrecio.value =
-        p.precio ??
-        p.PrecioMayorista ??
-        p.precioMayorista ??
-        "";
-    }
-
-    if (inputStock) {
-      inputStock.value =
-        p.stock ??
-        p.Stock ??
-        "";
-    }
-
-    if (inputCategoria) {
-      inputCategoria.value =
-        p.categoria ||
-        p.Categoria_Princ ||
-        p.Categoria ||
-        "";
-    }
-
-    if (inputSubcategoria) {
-      inputSubcategoria.value =
-        p.subcategoria ||
-        p.Sub_Categoria ||
-        p.Subcategoria ||
-        "";
-    }
-
-    if (inputImagen) {
-      inputImagen.value =
-        p.imagen ||
-        p.Imagen ||
-        "";
-    }
-
-    if (inputEtiquetas) {
-      const etiquetas =
-        p.etiquetas ||
-        p.tags ||
-        p.tag ||
-        p.Etiquetas ||
-        "";
-      if (Array.isArray(etiquetas)) {
-        inputEtiquetas.value = etiquetas.join(", ");
-      } else if (typeof etiquetas === "string") {
-        inputEtiquetas.value = etiquetas;
-      }
-    }
-
-    if (checkDestacado) {
-      checkDestacado.checked = !!p.destacado;
-    }
-
-  } catch (err) {
-    console.error("Error cargando producto:", err);
-    mostrarAlerta("Error cargando el producto desde Firestore.");
-  }
-}
-
-// --------- GUARDAR (CREAR / ACTUALIZAR) --------- //
-if (form) {
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    limpiarAlerta();
-
-    let codigo = (inputCodigo?.value || "").trim();
-    const nombre = (inputNombre?.value || "").trim();
-    const descripcion = (inputDescripcion?.value || "").trim();
-    const precioNum = Number(inputPrecio?.value || 0);
-    const stockNum = Number(inputStock?.value || 0);
-    const categoria = (inputCategoria?.value || "").trim();
-    const subcategoria = (inputSubcategoria?.value || "").trim();
-    const imagen = (inputImagen?.value || "").trim();
-    const etiquetasStr = (inputEtiquetas?.value || "").trim();
-    const destacado = !!(checkDestacado?.checked);
-
-    if (!codigo || !nombre) {
-      mostrarAlerta("Código y nombre son obligatorios.");
-      return;
-    }
-
-    // Normalizamos el código (ej: en mayúsculas)
-    codigo = codigo.toUpperCase();
-
-    // Procesar etiquetas a array
-    let etiquetasArr = [];
-    if (etiquetasStr) {
-      etiquetasArr = etiquetasStr
-        .split(",")
-        .map((t) => t.trim())
-        .filter(Boolean);
-    }
-
-    const baseData = {
-      // nombres "nuevos"
-      codigo,
-      nombre,
-      descripcionLarga: descripcion,
-      precio: precioNum,
-      stock: stockNum,
-      categoria,
-      subcategoria,
-      imagen,
-      etiquetas: etiquetasArr,
-      destacado,
-      actualizado: serverTimestamp(),
-
-      // nombres compatibles con la importación vieja
-      Codigo: codigo,
-      Nombre: nombre,
-      Descripcion: descripcion,
-      PrecioMayorista: precioNum,
-      Stock: stockNum,
-      Categoria_Princ: categoria,
-      Sub_Categoria: subcategoria,
-      Imagen: imagen,
-    };
-
-    try {
-      if (codigoOriginal) {
-        // MODO EDICIÓN
-        const ref = doc(db, "productos", codigoOriginal);
-        await updateDoc(ref, baseData);
-      } else {
-        // MODO NUEVO
-        const ref = doc(db, "productos", codigo);
-        await setDoc(ref, {
-          ...baseData,
-          creado: serverTimestamp(),
-        });
-      }
-
-      alert("Producto guardado correctamente ✅");
-      window.location.href = "admin.html";
-    } catch (err) {
-      console.error("Error guardando producto:", err);
-      mostrarAlerta("Hubo un error al guardar el producto. Revisá la consola.");
-    }
-  });
-}
-
-// --------- BOTÓN CANCELAR --------- //
-if (btnCancelar) {
-  btnCancelar.addEventListener("click", (e) => {
-    e.preventDefault();
-    window.location.href = "admin.html";
-  });
-}
+      inputCodigo.disabled = true; // no permitimos cambiar el código (id de Fir
