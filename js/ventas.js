@@ -1,7 +1,8 @@
 // js/ventas.js
 // Panel de ventas PRO: listado, filtros, estados y alta de ventas
 // con soporte para varios productos por venta (mini carrito en el modal)
-// DESCARGA AUTOMÁTICA DE STOCK y control de stock insuficiente.
+// DESCARGA AUTOMÁTICA DE STOCK, control de stock insuficiente
+// y PANEL DE ESTADÍSTICAS (histórico / hoy / mes) con botón ver/ocultar.
 
 import { auth, db } from "./firebase-init.js";
 import {
@@ -47,6 +48,13 @@ const btnAgregarProd   = document.getElementById("btnAgregarProductoVenta");
 const tablaProdBody    = document.getElementById("ventaProductosTabla");
 const labelTotalPrev   = document.getElementById("ventaTotalPreview");
 
+// 🔢 DOM estadísticas
+const btnToggleEstadisticas   = document.getElementById("btn-toggle-estadisticas");
+const panelEstadisticas       = document.getElementById("panel-estadisticas");
+const spanTotalHistorico      = document.getElementById("estad-total-historico");
+const spanTotalHoy            = document.getElementById("estad-total-hoy");
+const spanTotalMes            = document.getElementById("estad-total-mes");
+
 // ---------------------------------------------------------------------------
 // Estado en memoria
 // ---------------------------------------------------------------------------
@@ -73,6 +81,7 @@ onAuthStateChanged(auth, (user) => {
 
   cargarClientes();
   cargarVentas();
+  cargarEstadisticasVentas();
 });
 
 if (logoutBtn) {
@@ -251,6 +260,69 @@ async function cargarVentas() {
 }
 
 // ---------------------------------------------------------------------------
+// ESTADÍSTICAS: total histórico / hoy / mes
+// ---------------------------------------------------------------------------
+
+async function cargarEstadisticasVentas() {
+  try {
+    const ref  = collection(db, "ventas");
+    const snap = await getDocs(ref);
+
+    let totalHistorico = 0;
+    let totalHoy       = 0;
+    let totalMes       = 0;
+
+    const ahora      = new Date();
+    const inicioDia  = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate());
+    const inicioMes  = new Date(ahora.getFullYear(), ahora.getMonth(), 1);
+
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      const totalVenta = Number(data.total) || 0;
+
+      let fecha = null;
+      if (data.fecha && typeof data.fecha.toDate === "function") {
+        fecha = data.fecha.toDate();
+      }
+
+      // Total histórico
+      totalHistorico += totalVenta;
+
+      if (fecha) {
+        // Total HOY
+        if (fecha >= inicioDia) {
+          totalHoy += totalVenta;
+        }
+        // Total MES
+        if (fecha >= inicioMes) {
+          totalMes += totalVenta;
+        }
+      }
+    });
+
+    const opts = {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    };
+
+    if (spanTotalHistorico) {
+      spanTotalHistorico.textContent =
+        "$ " + totalHistorico.toLocaleString("es-AR", opts);
+    }
+    if (spanTotalHoy) {
+      spanTotalHoy.textContent =
+        "$ " + totalHoy.toLocaleString("es-AR", opts);
+    }
+    if (spanTotalMes) {
+      spanTotalMes.textContent =
+        "$ " + totalMes.toLocaleString("es-AR", opts);
+    }
+  } catch (err) {
+    console.error("Error calculando estadísticas de ventas:", err);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Filtros y render de tabla
 // ---------------------------------------------------------------------------
 
@@ -389,6 +461,7 @@ async function cambiarEstadoVenta(v) {
     v.estado = siguiente;
     mostrarMensaje("Estado actualizado.");
     aplicarFiltros();
+    cargarEstadisticasVentas();
   } catch (err) {
     console.error("Error cambiando estado:", err);
     mostrarMensaje("Error al cambiar estado.", true);
@@ -406,6 +479,7 @@ async function eliminarVenta(v) {
     mostrarMensaje("Venta eliminada.");
     ventas = ventas.filter((x) => x.id !== v.id);
     aplicarFiltros();
+    cargarEstadisticasVentas();
   } catch (err) {
     console.error("Error eliminando venta:", err);
     mostrarMensaje("Error al eliminar venta.", true);
@@ -486,9 +560,9 @@ function agregarProductoALaVenta() {
   }
 
   // ====== CONTROL DE STOCK AL ARMAR EL CARRITO ======
-  const existente = ventaProductosTmp.find((p) => p.codigo === codigoReal);
-  const yaEnCarrito = existente ? existente.cantidad : 0;
-  const totalDeseado = yaEnCarrito + cantidad;
+  const existente     = ventaProductosTmp.find((p) => p.codigo === codigoReal);
+  const yaEnCarrito   = existente ? existente.cantidad : 0;
+  const totalDeseado  = yaEnCarrito + cantidad;
 
   if (totalDeseado > prod.stock) {
     mostrarMensaje(
@@ -693,6 +767,7 @@ async function guardarVenta() {
     mostrarMensaje("Venta registrada y stock actualizado 👍");
     cerrarModalVenta();
     cargarVentas();
+    cargarEstadisticasVentas(); // refrescamos totales
   } catch (err) {
     console.error("Error guardando venta:", err);
     mostrarMensaje("Error al guardar la venta.", true);
@@ -734,9 +809,11 @@ if (inpProducto && listaProducto) {
         (p) => `
         <div class="autocomplete-item" data-codigo="${p.codigo}">
           <strong>${p.codigo}</strong> — ${p.nombre || "Sin nombre"}
-          ${Number.isFinite(p.stock)
-            ? `<span style="opacity:0.7;"> · stock: ${p.stock}</span>`
-            : ""}
+          ${
+            Number.isFinite(p.stock)
+              ? `<span style="opacity:0.7;"> · stock: ${p.stock}</span>`
+              : ""
+          }
         </div>`
       )
       .join("");
@@ -781,3 +858,28 @@ if (buscarVenta) {
 if (filtroEstado) {
   filtroEstado.addEventListener("change", aplicarFiltros);
 }
+
+// ---------------------------------------------------------------------------
+// VER / OCULTAR PANEL DE ESTADÍSTICAS
+// ---------------------------------------------------------------------------
+
+function initToggleEstadisticas() {
+  if (!btnToggleEstadisticas || !panelEstadisticas) return;
+
+  // Estado inicial: oculto (la clase .oculto ya viene desde el HTML/CSS)
+  panelEstadisticas.classList.add("oculto");
+  btnToggleEstadisticas.textContent = "👁️ Ver estadísticas";
+
+  btnToggleEstadisticas.addEventListener("click", () => {
+    const estaOculto = panelEstadisticas.classList.toggle("oculto");
+
+    if (estaOculto) {
+      btnToggleEstadisticas.textContent = "👁️ Ver estadísticas";
+    } else {
+      btnToggleEstadisticas.textContent = "🙈 Ocultar estadísticas";
+    }
+  });
+}
+
+// Como el script está al final del body, el DOM ya está listo:
+initToggleEstadisticas();
