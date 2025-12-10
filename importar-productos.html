@@ -1,77 +1,23 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
   <meta charset="UTF-8" />
-  <title>Importar productos.json a Firestore</title>
+  <title>Importador Firestore v2</title>
   <style>
-    body {
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #05030c;
-      color: #fff;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .card {
-      background: #11101c;
-      padding: 24px 26px;
-      border-radius: 16px;
-      max-width: 420px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    }
-    h1 {
-      font-size: 20px;
-      margin-bottom: 12px;
-    }
-    p {
-      font-size: 14px;
-      opacity: 0.85;
-      margin-bottom: 14px;
-    }
-    button {
-      margin-top: 10px;
-      padding: 10px 18px;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      font-weight: 600;
-      background: linear-gradient(90deg, #ff007a, #ff9800);
-      color: #fff;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-    }
-    button:active {
-      transform: scale(0.97);
-    }
-    #estado {
-      margin-top: 14px;
-      font-size: 13px;
-      white-space: pre-line;
-    }
+    body { background: #000; color: white; font-family: sans-serif; padding: 40px; }
+    button { padding: 10px 20px; font-size: 18px; border-radius: 8px; }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>Importar productos.json a Firestore</h1>
-    <p>
-      Este importador leerá <code>data/productos.json</code> y creará
-      un documento en la colección <strong>productos</strong> por cada ítem.
-    </p>
-    <button id="btnImportar">IMPORTAR AHORA</button>
-    <div id="estado"></div>
-  </div>
+  <h1>Importar productos.json a Firestore</h1>
+  <button id="importarBtn">IMPORTAR AHORA</button>
 
+  <pre id="log"></pre>
+
+  <!-- Firebase -->
   <script type="module">
-    // =========================
-    // 1. Firebase (CDN módulos)
-    // =========================
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      addDoc
-    } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCH2dJRTpXpOPUhAERnAkcj_avqbEYCSXE",
@@ -83,66 +29,57 @@
     };
 
     const app = initializeApp(firebaseConfig);
-    const db  = getFirestore(app);
+    const db = getFirestore(app);
 
-    const btnImportar = document.getElementById("btnImportar");
-    const estadoEl    = document.getElementById("estado");
-
-    // =========================
-    // 2. Función de importación
-    // =========================
-    async function importarProductos() {
-      try {
-        estadoEl.textContent = "Cargando data/productos.json ...";
-
-        const resp = await fetch("data/productos.json");
-        if (!resp.ok) {
-          throw new Error("No se pudo leer data/productos.json (" + resp.status + ")");
-        }
-
-        const data = await resp.json();
-
-        if (!Array.isArray(data)) {
-          throw new Error("El JSON no es un array. Esperaba [ { ...producto }, ... ]");
-        }
-
-        const ref = collection(db, "productos");
-
-        let ok = 0;
-        let fail = 0;
-
-        estadoEl.textContent = `Importando ${data.length} productos...\nEsto puede tardar unos segundos.`;
-
-        // IMPORTAR UNO POR UNO
-        for (const p of data) {
-          try {
-            await addDoc(ref, p);
-            ok++;
-            if (ok % 50 === 0) {
-              estadoEl.textContent = `Importando... ${ok}/${data.length} productos ok`;
-            }
-          } catch (e) {
-            console.error("Error importando producto:", p, e);
-            fail++;
-          }
-        }
-
-        estadoEl.textContent =
-          `✅ Importación COMPLETA\n` +
-          `✔ Productos importados correctamente: ${ok}\n` +
-          `❗ Errores: ${fail}`;
-
-      } catch (err) {
-        console.error(err);
-        estadoEl.textContent = "❌ Error: " + err.message;
-      }
+    const logBox = document.getElementById("log");
+    function log(msg) {
+      logBox.textContent += msg + "\n";
+      console.log(msg);
     }
 
-    btnImportar.addEventListener("click", () => {
-      if (confirm("¿Seguro que querés importar TODOS los productos a Firestore?")) {
-        importarProductos();
+    function sanitize(product) {
+      let obj = {};
+
+      for (let k in product) {
+        let v = product[k];
+
+        if (v === null || v === undefined) v = "";
+        if (typeof v === "string" && !isNaN(Number(v)) && k.toLowerCase().includes("precio")) {
+          v = Number(v);
+        }
+        obj[k] = v;
       }
-    });
+
+      return obj;
+    }
+
+    async function importar() {
+      log("Leyendo productos.json...");
+      const resp = await fetch("data/productos.json");
+      const data = await resp.json();
+
+      let ok = 0;
+      let fail = 0;
+
+      for (let p of data) {
+        try {
+          const safe = sanitize(p);
+          const codigo = safe.codigo || "sin-codigo-" + Date.now();
+          await setDoc(doc(db, "productos", codigo), safe);
+          ok++;
+        } catch (err) {
+          fail++;
+          log("❌ Error: " + err.message);
+        }
+      }
+
+      log("=================================");
+      log("📦 Importados correctamente: " + ok);
+      log("❌ Fallidos: " + fail);
+      log("=================================");
+    }
+
+    document.getElementById("importarBtn").addEventListener("click", importar);
   </script>
 </body>
 </html>
