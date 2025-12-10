@@ -1,6 +1,5 @@
 // js/admin.js
-// Panel administrativo PRO: listado, filtros, búsqueda, thumbnails, stock con colores
-// + Panel de estadísticas de ventas
+// Panel administrativo PRO: productos + estadísticas con gráficos
 
 import { auth, db } from "./firebase-init.js";
 import {
@@ -18,16 +17,16 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 // ---------- DOM: Productos ----------
-const tbody            = document.getElementById("tablaProductosBody"); // <tbody>
-const buscador         = document.getElementById("buscadorProductos");  // <input>
-const filtroCategoria  = document.getElementById("filtroCategoria");   // <select>
-const filtroSubcat     = document.getElementById("filtroSubcategoria");// <select>
-const chkSoloSinStock  = document.getElementById("filtroSoloSinStock");// <input type="checkbox">
-const btnNuevoProducto = document.getElementById("btnNuevoProducto");  // botón "Nuevo producto"
-const lblUsuario       = document.getElementById("nombreUsuario");     // opcional
-const btnLogout        = document.getElementById("btnLogout");         // botón salir (opcional)
+const tbody            = document.getElementById("tablaProductosBody");
+const buscador         = document.getElementById("buscadorProductos");
+const filtroCategoria  = document.getElementById("filtroCategoria");
+const filtroSubcat     = document.getElementById("filtroSubcategoria");
+const chkSoloSinStock  = document.getElementById("filtroSoloSinStock");
+const btnNuevoProducto = document.getElementById("btnNuevoProducto");
+const lblUsuario       = document.getElementById("nombreUsuario");
+const btnLogout        = document.getElementById("btnLogout");
 
-let productos = []; // todos los productos traídos de Firestore
+let productos = [];
 
 // ---------- DOM: Estadísticas Ventas ----------
 const statsTotalMonto   = document.getElementById("stats-total-monto");
@@ -36,6 +35,14 @@ const statsClientes     = document.getElementById("stats-clientes");
 const statsHoy          = document.getElementById("stats-hoy");
 const statsMes          = document.getElementById("stats-mes");
 const statsRanking      = document.getElementById("stats-ranking");
+
+// Canvas para charts
+const canvasVentasDias   = document.getElementById("chart-ventas-dias");
+const canvasProductosTop = document.getElementById("chart-productos-top");
+
+// Instances de Chart
+let chartVentasDias = null;
+let chartTopProductos = null;
 
 // ---------- Auth ----------
 onAuthStateChanged(auth, (user) => {
@@ -72,7 +79,6 @@ if (btnNuevoProducto) {
 //  PRODUCTOS
 // ============================================================================
 
-// ---------- Cargar productos ----------
 async function cargarProductos() {
   if (!tbody) {
     console.error("No se encontró <tbody id='tablaProductosBody'>");
@@ -90,7 +96,7 @@ async function cargarProductos() {
     const q    = query(ref, orderBy("nombre"));
     const snap = await getDocs(q);
 
-    productos.length = 0; // limpiar
+    productos.length = 0;
 
     const categorias = new Set();
     const subcats    = new Set();
@@ -136,10 +142,9 @@ async function cargarProductos() {
   }
 }
 
-// ---------- Filtros ----------
 function poblarFiltros(setCategorias, setSubcats) {
   if (filtroCategoria) {
-    filtroCategoria.innerHTML = `<option value="">Todas</option>`;
+    filtroCategoria.innerHTML = `<option value="">Todas las categorías</option>`;
     Array.from(setCategorias)
       .sort()
       .forEach((cat) => {
@@ -151,7 +156,7 @@ function poblarFiltros(setCategorias, setSubcats) {
   }
 
   if (filtroSubcat) {
-    filtroSubcat.innerHTML = `<option value="">Todas</option>`;
+    filtroSubcat.innerHTML = `<option value="">Todas las subcategorías</option>`;
     Array.from(setSubcats)
       .sort()
       .forEach((sub) => {
@@ -187,11 +192,9 @@ function aplicarFiltros() {
 
     if (!matchTexto) return false;
 
-    // filtros por categoría/sub
     if (cat && p.categoria !== cat) return false;
     if (sub && p.subcategoria !== sub) return false;
 
-    // solo sin stock
     if (soloSinStock && (p.stock || 0) > 0) return false;
 
     return true;
@@ -200,7 +203,6 @@ function aplicarFiltros() {
   mostrarProductos(filtrados);
 }
 
-// ---------- Render de tabla ----------
 function crearBadgeStock(stock) {
   const span  = document.createElement("span");
   const valor = Number.isFinite(stock) ? stock : 0;
@@ -263,11 +265,9 @@ function mostrarProductos(lista) {
       tr.classList.add("fila-sin-stock");
     }
 
-    // Código
     const tdCodigo = document.createElement("td");
     tdCodigo.textContent = p.codigo;
 
-    // Nombre
     const tdNombre = document.createElement("td");
     tdNombre.textContent = p.nombre || "-";
     if (p.destacado) {
@@ -277,27 +277,22 @@ function mostrarProductos(lista) {
       tdNombre.prepend(badge);
     }
 
-    // Categoría / Subcategoría
     const tdCategoria = document.createElement("td");
     tdCategoria.textContent = p.categoria || "";
 
     const tdSubcat = document.createElement("td");
     tdSubcat.textContent = p.subcategoria || "";
 
-    // Precio
     const tdPrecio = document.createElement("td");
     tdPrecio.textContent =
       p.precio != null ? `$ ${p.precio.toLocaleString("es-AR")}` : "-";
 
-    // Stock con badge
     const tdStock = document.createElement("td");
     tdStock.appendChild(crearBadgeStock(p.stock));
 
-    // Imagen
     const tdImg = document.createElement("td");
     tdImg.appendChild(crearThumbImagen(p.imagen));
 
-    // Acciones
     const tdAcciones = document.createElement("td");
     tdAcciones.classList.add("col-acciones");
 
@@ -305,7 +300,6 @@ function mostrarProductos(lista) {
     btnEditar.textContent = "Editar";
     btnEditar.classList.add("btn-accion", "btn-editar");
     btnEditar.addEventListener("click", () => {
-      // Usamos el código como ID del doc (coincide con lo que guarda editor.js)
       window.location.href = `editor.html?id=${p.codigo}`;
     });
 
@@ -330,7 +324,6 @@ function mostrarProductos(lista) {
   });
 }
 
-// ---------- Eliminar ----------
 async function eliminarProducto(codigo, nombre) {
   const ok = confirm(`¿Eliminar el producto "${nombre}" (${codigo})?`);
   if (!ok) return;
@@ -345,36 +338,26 @@ async function eliminarProducto(codigo, nombre) {
   }
 }
 
-// ---------- Eventos de filtros ----------
-if (buscador) {
-  buscador.addEventListener("input", aplicarFiltros);
-}
-
-if (filtroCategoria) {
-  filtroCategoria.addEventListener("change", aplicarFiltros);
-}
-
-if (filtroSubcat) {
-  filtroSubcat.addEventListener("change", aplicarFiltros);
-}
-
-if (chkSoloSinStock) {
-  chkSoloSinStock.addEventListener("change", aplicarFiltros);
-}
+if (buscador)       buscador.addEventListener("input", aplicarFiltros);
+if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
+if (filtroSubcat)    filtroSubcat.addEventListener("change", aplicarFiltros);
+if (chkSoloSinStock) chkSoloSinStock.addEventListener("change", aplicarFiltros);
 
 // ============================================================================
-//  ESTADÍSTICAS DE VENTAS
+//  ESTADÍSTICAS DE VENTAS + GRÁFICOS
 // ============================================================================
 
 async function cargarEstadisticasVentas() {
-  // Si no hay elementos de stats en el DOM, no hacemos nada
+  // Si no hay elementos de stats ni canvases en el DOM, no hacemos nada
   if (
     !statsTotalMonto &&
     !statsTotalPedidos &&
     !statsClientes &&
     !statsHoy &&
     !statsMes &&
-    !statsRanking
+    !statsRanking &&
+    !canvasVentasDias &&
+    !canvasProductosTop
   ) {
     return;
   }
@@ -390,6 +373,7 @@ async function cargarEstadisticasVentas() {
     let ventasMes        = 0;
 
     const productosVendidos = {}; // { codigo: cantidadTotalVendida }
+    const ventasPorDia = {};      // { 'YYYY-MM-DD': totalMonto }
 
     const hoy = new Date();
     const inicioDia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
@@ -406,7 +390,6 @@ async function cargarEstadisticasVentas() {
         clientesUnicos.add(data.clienteId);
       }
 
-      // Fecha (Timestamp Firestore → Date)
       let fechaVenta = null;
       if (data.fecha && typeof data.fecha.toDate === "function") {
         fechaVenta = data.fecha.toDate();
@@ -419,6 +402,10 @@ async function cargarEstadisticasVentas() {
         if (fechaVenta >= inicioMes) {
           ventasMes += total;
         }
+
+        // Ventas por día (para gráfico)
+        const iso = fechaVenta.toISOString().slice(0, 10); // YYYY-MM-DD
+        ventasPorDia[iso] = (ventasPorDia[iso] || 0) + total;
       }
 
       // Ranking productos
@@ -441,7 +428,7 @@ async function cargarEstadisticasVentas() {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5); // Top 5
 
-    // Actualizar UI solo si esos elementos existen
+    // Actualizar stats en texto
     if (statsTotalMonto) {
       statsTotalMonto.textContent = "$" + totalVentasMonto.toLocaleString("es-AR");
     }
@@ -466,10 +453,97 @@ async function cargarEstadisticasVentas() {
           .join("");
       }
     }
+
+    // Actualizar gráficos (si Chart está disponible)
+    actualizarChartVentasDias(ventasPorDia);
+    actualizarChartTopProductos(ranking);
+
   } catch (err) {
     console.error("Error cargando estadísticas de ventas:", err);
     if (statsRanking) {
       statsRanking.innerHTML = "<li>Error al cargar estadísticas.</li>";
     }
   }
+}
+
+// Helpers gráficos
+function formatearFechaCorta(iso) {
+  const [y, m, d] = iso.split("-");
+  return `${d}/${m}`;
+}
+
+function actualizarChartVentasDias(ventasPorDia) {
+  if (!canvasVentasDias || typeof Chart === "undefined") return;
+
+  const ctx = canvasVentasDias.getContext("2d");
+  if (!ctx) return;
+
+  const ordenado = Object.entries(ventasPorDia)
+    .sort((a, b) => a[0].localeCompare(b[0])); // asc por fecha
+
+  const ultimos = ordenado.slice(-7); // últimos días con movimiento
+
+  const labels = ultimos.map(([iso]) => formatearFechaCorta(iso));
+  const data   = ultimos.map(([, total]) => total);
+
+  if (chartVentasDias) chartVentasDias.destroy();
+
+  chartVentasDias = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Monto vendido",
+          data,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+      },
+    },
+  });
+}
+
+function actualizarChartTopProductos(ranking) {
+  if (!canvasProductosTop || typeof Chart === "undefined") return;
+
+  const ctx = canvasProductosTop.getContext("2d");
+  if (!ctx) return;
+
+  if (!ranking || !ranking.length) {
+    if (chartTopProductos) {
+      chartTopProductos.destroy();
+      chartTopProductos = null;
+    }
+    return;
+  }
+
+  const labels = ranking.map(([codigo]) => codigo);
+  const data   = ranking.map(([, cant]) => cant);
+
+  if (chartTopProductos) chartTopProductos.destroy();
+
+  chartTopProductos = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Unidades vendidas",
+          data,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+    },
+  });
 }
