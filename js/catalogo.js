@@ -1267,6 +1267,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     actualizarTextoToggle();
     aplicarFiltros();
   }
+  if (tagKey && tagKey !== "todas") {
+    let tagLabel = null;
+    const tagsPorCat = MAPA_TAGS[catKey];
+
+    if (tagsPorCat) {
+      let setTags = tagsPorCat[subKey];
+
+      if (!setTags) {
+        const tmp = new Set();
+        Object.values(tagsPorCat).forEach(st => st.forEach(t => tmp.add(t)));
+        setTags = tmp;
+      }
+
+      if (setTags) {
+        for (const t of setTags) {
+          if (t.toLowerCase() === tagKey) {
+            tagLabel = t;
+            break;
+          }
+        }
+      }
+    }
+
+    seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel || tagKey);
+  }
+
+  actualizarTextoToggle();
+  aplicarFiltros();
 });
-``` :contentReference[oaicite:0]{index=0}
-::contentReference[oaicite:1]{index=1}
