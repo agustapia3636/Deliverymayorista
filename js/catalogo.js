@@ -1,49 +1,40 @@
-// js/catalogo.js
 // ========================================
 // CATÁLOGO + CARRITO (página catalogo.html)
-// - Mega menú categorías + subcategorías + etiquetas
-// - Memoria de filtros en localStorage
-// - Paginación premium
-// - Carrito con mini-resumen
-// - AHORA: productos desde Firestore (colección "productos")
+// Mega menú categorías tipo "Telefonía"
+// con 3er nivel de ETIQUETAS libres + iconos
+// + memoria de filtros en localStorage
+// + botón premium "Limpiar filtros"
+// + PAGINACIÓN PREMIUM
 // ========================================
 
-import { db } from "./firebase-init.js";
-import {
-  collection,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
-
-// Imagen base en GitHub
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 const CLAVE_CARRITO = "dm_carrito";
 
 // ===== DOM PRINCIPAL =====
-const grid = document.getElementById("lista-productos");
-const buscador = document.getElementById("buscador");
-const filtroCategoria = document.getElementById("filtro-categoria"); // select oculto
-const filtroSubcategoria = document.getElementById("filtro-subcategoria"); // select oculto
+const grid               = document.getElementById("lista-productos");
+const buscador           = document.getElementById("buscador");
+const filtroCategoria    = document.getElementById("filtro-categoria");     // select oculto
+const filtroSubcategoria = document.getElementById("filtro-subcategoria");  // select oculto
 
 // Mega menú
 const megaDropdown = document.getElementById("megaDropdown");
-const megaToggle = document.getElementById("categoriaToggle");
-const megaMenu = document.getElementById("megaMenu");
-const megaCatList = document.getElementById("megaCategorias");
-const megaSubList = document.getElementById("megaSubcategorias");
-const megaTagList = document.getElementById("megaEtiquetas");
+const megaToggle   = document.getElementById("categoriaToggle");
+const megaMenu     = document.getElementById("megaMenu");
+const megaCatList  = document.getElementById("megaCategorias");
+const megaSubList  = document.getElementById("megaSubcategorias");
+const megaTagList  = document.getElementById("megaEtiquetas");
 const megaSubTitle = document.getElementById("megaSubTitle");
 const megaTagTitle = document.getElementById("megaTagTitle");
 const megaResetBtn = document.getElementById("megaReset");
 
-// Mini carrito
 const miniCantidad = document.getElementById("mini-carrito-cantidad");
-const miniTotal = document.getElementById("mini-carrito-total");
+const miniTotal    = document.getElementById("mini-carrito-total");
 
 // Paginación
-const resumenResultados = document.getElementById("resumen-resultados");
-const btnPaginaAnterior = document.getElementById("btn-pagina-anterior");
-const btnPaginaSiguiente = document.getElementById("btn-pagina-siguiente");
-const contenedorNumeros = document.getElementById("paginador-numeros");
+const resumenResultados   = document.getElementById("resumen-resultados");
+const btnPaginaAnterior   = document.getElementById("btn-pagina-anterior");
+const btnPaginaSiguiente  = document.getElementById("btn-pagina-siguiente");
+const contenedorNumeros   = document.getElementById("paginador-numeros");
 const contenedorPaginador = document.querySelector(".paginador-contenedor");
 
 const ITEMS_POR_PAGINA = 24;
@@ -51,38 +42,36 @@ let paginaActual = 1;
 let ultimoTotalFiltrado = 0;
 
 // mapa categoría → subcategorías
-let MAPA_CAT_SUB = {};
+let MAPA_CAT_SUB   = {};
 let MAPA_CAT_LABEL = {};
 
 // mapa etiquetas: catKey -> subKey -> Set(etiquetas)
 let MAPA_TAGS = {};
 
-// Productos en memoria
 let TODOS_LOS_PRODUCTOS = [];
 
-// Estado de filtros
-let categoriaSeleccionada = "todas";
+let categoriaSeleccionada    = "todas";
 let subcategoriaSeleccionada = "todas";
-let etiquetaSeleccionada = "todas";
+let etiquetaSeleccionada     = "todas";
 
-let labelCategoriaActual = "Todas las categorías";
+let labelCategoriaActual    = "Todas las categorías";
 let labelSubcategoriaActual = null;
-let labelEtiquetaActual = null;
+let labelEtiquetaActual     = null;
 
 // ========================
 // GUARDAR / LEER FILTROS
 // ========================
+
 const CLAVE_FILTROS = "dm_filtros";
 
 function guardarFiltrosActuales() {
   const data = {
-    categoria: categoriaSeleccionada || "todas",
+    categoria:    categoriaSeleccionada || "todas",
     subcategoria: subcategoriaSeleccionada || "todas",
-    etiqueta: etiquetaSeleccionada || "todas",
-    pagina: paginaActual || 1,
-    busqueda: buscador ? buscador.value.trim().toLowerCase() : ""
+    etiqueta:     etiquetaSeleccionada || "todas",
+    pagina:       paginaActual || 1,
+    busqueda:     buscador ? buscador.value.trim().toLowerCase() : ""
   };
-
   try {
     localStorage.setItem(CLAVE_FILTROS, JSON.stringify(data));
   } catch (e) {
@@ -103,12 +92,14 @@ function leerFiltrosGuardados() {
 }
 
 // ========= UTILIDADES =========
+
 function safe(value, fallback = "") {
   return (value === undefined || value === null) ? fallback : value;
 }
 
 function parsearPrecio(valor) {
   if (typeof valor === "number") return valor;
+
   if (typeof valor === "string") {
     const limpio = valor
       .toString()
@@ -123,9 +114,10 @@ function parsearPrecio(valor) {
 function formatearPrecio(valor) {
   const numero = parsearPrecio(valor);
   if (numero == null) return "Consultar";
+
   return numero.toLocaleString("es-AR", {
     minimumFractionDigits: 0,
-    maximumFractionDigits: 0
+    maximumFractionDigits: 0,
   });
 }
 
@@ -153,7 +145,7 @@ function setImagenProducto(imgElement, codigo) {
 
   const urls = [
     `${BASE_IMG}/${codigo}.jpg`,
-    `${BASE_IMG}/${codigo}.JPG`
+    `${BASE_IMG}/${codigo}.JPG`,
   ];
   let intento = 0;
 
@@ -175,6 +167,7 @@ function setImagenProducto(imgElement, codigo) {
 }
 
 // ========= CARRITO =========
+
 function leerCarrito() {
   try {
     const raw = localStorage.getItem(CLAVE_CARRITO);
@@ -202,27 +195,22 @@ function actualizarMiniCarrito() {
     (acc, p) => acc + (p.cantidad || 0),
     0
   );
+
   const totalPrecio = carrito.reduce((acc, p) => {
     const precio = Number(p.precio) || 0;
     return acc + precio * (p.cantidad || 0);
   }, 0);
 
   if (miniCantidad) miniCantidad.textContent = totalProductos;
-
   if (miniTotal) {
     miniTotal.textContent = totalPrecio.toLocaleString("es-AR", {
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      maximumFractionDigits: 0,
     });
   }
 }
 
-function agregarAlCarritoDesdeCatalogo(
-  productoBasico,
-  boton,
-  cantidadElegida,
-  stockDisponible
-) {
+function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, stockDisponible) {
   let carrito = leerCarrito();
   const idx = carrito.findIndex(p => p.codigo === productoBasico.codigo);
   let cantidad = Number(cantidadElegida) || 1;
@@ -236,14 +224,13 @@ function agregarAlCarritoDesdeCatalogo(
     item.cantidad += cantidad;
   } else {
     if (stockDisponible && cantidad > stockDisponible) cantidad = stockDisponible;
-
     carrito.push({
-      codigo: productoBasico.codigo,
-      nombre: productoBasico.nombre,
-      precio: productoBasico.precio,
+      codigo:  productoBasico.codigo,
+      nombre:  productoBasico.nombre,
+      precio:  productoBasico.precio,
       cantidad,
-      img: productoBasico.img || null,
-      stock: stockDisponible
+      img:     productoBasico.img || null,
+      stock:   stockDisponible,
     });
   }
 
@@ -262,11 +249,12 @@ function irAlCarrito() {
 }
 
 // ========= RENDER PRODUCTOS =========
+
 function renderProductos(lista) {
   grid.innerHTML = "";
 
   if (!lista || lista.length === 0) {
-    grid.innerHTML = `<p class="catalogo-vacio">No se encontraron productos.</p>`;
+    grid.innerHTML = `<p>No se encontraron productos.</p>`;
     return;
   }
 
@@ -308,11 +296,11 @@ function renderProductos(lista) {
       prod["Precio Mayorista"] ??
       prod["Precio Cliente"];
 
-    const precioNum = parsearPrecio(brutoPrecio) || 0;
+    const precioNum   = parsearPrecio(brutoPrecio) || 0;
     const precioTexto = formatearPrecio(brutoPrecio);
 
     const stockBruto = safe(prod.Stock ?? prod.stock, "");
-    const stockNum = Number(stockBruto) || 0;
+    const stockNum   = Number(stockBruto) || 0;
     const stockTexto = stockNum
       ? `Stock: ${stockNum} unidades`
       : (stockBruto ? `Stock: ${stockBruto}` : "");
@@ -325,35 +313,30 @@ function renderProductos(lista) {
       ? `En carrito (${itemCarrito.cantidad})`
       : "Agregar al carrito";
 
-    // Estructura de tarjeta (desktop tabla + mobile tarjeta)
     card.innerHTML = `
-      <div class="producto-card-inner">
-        <div class="producto-img-wrapper">
-          <img class="producto-imagen" alt="${titulo}" loading="lazy">
+      <div class="producto-imagen-wrapper">
+        <img class="producto-imagen" alt="${nombreBase}">
+      </div>
+
+      <div class="producto-info">
+        <h3 class="producto-titulo">${titulo}</h3>
+        <p class="producto-descripcion">${descLarga}</p>
+
+        <div class="producto-precio-row">
+          <span class="producto-precio">$ ${precioTexto}</span>
         </div>
-        <div class="producto-info">
-          <h3 class="producto-titulo">${titulo}</h3>
-          ${descLarga ? `<p class="producto-descripcion">${descLarga}</p>` : ""}
-          <div class="producto-precio-stock">
-            <span class="producto-precio">$ ${precioTexto}</span>
-            <span class="stock-text">${stockTexto}</span>
-          </div>
-          <div class="producto-acciones">
-            <div class="cantidad-wrapper">
-              <button type="button" class="btn-cantidad menos">−</button>
-              <input
-                type="text"
-                class="input-cantidad"
-                value="1"
-                inputmode="numeric"
-              />
-              <button type="button" class="btn-cantidad mas">+</button>
-            </div>
-            <button type="button" class="btn-agregar-carrito">
-              ${textoBoton}
-            </button>
-          </div>
+
+        ${stockTexto ? `<p class="producto-stock stock-text">${stockTexto}</p>` : ""}
+
+        <div class="cantidad-container">
+          <button class="btn-cantidad menos">−</button>
+          <input type="number" class="input-cantidad">
+          <button class="btn-cantidad mas">+</button>
         </div>
+
+        <button class="btn-agregar-carrito">
+          ${textoBoton}
+        </button>
       </div>
     `;
 
@@ -365,11 +348,10 @@ function renderProductos(lista) {
       btn.classList.add("btn-agregar-carrito-activo");
     }
 
-    const input = card.querySelector(".input-cantidad");
+    const input        = card.querySelector(".input-cantidad");
     const stockVisible = card.querySelector(".stock-text");
     const stockInicial = stockNum || 0;
 
-    // Helpers cantidad
     function obtenerCantidadSegura() {
       let cant = parseInt(input.value, 10);
       if (!Number.isFinite(cant) || cant < 1) cant = 1;
@@ -392,14 +374,15 @@ function renderProductos(lista) {
 
       let restante = stockInicial - cant;
       if (restante < 0) restante = 0;
+
       stockVisible.textContent = `Stock: ${restante} unidades`;
     }
 
-    const btnMas = card.querySelector(".btn-cantidad.mas");
+    const btnMas   = card.querySelector(".btn-cantidad.mas");
     const btnMenos = card.querySelector(".btn-cantidad.menos");
 
     if (btnMas) {
-      btnMas.addEventListener("click", ev => {
+      btnMas.addEventListener("click", (ev) => {
         ev.stopPropagation();
         let v = parseInt(input.value, 10);
         if (!Number.isFinite(v) || v < 1) v = 1;
@@ -411,7 +394,7 @@ function renderProductos(lista) {
     }
 
     if (btnMenos) {
-      btnMenos.addEventListener("click", ev => {
+      btnMenos.addEventListener("click", (ev) => {
         ev.stopPropagation();
         let v = parseInt(input.value, 10);
         if (!Number.isFinite(v) || v <= 1) v = 1;
@@ -422,17 +405,15 @@ function renderProductos(lista) {
     }
 
     if (input) {
-      const handleTyping = ev => {
+      const handleTyping = (ev) => {
         ev.stopPropagation();
         ev.target.value = ev.target.value.replace(/\D/g, "");
         actualizarStockVisible();
       };
-
       ["input", "keyup", "change"].forEach(evt =>
         input.addEventListener(evt, handleTyping)
       );
-
-      input.addEventListener("blur", ev => {
+      input.addEventListener("blur", (ev) => {
         ev.stopPropagation();
         const cant = obtenerCantidadSegura();
         input.value = String(cant);
@@ -444,7 +425,6 @@ function renderProductos(lista) {
       stockVisible.textContent = `Stock: ${stockInicial} unidades`;
     }
 
-    // Botón agregar al carrito
     btn.addEventListener("click", ev => {
       ev.preventDefault();
       ev.stopPropagation();
@@ -461,17 +441,11 @@ function renderProductos(lista) {
       };
 
       const stockParaCarrito = stockInicial || 9999;
-      agregarAlCarritoDesdeCatalogo(
-        productoBasico,
-        btn,
-        cant,
-        stockParaCarrito
-      );
+      agregarAlCarritoDesdeCatalogo(productoBasico, btn, cant, stockParaCarrito);
     });
 
-    // Click a detalle
     const tituloEl = card.querySelector(".producto-titulo");
-    const imgEl = card.querySelector(".producto-imagen");
+    const imgEl    = card.querySelector(".producto-imagen");
 
     function irADetalle(ev) {
       ev.preventDefault();
@@ -480,26 +454,25 @@ function renderProductos(lista) {
     }
 
     if (tituloEl) tituloEl.addEventListener("click", irADetalle);
-    if (imgEl) imgEl.addEventListener("click", irADetalle);
+    if (imgEl)    imgEl.addEventListener("click", irADetalle);
 
     grid.appendChild(card);
   });
 }
 
 // ========= FILTROS (BUSCADOR + CAT + SUBCAT + TAG) =========
+
 function aplicarFiltros() {
   const texto = buscador ? buscador.value.trim().toLowerCase() : "";
-  const cat = filtroCategoria ? filtroCategoria.value : "";
-  const sub = filtroSubcategoria ? filtroSubcategoria.value : "";
-  const tag = etiquetaSeleccionada || "todas";
+  const cat   = filtroCategoria ? filtroCategoria.value : "";
+  const sub   = filtroSubcategoria ? filtroSubcategoria.value : "";
+  const tag   = etiquetaSeleccionada || "todas";
 
   const filtrados = TODOS_LOS_PRODUCTOS.filter(prod => {
     const codigo = safe(
       prod.codigo || prod.cod || prod.Code || prod.Codigo,
       ""
-    )
-      .toString()
-      .toLowerCase();
+    ).toString().toLowerCase();
 
     const nombre = safe(
       prod.nombre || prod.descripcion || prod.titulo || prod["Nombre Corto"],
@@ -543,9 +516,7 @@ function aplicarFiltros() {
       !sub || sub === "todas" || subcategoria === sub.toLowerCase();
 
     const pasaEtiqueta =
-      !tag ||
-      tag === "todas" ||
-      etiquetasNormalizadas.includes(tag.toLowerCase());
+      !tag || tag === "todas" || etiquetasNormalizadas.includes(tag.toLowerCase());
 
     return pasaTexto && pasaCategoria && pasaSubcategoria && pasaEtiqueta;
   });
@@ -554,6 +525,7 @@ function aplicarFiltros() {
 }
 
 // ========= PAGINACIÓN PREMIUM =========
+
 function renderConPaginador(listaFiltrada) {
   ultimoTotalFiltrado = listaFiltrada.length;
 
@@ -566,10 +538,11 @@ function renderConPaginador(listaFiltrada) {
   if (paginaActual < 1) paginaActual = 1;
 
   const inicio = (paginaActual - 1) * ITEMS_POR_PAGINA;
-  const fin = inicio + ITEMS_POR_PAGINA;
+  const fin    = inicio + ITEMS_POR_PAGINA;
+
   const paginaLista = listaFiltrada.slice(inicio, fin);
 
-  // Render tarjetas
+  // Render de tarjetas
   renderProductos(paginaLista);
 
   // Resumen
@@ -583,15 +556,15 @@ function renderConPaginador(listaFiltrada) {
     }
   }
 
-  // Contenedor paginador (sticky + ocultar si solo 1 página)
+  // Configuración visual del contenedor del paginador (sticky + ocultar si 1 sola página)
   if (contenedorPaginador) {
     if (totalPaginas <= 1) {
       contenedorPaginador.style.display = "none";
     } else {
-      contenedorPaginador.style.display = "flex";
-      contenedorPaginador.style.position = "sticky";
-      contenedorPaginador.style.bottom = "0";
-      contenedorPaginador.style.zIndex = "40";
+      contenedorPaginador.style.display   = "flex";
+      contenedorPaginador.style.position  = "sticky";
+      contenedorPaginador.style.bottom    = "0";
+      contenedorPaginador.style.zIndex    = "40";
       contenedorPaginador.style.background = "#0f0f1a";
     }
   }
@@ -599,22 +572,20 @@ function renderConPaginador(listaFiltrada) {
   if (!contenedorNumeros) return;
 
   // Animación suave
-  contenedorNumeros.style.transition =
-    "opacity 0.15s ease, transform 0.15s ease";
-  contenedorNumeros.style.opacity = "0";
-  contenedorNumeros.style.transform = "translateY(4px)";
+  contenedorNumeros.style.transition = "opacity 0.15s ease, transform 0.15s ease";
+  contenedorNumeros.style.opacity    = "0";
+  contenedorNumeros.style.transform  = "translateY(4px)";
+
   contenedorNumeros.innerHTML = "";
 
-  // Si no hay más de una página
+  // Si no hay más de una página, terminamos acá
   if (totalPaginas <= 1) {
     if (btnPaginaAnterior) btnPaginaAnterior.disabled = true;
     if (btnPaginaSiguiente) btnPaginaSiguiente.disabled = true;
-
     requestAnimationFrame(() => {
-      contenedorNumeros.style.opacity = "1";
+      contenedorNumeros.style.opacity   = "1";
       contenedorNumeros.style.transform = "translateY(0)";
     });
-
     return;
   }
 
@@ -650,7 +621,7 @@ function renderConPaginador(listaFiltrada) {
     contenedorNumeros.appendChild(dots);
   }
 
-  // 3) Páginas intermedias
+  // 3) Páginas intermedias alrededor de la actual
   for (
     let i = Math.max(2, paginaActual - rango);
     i <= Math.min(total - 1, paginaActual + rango);
@@ -681,37 +652,41 @@ function renderConPaginador(listaFiltrada) {
 
   // Terminar animación
   requestAnimationFrame(() => {
-    contenedorNumeros.style.opacity = "1";
+    contenedorNumeros.style.opacity   = "1";
     contenedorNumeros.style.transform = "translateY(0)";
   });
 }
 
 // ========= ICONOS PARA CATEGORÍAS =========
+
 function iconoParaCategoria(catLabel) {
   if (!catLabel) return "•";
+
   const txt = catLabel.toLowerCase().trim();
 
   const mapa = {
     "todas las categorías": "★",
+
     "accesorios vehiculares": "🚗",
     "baño y cocina": "🍽️",
     "bano y cocina": "🍽️",
     "camping": "⛺",
     "cocina": "🍳",
     "cuidado personal": "🧴",
-    "decoración": "🪴",
-    "decoracion": "🪴",
-    "bazar": "🛒",
-    "hogar": "🏠",
+    "decoración": "🕯️",
+    "decoracion": "🕯️",
+
+    "bazar": "🛍️",
+    "hogar": "🏡",
     "librería": "📚",
     "libreria": "📚",
-    "oficina": "🗂️",
+    "oficina": "📎",
     "electrónica": "🔌",
     "electronica": "🔌",
     "audio": "🎧",
-    "ferretería": "🛠️",
-    "ferreteria": "🛠️",
-    "herramientas": "🛠️",
+    "ferretería": "🛠",
+    "ferreteria": "🛠",
+    "herramientas": "🛠",
     "juguetes": "🧸",
     "regalería": "🎁",
     "regaleria": "🎁",
@@ -722,24 +697,24 @@ function iconoParaCategoria(catLabel) {
   if (mapa[txt]) return mapa[txt];
 
   if (txt.includes("vehicul")) return "🚗";
-  if (txt.includes("auto") || txt.includes("motor")) return "🚗";
-  if (txt.includes("baño") || txt.includes("bano") || txt.includes("cocina"))
-    return "🍽️";
-  if (txt.includes("hogar")) return "🏠";
+  if (txt.includes("auto") || txt.includes("motor")) return "🚙";
+  if (txt.includes("baño") || txt.includes("bano") || txt.includes("cocina")) return "🍽️";
+  if (txt.includes("hogar")) return "🏡";
   if (txt.includes("camping")) return "⛺";
   if (txt.includes("cuidado")) return "🧴";
-  if (txt.includes("decor")) return "🪴";
-  if (txt.includes("juguet") || txt.includes("regal")) return "🎁";
+  if (txt.includes("decor")) return "🕯️";
+  if (txt.includes("juguet") || txt.includes("regal")) return "🧸";
   if (txt.includes("librer") || txt.includes("oficina")) return "📚";
   if (txt.includes("electr")) return "🔌";
-  if (txt.includes("herramient") || txt.includes("ferreter")) return "🛠️";
+  if (txt.includes("herramient") || txt.includes("ferreter")) return "🛠";
   if (txt.includes("bolso") || txt.includes("mochila")) return "🎒";
-  if (txt.includes("bazar")) return "🛒";
+  if (txt.includes("bazar")) return "🛍️";
 
   return "•";
 }
 
 // ========= MEGA MENÚ: CATEGORÍAS / SUBCATEGORÍAS / ETIQUETAS =========
+
 function cerrarMegaMenu() {
   if (megaDropdown) megaDropdown.classList.remove("open");
 }
@@ -749,16 +724,18 @@ function abrirMegaMenu() {
 }
 
 function actualizarTextoToggle() {
-  if (!megaToggle) return;
-
   let partes = [];
 
-  if (labelCategoriaActual && labelCategoriaActual !== "Todas las categorías") {
-    partes.push(labelCategoriaActual);
+  if (labelCategoriaActual) {
+    if (labelCategoriaActual !== "Todas las categorías") {
+      partes.push(labelCategoriaActual);
+    }
   }
+
   if (labelSubcategoriaActual && labelSubcategoriaActual !== "Todas") {
     partes.push(labelSubcategoriaActual);
   }
+
   if (labelEtiquetaActual && labelEtiquetaActual !== "Todas") {
     partes.push(labelEtiquetaActual);
   }
@@ -770,34 +747,32 @@ function actualizarTextoToggle() {
     texto = partes.join(" › ");
   }
 
-  megaToggle.innerHTML = `${texto} ▾`;
+  megaToggle.innerHTML = `
+    <span class="mega-label">${texto}</span>
+    <span class="mega-arrow">▾</span>
+  `;
 }
 
 function seleccionarCategoria(catKey) {
-  categoriaSeleccionada = catKey || "todas";
+  categoriaSeleccionada    = catKey || "todas";
   subcategoriaSeleccionada = "todas";
-  etiquetaSeleccionada = "todas";
-  paginaActual = 1;
+  etiquetaSeleccionada     = "todas";
+  paginaActual             = 1;
 
-  if (filtroCategoria) filtroCategoria.value = categoriaSeleccionada;
+  if (filtroCategoria)    filtroCategoria.value    = categoriaSeleccionada;
   if (filtroSubcategoria) filtroSubcategoria.value = "todas";
 
   if (megaCatList) {
     megaCatList.querySelectorAll(".mega-item").forEach(li => {
-      li.classList.toggle(
-        "mega-item-activo",
-        li.dataset.catKey === categoriaSeleccionada
-      );
+      li.classList.toggle("mega-item-activo", li.dataset.catKey === categoriaSeleccionada);
     });
   }
 
-  labelCategoriaActual =
-    categoriaSeleccionada === "todas"
-      ? "Todas las categorías"
-      : (MAPA_CAT_LABEL[categoriaSeleccionada] || "Categoría");
-
+  labelCategoriaActual   = categoriaSeleccionada === "todas"
+    ? "Todas las categorías"
+    : (MAPA_CAT_LABEL[categoriaSeleccionada] || "Categoría");
   labelSubcategoriaActual = null;
-  labelEtiquetaActual = null;
+  labelEtiquetaActual     = null;
 
   construirMenuSubcategorias(categoriaSeleccionada, labelCategoriaActual);
   construirMenuEtiquetas(categoriaSeleccionada, "todas", labelCategoriaActual, null);
@@ -809,25 +784,21 @@ function seleccionarCategoria(catKey) {
 
 function seleccionarSubcategoria(catKey, subKey, subLabel) {
   subcategoriaSeleccionada = subKey || "todas";
-  etiquetaSeleccionada = "todas";
-  paginaActual = 1;
+  etiquetaSeleccionada     = "todas";
+  paginaActual             = 1;
 
   if (filtroSubcategoria) filtroSubcategoria.value = subcategoriaSeleccionada;
 
   if (megaSubList) {
     megaSubList.querySelectorAll(".mega-subitem").forEach(li => {
-      li.classList.toggle(
-        "mega-subitem-activo",
-        li.dataset.subKey === subcategoriaSeleccionada
-      );
+      li.classList.toggle("mega-subitem-activo", li.dataset.subKey === subcategoriaSeleccionada);
     });
   }
 
   labelSubcategoriaActual = subKey === "todas" ? null : (subLabel || subKey);
-  labelEtiquetaActual = null;
+  labelEtiquetaActual     = null;
 
   construirMenuEtiquetas(catKey, subKey, labelCategoriaActual, labelSubcategoriaActual);
-
   actualizarTextoToggle();
   aplicarFiltros();
   guardarFiltrosActuales();
@@ -835,14 +806,11 @@ function seleccionarSubcategoria(catKey, subKey, subLabel) {
 
 function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
   etiquetaSeleccionada = tagKey || "todas";
-  paginaActual = 1;
+  paginaActual         = 1;
 
   if (megaTagList) {
     megaTagList.querySelectorAll(".mega-tagitem").forEach(li => {
-      li.classList.toggle(
-        "mega-tagitem-activo",
-        li.dataset.tagKey === etiquetaSeleccionada
-      );
+      li.classList.toggle("mega-tagitem-activo", li.dataset.tagKey === etiquetaSeleccionada);
     });
   }
 
@@ -864,6 +832,7 @@ function resetearFiltrosMega() {
 
 function construirMenuEtiquetas(catKey, subKey, catLabel, subLabel) {
   if (!megaTagList) return;
+
   megaTagList.innerHTML = "";
 
   const ck = (catKey || "todas").toLowerCase();
@@ -923,6 +892,7 @@ function construirMenuEtiquetas(catKey, subKey, catLabel, subLabel) {
 
 function construirMenuSubcategorias(catKey, catLabel) {
   if (!megaSubList) return;
+
   megaSubList.innerHTML = "";
 
   const key = (catKey || "todas").toLowerCase();
@@ -938,7 +908,6 @@ function construirMenuSubcategorias(catKey, catLabel) {
     li.addEventListener("click", () => {
       seleccionarSubcategoria("todas", "todas", "Todas");
     });
-
     megaSubList.appendChild(li);
     return;
   }
@@ -971,13 +940,14 @@ function construirMenuSubcategorias(catKey, catLabel) {
 
 function construirMenuCategorias(categoriasUnicas) {
   if (!megaCatList) return;
+
   megaCatList.innerHTML = "";
 
   const liTodas = document.createElement("li");
   liTodas.className = "mega-item mega-item-activo";
   liTodas.textContent = "Todas las categorías";
   liTodas.dataset.catKey = "todas";
-  liTodas.dataset.icon = "★";
+  liTodas.dataset.icon   = "★";
   liTodas.addEventListener("click", () => seleccionarCategoria("todas"));
   megaCatList.appendChild(liTodas);
 
@@ -989,68 +959,46 @@ function construirMenuCategorias(categoriasUnicas) {
     li.className = "mega-item";
     li.textContent = cat;
     li.dataset.catKey = key;
-    li.dataset.icon = iconoParaCategoria(cat);
+    li.dataset.icon   = iconoParaCategoria(cat);
     li.addEventListener("click", () => seleccionarCategoria(key));
     megaCatList.appendChild(li);
   });
 }
 
-// ========= CARGA INICIAL (AHORA DESDE FIRESTORE) =========
+// ========= CARGA INICIAL =========
+
 async function cargarProductos() {
   try {
-    // Firestore: colección "productos"
-    const ref = collection(db, "productos");
-    const snap = await getDocs(ref);
+    const resp = await fetch("data/productos.json");
+    if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
-    TODOS_LOS_PRODUCTOS = snap.docs.map(d => {
-      const data = d.data() || {};
-      // asegurar campo codigo
-      if (!data.codigo) data.codigo = d.id;
-      return {
-        id: d.id,
-        ...data
-      };
-    });
+    const data = await resp.json();
+    TODOS_LOS_PRODUCTOS = Array.isArray(data)
+      ? data
+      : (data.productos || []);
 
-    // Opcional: si usás un campo "activo" para ocultar productos
-    TODOS_LOS_PRODUCTOS = TODOS_LOS_PRODUCTOS.filter(p => {
-      if (p.activo === undefined) return true; // si no existe el campo, se muestra
-      return !!p.activo;
-    });
-
-    // Limpiar mapas
-    MAPA_CAT_SUB = {};
+    MAPA_CAT_SUB   = {};
     MAPA_CAT_LABEL = {};
-    MAPA_TAGS = {};
+    MAPA_TAGS      = {};
 
-    // Construir mapas de categorías, subcategorías y etiquetas
     TODOS_LOS_PRODUCTOS.forEach(p => {
       const catOriginal = safe(
-        p.categoria ||
-          p.rubro ||
-          p.cat ||
-          p["Categoria Princ"] ||
-          p["Categoria_Princ"],
+        p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
         ""
-      )
-        .toString()
-        .trim();
+      ).toString().trim();
 
       const subOriginal = safe(
         p.subcategoria ||
-          p.Subcategoria ||
-          p.Sub_Categoria ||
-          p["Sub_Categoria"] ||
-          p["Subcategoria"],
+        p.Subcategoria ||
+        p.Sub_Categoria ||
+        p["Sub_Categoria"] ||
+        p["Subcategoria"],
         ""
-      )
-        .toString()
-        .trim();
+      ).toString().trim();
 
       const catKey = (catOriginal.toLowerCase() || "sin-categoria");
       const subKey = (subOriginal.toLowerCase() || "sin-subcategoria");
 
-      // mapa categorías → subcategorías
       if (!MAPA_CAT_SUB[catKey]) {
         MAPA_CAT_SUB[catKey] = new Set();
       }
@@ -1058,7 +1006,6 @@ async function cargarProductos() {
         MAPA_CAT_SUB[catKey].add(subOriginal);
       }
 
-      // mapa etiquetas
       const etiquetasRaw =
         p.etiquetas ||
         p.tags ||
@@ -1067,30 +1014,21 @@ async function cargarProductos() {
         p["etiquetas"];
 
       const etiquetasNorm = normalizarEtiquetasCampo(etiquetasRaw);
-
       if (etiquetasNorm.length) {
         if (!MAPA_TAGS[catKey]) MAPA_TAGS[catKey] = {};
         if (!MAPA_TAGS[catKey][subKey]) MAPA_TAGS[catKey][subKey] = new Set();
-
-        etiquetasNorm.forEach(t =>
-          MAPA_TAGS[catKey][subKey].add(
-            t.charAt(0).toUpperCase() + t.slice(1)
-          )
-        );
+        etiquetasNorm.forEach(t => MAPA_TAGS[catKey][subKey].add(
+          t.charAt(0).toUpperCase() + t.slice(1)
+        ));
       }
     });
 
-    // Poblar select de categorías y mega menú
     if (filtroCategoria) {
       const categoriasUnicas = Array.from(
         new Set(
           TODOS_LOS_PRODUCTOS.map(p =>
             safe(
-              p.categoria ||
-                p.rubro ||
-                p.cat ||
-                p["Categoria Princ"] ||
-                p["Categoria_Princ"],
+              p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
               ""
             ).toString()
           ).filter(c => c !== "")
@@ -1098,7 +1036,6 @@ async function cargarProductos() {
       ).sort((a, b) => a.localeCompare(b, "es"));
 
       filtroCategoria.innerHTML = "";
-
       const optTodas = document.createElement("option");
       optTodas.value = "todas";
       optTodas.textContent = "Todas las categorías";
@@ -1114,7 +1051,6 @@ async function cargarProductos() {
       construirMenuCategorias(categoriasUnicas);
     }
 
-    // Poblar select de subcategorías
     if (filtroSubcategoria) {
       filtroSubcategoria.innerHTML = "";
       const optTodasSub = document.createElement("option");
@@ -1128,11 +1064,12 @@ async function cargarProductos() {
     actualizarMiniCarrito();
   } catch (err) {
     console.error(err);
-    grid.innerHTML = `<p class="catalogo-error">Error cargando productos: ${err.message}</p>`;
+    grid.innerHTML = `<p>Error cargando productos: ${err.message}</p>`;
   }
 }
 
 // ========= EVENTOS =========
+
 if (buscador) {
   buscador.addEventListener("input", () => {
     paginaActual = 1;
@@ -1147,7 +1084,6 @@ if (btnPaginaAnterior) {
       1,
       Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
     );
-
     if (paginaActual > 1) {
       paginaActual--;
       if (paginaActual < 1) paginaActual = 1;
@@ -1163,7 +1099,6 @@ if (btnPaginaSiguiente) {
       1,
       Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
     );
-
     if (paginaActual < totalPaginas) {
       paginaActual++;
       if (paginaActual > totalPaginas) paginaActual = totalPaginas;
@@ -1173,9 +1108,8 @@ if (btnPaginaSiguiente) {
   });
 }
 
-// Mega toggle
 if (megaToggle && megaDropdown) {
-  megaToggle.addEventListener("click", e => {
+  megaToggle.addEventListener("click", (e) => {
     e.stopPropagation();
     if (megaDropdown.classList.contains("open")) {
       cerrarMegaMenu();
@@ -1184,7 +1118,7 @@ if (megaToggle && megaDropdown) {
     }
   });
 
-  document.addEventListener("click", e => {
+  document.addEventListener("click", (e) => {
     if (!megaDropdown.contains(e.target)) {
       cerrarMegaMenu();
     }
@@ -1193,7 +1127,7 @@ if (megaToggle && megaDropdown) {
 
 // Botón reset filtros
 if (megaResetBtn) {
-  megaResetBtn.addEventListener("click", e => {
+  megaResetBtn.addEventListener("click", (e) => {
     e.preventDefault();
     e.stopPropagation();
     resetearFiltrosMega();
@@ -1201,13 +1135,20 @@ if (megaResetBtn) {
 }
 
 // ========= INICIO: CARGA + RESTAURAR FILTROS =========
+
 document.addEventListener("DOMContentLoaded", async () => {
   await cargarProductos();
   actualizarMiniCarrito();
 
   const guardados = leerFiltrosGuardados();
   if (guardados) {
-    const { categoria, subcategoria, etiqueta, pagina, busqueda } = guardados;
+    const {
+      categoria,
+      subcategoria,
+      etiqueta,
+      pagina,
+      busqueda
+    } = guardados;
 
     const catKey = categoria || "todas";
     const subKey = subcategoria || "todas";
@@ -1216,6 +1157,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (typeof pagina === "number" && pagina > 0) {
       paginaActual = pagina;
     }
+
     if (busqueda && buscador) {
       buscador.value = busqueda;
     }
@@ -1235,40 +1177,32 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         }
       }
-           seleccionarSubcategoria(catKey, subKey, subLabel || subKey);
+      seleccionarSubcategoria(catKey, subKey, subLabel || subKey);
     }
-       // --- FILTRO POR ETIQUETA (tagKey) ---
-    let tagLabel = null;
+
     if (tagKey && tagKey !== "todas") {
-        let tagLabel = null;
-        const tagsPorCat = MAPA_TAGS[catKey];
-
-        if (tagsPorCat) {
-            let setTags = tagsPorCat[subKey];
-
-            // Si no hay set para esa subcategoría, armamos uno con todos los tags de la categoría
-            if (!setTags) {
-                const tmp = new Set();
-                Object.values(tagsPorCat).forEach(st => st.forEach(t => tmp.add(t)));
-                setTags = tmp;
-            }
-
-            if (setTags) {
-                for (const t of setTags) {
-                    if (t.toLowerCase() === tagKey) {
-                        tagLabel = t;
-                        break;
-                    }
-                }
-            }
+      let tagLabel = null;
+      const tagsPorCat = MAPA_TAGS[catKey];
+      if (tagsPorCat) {
+        let setTags = tagsPorCat[subKey];
+        if (!setTags) {
+          const tmp = new Set();
+          Object.values(tagsPorCat).forEach(st => st.forEach(t => tmp.add(t)));
+          setTags = tmp;
         }
-
-        seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel || tagKey);
+        if (setTags) {
+          for (const t of setTags) {
+            if (t.toLowerCase() === tagKey) {
+              tagLabel = t;
+              break;
+            }
+          }
+        }
+      }
+      seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel || tagKey);
     }
 
-    // Actualizamos textos y aplicamos filtros con la selección final
     actualizarTextoToggle();
     aplicarFiltros();
-}); // <-- cierre REAL del addEventListener / función
-
-// Fin del archivo
+  }
+});
