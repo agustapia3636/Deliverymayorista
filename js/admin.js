@@ -1,5 +1,6 @@
 // js/admin.js
 // Panel administrativo PRO: listado, filtros, búsqueda, thumbnails, stock con colores
+// + Panel de estadísticas de ventas
 
 import { auth, db } from "./firebase-init.js";
 import {
@@ -16,7 +17,7 @@ import {
   orderBy,
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// ---------- DOM ----------
+// ---------- DOM: Productos ----------
 const tbody            = document.getElementById("tablaProductosBody"); // <tbody>
 const buscador         = document.getElementById("buscadorProductos");  // <input>
 const filtroCategoria  = document.getElementById("filtroCategoria");   // <select>
@@ -27,6 +28,14 @@ const lblUsuario       = document.getElementById("nombreUsuario");     // opcion
 const btnLogout        = document.getElementById("btnLogout");         // botón salir (opcional)
 
 let productos = []; // todos los productos traídos de Firestore
+
+// ---------- DOM: Estadísticas Ventas ----------
+const statsTotalMonto   = document.getElementById("stats-total-monto");
+const statsTotalPedidos = document.getElementById("stats-total-pedidos");
+const statsClientes     = document.getElementById("stats-clientes");
+const statsHoy          = document.getElementById("stats-hoy");
+const statsMes          = document.getElementById("stats-mes");
+const statsRanking      = document.getElementById("stats-ranking");
 
 // ---------- Auth ----------
 onAuthStateChanged(auth, (user) => {
@@ -39,7 +48,11 @@ onAuthStateChanged(auth, (user) => {
     lblUsuario.textContent = user.email || "Admin";
   }
 
+  // Cargar listado productos
   cargarProductos();
+
+  // Cargar estadísticas de ventas (si el panel existe en el HTML)
+  cargarEstadisticasVentas();
 });
 
 if (btnLogout) {
@@ -55,6 +68,10 @@ if (btnNuevoProducto) {
   });
 }
 
+// ============================================================================
+//  PRODUCTOS
+// ============================================================================
+
 // ---------- Cargar productos ----------
 async function cargarProductos() {
   if (!tbody) {
@@ -69,11 +86,11 @@ async function cargarProductos() {
   `;
 
   try {
-    const ref = collection(db, "productos");
-    const q   = query(ref, orderBy("nombre"));
+    const ref  = collection(db, "productos");
+    const q    = query(ref, orderBy("nombre"));
     const snap = await getDocs(q);
 
-    productos = [];
+    productos.length = 0; // limpiar
 
     const categorias = new Set();
     const subcats    = new Set();
@@ -147,13 +164,13 @@ function poblarFiltros(setCategorias, setSubcats) {
 }
 
 function aplicarFiltros() {
-  const texto = (buscador?.value || "").toLowerCase();
-  const cat   = filtroCategoria?.value || "";
-  const sub   = filtroSubcat?.value || "";
+  const texto        = (buscador?.value || "").toLowerCase();
+  const cat          = filtroCategoria?.value || "";
+  const sub          = filtroSubcat?.value || "";
   const soloSinStock = !!(chkSoloSinStock?.checked);
 
   const filtrados = productos.filter((p) => {
-    // búsqueda
+    // búsqueda texto
     const matchTexto = (() => {
       if (!texto) return true;
       const codigo = (p.codigo || "").toLowerCase();
@@ -185,7 +202,7 @@ function aplicarFiltros() {
 
 // ---------- Render de tabla ----------
 function crearBadgeStock(stock) {
-  const span = document.createElement("span");
+  const span  = document.createElement("span");
   const valor = Number.isFinite(stock) ? stock : 0;
   span.textContent = valor;
 
@@ -288,6 +305,7 @@ function mostrarProductos(lista) {
     btnEditar.textContent = "Editar";
     btnEditar.classList.add("btn-accion", "btn-editar");
     btnEditar.addEventListener("click", () => {
+      // Usamos el código como ID del doc (coincide con lo que guarda editor.js)
       window.location.href = `editor.html?id=${p.codigo}`;
     });
 
@@ -329,25 +347,129 @@ async function eliminarProducto(codigo, nombre) {
 
 // ---------- Eventos de filtros ----------
 if (buscador) {
-  buscador.addEventListener("input", () => {
-    aplicarFiltros();
-  });
+  buscador.addEventListener("input", aplicarFiltros);
 }
 
 if (filtroCategoria) {
-  filtroCategoria.addEventListener("change", () => {
-    aplicarFiltros();
-  });
+  filtroCategoria.addEventListener("change", aplicarFiltros);
 }
 
 if (filtroSubcat) {
-  filtroSubcat.addEventListener("change", () => {
-    aplicarFiltros();
-  });
+  filtroSubcat.addEventListener("change", aplicarFiltros);
 }
 
 if (chkSoloSinStock) {
-  chkSoloSinStock.addEventListener("change", () => {
-    aplicarFiltros();
-  });
+  chkSoloSinStock.addEventListener("change", aplicarFiltros);
+}
+
+// ============================================================================
+//  ESTADÍSTICAS DE VENTAS
+// ============================================================================
+
+async function cargarEstadisticasVentas() {
+  // Si no hay elementos de stats en el DOM, no hacemos nada
+  if (
+    !statsTotalMonto &&
+    !statsTotalPedidos &&
+    !statsClientes &&
+    !statsHoy &&
+    !statsMes &&
+    !statsRanking
+  ) {
+    return;
+  }
+
+  try {
+    const ventasRef  = collection(db, "ventas");
+    const ventasSnap = await getDocs(ventasRef);
+
+    let totalVentasMonto = 0;
+    let totalPedidos     = 0;
+    const clientesUnicos = new Set();
+    let ventasHoy        = 0;
+    let ventasMes        = 0;
+
+    const productosVendidos = {}; // { codigo: cantidadTotalVendida }
+
+    const hoy = new Date();
+    const inicioDia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+    const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+
+    ventasSnap.forEach((docSnap) => {
+      const data = docSnap.data();
+
+      const total = Number(data.total) || 0;
+      totalVentasMonto += total;
+      totalPedidos++;
+
+      if (data.clienteId) {
+        clientesUnicos.add(data.clienteId);
+      }
+
+      // Fecha (Timestamp Firestore → Date)
+      let fechaVenta = null;
+      if (data.fecha && typeof data.fecha.toDate === "function") {
+        fechaVenta = data.fecha.toDate();
+      }
+
+      if (fechaVenta) {
+        if (fechaVenta >= inicioDia) {
+          ventasHoy += total;
+        }
+        if (fechaVenta >= inicioMes) {
+          ventasMes += total;
+        }
+      }
+
+      // Ranking productos
+      if (Array.isArray(data.productos)) {
+        data.productos.forEach((p) => {
+          const codigo = p.codigo || p.cod || "";
+          const cant   = Number(p.cantidad) || 0;
+          if (!codigo || cant <= 0) return;
+
+          if (!productosVendidos[codigo]) {
+            productosVendidos[codigo] = 0;
+          }
+          productosVendidos[codigo] += cant;
+        });
+      }
+    });
+
+    // Ranking ordenado
+    const ranking = Object.entries(productosVendidos)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5); // Top 5
+
+    // Actualizar UI solo si esos elementos existen
+    if (statsTotalMonto) {
+      statsTotalMonto.textContent = "$" + totalVentasMonto.toLocaleString("es-AR");
+    }
+    if (statsTotalPedidos) {
+      statsTotalPedidos.textContent = totalPedidos.toString();
+    }
+    if (statsClientes) {
+      statsClientes.textContent = clientesUnicos.size.toString();
+    }
+    if (statsHoy) {
+      statsHoy.textContent = "$" + ventasHoy.toLocaleString("es-AR");
+    }
+    if (statsMes) {
+      statsMes.textContent = "$" + ventasMes.toLocaleString("es-AR");
+    }
+    if (statsRanking) {
+      if (!ranking.length) {
+        statsRanking.innerHTML = "<li>No hay datos de ventas aún.</li>";
+      } else {
+        statsRanking.innerHTML = ranking
+          .map(([codigo, cant]) => `<li>${codigo} — ${cant} unidades vendidas</li>`)
+          .join("");
+      }
+    }
+  } catch (err) {
+    console.error("Error cargando estadísticas de ventas:", err);
+    if (statsRanking) {
+      statsRanking.innerHTML = "<li>Error al cargar estadísticas.</li>";
+    }
+  }
 }
