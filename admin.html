@@ -159,32 +159,38 @@
     }
 
     /* Gráficos – OCULTOS por defecto, los muestra JS cuando haya ventas */
-    .charts-grid {
-      display: none; /* <- importante */
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 12px;
-      margin-top: 12px;
-    }
+.charts-grid {
+  display: none; /* JS lo pone en grid cuando haya ventas */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin-top: 10px;
+}
 
-    .chart-card {
-      background: rgba(6, 6, 22, 0.95);
-      border-radius: 14px;
-      padding: 8px 10px 12px;
-      border: 1px solid rgba(255,255,255,0.05);
-      font-size: 0.8rem;
-    }
+.chart-card {
+  background: rgba(6, 6, 22, 0.95);
+  border-radius: 14px;
+  padding: 8px 10px 10px;
+  border: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.8rem;
+  /* 🔹 altura fija y compacta */
+  height: 210px;
+  display: flex;
+  flex-direction: column;
+}
 
-    .chart-card h3 {
-      margin: 0 0 4px;
-      font-size: 0.8rem;
-      color: #d8d8ff;
-      font-weight: 500;
-    }
+.chart-card h3 {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  color: #d8d8ff;
+  font-weight: 500;
+}
 
-    .chart-card canvas {
-      width: 100%;
-      min-height: 170px;
-    }
+/* 🔹 el canvas rellena la tarjeta pero sin hacerse gigante */
+.chart-card canvas {
+  width: 100%;
+  height: 170px !important;
+}
+
 
     /* ======================
        TOOLBAR / TABLA
