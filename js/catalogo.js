@@ -958,99 +958,30 @@ function construirMenuCategorias(categoriasUnicas) {
   });
 }
 
-// ========= CARGA INICIAL DESDE FIRESTORE =========
+// ========= CARGA INICIAL DESDE productos.json =========
 async function cargarProductos() {
   try {
-    const ref = collection(db, "productos");
-    const snapshot = await getDocs(ref);
+    const resp = await fetch("data/productos.json");
+    if (!resp.ok) throw new Error("Error al cargar productos.json");
 
-    TODOS_LOS_PRODUCTOS = snapshot.docs.map(d => d.data());
+    const data = await resp.json();
 
-    MAPA_CAT_SUB   = {};
-    MAPA_CAT_LABEL = {};
-    MAPA_TAGS      = {};
+    // Guardamos todos los productos en memoria
+    TODOS_LOS_PRODUCTOS = Array.isArray(data) ? data : [];
 
-    TODOS_LOS_PRODUCTOS.forEach(p => {
-      const catOriginal = safe(
-        p.categoria || p.rubro || p.cat,
-        ""
-      ).toString().trim();
+    // DEBUG (podés dejarlo, te ayuda a ver si cargó)
+    console.log("Productos cargados:", TODOS_LOS_PRODUCTOS.length);
 
-      const subOriginal = safe(
-        p.subcategoria || p.Subcategoria,
-        ""
-      ).toString().trim();
-
-      const catKey = (catOriginal.toLowerCase() || "sin-categoria");
-      const subKey = (subOriginal.toLowerCase() || "sin-subcategoria");
-
-      if (!MAPA_CAT_SUB[catKey]) {
-        MAPA_CAT_SUB[catKey] = new Set();
-      }
-      if (subOriginal) {
-        MAPA_CAT_SUB[catKey].add(subOriginal);
-      }
-
-      const etiquetasRaw =
-        p.etiquetas ||
-        p.tags ||
-        p.tag;
-
-      const etiquetasNorm = normalizarEtiquetasCampo(etiquetasRaw);
-      if (etiquetasNorm.length) {
-        if (!MAPA_TAGS[catKey]) MAPA_TAGS[catKey] = {};
-        if (!MAPA_TAGS[catKey][subKey]) MAPA_TAGS[catKey][subKey] = new Set();
-        etiquetasNorm.forEach(t => MAPA_TAGS[catKey][subKey].add(
-          t.charAt(0).toUpperCase() + t.slice(1)
-        ));
-      }
-    });
-
-    if (filtroCategoria) {
-      const categoriasUnicas = Array.from(
-        new Set(
-          TODOS_LOS_PRODUCTOS.map(p =>
-            safe(
-              p.categoria || p.rubro || p.cat,
-              ""
-            ).toString()
-          ).filter(c => c !== "")
-        )
-      ).sort((a, b) => a.localeCompare(b, "es"));
-
-      filtroCategoria.innerHTML = "";
-      const optTodas = document.createElement("option");
-      optTodas.value = "todas";
-      optTodas.textContent = "Todas las categorías";
-      filtroCategoria.appendChild(optTodas);
-
-      categoriasUnicas.forEach(cat => {
-        const op = document.createElement("option");
-        op.value = cat.toLowerCase();
-        op.textContent = cat;
-        filtroCategoria.appendChild(op);
-      });
-
-      construirMenuCategorias(categoriasUnicas);
-    }
-
-    if (filtroSubcategoria) {
-      filtroSubcategoria.innerHTML = "";
-      const optTodasSub = document.createElement("option");
-      optTodasSub.value = "todas";
-      optTodasSub.textContent = "Todas las subcategorías";
-      filtroSubcategoria.appendChild(optTodasSub);
-      filtroSubcategoria.value = "todas";
-    }
-
+    // Render inicial del catálogo
     aplicarFiltros();
     actualizarMiniCarrito();
   } catch (err) {
-    console.error(err);
-    grid.innerHTML = `<p>Error cargando productos Firestore: ${err.message}</p>`;
+    console.error("No se pudo cargar productos:", err);
+    if (grid) {
+      grid.innerHTML = `<p>Error cargando catálogo: ${err.message}</p>`;
+    }
   }
 }
-
 // ========= EVENTOS =========
 if (buscador) {
   buscador.addEventListener("input", () => {
