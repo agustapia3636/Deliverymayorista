@@ -1235,7 +1235,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         }
       }
+           seleccionarSubcategoria(catKey, subKey, subLabel || subKey);
+    }
        // --- FILTRO POR ETIQUETA (tagKey) ---
+    let tagLabel = null;
     if (tagKey && tagKey !== "todas") {
         let tagLabel = null;
         const tagsPorCat = MAPA_TAGS[catKey];
