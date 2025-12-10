@@ -1268,3 +1268,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     aplicarFiltros();
   }
 });
+``` :contentReference[oaicite:0]{index=0}
+::contentReference[oaicite:1]{index=1}
