@@ -499,28 +499,28 @@ function actualizarChartVentasDias(ventasPorDia) {
 
   if (chartVentasDias) chartVentasDias.destroy();
 
-  chartVentasDias = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Monto vendido",
-          data,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      scales: {
-        y: {
-          beginAtZero: true,
-        },
+ chartVentasDias = new Chart(ctx, {
+  type: "bar",
+  data: {
+    labels,
+    datasets: [
+      {
+        label: "Monto vendido",
+        data,
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,   // 🔹 antes estaba en false
+    aspectRatio: 2.5,            // 🔹 más ancho que alto
+    scales: {
+      y: {
+        beginAtZero: true,
       },
     },
-  });
-}
+  },
+});
 
 function actualizarChartTopProductos(ranking) {
   if (!canvasProductosTop || typeof Chart === "undefined") return;
@@ -541,20 +541,20 @@ function actualizarChartTopProductos(ranking) {
 
   if (chartTopProductos) chartTopProductos.destroy();
 
-  chartTopProductos = new Chart(ctx, {
-    type: "doughnut",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Unidades vendidas",
-          data,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-    },
-  });
-}
+ chartTopProductos = new Chart(ctx, {
+  type: "doughnut",
+  data: {
+    labels,
+    datasets: [
+      {
+        label: "Unidades vendidas",
+        data,
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: true,  // 🔹
+    aspectRatio: 1.8,           // 🔹
+  },
+});
