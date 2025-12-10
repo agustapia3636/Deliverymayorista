@@ -1,112 +1,338 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Editor de Producto</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Editor de producto | Delivery Mayorista</title>
 
   <style>
+    :root {
+      --bg: #05030c;
+      --card: #11101c;
+      --accent: #ff007a;
+      --accent2: #ff9800;
+      --texto: #ffffff;
+      --texto-suave: #b3b3d1;
+      --borde: #2b2a3a;
+      --error: #ff4d6a;
+      --ok: #00b341;
+      --radio: 14px;
+      --fuente: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: system-ui, sans-serif;
-      background: #0d0d17;
       margin: 0;
-      padding: 0;
-      color: white;
+      font-family: var(--fuente);
+      background: radial-gradient(circle at top, #141327 0, #05030c 56%);
+      color: var(--texto);
+      min-height: 100vh;
     }
 
     header {
-      background: linear-gradient(90deg, #ff005d, #ffa400);
-      padding: 16px;
-      font-size: 1.3rem;
-      font-weight: bold;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      padding: 14px 18px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
+      border-bottom-left-radius: 18px;
+      border-bottom-right-radius: 18px;
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
-    .contenedor {
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
+    .header-titulo {
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      font-size: 16px;
     }
 
-    label {
-      display: block;
-      margin-top: 15px;
-      margin-bottom: 5px;
-      font-weight: 600;
+    .header-derecha {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
     }
 
-    input, textarea {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #333;
-      background: #151525;
-      color: white;
+    .header-email {
+      opacity: 0.9;
     }
 
-    textarea {
-      height: 120px;
+    .btn-header {
+      background: rgba(0, 0, 0, 0.18);
+      border-radius: 999px;
+      padding: 6px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.32);
+      font-size: 12px;
+      cursor: pointer;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    .breadcrumb {
+      font-size: 13px;
+      margin-bottom: 10px;
+      color: var(--texto-suave);
+    }
+
+    .breadcrumb a {
+      color: #c28cff;
+      text-decoration: none;
+    }
+
+    .breadcrumb a:hover {
+      text-decoration: underline;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin: 4px 0 16px;
+    }
+
+    .card-form {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 18px 18px 20px;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 18px;
+    }
+
+    .grupo {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 14px;
+    }
+
+    .grupo label {
+      font-size: 13px;
+      color: var(--texto-suave);
+    }
+
+    .grupo input,
+    .grupo textarea {
+      border-radius: 10px;
+      border: 1px solid var(--borde);
+      padding: 8px 10px;
+      background: #080713;
+      color: var(--texto);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .grupo input:focus,
+    .grupo textarea:focus {
+      border-color: var(--accent2);
+      box-shadow: 0 0 0 1px rgba(255, 152, 0, 0.3);
+    }
+
+    .grupo textarea {
+      min-height: 80px;
       resize: vertical;
     }
 
-    button {
-      margin-top: 20px;
-      width: 100%;
-      padding: 14px;
-      background: #28d48c;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: bold;
+    .grupo-inline {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 13px;
+      color: var(--texto-suave);
     }
 
-    .btn-eliminar {
-      background: #ff5a5a;
+    .grupo-inline input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+    }
+
+    .form-footer {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-guardar {
+      background: var(--ok);
+      color: #fff;
+      box-shadow: 0 0 18px rgba(0, 179, 65, 0.55);
+    }
+
+    .btn-guardar:active {
+      transform: scale(0.98);
+    }
+
+    .btn-cancelar {
+      background: transparent;
+      color: var(--texto);
+      border: 1px solid var(--borde);
+    }
+
+    .pill-estado {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      margin-bottom: 12px;
+      color: var(--texto-suave);
+    }
+
+    .pill-estado span {
+      font-size: 11px;
+    }
+
+    .alerta {
       margin-top: 10px;
+      font-size: 13px;
+      color: var(--error);
+      display: none;
+    }
+
+    .alerta.visible {
+      display: block;
+    }
+
+    @media (max-width: 720px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+
+      .header-titulo {
+        font-size: 15px;
+      }
+
+      .header-derecha {
+        width: 100%;
+        justify-content: space-between;
+      }
     }
   </style>
 </head>
-
 <body>
   <header>
-    Editor de Producto
-    <button onclick="window.location.href='admin.html'">Volver</button>
+    <div class="header-titulo">DELIVERY MAYORISTA · ADMIN</div>
+    <div class="header-derecha">
+      <span id="user-email" class="header-email"></span>
+      <a href="admin.html" class="btn-header">Volver al listado</a>
+    </div>
   </header>
 
-  <div class="contenedor">
-    <form id="formProducto">
-      <label>Código</label>
-      <input type="text" id="codigo" required>
+  <main>
+    <div class="breadcrumb">
+      <a href="admin.html">Productos</a> · <span id="crumb-modo">Nuevo</span>
+    </div>
 
-      <label>Nombre</label>
-      <input type="text" id="nombre" required>
+    <h1 id="titulo-editor">Nuevo producto</h1>
 
-      <label>Precio</label>
-      <input type="number" id="precio" required>
+    <div class="card-form">
+      <div class="pill-estado" id="pill-estado">
+        <span>●</span>
+        <span id="texto-estado">Modo creación</span>
+      </div>
 
-      <label>Stock</label>
-      <input type="number" id="stock" required>
+      <form id="form-producto" autocomplete="off">
+        <div class="form-grid">
+          <div class="grupo">
+            <label for="prod-codigo">Código *</label>
+            <input id="prod-codigo" type="text" placeholder="Ej: N0001" required />
+          </div>
 
-      <label>Categoría</label>
-      <input type="text" id="categoria" required>
+          <div class="grupo">
+            <label for="prod-nombre">Nombre *</label>
+            <input id="prod-nombre" type="text" required />
+          </div>
 
-      <label>Subcategoría</label>
-      <input type="text" id="subcategoria">
+          <div class="grupo">
+            <label for="prod-categoria">Categoría</label>
+            <input id="prod-categoria" type="text" placeholder="Ej: Hogar, Bazar, etc." />
+          </div>
 
-      <label>Descripción</label>
-      <textarea id="descripcion"></textarea>
+          <div class="grupo">
+            <label for="prod-subcategoria">Subcategoría</label>
+            <input id="prod-subcategoria" type="text" placeholder="Ej: Cocina, Baño, etc." />
+          </div>
 
-      <label>Imagen (URL)</label>
-      <input type="text" id="imagen">
+          <div class="grupo">
+            <label for="prod-precio">Precio mayorista</label>
+            <input id="prod-precio" type="number" min="0" step="1" />
+          </div>
 
-      <button type="submit">Guardar producto</button>
-      <button type="button" id="btnEliminar" class="btn-eliminar" style="display:none">Eliminar producto</button>
-    </form>
-  </div>
+          <div class="grupo">
+            <label for="prod-stock">Stock</label>
+            <input id="prod-stock" type="number" min="0" step="1" />
+          </div>
 
-  <script type="module" src="js/editor.js"></script>
+          <div class="grupo">
+            <label for="prod-imagen">URL imagen</label>
+            <input id="prod-imagen" type="text" placeholder="https://..." />
+          </div>
+
+          <div class="grupo">
+            <label for="prod-etiquetas">Etiquetas (separadas por coma)</label>
+            <input id="prod-etiquetas" type="text" placeholder="promo, verano, oferta..." />
+          </div>
+        </div>
+
+        <div class="grupo" style="margin-top: 10px;">
+          <label for="prod-descripcion">Descripción</label>
+          <textarea id="prod-descripcion" placeholder="Descripción larga del producto"></textarea>
+
+          <div class="grupo-inline">
+            <input id="prod-destacado" type="checkbox" />
+            <label for="prod-destacado">Marcar como destacado</label>
+          </div>
+        </div>
+
+        <p id="alerta-form" class="alerta"></p>
+
+        <div class="form-footer">
+          <button type="button" id="btn-cancelar" class="btn btn-cancelar">Cancelar</button>
+          <button type="submit" class="btn btn-guardar">
+            💾 Guardar producto
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script type="module" src="./js/editor.js?v=1"></script>
 </body>
 </html>
