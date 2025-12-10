@@ -40,6 +40,7 @@ const statsRanking      = document.getElementById("stats-ranking");
 const chartsGrid         = document.querySelector(".charts-grid");
 const canvasVentasDias   = document.getElementById("chart-ventas-dias");
 const canvasProductosTop = document.getElementById("chart-productos-top");
+const btnToggleCharts    = document.getElementById("btnToggleCharts");
 
 // Instances de Chart
 let chartVentasDias = null;
@@ -70,6 +71,20 @@ if (btnLogout) {
 if (btnNuevoProducto) {
   btnNuevoProducto.addEventListener("click", () => {
     window.location.href = "editor.html";
+  });
+}
+
+// Toggle gráficos
+if (btnToggleCharts && chartsGrid) {
+  btnToggleCharts.addEventListener("click", () => {
+    const visible = chartsGrid.style.display === "grid";
+    if (visible) {
+      chartsGrid.style.display = "none";
+      btnToggleCharts.textContent = "Ver gráficos";
+    } else {
+      chartsGrid.style.display = "grid";
+      btnToggleCharts.textContent = "Ocultar gráficos";
+    }
   });
 }
 
@@ -349,8 +364,7 @@ async function cargarEstadisticasVentas() {
     !statsClientes &&
     !statsHoy &&
     !statsMes &&
-    !statsRanking &&
-    !chartsGrid
+    !statsRanking
   ) {
     return;
   }
@@ -359,7 +373,6 @@ async function cargarEstadisticasVentas() {
     const ventasRef  = collection(db, "ventas");
     const ventasSnap = await getDocs(ventasRef);
 
-    // Si NO hay ventas: dejamos los números en 0, ranking con mensaje y ocultamos gráficos
     if (ventasSnap.empty) {
       if (statsTotalMonto)   statsTotalMonto.textContent   = "$0";
       if (statsTotalPedidos) statsTotalPedidos.textContent = "0";
@@ -372,6 +385,7 @@ async function cargarEstadisticasVentas() {
       }
 
       if (chartsGrid) chartsGrid.style.display = "none";
+      if (btnToggleCharts) btnToggleCharts.style.display = "none";
 
       if (chartVentasDias) { chartVentasDias.destroy(); chartVentasDias = null; }
       if (chartTopProductos) { chartTopProductos.destroy(); chartTopProductos = null; }
@@ -463,8 +477,14 @@ async function cargarEstadisticasVentas() {
       }
     }
 
-    // Ahora sí mostramos los gráficos porque hay ventas
-    if (chartsGrid) chartsGrid.style.display = "grid";
+    // Hay ventas → mostramos botón y dejamos los gráficos colapsados por defecto
+    if (btnToggleCharts) {
+      btnToggleCharts.style.display = "inline-flex";
+      btnToggleCharts.textContent = "Ver gráficos";
+    }
+    if (chartsGrid) {
+      chartsGrid.style.display = "none";
+    }
 
     actualizarChartVentasDias(ventasPorDia);
     actualizarChartTopProductos(ranking);
@@ -475,6 +495,7 @@ async function cargarEstadisticasVentas() {
       statsRanking.innerHTML = "<li>Error al cargar estadísticas.</li>";
     }
     if (chartsGrid) chartsGrid.style.display = "none";
+    if (btnToggleCharts) btnToggleCharts.style.display = "none";
   }
 }
 
@@ -499,28 +520,29 @@ function actualizarChartVentasDias(ventasPorDia) {
 
   if (chartVentasDias) chartVentasDias.destroy();
 
- chartVentasDias = new Chart(ctx, {
-  type: "bar",
-  data: {
-    labels,
-    datasets: [
-      {
-        label: "Monto vendido",
-        data,
-      },
-    ],
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: true,   // 🔹 antes estaba en false
-    aspectRatio: 2.5,            // 🔹 más ancho que alto
-    scales: {
-      y: {
-        beginAtZero: true,
+  chartVentasDias = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Monto vendido",
+          data,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 2.5,
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
       },
     },
-  },
-});
+  });
+}
 
 function actualizarChartTopProductos(ranking) {
   if (!canvasProductosTop || typeof Chart === "undefined") return;
@@ -541,20 +563,21 @@ function actualizarChartTopProductos(ranking) {
 
   if (chartTopProductos) chartTopProductos.destroy();
 
- chartTopProductos = new Chart(ctx, {
-  type: "doughnut",
-  data: {
-    labels,
-    datasets: [
-      {
-        label: "Unidades vendidas",
-        data,
-      },
-    ],
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: true,  // 🔹
-    aspectRatio: 1.8,           // 🔹
-  },
-});
+  chartTopProductos = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Unidades vendidas",
+          data,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      aspectRatio: 1.8,
+    },
+  });
+}
