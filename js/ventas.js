@@ -2,7 +2,8 @@
 // Panel de ventas PRO: listado, filtros, estados y alta de ventas
 // con soporte para varios productos por venta (mini carrito en el modal)
 // DESCARGA AUTOMÁTICA DE STOCK, control de stock insuficiente
-// y PANEL DE ESTADÍSTICAS (histórico / hoy / mes) con botón ver/ocultar.
+// y PANEL DE ESTADÍSTICAS (histórico / hoy / mes) con botón ver/ocultar
+// + gráfico de ventas últimos 7 días.
 
 import { auth, db } from "./firebase-init.js";
 import {
@@ -63,6 +64,7 @@ let ventas            = [];   // todas las ventas cargadas
 let clientes          = [];   // clientes para el combo
 let productosCatalogo = [];   // productos para autocomplete
 let ventaProductosTmp = [];   // productos de la venta actual {codigo, nombre, precio, cantidad}
+let ventas7dChart     = null; // instancia del gráfico de últimos 7 días
 
 // ---------------------------------------------------------------------------
 // Auth y carga inicial
@@ -248,6 +250,7 @@ async function cargarVentas() {
     });
 
     aplicarFiltros();
+    construirGraficoVentas7Dias(); // 📊 actualizamos gráfico
   } catch (err) {
     console.error("Error cargando ventas:", err);
     tablaVentasBody.innerHTML = `
@@ -320,6 +323,94 @@ async function cargarEstadisticasVentas() {
   } catch (err) {
     console.error("Error calculando estadísticas de ventas:", err);
   }
+}
+
+// ---------------------------------------------------------------------------
+// GRÁFICO: ventas últimos 7 días (usa el array "ventas" ya cargado)
+// ---------------------------------------------------------------------------
+
+function construirGraficoVentas7Dias() {
+  const canvas = document.getElementById("chartVentas7Dias");
+  if (!canvas || typeof Chart === "undefined") return;
+
+  // Mapa yyyy-mm-dd => total vendido ese día
+  const mapa = {};
+  ventas.forEach((v) => {
+    if (!v.fecha || !(v.fecha instanceof Date)) return;
+    const d = new Date(
+      v.fecha.getFullYear(),
+      v.fecha.getMonth(),
+      v.fecha.getDate()
+    );
+    const key = d.toISOString().slice(0, 10); // yyyy-mm-dd
+    mapa[key] = (mapa[key] || 0) + (v.total || 0);
+  });
+
+  const labels = [];
+  const data   = [];
+
+  const hoy = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(
+      hoy.getFullYear(),
+      hoy.getMonth(),
+      hoy.getDate() - i
+    );
+    const key = d.toISOString().slice(0, 10);
+    const dia = String(d.getDate()).padStart(2, "0");
+    const mes = String(d.getMonth() + 1).padStart(2, "0");
+
+    labels.push(`${dia}/${mes}`);
+    data.push(mapa[key] || 0);
+  }
+
+  // Si ya había un gráfico, lo destruimos para recrearlo con los nuevos datos
+  if (ventas7dChart) {
+    ventas7dChart.destroy();
+  }
+
+  ventas7dChart = new Chart(canvas.getContext("2d"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Total vendido ($)",
+          data,
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          display: false,
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) =>
+              "$ " + ctx.raw.toLocaleString("es-AR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              }),
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: (value) =>
+              "$ " +
+              Number(value).toLocaleString("es-AR", {
+                maximumFractionDigits: 0,
+              }),
+          },
+        },
+      },
+    },
+  });
 }
 
 // ---------------------------------------------------------------------------
