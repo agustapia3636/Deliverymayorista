@@ -6,16 +6,61 @@ import {
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
 // -------------------------
+// Config: qué páginas son privadas y cuáles públicas
+// -------------------------
+
+// Páginas que requieren sesión iniciada
+const PAGINAS_PROTEGIDAS = [
+  "admin.html",
+  "editor.html",
+  "ventas.html",
+  "clientes.html",
+  "historial.html"
+];
+
+// Páginas públicas (no redirigir aunque no haya usuario)
+const PAGINAS_PUBLICAS = [
+  "",
+  "index.html",
+  "catalogo.html",
+  "carrito.html",
+  "producto.html",
+  "login.html"
+];
+
+// Detectar archivo actual (sin querystring)
+const path = window.location.pathname || "";
+let actual = path.substring(path.lastIndexOf("/") + 1);
+actual = actual.split("?")[0] || ""; // por si viene con ?algo
+
+const esLogin = actual === "login.html";
+const esProtegida = PAGINAS_PROTEGIDAS.includes(actual);
+
+// -------------------------
 // Protección de páginas del panel
 // -------------------------
 onAuthStateChanged(auth, (user) => {
-  // Si no hay usuario logueado y NO estamos en login.html → mandar a login
-  const path = window.location.pathname || "";
-  const esLogin = path.endsWith("/login.html") || path.endsWith("login.html");
+  // Si estamos en una página pública, no hacemos nada
+  if (!esProtegida) {
+    // Caso especial: si estamos en login y ya hay usuario, podemos llevarlo al admin
+    if (esLogin && user) {
+      // Intentar recuperar adónde quería ir antes de loguearse
+      let destino = "admin.html";
+      try {
+        const guardado = sessionStorage.getItem("dm_afterLogin");
+        if (guardado) destino = guardado;
+      } catch (e) {
+        // ignorar
+      }
+      window.location.href = destino;
+    }
+    return;
+  }
 
-  if (!user && !esLogin) {
-    // (Opcional) guardar a dónde quería ir para usarlo en el futuro
+  // Si la página es protegida y NO hay usuario, mandamos al login
+  if (!user) {
     try {
+      // Guardar adónde quería ir
       sessionStorage.setItem(
         "dm_afterLogin",
         window.location.pathname + window.location.search
