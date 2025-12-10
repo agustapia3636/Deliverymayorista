@@ -10,21 +10,17 @@
 // =======================
 // 🔥 FIREBASE + FIRESTORE
 // =======================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+// FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ⚠️ Pegar acá tu configuración REAL de Firebase
 const firebaseConfig = {
-  // apiKey: "TU_API_KEY",
-  // authDomain: "TU_AUTH_DOMAIN",
-  // projectId: "TU_PROJECT_ID",
-  // storageBucket: "TU_STORAGE_BUCKET",
-  // messagingSenderId: "TU_MESSAGING_SENDER_ID",
-  // appId: "TU_APP_ID"
+  apiKey: "AIzaSyCH2dJRTpXpOPUhAERnAkcj_avqbEYCSXE",
+  authDomain: "deliverymayorista-8c042.firebaseapp.com",
+  projectId: "deliverymayorista-8c042",
+  storageBucket: "deliverymayorista-8c042.firebasestorage.app",
+  messagingSenderId: "98776210634",
+  appId: "1:98776210634:web:5e89cecdb641988d53e833"
 };
 
 const app = initializeApp(firebaseConfig);
