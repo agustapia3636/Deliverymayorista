@@ -5,14 +5,18 @@
 // + memoria de filtros en localStorage
 // + botón premium "Limpiar filtros"
 // + PAGINACIÓN PREMIUM
+// + DATOS DESDE FIRESTORE (colección "productos")
 // ========================================
 
 // =======================
 // 🔥 FIREBASE + FIRESTORE
 // =======================
-// FIREBASE
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCH2dJRTpXpOPUhAERnAkcj_avqbEYCSXE",
@@ -26,8 +30,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
-// ========================================
-// RESTO DE TU CÓDIGO (IGUAL QUE ANTES)
 // ========================================
 
 const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
@@ -988,71 +990,27 @@ function construirMenuCategorias(categoriasUnicas) {
   });
 }
 
-// ========= CARGA INICIAL (AHORA DESDE FIRESTORE) =========
+// ========= CARGA INICIAL DESDE FIRESTORE =========
 
-async function cargarProductos() {
+async function cargarProductosFirestore() {
   try {
-    const snap = await getDocs(collection(db, "productos"));
+    const ref = collection(db, "productos");
+    const snapshot = await getDocs(ref);
 
-    const data = snap.docs.map(doc => {
+    // Versión básica que vos mencionaste:
+    // TODOS_LOS_PRODUCTOS = snapshot.docs.map(d => d.data());
+    // Pero además agregamos id y preparamos datos para filtros/mega menú
+    const data = snapshot.docs.map(doc => {
       const p = doc.data();
-
       return {
-        ...p,
-        codigo: p.codigo || p.cod || p.Code || p.Codigo || "",
-        nombre:
-          p.nombre ||
-          p.descripcion ||
-          p.titulo ||
-          p["Nombre Corto"] ||
-          "",
-        descripcionLarga:
-          p.descripcionLarga ||
-          p.descripcion_larga ||
-          p["descripcionLarga"] ||
-          p["descripcion_larga"] ||
-          p["Descripción Larga"] ||
-          p.descripcionCorta ||
-          p.descripcion_corta ||
-          p.descripcion ||
-          "",
-        precio:
-          p.precio ??
-          p.precioMayorista ??
-          p.precio_venta ??
-          p.precioLista ??
-          p["Precio Mayorista"] ??
-          p["Precio Cliente"] ??
-          0,
-        stock: p.stock ?? p.Stock ?? 0,
-        categoria:
-          p.categoria ||
-          p.rubro ||
-          p.cat ||
-          p["Categoria Princ"] ||
-          p["Categoria_Princ"] ||
-          "",
-        subcategoria:
-          p.subcategoria ||
-          p.Subcategoria ||
-          p.Sub_Categoria ||
-          p["Sub_Categoria"] ||
-          p["Subcategoria"] ||
-          "",
-        etiquetas:
-          p.etiquetas ||
-          p.tags ||
-          p.tag ||
-          p["Etiquetas"] ||
-          p["etiquetas"] ||
-          [],
-        imagen: p.imagen || ""
+        id: doc.id,
+        ...p
       };
     });
 
     TODOS_LOS_PRODUCTOS = Array.isArray(data) ? data : [];
 
-    // Construir mapas igual que antes
+    // Construir mapas de categorías / subcategorías / tags
     MAPA_CAT_SUB   = {};
     MAPA_CAT_LABEL = {};
     MAPA_TAGS      = {};
@@ -1216,7 +1174,7 @@ if (megaResetBtn) {
 // ========= INICIO: CARGA + RESTAURAR FILTROS =========
 
 document.addEventListener("DOMContentLoaded", async () => {
-  await cargarProductos();
+  await cargarProductosFirestore();
   actualizarMiniCarrito();
 
   const guardados = leerFiltrosGuardados();
