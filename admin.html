@@ -93,15 +93,39 @@
       box-shadow: 0 18px 45px rgba(0,0,0,0.45);
     }
 
+    .panel-estadisticas-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
     .panel-estadisticas h2 {
-      margin: 0 0 6px;
+      margin: 0 0 4px;
       font-size: 1rem;
     }
 
     .panel-estadisticas p {
-      margin: 0 0 14px;
+      margin: 0;
       font-size: 0.8rem;
       color: #a3a3d5;
+    }
+
+    .btn-toggle-charts {
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(8,8,24,0.95);
+      color: #d8d8ff;
+      font-size: 0.78rem;
+      padding: 6px 10px;
+      cursor: pointer;
+      display: none; /* JS la muestra cuando haya ventas */
+      white-space: nowrap;
+    }
+
+    .btn-toggle-charts:hover {
+      background: rgba(18,18,40,0.95);
     }
 
     .stats-grid {
@@ -158,39 +182,36 @@
       border-bottom: none;
     }
 
-    /* Gráficos – OCULTOS por defecto, los muestra JS cuando haya ventas */
-.charts-grid {
-  display: none; /* JS lo pone en grid cuando haya ventas */
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 12px;
-  margin-top: 10px;
-}
+    /* Gráficos – ocultos por defecto, JS los muestra/oculta */
+    .charts-grid {
+      display: none;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-top: 10px;
+    }
 
-.chart-card {
-  background: rgba(6, 6, 22, 0.95);
-  border-radius: 14px;
-  padding: 8px 10px 10px;
-  border: 1px solid rgba(255,255,255,0.05);
-  font-size: 0.8rem;
-  /* 🔹 altura fija y compacta */
-  height: 210px;
-  display: flex;
-  flex-direction: column;
-}
+    .chart-card {
+      background: rgba(6, 6, 22, 0.95);
+      border-radius: 14px;
+      padding: 8px 10px 10px;
+      border: 1px solid rgba(255,255,255,0.05);
+      font-size: 0.8rem;
+      height: 210px;
+      display: flex;
+      flex-direction: column;
+    }
 
-.chart-card h3 {
-  margin: 0 0 4px;
-  font-size: 0.8rem;
-  color: #d8d8ff;
-  font-weight: 500;
-}
+    .chart-card h3 {
+      margin: 0 0 4px;
+      font-size: 0.8rem;
+      color: #d8d8ff;
+      font-weight: 500;
+    }
 
-/* 🔹 el canvas rellena la tarjeta pero sin hacerse gigante */
-.chart-card canvas {
-  width: 100%;
-  height: 170px !important;
-}
-
+    .chart-card canvas {
+      width: 100%;
+      height: 170px !important;
+    }
 
     /* ======================
        TOOLBAR / TABLA
@@ -387,6 +408,15 @@
       .input-buscador-admin {
         min-width: 100%;
       }
+
+      .panel-estadisticas-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .btn-toggle-charts {
+        align-self: flex-end;
+      }
     }
   </style>
 </head>
@@ -418,8 +448,13 @@
          PANEL DE ESTADÍSTICAS
     =========================== -->
     <div class="panel-estadisticas">
-      <h2>📊 Estadísticas generales</h2>
-      <p>Resumen generado automáticamente desde Firestore (colección <strong>ventas</strong>).</p>
+      <div class="panel-estadisticas-header">
+        <div>
+          <h2>📊 Estadísticas generales</h2>
+          <p>Resumen generado automáticamente desde Firestore (colección <strong>ventas</strong>).</p>
+        </div>
+        <button id="btnToggleCharts" class="btn-toggle-charts">Ver gráficos</button>
+      </div>
 
       <div class="stats-grid">
         <div class="stats-box">
@@ -524,7 +559,6 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <script type="module" src="js/auth-guard.js"></script>
   <script type="module" src="js/admin.js"></script>
 </body>
