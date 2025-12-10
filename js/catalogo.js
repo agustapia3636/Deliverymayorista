@@ -272,7 +272,10 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, s
 function irAlCarrito() {
   window.location.href = "carrito.html";
 }
-
+const miniCarritoBox = document.getElementById("mini-carrito");
+if (miniCarritoBox) {
+  miniCarritoBox.addEventListener("click", irAlCarrito);
+}
 // ========= RENDER PRODUCTOS =========
 
 function renderProductos(lista) {
