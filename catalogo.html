@@ -331,42 +331,42 @@
       background: #1ebe57;
     }
 
-    /* BOTÓN FLOTANTE WHATSAPP EN CATÁLOGO (simple, link fijo) */
-.btn-wa-flotante {
-  position: fixed;
-  right: 18px;
-  bottom: 18px;
-  background: #25d366;
-  padding: 12px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  text-decoration: none;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.45);
-  z-index: 999;
-  transition: transform 0.1s ease, filter 0.1s ease;
-}
-.btn-wa-flotante:hover {
-  filter: brightness(1.06);
-  transform: translateY(-1px);
-}
+    /* BOTÓN FLOTANTE WHATSAPP EN CATÁLOGO */
+    .btn-wa-flotante {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: #25d366;
+      padding: 12px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 10px 24px rgba(0,0,0,0.45);
+      z-index: 999;
+      transition: transform 0.1s ease, filter 0.1s ease;
+    }
+    .btn-wa-flotante:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
 
-@media (max-width: 480px) {
-  .btn-wa-flotante {
-    bottom: 90px !important;
-  }
-}
+    @media (max-width: 480px) {
+      .btn-wa-flotante {
+        bottom: 90px !important;
+      }
+    }
 
-/* contorno circular premium */
-.btn-wa-flotante:focus,
-.btn-wa-flotante:active,
-.btn-wa-flotante:visited {
-  outline: none;
-  border-radius: 50% !important;
-  box-shadow: 0 0 0 3px #25d36688;
-}
+    /* contorno circular premium */
+    .btn-wa-flotante:focus,
+    .btn-wa-flotante:active,
+    .btn-wa-flotante:visited {
+      outline: none;
+      border-radius: 50% !important;
+      box-shadow: 0 0 0 3px #25d36688;
+    }
 
     /* MINI CARRITO FLOTANTE */
     .mini-carrito {
@@ -618,6 +618,7 @@
     <select id="filtro-subcategoria"></select>
   </div>
 
+  <!-- GRID DE PRODUCTOS -->
   <div id="lista-productos" class="grid"></div>
 
   <!-- PAGINADOR + RESUMEN -->
@@ -650,27 +651,27 @@
     </div>
   </div>
 
-  <!-- Botón flotante de WhatsApp (mensaje simple genérico) -->
-<a
-  id="wa-flotante"
-  class="btn-wa-flotante"
-  href="https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista."
-  target="_blank"
-  aria-label="WhatsApp"
->
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="26"
-    height="26"
-    fill="#ffffff"
-    viewBox="0 0 32 32"
+  <!-- Botón flotante de WhatsApp -->
+  <a
+    id="wa-flotante"
+    class="btn-wa-flotante"
+    href="https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista."
+    target="_blank"
+    aria-label="WhatsApp"
   >
-    <path d="M16.019 2.594c-7.453 0-13.438 6.063-13.438 13.531 0 2.375.625 4.656 1.844 6.719l-1.969 7.219 7.453-1.969c1.969 1.063 4.219 1.625 6.375 1.625h.031c7.438 0 13.438-6.063 13.438-13.531 0-3.594-1.406-6.938-3.969-9.469-2.531-2.531-5.906-4.125-9.656-4.125zm0 24.844h-.031c-1.938 0-3.813-.5-5.469-1.406l-.406-.219-4.438 1.188 1.188-4.344-.25-.406c-1.188-1.906-1.813-4.094-1.813-6.375 0-6.563 5.344-11.906 11.906-11.906 3.188 0 6.156 1.25 8.406 3.5 2.25 2.25 3.5 5.219 3.5 8.406-.031 6.531-5.375 11.875-11.906 11.875zm6.344-8.531c-.344-.188-2.031-1-2.344-1.094-.313-.094-.531-.156-.75.188-.219.344-.875 1.094-1.063 1.313-.188.188-.375.219-.719.031-.344-.188-1.438-.531-2.75-1.656-1-.875-1.656-1.938-1.844-2.281-.188-.344-.016-.531.156-.719.156-.156.344-.406.5-.594.156-.188.219-.313.344-.531.094-.219.031-.406-.031-.594-.063-.188-.75-1.844-1.031-2.5-.281-.656-.563-.563-.75-.563h-.656c-.219 0-.594.094-.906.438-.313.344-1.188 1.156-1.188 2.813s1.219 3.25 1.406 3.469c.188.219 2.406 3.656 5.844 5 3.438 1.344 3.438.875 4.063.813.625-.063 2.031-.813 2.313-1.594.281-.781.281-1.438.219-1.594-.063-.156-.281-.25-.625-.438z"/>
-  </svg>
-</a>
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="26"
+      height="26"
+      fill="#ffffff"
+      viewBox="0 0 32 32"
+    >
+      <path d="M16.019 2.594c-7.453 0-13.438 6.063-13.438 13.531 0 2.375.625 4.656 1.844 6.719l-1.969 7.219 7.453-1.969c1.969 1.063 4.219 1.625 6.375 1.625h.031c7.438 0 13.438-6.063 13.438-13.531 0-3.594-1.406-6.938-3.969-9.469-2.531-2.531-5.906-4.125-9.656-4.125zm0 24.844h-.031c-1.938 0-3.813-.5-5.469-1.406l-.406-.219-4.438 1.188 1.188-4.344-.25-.406c-1.188-1.906-1.813-4.094-1.813-6.375 0-6.563 5.344-11.906 11.906-11.906 3.188 0 6.156 1.25 8.406 3.5 2.25 2.25 3.5 5.219 3.5 8.406-.031 6.531-5.375 11.875-11.906 11.875zm6.344-8.531c-.344-.188-2.031-1-2.344-1.094-.313-.094-.531-.156-.75.188-.219.344-.875 1.094-1.063 1.313-.188.188-.375.219-.719.031-.344-.188-1.438-.531-2.75-1.656-1-.875-1.656-1.938-1.844-2.281-.188-.344-.016-.531.156-.719.156-.156.344-.406.5-.594.156-.188.219-.313.344-.531.094-.219.031-.406-.031-.594-.063-.188-.75-1.844-1.031-2.5-.281-.656-.563-.563-.75-.563h-.656c-.219 0-.594.094-.906.438-.313.344-1.188 1.156-1.188 2.813s1.219 3.25 1.406 3.469c.188.219 2.406 3.656 5.844 5 3.438 1.344 3.438.875 4.063.813.625-.063 2.031-.813 2.313-1.594.281-.781.281-1.438.219-1.594-.063-.156-.281-.25-.625-.438z"/>
+    </svg>
+  </a>
 
   <!-- MINI CARRITO GLOBAL -->
-  <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
+  <div id="mini-carrito" class="mini-carrito">
     <div class="mini-carrito-icono">🛒</div>
     <div class="mini-carrito-texto">
       <span class="mini-carrito-linea">
@@ -682,7 +683,7 @@
     </div>
   </div>
 
-  <!-- SCRIPT DEL CATÁLOGO + CARRITO -->
-<script type="module" src="js/catalogo.js?v=7"></script>
+  <!-- SCRIPT DEL CATÁLOGO + CARRITO (FIRESTORE) -->
+  <script type="module" src="js/catalogo.js?v=7"></script>
 </body>
 </html>
