@@ -3,7 +3,7 @@
 
 import { auth, db } from "./firebase-init.js";
 import {
-  onAuthStateChanged
+  onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 
 import {
@@ -210,7 +210,7 @@ if (form) {
     if (etiquetasStr) {
       etiquetasArr = etiquetasStr
         .split(",")
-        .map(t => t.trim())
+        .map((t) => t.trim())
         .filter(Boolean);
     }
 
@@ -234,9 +234,9 @@ if (form) {
       Descripcion: descripcion,
       PrecioMayorista: precioNum,
       Stock: stockNum,
-      "Categoria_Princ": categoria,
-      "Sub_Categoria": subcategoria,
-      "Imagen": imagen,
+      Categoria_Princ: categoria,
+      Sub_Categoria: subcategoria,
+      Imagen: imagen,
     };
 
     try {
