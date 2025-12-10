@@ -513,8 +513,13 @@
       </div>
     </div>
 
-    <!-- Si más adelante agregamos gráficos, van acá abajo -->
-    <!-- <canvas id="graficoVentasDia"></canvas> -->
+    <!-- 📊 Mini gráfico ventas últimos 7 días -->
+    <div style="margin-top: 10px;">
+      <h3 style="font-size: 14px; margin: 0 0 6px; opacity: .8;">
+        Ventas últimos 7 días
+      </h3>
+      <canvas id="chartVentas7Dias" height="120"></canvas>
+    </div>
   </div>
 
   <div class="acciones">
@@ -619,6 +624,7 @@
 </div>
 
 <!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="module" src="js/auth-guard.js"></script>
 <script type="module" src="js/ventas.js"></script>
 </body>
