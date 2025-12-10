@@ -1,17 +1,16 @@
 // js/editor.js
-// Editor de producto: crear / editar documentos en la colección "productos"
-// Adaptado para editor.html (ids: formProducto, codigo, nombre, precio, etc.)
+// Crear / editar productos en la colección "productos"
 
 import { db } from "./firebase-init.js";
 import {
   doc,
   getDoc,
   setDoc,
-  updateDoc,
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// ---------- DOM (coinciden con editor.html) ----------
+// ---------- Referencias al DOM (coinciden con editor.html) ----------
+const form              = document.getElementById("formProducto");
 const inputCodigo       = document.getElementById("codigo");
 const inputNombre       = document.getElementById("nombre");
 const inputCategoria    = document.getElementById("categoria");
@@ -23,41 +22,37 @@ const inputEtiquetas    = document.getElementById("etiquetas");
 const inputDescripcion  = document.getElementById("descripcion");
 const checkDestacado    = document.getElementById("destacado");
 
-const form              = document.getElementById("formProducto");
-const btnGuardar        = document.getElementById("btnGuardar");
-const lblTitulo         = document.getElementById("tituloFormulario");
+const tituloFormulario  = document.getElementById("tituloFormulario");
 const subTituloHeader   = document.getElementById("subTituloHeader");
 const modoTexto         = document.getElementById("modoTexto");
 const mensaje           = document.getElementById("mensaje");
 const previewImagenTag  = document.getElementById("previewImagenTag");
 
-// Modo actual
-let codigoOriginal = null; // cuando editamos, guardamos el código original (id documento)
+// Código original (cuando estamos editando)
+let codigoEdicion = null;
 
-// ---------- Helpers de mensaje ----------
+// ---------- Helpers ----------
+function mostrarMensaje(texto, tipo = "info") {
+  if (!mensaje) return;
+  mensaje.textContent = texto;
+  mensaje.classList.remove("mensaje-ok", "mensaje-error");
+
+  if (tipo === "ok") mensaje.classList.add("mensaje-ok");
+  if (tipo === "error") mensaje.classList.add("mensaje-error");
+}
+
 function limpiarMensaje() {
   if (!mensaje) return;
   mensaje.textContent = "";
   mensaje.classList.remove("mensaje-ok", "mensaje-error");
 }
 
-function mostrarMensaje(texto, tipo = "info") {
-  if (!mensaje) return;
-  mensaje.textContent = texto;
-  mensaje.classList.remove("mensaje-ok", "mensaje-error");
-  if (tipo === "ok") {
-    mensaje.classList.add("mensaje-ok");
-  } else if (tipo === "error") {
-    mensaje.classList.add("mensaje-error");
-  }
-}
-
-// ---------- Vista previa de imagen ----------
 function actualizarPreviewImagen(url) {
   if (!previewImagenTag) return;
 
-  if (url && url.trim() !== "") {
-    previewImagenTag.src = url.trim();
+  const limpia = (url || "").trim();
+  if (limpia) {
+    previewImagenTag.src = limpia;
     previewImagenTag.style.display = "block";
   } else {
     previewImagenTag.src = "";
@@ -65,41 +60,40 @@ function actualizarPreviewImagen(url) {
   }
 }
 
+// Vista previa en vivo al escribir la URL
 if (inputImagen) {
   inputImagen.addEventListener("input", () => {
     actualizarPreviewImagen(inputImagen.value);
   });
 }
 
-// ---------- Inicio: detectar si es nuevo o edición ----------
+// ---------- Cargar datos si estamos en modo edición ----------
 async function iniciarEditor() {
   const params = new URLSearchParams(window.location.search);
-  const id = params.get("id"); // en tu admin.js usás editor.html?id=N0001
+  const id = params.get("id");
 
   if (id) {
     // MODO EDICIÓN
-    codigoOriginal = id;
+    codigoEdicion = id;
+    if (tituloFormulario) tituloFormulario.textContent = "Editar producto";
+    if (subTituloHeader)  subTituloHeader.textContent  = `Editando código ${id}`;
+    if (modoTexto)        modoTexto.textContent        = "Modo edición";
 
-    if (lblTitulo)       lblTitulo.textContent = `Editar producto`;
-    if (subTituloHeader) subTituloHeader.textContent = `Editando código ${id}`;
-    if (modoTexto)       modoTexto.textContent = "Modo edición";
     if (inputCodigo) {
       inputCodigo.value = id;
-      inputCodigo.disabled = true; // no permitimos cambiar el código (id de Firestore)
+      inputCodigo.disabled = true; // no dejamos cambiar el código (ID del doc)
     }
 
     await cargarProducto(id);
   } else {
     // MODO NUEVO
-    codigoOriginal = null;
-
-    if (lblTitulo)       lblTitulo.textContent = "Nuevo producto";
-    if (subTituloHeader) subTituloHeader.textContent = "Nuevo producto";
-    if (modoTexto)       modoTexto.textContent = "Modo creación";
+    codigoEdicion = null;
+    if (tituloFormulario) tituloFormulario.textContent = "Nuevo producto";
+    if (subTituloHeader)  subTituloHeader.textContent  = "Nuevo producto";
+    if (modoTexto)        modoTexto.textContent        = "Modo creación";
   }
 }
 
-// ---------- Cargar producto existente desde Firestore ----------
 async function cargarProducto(codigo) {
   try {
     const ref = doc(db, "productos", codigo);
@@ -112,46 +106,13 @@ async function cargarProducto(codigo) {
 
     const p = snap.data();
 
-    // Rellenar campos con fallbacks (por si vienen de import viejo)
-    if (inputNombre) {
-      inputNombre.value = p.nombre || p.Nombre || "";
-    }
-
-    if (inputDescripcion) {
-      inputDescripcion.value =
-        p.descripcionLarga ||
-        p.descripcion ||
-        p.Descripcion ||
-        "";
-    }
-
-    if (inputPrecio) {
-      inputPrecio.value =
-        p.precio ??
-        p.PrecioMayorista ??
-        p.precioMayorista ??
-        "";
-    }
-
-    if (inputStock) {
-      inputStock.value = p.stock ?? p.Stock ?? "";
-    }
-
-    if (inputCategoria) {
-      inputCategoria.value =
-        p.categoria ||
-        p.Categoria_Princ ||
-        p.Categoria ||
-        "";
-    }
-
-    if (inputSubcategoria) {
-      inputSubcategoria.value =
-        p.subcategoria ||
-        p.Sub_Categoria ||
-        p.Subcategoria ||
-        "";
-    }
+    if (inputNombre)       inputNombre.value       = p.nombre || p.Nombre || "";
+    if (inputCategoria)    inputCategoria.value    = p.categoria || p.Categoria_Princ || "";
+    if (inputSubcategoria) inputSubcategoria.value = p.subcategoria || p.Sub_Categoria || "";
+    if (inputPrecio)       inputPrecio.value       = p.precio ?? p.PrecioMayorista ?? "";
+    if (inputStock)        inputStock.value        = p.stock ?? p.Stock ?? "";
+    if (inputDescripcion)  inputDescripcion.value  =
+      p.descripcionLarga || p.Descripcion || p.descripcion || "";
 
     if (inputImagen) {
       inputImagen.value = p.imagen || p.Imagen || "";
@@ -159,16 +120,11 @@ async function cargarProducto(codigo) {
     }
 
     if (inputEtiquetas) {
-      const etiquetas =
-        p.etiquetas ||
-        p.tags ||
-        p.tag ||
-        p.Etiquetas ||
-        "";
-      if (Array.isArray(etiquetas)) {
-        inputEtiquetas.value = etiquetas.join(", ");
-      } else if (typeof etiquetas === "string") {
-        inputEtiquetas.value = etiquetas;
+      const etq = p.etiquetas || p.Etiquetas || p.tags || [];
+      if (Array.isArray(etq)) {
+        inputEtiquetas.value = etq.join(", ");
+      } else if (typeof etq === "string") {
+        inputEtiquetas.value = etq;
       }
     }
 
@@ -181,32 +137,35 @@ async function cargarProducto(codigo) {
   }
 }
 
-// ---------- Guardar (crear / actualizar) ----------
+// ---------- Guardar (nuevo o edición) ----------
 if (form) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     limpiarMensaje();
 
     let codigo = (inputCodigo?.value || "").trim();
-    const nombre = (inputNombre?.value || "").trim();
-    const categoria = (inputCategoria?.value || "").trim();
+    const nombre       = (inputNombre?.value || "").trim();
+    const categoria    = (inputCategoria?.value || "").trim();
     const subcategoria = (inputSubcategoria?.value || "").trim();
-    const descripcion = (inputDescripcion?.value || "").trim();
-    const precioNum = Number(inputPrecio?.value || 0);
-    const stockNum = Number(inputStock?.value || 0);
-    const imagen = (inputImagen?.value || "").trim();
+    const descripcion  = (inputDescripcion?.value || "").trim();
+    const precioNum    = Number(inputPrecio?.value || 0);
+    const stockNum     = Number(inputStock?.value || 0);
+    const urlImagen    = (inputImagen?.value || "").trim();
     const etiquetasStr = (inputEtiquetas?.value || "").trim();
-    const destacado = !!(checkDestacado?.checked);
+    const destacado    = !!(checkDestacado?.checked);
 
     if (!codigo || !nombre) {
       mostrarMensaje("Código y nombre son obligatorios.", "error");
       return;
     }
 
-    // Normalizamos el código (ej: en mayúsculas)
+    // normalizamos el código
     codigo = codigo.toUpperCase();
 
-    // Procesar etiquetas a array
+    // si estamos editando, usamos siempre el código original como id de doc
+    const idDoc = codigoEdicion || codigo;
+
+    // convertir etiquetas en array
     let etiquetasArr = [];
     if (etiquetasStr) {
       etiquetasArr = etiquetasStr
@@ -215,46 +174,41 @@ if (form) {
         .filter(Boolean);
     }
 
-    const baseData = {
-      // nombres "nuevos" (los que usa tu admin.js)
+    const producto = {
+      // campos principales (los que usa el admin)
       codigo,
       nombre,
-      descripcionLarga: descripcion,
-      precio: precioNum,
-      stock: stockNum,
       categoria,
       subcategoria,
-      imagen,
-      etiquetas: etiquetasArr,
+      precio: precioNum,
+      stock: stockNum,
+      imagen: urlImagen,
+      descripcionLarga: descripcion,
       destacado,
+      etiquetas: etiquetasArr,
       actualizado: serverTimestamp(),
 
-      // nombres compatibles con la importación vieja / catálogo
+      // compatibilidad con datos viejos
       Codigo: codigo,
       Nombre: nombre,
-      Descripcion: descripcion,
-      PrecioMayorista: precioNum,
-      Stock: stockNum,
       Categoria_Princ: categoria,
       Sub_Categoria: subcategoria,
-      Imagen: imagen,
+      PrecioMayorista: precioNum,
+      Stock: stockNum,
+      Imagen: urlImagen,
+      Descripcion: descripcion,
     };
 
     try {
-      if (btnGuardar) {
-        btnGuardar.disabled = true;
-        btnGuardar.textContent = "Guardando...";
-      }
+      const ref = doc(db, "productos", idDoc);
 
-      if (codigoOriginal) {
-        // MODO EDICIÓN: el id del doc ya existe (codigoOriginal)
-        const ref = doc(db, "productos", codigoOriginal);
-        await updateDoc(ref, baseData);
+      if (codigoEdicion) {
+        // MODO EDICIÓN → sólo actualizamos
+        await setDoc(ref, producto, { merge: true });
       } else {
-        // MODO NUEVO: creamos doc con ID = código
-        const ref = doc(db, "productos", codigo);
+        // MODO NUEVO → creamos con timestamps
         await setDoc(ref, {
-          ...baseData,
+          ...producto,
           creado: serverTimestamp(),
         });
       }
@@ -265,15 +219,10 @@ if (form) {
     } catch (err) {
       console.error("Error guardando producto:", err);
       mostrarMensaje("Hubo un error al guardar el producto. Revisá la consola.", "error");
-    } finally {
-      if (btnGuardar) {
-        btnGuardar.disabled = false;
-        btnGuardar.textContent = "💾 Guardar producto";
-      }
     }
   });
 } else {
-  console.error("No se encontró el formulario con id='formProducto'.");
+  console.error("No se encontró el formulario con id='formProducto'");
 }
 
 // ---------- Arranque ----------
