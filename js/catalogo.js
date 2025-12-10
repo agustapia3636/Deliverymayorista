@@ -1235,9 +1235,6 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         }
       }
-      seleccionarSubcategoria(catKey, subKey, subLabel || subKey);
-    }
-
        // --- FILTRO POR ETIQUETA (tagKey) ---
     if (tagKey && tagKey !== "todas") {
         let tagLabel = null;
