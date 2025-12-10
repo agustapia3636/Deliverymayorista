@@ -1238,61 +1238,37 @@ document.addEventListener("DOMContentLoaded", async () => {
       seleccionarSubcategoria(catKey, subKey, subLabel || subKey);
     }
 
+       // --- FILTRO POR ETIQUETA (tagKey) ---
     if (tagKey && tagKey !== "todas") {
-      let tagLabel = null;
-      const tagsPorCat = MAPA_TAGS[catKey];
+        let tagLabel = null;
+        const tagsPorCat = MAPA_TAGS[catKey];
 
-      if (tagsPorCat) {
-        let setTags = tagsPorCat[subKey];
+        if (tagsPorCat) {
+            let setTags = tagsPorCat[subKey];
 
-        if (!setTags) {
-          const tmp = new Set();
-          Object.values(tagsPorCat).forEach(st => st.forEach(t => tmp.add(t)));
-          setTags = tmp;
-        }
-
-        if (setTags) {
-          for (const t of setTags) {
-            if (t.toLowerCase() === tagKey) {
-              tagLabel = t;
-              break;
+            // Si no hay set para esa subcategoría, armamos uno con todos los tags de la categoría
+            if (!setTags) {
+                const tmp = new Set();
+                Object.values(tagsPorCat).forEach(st => st.forEach(t => tmp.add(t)));
+                setTags = tmp;
             }
-          }
-        }
-      }
 
-      seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel || tagKey);
+            if (setTags) {
+                for (const t of setTags) {
+                    if (t.toLowerCase() === tagKey) {
+                        tagLabel = t;
+                        break;
+                    }
+                }
+            }
+        }
+
+        seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel || tagKey);
     }
 
+    // Actualizamos textos y aplicamos filtros con la selección final
     actualizarTextoToggle();
     aplicarFiltros();
-  }
-  if (tagKey && tagKey !== "todas") {
-    let tagLabel = null;
-    const tagsPorCat = MAPA_TAGS[catKey];
+}); // <-- cierre REAL del addEventListener / función
 
-    if (tagsPorCat) {
-      let setTags = tagsPorCat[subKey];
-
-      if (!setTags) {
-        const tmp = new Set();
-        Object.values(tagsPorCat).forEach(st => st.forEach(t => tmp.add(t)));
-        setTags = tmp;
-      }
-
-      if (setTags) {
-        for (const t of setTags) {
-          if (t.toLowerCase() === tagKey) {
-            tagLabel = t;
-            break;
-          }
-        }
-      }
-    }
-
-    seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel || tagKey);
-  }
-
-  actualizarTextoToggle();
-  aplicarFiltros();
-});
+// Fin del archivo
