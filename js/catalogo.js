@@ -5,10 +5,11 @@
 // + memoria de filtros en localStorage
 // + botón premium "Limpiar filtros"
 // + PAGINACIÓN PREMIUM
-// + DATOS DESDE FIRESTORE (sin productos.json)
 // ========================================
 
-// ===== FIREBASE (MODULAR) =====
+// =======================
+// 🔥 FIREBASE + FIRESTORE
+// =======================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import {
   getFirestore,
@@ -16,13 +17,13 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-// ⚠️ PEGÁ ACÁ EL MISMO CONFIG QUE USAS EN login.js / admin.js
+// ⚠️ Pegar acá tu configuración REAL de Firebase
 const firebaseConfig = {
   // apiKey: "TU_API_KEY",
   // authDomain: "TU_AUTH_DOMAIN",
   // projectId: "TU_PROJECT_ID",
-  // storageBucket: "TU_BUCKET",
-  // messagingSenderId: "TU_SENDER_ID",
+  // storageBucket: "TU_STORAGE_BUCKET",
+  // messagingSenderId: "TU_MESSAGING_SENDER_ID",
   // appId: "TU_APP_ID"
 };
 
@@ -30,8 +31,10 @@ const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
 // ========================================
+// RESTO DE TU CÓDIGO (IGUAL QUE ANTES)
+// ========================================
 
-const BASE_IMG     = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
+const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 const CLAVE_CARRITO = "dm_carrito";
 
 // ===== DOM PRINCIPAL =====
@@ -161,54 +164,33 @@ function normalizarEtiquetasCampo(campo) {
     .map(t => t.toLowerCase());
 }
 
-// 🔄 Ahora puede usar URL directa de Firestore (campo "imagen")
-// y si no existe, cae al patrón BASE_IMG/codigo.jpg
-function setImagenProducto(imgElement, codigo, urlDirecta) {
-  if (!imgElement) return;
-
-  const fallbackPorCodigo = () => {
-    if (!codigo) {
-      imgElement.style.display = "none";
-      return;
-    }
-
-    const urls = [
-      `${BASE_IMG}/${codigo}.jpg`,
-      `${BASE_IMG}/${codigo}.JPG`,
-    ];
-    let intento = 0;
-
-    const probar = () => {
-      if (intento >= urls.length) {
-        imgElement.style.display = "none";
-        return;
-      }
-      imgElement.src = urls[intento];
-      intento++;
-    };
-
-    imgElement.onload = () => {
-      imgElement.dataset.srcOk = imgElement.src;
-    };
-    imgElement.onerror = probar;
-
-    probar();
-  };
-
-  if (urlDirecta) {
-    imgElement.onload = () => {
-      imgElement.dataset.srcOk = imgElement.src;
-    };
-    imgElement.onerror = () => {
-      // si falla la URL de Firestore, probamos por código
-      fallbackPorCodigo();
-    };
-    imgElement.src = urlDirecta;
+function setImagenProducto(imgElement, codigo) {
+  if (!imgElement || !codigo) {
+    if (imgElement) imgElement.style.display = "none";
     return;
   }
 
-  // Si no hay urlDirecta, vamos directo al fallback por código
-  fallbackPorCodigo();
+  const urls = [
+    `${BASE_IMG}/${codigo}.jpg`,
+    `${BASE_IMG}/${codigo}.JPG`,
+  ];
+  let intento = 0;
+
+  const probar = () => {
+    if (intento >= urls.length) {
+      imgElement.style.display = "none";
+      return;
+    }
+    imgElement.src = urls[intento];
+    intento++;
+  };
+
+  imgElement.onload = () => {
+    imgElement.dataset.srcOk = imgElement.src;
+  };
+  imgElement.onerror = probar;
+
+  probar();
 }
 
 // ========= CARRITO =========
@@ -386,8 +368,7 @@ function renderProductos(lista) {
     `;
 
     const img = card.querySelector(".producto-imagen");
-    // usamos imagen directa de Firestore si existe, sino BASE_IMG/codigo
-    setImagenProducto(img, codigo, prod.imagen);
+    setImagenProducto(img, codigo);
 
     const btn = card.querySelector(".btn-agregar-carrito");
     if (itemCarrito) {
@@ -692,4 +673,619 @@ function renderConPaginador(listaFiltrada) {
   if (btnPaginaAnterior) {
     btnPaginaAnterior.disabled = paginaActual <= 1;
   }
-  if (btnPagina
+  if (btnPaginaSiguiente) {
+    btnPaginaSiguiente.disabled = paginaActual >= totalPaginas;
+  }
+
+  // Terminar animación
+  requestAnimationFrame(() => {
+    contenedorNumeros.style.opacity   = "1";
+    contenedorNumeros.style.transform = "translateY(0)";
+  });
+}
+
+// ========= ICONOS PARA CATEGORÍAS =========
+
+function iconoParaCategoria(catLabel) {
+  if (!catLabel) return "•";
+
+  const txt = catLabel.toLowerCase().trim();
+
+  const mapa = {
+    "todas las categorías": "★",
+
+    "accesorios vehiculares": "🚗",
+    "baño y cocina": "🍽️",
+    "bano y cocina": "🍽️",
+    "camping": "⛺",
+    "cocina": "🍳",
+    "cuidado personal": "🧴",
+    "decoración": "🕯️",
+    "decoracion": "🕯️",
+
+    "bazar": "🛍️",
+    "hogar": "🏡",
+    "librería": "📚",
+    "libreria": "📚",
+    "oficina": "📎",
+    "electrónica": "🔌",
+    "electronica": "🔌",
+    "audio": "🎧",
+    "ferretería": "🛠",
+    "ferreteria": "🛠",
+    "herramientas": "🛠",
+    "juguetes": "🧸",
+    "regalería": "🎁",
+    "regaleria": "🎁",
+    "mochilas": "🎒",
+    "bolsos": "👜"
+  };
+
+  if (mapa[txt]) return mapa[txt];
+
+  if (txt.includes("vehicul")) return "🚗";
+  if (txt.includes("auto") || txt.includes("motor")) return "🚙";
+  if (txt.includes("baño") || txt.includes("bano") || txt.includes("cocina")) return "🍽️";
+  if (txt.includes("hogar")) return "🏡";
+  if (txt.includes("camping")) return "⛺";
+  if (txt.includes("cuidado")) return "🧴";
+  if (txt.includes("decor")) return "🕯️";
+  if (txt.includes("juguet") || txt.includes("regal")) return "🧸";
+  if (txt.includes("librer") || txt.includes("oficina")) return "📚";
+  if (txt.includes("electr")) return "🔌";
+  if (txt.includes("herramient") || txt.includes("ferreter")) return "🛠";
+  if (txt.includes("bolso") || txt.includes("mochila")) return "🎒";
+  if (txt.includes("bazar")) return "🛍️";
+
+  return "•";
+}
+
+// ========= MEGA MENÚ: CATEGORÍAS / SUBCATEGORÍAS / ETIQUETAS =========
+
+function cerrarMegaMenu() {
+  if (megaDropdown) megaDropdown.classList.remove("open");
+}
+
+function abrirMegaMenu() {
+  if (megaDropdown) megaDropdown.classList.add("open");
+}
+
+function actualizarTextoToggle() {
+  let partes = [];
+
+  if (labelCategoriaActual) {
+    if (labelCategoriaActual !== "Todas las categorías") {
+      partes.push(labelCategoriaActual);
+    }
+  }
+
+  if (labelSubcategoriaActual && labelSubcategoriaActual !== "Todas") {
+    partes.push(labelSubcategoriaActual);
+  }
+
+  if (labelEtiquetaActual && labelEtiquetaActual !== "Todas") {
+    partes.push(labelEtiquetaActual);
+  }
+
+  let texto;
+  if (partes.length === 0) {
+    texto = "Todas las categorías";
+  } else {
+    texto = partes.join(" › ");
+  }
+
+  megaToggle.innerHTML = `
+    <span class="mega-label">${texto}</span>
+    <span class="mega-arrow">▾</span>
+  `;
+}
+
+function seleccionarCategoria(catKey) {
+  categoriaSeleccionada    = catKey || "todas";
+  subcategoriaSeleccionada = "todas";
+  etiquetaSeleccionada     = "todas";
+  paginaActual             = 1;
+
+  if (filtroCategoria)    filtroCategoria.value    = categoriaSeleccionada;
+  if (filtroSubcategoria) filtroSubcategoria.value = "todas";
+
+  if (megaCatList) {
+    megaCatList.querySelectorAll(".mega-item").forEach(li => {
+      li.classList.toggle("mega-item-activo", li.dataset.catKey === categoriaSeleccionada);
+    });
+  }
+
+  labelCategoriaActual   = categoriaSeleccionada === "todas"
+    ? "Todas las categorías"
+    : (MAPA_CAT_LABEL[categoriaSeleccionada] || "Categoría");
+  labelSubcategoriaActual = null;
+  labelEtiquetaActual     = null;
+
+  construirMenuSubcategorias(categoriaSeleccionada, labelCategoriaActual);
+  construirMenuEtiquetas(categoriaSeleccionada, "todas", labelCategoriaActual, null);
+
+  actualizarTextoToggle();
+  aplicarFiltros();
+  guardarFiltrosActuales();
+}
+
+function seleccionarSubcategoria(catKey, subKey, subLabel) {
+  subcategoriaSeleccionada = subKey || "todas";
+  etiquetaSeleccionada     = "todas";
+  paginaActual             = 1;
+
+  if (filtroSubcategoria) filtroSubcategoria.value = subcategoriaSeleccionada;
+
+  if (megaSubList) {
+    megaSubList.querySelectorAll(".mega-subitem").forEach(li => {
+      li.classList.toggle("mega-subitem-activo", li.dataset.subKey === subcategoriaSeleccionada);
+    });
+  }
+
+  labelSubcategoriaActual = subKey === "todas" ? null : (subLabel || subKey);
+  labelEtiquetaActual     = null;
+
+  construirMenuEtiquetas(catKey, subKey, labelCategoriaActual, labelSubcategoriaActual);
+  actualizarTextoToggle();
+  aplicarFiltros();
+  guardarFiltrosActuales();
+}
+
+function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
+  etiquetaSeleccionada = tagKey || "todas";
+  paginaActual         = 1;
+
+  if (megaTagList) {
+    megaTagList.querySelectorAll(".mega-tagitem").forEach(li => {
+      li.classList.toggle("mega-tagitem-activo", li.dataset.tagKey === etiquetaSeleccionada);
+    });
+  }
+
+  labelEtiquetaActual = tagKey === "todas" ? null : (tagLabel || tagKey);
+
+  actualizarTextoToggle();
+  aplicarFiltros();
+  guardarFiltrosActuales();
+  cerrarMegaMenu();
+}
+
+// Botón Premium: limpiar filtros
+function resetearFiltrosMega() {
+  if (buscador) buscador.value = "";
+  paginaActual = 1;
+  seleccionarCategoria("todas");
+  cerrarMegaMenu();
+}
+
+function construirMenuEtiquetas(catKey, subKey, catLabel, subLabel) {
+  if (!megaTagList) return;
+
+  megaTagList.innerHTML = "";
+
+  const ck = (catKey || "todas").toLowerCase();
+  const sk = (subKey || "todas").toLowerCase();
+
+  let setTags = null;
+
+  if (ck === "todas") {
+    setTags = null;
+  } else if (MAPA_TAGS[ck]) {
+    if (MAPA_TAGS[ck][sk]) {
+      setTags = MAPA_TAGS[ck][sk];
+    } else {
+      const temp = new Set();
+      Object.values(MAPA_TAGS[ck]).forEach(s => {
+        s.forEach(t => temp.add(t));
+      });
+      setTags = temp;
+    }
+  }
+
+  if (megaTagTitle) {
+    if (!subLabel || sk === "todas") {
+      megaTagTitle.textContent = "Etiquetas";
+    } else {
+      megaTagTitle.textContent = `Etiquetas de ${subLabel}`;
+    }
+  }
+
+  const liTodas = document.createElement("li");
+  liTodas.className = "mega-tagitem mega-tagitem-activo";
+  liTodas.textContent = "Todas";
+  liTodas.dataset.tagKey = "todas";
+  liTodas.addEventListener("click", () =>
+    seleccionarEtiqueta(ck, sk, "todas", "Todas")
+  );
+  megaTagList.appendChild(liTodas);
+
+  if (!setTags || setTags.size === 0) {
+    return;
+  }
+
+  Array.from(setTags)
+    .sort((a, b) => a.localeCompare(b, "es"))
+    .forEach(tagLabel => {
+      const tagKey = tagLabel.toLowerCase();
+      const li = document.createElement("li");
+      li.className = "mega-tagitem";
+      li.textContent = tagLabel;
+      li.dataset.tagKey = tagKey;
+      li.addEventListener("click", () =>
+        seleccionarEtiqueta(ck, sk, tagKey, tagLabel)
+      );
+      megaTagList.appendChild(li);
+    });
+}
+
+function construirMenuSubcategorias(catKey, catLabel) {
+  if (!megaSubList) return;
+
+  megaSubList.innerHTML = "";
+
+  const key = (catKey || "todas").toLowerCase();
+  const subSet = MAPA_CAT_SUB[key];
+
+  if (!subSet || subSet.size === 0 || key === "todas") {
+    if (megaSubTitle) megaSubTitle.textContent = "Subcategorías";
+
+    const li = document.createElement("li");
+    li.className = "mega-subitem mega-subitem-activo";
+    li.textContent = "Todas";
+    li.dataset.subKey = "todas";
+    li.addEventListener("click", () => {
+      seleccionarSubcategoria("todas", "todas", "Todas");
+    });
+    megaSubList.appendChild(li);
+    return;
+  }
+
+  if (megaSubTitle) megaSubTitle.textContent = catLabel || "Subcategorías";
+
+  const liTodas = document.createElement("li");
+  liTodas.className = "mega-subitem mega-subitem-activo";
+  liTodas.textContent = "Todas";
+  liTodas.dataset.subKey = "todas";
+  liTodas.addEventListener("click", () => {
+    seleccionarSubcategoria(catKey, "todas", "Todas");
+  });
+  megaSubList.appendChild(liTodas);
+
+  Array.from(subSet)
+    .sort((a, b) => a.localeCompare(b, "es"))
+    .forEach(sub => {
+      const subKey = sub.toLowerCase();
+      const li = document.createElement("li");
+      li.className = "mega-subitem";
+      li.textContent = sub;
+      li.dataset.subKey = subKey;
+      li.addEventListener("click", () => {
+        seleccionarSubcategoria(catKey, subKey, sub);
+      });
+      megaSubList.appendChild(li);
+    });
+}
+
+function construirMenuCategorias(categoriasUnicas) {
+  if (!megaCatList) return;
+
+  megaCatList.innerHTML = "";
+
+  const liTodas = document.createElement("li");
+  liTodas.className = "mega-item mega-item-activo";
+  liTodas.textContent = "Todas las categorías";
+  liTodas.dataset.catKey = "todas";
+  liTodas.dataset.icon   = "★";
+  liTodas.addEventListener("click", () => seleccionarCategoria("todas"));
+  megaCatList.appendChild(liTodas);
+
+  categoriasUnicas.forEach(cat => {
+    const key = cat.toLowerCase();
+    MAPA_CAT_LABEL[key] = cat;
+
+    const li = document.createElement("li");
+    li.className = "mega-item";
+    li.textContent = cat;
+    li.dataset.catKey = key;
+    li.dataset.icon   = iconoParaCategoria(cat);
+    li.addEventListener("click", () => seleccionarCategoria(key));
+    megaCatList.appendChild(li);
+  });
+}
+
+// ========= CARGA INICIAL (AHORA DESDE FIRESTORE) =========
+
+async function cargarProductos() {
+  try {
+    const snap = await getDocs(collection(db, "productos"));
+
+    const data = snap.docs.map(doc => {
+      const p = doc.data();
+
+      return {
+        ...p,
+        codigo: p.codigo || p.cod || p.Code || p.Codigo || "",
+        nombre:
+          p.nombre ||
+          p.descripcion ||
+          p.titulo ||
+          p["Nombre Corto"] ||
+          "",
+        descripcionLarga:
+          p.descripcionLarga ||
+          p.descripcion_larga ||
+          p["descripcionLarga"] ||
+          p["descripcion_larga"] ||
+          p["Descripción Larga"] ||
+          p.descripcionCorta ||
+          p.descripcion_corta ||
+          p.descripcion ||
+          "",
+        precio:
+          p.precio ??
+          p.precioMayorista ??
+          p.precio_venta ??
+          p.precioLista ??
+          p["Precio Mayorista"] ??
+          p["Precio Cliente"] ??
+          0,
+        stock: p.stock ?? p.Stock ?? 0,
+        categoria:
+          p.categoria ||
+          p.rubro ||
+          p.cat ||
+          p["Categoria Princ"] ||
+          p["Categoria_Princ"] ||
+          "",
+        subcategoria:
+          p.subcategoria ||
+          p.Subcategoria ||
+          p.Sub_Categoria ||
+          p["Sub_Categoria"] ||
+          p["Subcategoria"] ||
+          "",
+        etiquetas:
+          p.etiquetas ||
+          p.tags ||
+          p.tag ||
+          p["Etiquetas"] ||
+          p["etiquetas"] ||
+          [],
+        imagen: p.imagen || ""
+      };
+    });
+
+    TODOS_LOS_PRODUCTOS = Array.isArray(data) ? data : [];
+
+    // Construir mapas igual que antes
+    MAPA_CAT_SUB   = {};
+    MAPA_CAT_LABEL = {};
+    MAPA_TAGS      = {};
+
+    TODOS_LOS_PRODUCTOS.forEach(p => {
+      const catOriginal = safe(
+        p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
+        ""
+      ).toString().trim();
+
+      const subOriginal = safe(
+        p.subcategoria ||
+        p.Subcategoria ||
+        p.Sub_Categoria ||
+        p["Sub_Categoria"] ||
+        p["Subcategoria"],
+        ""
+      ).toString().trim();
+
+      const catKey = (catOriginal.toLowerCase() || "sin-categoria");
+      const subKey = (subOriginal.toLowerCase() || "sin-subcategoria");
+
+      if (!MAPA_CAT_SUB[catKey]) {
+        MAPA_CAT_SUB[catKey] = new Set();
+      }
+      if (subOriginal) {
+        MAPA_CAT_SUB[catKey].add(subOriginal);
+      }
+
+      const etiquetasRaw =
+        p.etiquetas ||
+        p.tags ||
+        p.tag ||
+        p["Etiquetas"] ||
+        p["etiquetas"];
+
+      const etiquetasNorm = normalizarEtiquetasCampo(etiquetasRaw);
+      if (etiquetasNorm.length) {
+        if (!MAPA_TAGS[catKey]) MAPA_TAGS[catKey] = {};
+        if (!MAPA_TAGS[catKey][subKey]) MAPA_TAGS[catKey][subKey] = new Set();
+        etiquetasNorm.forEach(t =>
+          MAPA_TAGS[catKey][subKey].add(
+            t.charAt(0).toUpperCase() + t.slice(1)
+          )
+        );
+      }
+    });
+
+    // Armar selects / mega menú
+    if (filtroCategoria) {
+      const categoriasUnicas = Array.from(
+        new Set(
+          TODOS_LOS_PRODUCTOS.map(p =>
+            safe(
+              p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
+              ""
+            ).toString()
+          ).filter(c => c !== "")
+        )
+      ).sort((a, b) => a.localeCompare(b, "es"));
+
+      filtroCategoria.innerHTML = "";
+      const optTodas = document.createElement("option");
+      optTodas.value = "todas";
+      optTodas.textContent = "Todas las categorías";
+      filtroCategoria.appendChild(optTodas);
+
+      categoriasUnicas.forEach(cat => {
+        const op = document.createElement("option");
+        op.value = cat.toLowerCase();
+        op.textContent = cat;
+        filtroCategoria.appendChild(op);
+      });
+
+      construirMenuCategorias(categoriasUnicas);
+    }
+
+    if (filtroSubcategoria) {
+      filtroSubcategoria.innerHTML = "";
+      const optTodasSub = document.createElement("option");
+      optTodasSub.value = "todas";
+      optTodasSub.textContent = "Todas las subcategorías";
+      filtroSubcategoria.appendChild(optTodasSub);
+      filtroSubcategoria.value = "todas";
+    }
+
+    aplicarFiltros();
+    actualizarMiniCarrito();
+  } catch (err) {
+    console.error("Error cargando productos desde Firestore:", err);
+    grid.innerHTML = `<p>Error cargando productos: ${err.message}</p>`;
+  }
+}
+
+// ========= EVENTOS =========
+
+if (buscador) {
+  buscador.addEventListener("input", () => {
+    paginaActual = 1;
+    aplicarFiltros();
+    guardarFiltrosActuales();
+  });
+}
+
+if (btnPaginaAnterior) {
+  btnPaginaAnterior.addEventListener("click", () => {
+    const totalPaginas = Math.max(
+      1,
+      Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
+    );
+    if (paginaActual > 1) {
+      paginaActual--;
+      if (paginaActual < 1) paginaActual = 1;
+      guardarFiltrosActuales();
+      aplicarFiltros();
+    }
+  });
+}
+
+if (btnPaginaSiguiente) {
+  btnPaginaSiguiente.addEventListener("click", () => {
+    const totalPaginas = Math.max(
+      1,
+      Math.ceil(ultimoTotalFiltrado / ITEMS_POR_PAGINA)
+    );
+    if (paginaActual < totalPaginas) {
+      paginaActual++;
+      if (paginaActual > totalPaginas) paginaActual = totalPaginas;
+      guardarFiltrosActuales();
+      aplicarFiltros();
+    }
+  });
+}
+
+if (megaToggle && megaDropdown) {
+  megaToggle.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (megaDropdown.classList.contains("open")) {
+      cerrarMegaMenu();
+    } else {
+      abrirMegaMenu();
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!megaDropdown.contains(e.target)) {
+      cerrarMegaMenu();
+    }
+  });
+}
+
+// Botón reset filtros
+if (megaResetBtn) {
+  megaResetBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    resetearFiltrosMega();
+  });
+}
+
+// ========= INICIO: CARGA + RESTAURAR FILTROS =========
+
+document.addEventListener("DOMContentLoaded", async () => {
+  await cargarProductos();
+  actualizarMiniCarrito();
+
+  const guardados = leerFiltrosGuardados();
+  if (guardados) {
+    const {
+      categoria,
+      subcategoria,
+      etiqueta,
+      pagina,
+      busqueda
+    } = guardados;
+
+    const catKey = categoria || "todas";
+    const subKey = subcategoria || "todas";
+    const tagKey = etiqueta || "todas";
+
+    if (typeof pagina === "number" && pagina > 0) {
+      paginaActual = pagina;
+    }
+
+    if (busqueda && buscador) {
+      buscador.value = busqueda;
+    }
+
+    if (catKey && catKey !== "todas") {
+      seleccionarCategoria(catKey);
+    }
+
+    if (subKey && subKey !== "todas") {
+      let subLabel = null;
+      const setSubs = MAPA_CAT_SUB[catKey];
+      if (setSubs) {
+        for (const s of setSubs) {
+          if (s.toLowerCase() === subKey) {
+            subLabel = s;
+            break;
+          }
+        }
+      }
+      seleccionarSubcategoria(catKey, subKey, subLabel || subKey);
+    }
+
+    if (tagKey && tagKey !== "todas") {
+      let tagLabel = null;
+      const tagsPorCat = MAPA_TAGS[catKey];
+      if (tagsPorCat) {
+        let setTags = tagsPorCat[subKey];
+        if (!setTags) {
+          const tmp = new Set();
+          Object.values(tagsPorCat).forEach(st => st.forEach(t => tmp.add(t)));
+          setTags = tmp;
+        }
+        if (setTags) {
+          for (const t of setTags) {
+            if (t.toLowerCase() === tagKey) {
+              tagLabel = t;
+              break;
+            }
+          }
+        }
+      }
+      seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel || tagKey);
+    }
+
+    actualizarTextoToggle();
+    aplicarFiltros();
+  }
+});
