@@ -1,39 +1,20 @@
 // ========================================
 // CATÁLOGO + CARRITO (página catalogo.html)
-// Versión FIRESTORE
+// Mega menú categorías tipo "Telefonía"
+// con 3er nivel de ETIQUETAS libres + iconos
+// + memoria de filtros en localStorage
+// + botón premium "Limpiar filtros"
+// + PAGINACIÓN PREMIUM
 // ========================================
 
-// --- FIREBASE + FIRESTORE (CDN módulos) ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCH2dJRTpXpOPUhAERnAkcj_avqbEYCSXE",
-  authDomain: "deliverymayorista-8c042.firebaseapp.com",
-  projectId: "deliverymayorista-8c042",
-  storageBucket: "deliverymayorista-8c042.firebasestorage.app",
-  messagingSenderId: "98776210634",
-  appId: "1:98776210634:web:5e89cecdb641988d53e833"
-};
-
-const app = initializeApp(firebaseConfig);
-const db  = getFirestore(app);
-
-// ========================================
-// CONFIG GENERAL
-// ========================================
-const BASE_IMG     = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
+const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 const CLAVE_CARRITO = "dm_carrito";
 
 // ===== DOM PRINCIPAL =====
 const grid               = document.getElementById("lista-productos");
 const buscador           = document.getElementById("buscador");
-const filtroCategoria    = document.getElementById("filtro-categoria");
-const filtroSubcategoria = document.getElementById("filtro-subcategoria");
+const filtroCategoria    = document.getElementById("filtro-categoria");     // select oculto
+const filtroSubcategoria = document.getElementById("filtro-subcategoria");  // select oculto
 
 // Mega menú
 const megaDropdown = document.getElementById("megaDropdown");
@@ -60,10 +41,12 @@ const ITEMS_POR_PAGINA = 24;
 let paginaActual = 1;
 let ultimoTotalFiltrado = 0;
 
-// mapas categoría / subcategoría / etiquetas
+// mapa categoría → subcategorías
 let MAPA_CAT_SUB   = {};
 let MAPA_CAT_LABEL = {};
-let MAPA_TAGS      = {};
+
+// mapa etiquetas: catKey -> subKey -> Set(etiquetas)
+let MAPA_TAGS = {};
 
 let TODOS_LOS_PRODUCTOS = [];
 
@@ -78,6 +61,7 @@ let labelEtiquetaActual     = null;
 // ========================
 // GUARDAR / LEER FILTROS
 // ========================
+
 const CLAVE_FILTROS = "dm_filtros";
 
 function guardarFiltrosActuales() {
@@ -99,7 +83,8 @@ function leerFiltrosGuardados() {
   try {
     const raw = localStorage.getItem(CLAVE_FILTROS);
     if (!raw) return null;
-    return JSON.parse(raw);
+    const data = JSON.parse(raw);
+    return data;
   } catch (e) {
     console.error("Error leyendo filtros", e);
     return null;
@@ -107,6 +92,7 @@ function leerFiltrosGuardados() {
 }
 
 // ========= UTILIDADES =========
+
 function safe(value, fallback = "") {
   return (value === undefined || value === null) ? fallback : value;
 }
@@ -181,6 +167,7 @@ function setImagenProducto(imgElement, codigo) {
 }
 
 // ========= CARRITO =========
+
 function leerCarrito() {
   try {
     const raw = localStorage.getItem(CLAVE_CARRITO);
@@ -210,7 +197,7 @@ function actualizarMiniCarrito() {
   );
 
   const totalPrecio = carrito.reduce((acc, p) => {
-    const precio = Number(p.precioMayorista ?? p.precio ?? 0) || 0;
+    const precio = Number(p.precio) || 0;
     return acc + precio * (p.cantidad || 0);
   }, 0);
 
@@ -238,13 +225,12 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, s
   } else {
     if (stockDisponible && cantidad > stockDisponible) cantidad = stockDisponible;
     carrito.push({
-      codigo:          productoBasico.codigo,
-      nombre:          productoBasico.nombre,
-      precioMayorista: productoBasico.precioMayorista,
-      precio:          productoBasico.precioMayorista,
+      codigo:  productoBasico.codigo,
+      nombre:  productoBasico.nombre,
+      precio:  productoBasico.precio,
       cantidad,
-      img:            productoBasico.img || null,
-      stock:          stockDisponible,
+      img:     productoBasico.img || null,
+      stock:   stockDisponible,
     });
   }
 
@@ -262,13 +248,8 @@ function irAlCarrito() {
   window.location.href = "carrito.html";
 }
 
-// mini-carrito (como módulo, sin onclick inline)
-const miniCarritoBox = document.getElementById("mini-carrito");
-if (miniCarritoBox) {
-  miniCarritoBox.addEventListener("click", irAlCarrito);
-}
-
 // ========= RENDER PRODUCTOS =========
+
 function renderProductos(lista) {
   grid.innerHTML = "";
 
@@ -455,7 +436,7 @@ function renderProductos(lista) {
       const productoBasico = {
         codigo,
         nombre: nombreBase,
-        precioMayorista: precioNum,
+        precio: precioNum,
         img: (img && (img.dataset.srcOk || img.src)) || null
       };
 
@@ -479,7 +460,8 @@ function renderProductos(lista) {
   });
 }
 
-// ========= FILTROS =========
+// ========= FILTROS (BUSCADOR + CAT + SUBCAT + TAG) =========
+
 function aplicarFiltros() {
   const texto = buscador ? buscador.value.trim().toLowerCase() : "";
   const cat   = filtroCategoria ? filtroCategoria.value : "";
@@ -500,20 +482,27 @@ function aplicarFiltros() {
     const categoria = safe(
       prod.categoria ||
       prod.rubro ||
-      prod.cat,
+      prod.cat ||
+      prod["Categoria Princ"] ||
+      prod["Categoria_Princ"],
       ""
     ).toLowerCase();
 
     const subcategoria = safe(
       prod.subcategoria ||
-      prod.Subcategoria,
+      prod.Subcategoria ||
+      prod.Sub_Categoria ||
+      prod["Sub_Categoria"] ||
+      prod["Subcategoria"],
       ""
     ).toLowerCase();
 
     const etiquetasRaw =
       prod.etiquetas ||
       prod.tags ||
-      prod.tag;
+      prod.tag ||
+      prod["Etiquetas"] ||
+      prod["etiquetas"];
 
     const etiquetasNormalizadas = normalizarEtiquetasCampo(etiquetasRaw);
 
@@ -535,7 +524,8 @@ function aplicarFiltros() {
   renderConPaginador(filtrados);
 }
 
-// ========= PAGINACIÓN =========
+// ========= PAGINACIÓN PREMIUM =========
+
 function renderConPaginador(listaFiltrada) {
   ultimoTotalFiltrado = listaFiltrada.length;
 
@@ -552,8 +542,10 @@ function renderConPaginador(listaFiltrada) {
 
   const paginaLista = listaFiltrada.slice(inicio, fin);
 
+  // Render de tarjetas
   renderProductos(paginaLista);
 
+  // Resumen
   if (resumenResultados) {
     if (ultimoTotalFiltrado === 0) {
       resumenResultados.textContent = "0 productos encontrados";
@@ -564,6 +556,7 @@ function renderConPaginador(listaFiltrada) {
     }
   }
 
+  // Configuración visual del contenedor del paginador (sticky + ocultar si 1 sola página)
   if (contenedorPaginador) {
     if (totalPaginas <= 1) {
       contenedorPaginador.style.display = "none";
@@ -578,11 +571,14 @@ function renderConPaginador(listaFiltrada) {
 
   if (!contenedorNumeros) return;
 
+  // Animación suave
   contenedorNumeros.style.transition = "opacity 0.15s ease, transform 0.15s ease";
   contenedorNumeros.style.opacity    = "0";
   contenedorNumeros.style.transform  = "translateY(4px)";
+
   contenedorNumeros.innerHTML = "";
 
+  // Si no hay más de una página, terminamos acá
   if (totalPaginas <= 1) {
     if (btnPaginaAnterior) btnPaginaAnterior.disabled = true;
     if (btnPaginaSiguiente) btnPaginaSiguiente.disabled = true;
@@ -593,6 +589,7 @@ function renderConPaginador(listaFiltrada) {
     return;
   }
 
+  // Helper para crear botón numerado
   function crearBotonPagina(num) {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -612,8 +609,10 @@ function renderConPaginador(listaFiltrada) {
   const rango = 3;
   const total = totalPaginas;
 
+  // 1) Primera página
   crearBotonPagina(1);
 
+  // 2) "..." inicial
   if (paginaActual - rango > 2) {
     const dots = document.createElement("span");
     dots.textContent = "…";
@@ -622,6 +621,7 @@ function renderConPaginador(listaFiltrada) {
     contenedorNumeros.appendChild(dots);
   }
 
+  // 3) Páginas intermedias alrededor de la actual
   for (
     let i = Math.max(2, paginaActual - rango);
     i <= Math.min(total - 1, paginaActual + rango);
@@ -630,6 +630,7 @@ function renderConPaginador(listaFiltrada) {
     crearBotonPagina(i);
   }
 
+  // 4) "..." final
   if (paginaActual + rango < total - 1) {
     const dots2 = document.createElement("span");
     dots2.textContent = "…";
@@ -638,8 +639,10 @@ function renderConPaginador(listaFiltrada) {
     contenedorNumeros.appendChild(dots2);
   }
 
+  // 5) Última página
   if (total > 1) crearBotonPagina(total);
 
+  // Prev / Next
   if (btnPaginaAnterior) {
     btnPaginaAnterior.disabled = paginaActual <= 1;
   }
@@ -647,13 +650,15 @@ function renderConPaginador(listaFiltrada) {
     btnPaginaSiguiente.disabled = paginaActual >= totalPaginas;
   }
 
+  // Terminar animación
   requestAnimationFrame(() => {
     contenedorNumeros.style.opacity   = "1";
     contenedorNumeros.style.transform = "translateY(0)";
   });
 }
 
-// ========= ICONOS CATEGORÍAS (igual que antes) =========
+// ========= ICONOS PARA CATEGORÍAS =========
+
 function iconoParaCategoria(catLabel) {
   if (!catLabel) return "•";
 
@@ -708,7 +713,8 @@ function iconoParaCategoria(catLabel) {
   return "•";
 }
 
-// ========= MEGA MENÚ (categorías / subcategorías / etiquetas) =========
+// ========= MEGA MENÚ: CATEGORÍAS / SUBCATEGORÍAS / ETIQUETAS =========
+
 function cerrarMegaMenu() {
   if (megaDropdown) megaDropdown.classList.remove("open");
 }
@@ -816,6 +822,7 @@ function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
   cerrarMegaMenu();
 }
 
+// Botón Premium: limpiar filtros
 function resetearFiltrosMega() {
   if (buscador) buscador.value = "";
   paginaActual = 1;
@@ -958,31 +965,111 @@ function construirMenuCategorias(categoriasUnicas) {
   });
 }
 
-// ========= CARGA INICIAL DESDE productos.json =========
+// ========= CARGA INICIAL =========
+
 async function cargarProductos() {
   try {
     const resp = await fetch("data/productos.json");
-    if (!resp.ok) throw new Error("Error al cargar productos.json");
+    if (!resp.ok) throw new Error("No se pudo cargar productos.json");
 
     const data = await resp.json();
+    TODOS_LOS_PRODUCTOS = Array.isArray(data)
+      ? data
+      : (data.productos || []);
 
-    // Guardamos todos los productos en memoria
-    TODOS_LOS_PRODUCTOS = Array.isArray(data) ? data : [];
+    MAPA_CAT_SUB   = {};
+    MAPA_CAT_LABEL = {};
+    MAPA_TAGS      = {};
 
-    // DEBUG (podés dejarlo, te ayuda a ver si cargó)
-    console.log("Productos cargados:", TODOS_LOS_PRODUCTOS.length);
+    TODOS_LOS_PRODUCTOS.forEach(p => {
+      const catOriginal = safe(
+        p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
+        ""
+      ).toString().trim();
 
-    // Render inicial del catálogo
+      const subOriginal = safe(
+        p.subcategoria ||
+        p.Subcategoria ||
+        p.Sub_Categoria ||
+        p["Sub_Categoria"] ||
+        p["Subcategoria"],
+        ""
+      ).toString().trim();
+
+      const catKey = (catOriginal.toLowerCase() || "sin-categoria");
+      const subKey = (subOriginal.toLowerCase() || "sin-subcategoria");
+
+      if (!MAPA_CAT_SUB[catKey]) {
+        MAPA_CAT_SUB[catKey] = new Set();
+      }
+      if (subOriginal) {
+        MAPA_CAT_SUB[catKey].add(subOriginal);
+      }
+
+      const etiquetasRaw =
+        p.etiquetas ||
+        p.tags ||
+        p.tag ||
+        p["Etiquetas"] ||
+        p["etiquetas"];
+
+      const etiquetasNorm = normalizarEtiquetasCampo(etiquetasRaw);
+      if (etiquetasNorm.length) {
+        if (!MAPA_TAGS[catKey]) MAPA_TAGS[catKey] = {};
+        if (!MAPA_TAGS[catKey][subKey]) MAPA_TAGS[catKey][subKey] = new Set();
+        etiquetasNorm.forEach(t => MAPA_TAGS[catKey][subKey].add(
+          t.charAt(0).toUpperCase() + t.slice(1)
+        ));
+      }
+    });
+
+    if (filtroCategoria) {
+      const categoriasUnicas = Array.from(
+        new Set(
+          TODOS_LOS_PRODUCTOS.map(p =>
+            safe(
+              p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
+              ""
+            ).toString()
+          ).filter(c => c !== "")
+        )
+      ).sort((a, b) => a.localeCompare(b, "es"));
+
+      filtroCategoria.innerHTML = "";
+      const optTodas = document.createElement("option");
+      optTodas.value = "todas";
+      optTodas.textContent = "Todas las categorías";
+      filtroCategoria.appendChild(optTodas);
+
+      categoriasUnicas.forEach(cat => {
+        const op = document.createElement("option");
+        op.value = cat.toLowerCase();
+        op.textContent = cat;
+        filtroCategoria.appendChild(op);
+      });
+
+      construirMenuCategorias(categoriasUnicas);
+    }
+
+    if (filtroSubcategoria) {
+      filtroSubcategoria.innerHTML = "";
+      const optTodasSub = document.createElement("option");
+      optTodasSub.value = "todas";
+      optTodasSub.textContent = "Todas las subcategorías";
+      filtroSubcategoria.appendChild(optTodasSub);
+      filtroSubcategoria.value = "todas";
+    }
+
     aplicarFiltros();
     actualizarMiniCarrito();
   } catch (err) {
-    console.error("No se pudo cargar productos:", err);
-    if (grid) {
-      grid.innerHTML = `<p>Error cargando catálogo: ${err.message}</p>`;
-    }
+    console.error(err);
+    grid.innerHTML = `<p>Error cargando productos: ${err.message}</p>`;
   }
 }
+
 // ========= EVENTOS =========
+
 if (buscador) {
   buscador.addEventListener("input", () => {
     paginaActual = 1;
@@ -1038,6 +1125,7 @@ if (megaToggle && megaDropdown) {
   });
 }
 
+// Botón reset filtros
 if (megaResetBtn) {
   megaResetBtn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -1046,7 +1134,8 @@ if (megaResetBtn) {
   });
 }
 
-// ========= INICIO =========
+// ========= INICIO: CARGA + RESTAURAR FILTROS =========
+
 document.addEventListener("DOMContentLoaded", async () => {
   await cargarProductos();
   actualizarMiniCarrito();
