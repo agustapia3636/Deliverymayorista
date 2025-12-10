@@ -36,7 +36,8 @@ const statsHoy          = document.getElementById("stats-hoy");
 const statsMes          = document.getElementById("stats-mes");
 const statsRanking      = document.getElementById("stats-ranking");
 
-// Canvas para charts
+// Panel y charts
+const chartsGrid         = document.querySelector(".charts-grid");
 const canvasVentasDias   = document.getElementById("chart-ventas-dias");
 const canvasProductosTop = document.getElementById("chart-productos-top");
 
@@ -55,10 +56,7 @@ onAuthStateChanged(auth, (user) => {
     lblUsuario.textContent = user.email || "Admin";
   }
 
-  // Cargar listado productos
   cargarProductos();
-
-  // Cargar estadísticas de ventas (si el panel existe en el HTML)
   cargarEstadisticasVentas();
 });
 
@@ -71,7 +69,7 @@ if (btnLogout) {
 
 if (btnNuevoProducto) {
   btnNuevoProducto.addEventListener("click", () => {
-    window.location.href = "editor.html"; // sin ?id → modo nuevo
+    window.location.href = "editor.html";
   });
 }
 
@@ -175,7 +173,6 @@ function aplicarFiltros() {
   const soloSinStock = !!(chkSoloSinStock?.checked);
 
   const filtrados = productos.filter((p) => {
-    // búsqueda texto
     const matchTexto = (() => {
       if (!texto) return true;
       const codigo = (p.codigo || "").toLowerCase();
@@ -191,10 +188,8 @@ function aplicarFiltros() {
     })();
 
     if (!matchTexto) return false;
-
     if (cat && p.categoria !== cat) return false;
     if (sub && p.subcategoria !== sub) return false;
-
     if (soloSinStock && (p.stock || 0) > 0) return false;
 
     return true;
@@ -338,7 +333,7 @@ async function eliminarProducto(codigo, nombre) {
   }
 }
 
-if (buscador)       buscador.addEventListener("input", aplicarFiltros);
+if (buscador)        buscador.addEventListener("input", aplicarFiltros);
 if (filtroCategoria) filtroCategoria.addEventListener("change", aplicarFiltros);
 if (filtroSubcat)    filtroSubcat.addEventListener("change", aplicarFiltros);
 if (chkSoloSinStock) chkSoloSinStock.addEventListener("change", aplicarFiltros);
@@ -348,7 +343,6 @@ if (chkSoloSinStock) chkSoloSinStock.addEventListener("change", aplicarFiltros);
 // ============================================================================
 
 async function cargarEstadisticasVentas() {
-  // Si no hay elementos de stats ni canvases en el DOM, no hacemos nada
   if (
     !statsTotalMonto &&
     !statsTotalPedidos &&
@@ -356,8 +350,7 @@ async function cargarEstadisticasVentas() {
     !statsHoy &&
     !statsMes &&
     !statsRanking &&
-    !canvasVentasDias &&
-    !canvasProductosTop
+    !chartsGrid
   ) {
     return;
   }
@@ -366,14 +359,34 @@ async function cargarEstadisticasVentas() {
     const ventasRef  = collection(db, "ventas");
     const ventasSnap = await getDocs(ventasRef);
 
+    // Si NO hay ventas: dejamos los números en 0, ranking con mensaje y ocultamos gráficos
+    if (ventasSnap.empty) {
+      if (statsTotalMonto)   statsTotalMonto.textContent   = "$0";
+      if (statsTotalPedidos) statsTotalPedidos.textContent = "0";
+      if (statsClientes)     statsClientes.textContent     = "0";
+      if (statsHoy)          statsHoy.textContent          = "$0";
+      if (statsMes)          statsMes.textContent          = "$0";
+
+      if (statsRanking) {
+        statsRanking.innerHTML = "<li>No hay datos de ventas aún.</li>";
+      }
+
+      if (chartsGrid) chartsGrid.style.display = "none";
+
+      if (chartVentasDias) { chartVentasDias.destroy(); chartVentasDias = null; }
+      if (chartTopProductos) { chartTopProductos.destroy(); chartTopProductos = null; }
+
+      return;
+    }
+
     let totalVentasMonto = 0;
     let totalPedidos     = 0;
     const clientesUnicos = new Set();
     let ventasHoy        = 0;
     let ventasMes        = 0;
 
-    const productosVendidos = {}; // { codigo: cantidadTotalVendida }
-    const ventasPorDia = {};      // { 'YYYY-MM-DD': totalMonto }
+    const productosVendidos = {};
+    const ventasPorDia      = {};
 
     const hoy = new Date();
     const inicioDia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
@@ -403,12 +416,10 @@ async function cargarEstadisticasVentas() {
           ventasMes += total;
         }
 
-        // Ventas por día (para gráfico)
-        const iso = fechaVenta.toISOString().slice(0, 10); // YYYY-MM-DD
+        const iso = fechaVenta.toISOString().slice(0, 10);
         ventasPorDia[iso] = (ventasPorDia[iso] || 0) + total;
       }
 
-      // Ranking productos
       if (Array.isArray(data.productos)) {
         data.productos.forEach((p) => {
           const codigo = p.codigo || p.cod || "";
@@ -423,12 +434,10 @@ async function cargarEstadisticasVentas() {
       }
     });
 
-    // Ranking ordenado
     const ranking = Object.entries(productosVendidos)
       .sort((a, b) => b[1] - a[1])
-      .slice(0, 5); // Top 5
+      .slice(0, 5);
 
-    // Actualizar stats en texto
     if (statsTotalMonto) {
       statsTotalMonto.textContent = "$" + totalVentasMonto.toLocaleString("es-AR");
     }
@@ -454,7 +463,9 @@ async function cargarEstadisticasVentas() {
       }
     }
 
-    // Actualizar gráficos (si Chart está disponible)
+    // Ahora sí mostramos los gráficos porque hay ventas
+    if (chartsGrid) chartsGrid.style.display = "grid";
+
     actualizarChartVentasDias(ventasPorDia);
     actualizarChartTopProductos(ranking);
 
@@ -463,10 +474,10 @@ async function cargarEstadisticasVentas() {
     if (statsRanking) {
       statsRanking.innerHTML = "<li>Error al cargar estadísticas.</li>";
     }
+    if (chartsGrid) chartsGrid.style.display = "none";
   }
 }
 
-// Helpers gráficos
 function formatearFechaCorta(iso) {
   const [y, m, d] = iso.split("-");
   return `${d}/${m}`;
@@ -479,9 +490,9 @@ function actualizarChartVentasDias(ventasPorDia) {
   if (!ctx) return;
 
   const ordenado = Object.entries(ventasPorDia)
-    .sort((a, b) => a[0].localeCompare(b[0])); // asc por fecha
+    .sort((a, b) => a[0].localeCompare(b[0]));
 
-  const ultimos = ordenado.slice(-7); // últimos días con movimiento
+  const ultimos = ordenado.slice(-7);
 
   const labels = ultimos.map(([iso]) => formatearFechaCorta(iso));
   const data   = ultimos.map(([, total]) => total);
