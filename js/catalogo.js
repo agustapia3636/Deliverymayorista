@@ -1,20 +1,46 @@
 // ========================================
 // CATÁLOGO + CARRITO (página catalogo.html)
-// Mega menú categorías tipo "Telefonía"
-// con 3er nivel de ETIQUETAS libres + iconos
+// Fuente de productos: Firestore (colección "productos")
+// Mega menú categorías + subcategorías + etiquetas
 // + memoria de filtros en localStorage
-// + botón premium "Limpiar filtros"
+// + botón "Limpiar filtros"
 // + PAGINACIÓN PREMIUM
 // ========================================
 
-const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
+// ======================
+// FIREBASE (CDN ESM)
+// ======================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCH2dJRTpXpOPUhAERnAkcj_avqbEYCSXE",
+  authDomain: "deliverymayorista-8c042.firebaseapp.com",
+  projectId: "deliverymayorista-8c042",
+  storageBucket: "deliverymayorista-8c042.firebasestorage.app",
+  messagingSenderId: "98776210634",
+  appId: "1:98776210634:web:5e89cecdb641988d53e833"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+// ======================
+// CONFIG GENERAL
+// ======================
+
+const BASE_IMG      = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 const CLAVE_CARRITO = "dm_carrito";
 
 // ===== DOM PRINCIPAL =====
 const grid               = document.getElementById("lista-productos");
 const buscador           = document.getElementById("buscador");
-const filtroCategoria    = document.getElementById("filtro-categoria");     // select oculto
-const filtroSubcategoria = document.getElementById("filtro-subcategoria");  // select oculto
+const filtroCategoria    = document.getElementById("filtro-categoria");
+const filtroSubcategoria = document.getElementById("filtro-subcategoria");
 
 // Mega menú
 const megaDropdown = document.getElementById("megaDropdown");
@@ -556,7 +582,7 @@ function renderConPaginador(listaFiltrada) {
     }
   }
 
-  // Configuración visual del contenedor del paginador (sticky + ocultar si 1 sola página)
+  // Configuración visual del contenedor del paginador
   if (contenedorPaginador) {
     if (totalPaginas <= 1) {
       contenedorPaginador.style.display = "none";
@@ -571,14 +597,12 @@ function renderConPaginador(listaFiltrada) {
 
   if (!contenedorNumeros) return;
 
-  // Animación suave
   contenedorNumeros.style.transition = "opacity 0.15s ease, transform 0.15s ease";
   contenedorNumeros.style.opacity    = "0";
   contenedorNumeros.style.transform  = "translateY(4px)";
 
   contenedorNumeros.innerHTML = "";
 
-  // Si no hay más de una página, terminamos acá
   if (totalPaginas <= 1) {
     if (btnPaginaAnterior) btnPaginaAnterior.disabled = true;
     if (btnPaginaSiguiente) btnPaginaSiguiente.disabled = true;
@@ -589,7 +613,6 @@ function renderConPaginador(listaFiltrada) {
     return;
   }
 
-  // Helper para crear botón numerado
   function crearBotonPagina(num) {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -609,10 +632,8 @@ function renderConPaginador(listaFiltrada) {
   const rango = 3;
   const total = totalPaginas;
 
-  // 1) Primera página
   crearBotonPagina(1);
 
-  // 2) "..." inicial
   if (paginaActual - rango > 2) {
     const dots = document.createElement("span");
     dots.textContent = "…";
@@ -621,7 +642,6 @@ function renderConPaginador(listaFiltrada) {
     contenedorNumeros.appendChild(dots);
   }
 
-  // 3) Páginas intermedias alrededor de la actual
   for (
     let i = Math.max(2, paginaActual - rango);
     i <= Math.min(total - 1, paginaActual + rango);
@@ -630,7 +650,6 @@ function renderConPaginador(listaFiltrada) {
     crearBotonPagina(i);
   }
 
-  // 4) "..." final
   if (paginaActual + rango < total - 1) {
     const dots2 = document.createElement("span");
     dots2.textContent = "…";
@@ -639,10 +658,8 @@ function renderConPaginador(listaFiltrada) {
     contenedorNumeros.appendChild(dots2);
   }
 
-  // 5) Última página
   if (total > 1) crearBotonPagina(total);
 
-  // Prev / Next
   if (btnPaginaAnterior) {
     btnPaginaAnterior.disabled = paginaActual <= 1;
   }
@@ -650,7 +667,6 @@ function renderConPaginador(listaFiltrada) {
     btnPaginaSiguiente.disabled = paginaActual >= totalPaginas;
   }
 
-  // Terminar animación
   requestAnimationFrame(() => {
     contenedorNumeros.style.opacity   = "1";
     contenedorNumeros.style.transform = "translateY(0)";
@@ -713,7 +729,7 @@ function iconoParaCategoria(catLabel) {
   return "•";
 }
 
-// ========= MEGA MENÚ: CATEGORÍAS / SUBCATEGORÍAS / ETIQUETAS =========
+// ========= MEGA MENÚ =========
 
 function cerrarMegaMenu() {
   if (megaDropdown) megaDropdown.classList.remove("open");
@@ -895,7 +911,7 @@ function construirMenuSubcategorias(catKey, catLabel) {
 
   megaSubList.innerHTML = "";
 
-  const key = (catKey || "todas").toLowerCase();
+  const key   = (catKey || "todas").toLowerCase();
   const subSet = MAPA_CAT_SUB[key];
 
   if (!subSet || subSet.size === 0 || key === "todas") {
@@ -965,22 +981,25 @@ function construirMenuCategorias(categoriasUnicas) {
   });
 }
 
-// ========= CARGA INICIAL =========
+// ========= CARGA INICIAL DESDE FIRESTORE =========
 
 async function cargarProductos() {
   try {
-    const resp = await fetch("data/productos.json");
-    if (!resp.ok) throw new Error("No se pudo cargar productos.json");
+    console.log("Leyendo productos desde Firestore...");
+    const ref = collection(db, "productos");
+    const snapshot = await getDocs(ref);
 
-    const data = await resp.json();
-    TODOS_LOS_PRODUCTOS = Array.isArray(data)
-      ? data
-      : (data.productos || []);
+    // Guardamos todos los productos en memoria
+    TODOS_LOS_PRODUCTOS = snapshot.docs.map(d => d.data());
 
+    console.log("Productos cargados:", TODOS_LOS_PRODUCTOS.length);
+
+    // Reiniciamos mapas
     MAPA_CAT_SUB   = {};
     MAPA_CAT_LABEL = {};
     MAPA_TAGS      = {};
 
+    // Construimos mapas de categorías / subcategorías / etiquetas
     TODOS_LOS_PRODUCTOS.forEach(p => {
       const catOriginal = safe(
         p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
@@ -1023,6 +1042,7 @@ async function cargarProductos() {
       }
     });
 
+    // Construimos selects y mega menú
     if (filtroCategoria) {
       const categoriasUnicas = Array.from(
         new Set(
@@ -1064,7 +1084,9 @@ async function cargarProductos() {
     actualizarMiniCarrito();
   } catch (err) {
     console.error(err);
-    grid.innerHTML = `<p>Error cargando productos: ${err.message}</p>`;
+    if (grid) {
+      grid.innerHTML = `<p>Error cargando productos: ${err.message}</p>`;
+    }
   }
 }
 
@@ -1134,7 +1156,13 @@ if (megaResetBtn) {
   });
 }
 
-// ========= INICIO: CARGA + RESTAURAR FILTROS =========
+// Mini carrito clickable
+const miniCarritoBox = document.getElementById("mini-carrito");
+if (miniCarritoBox) {
+  miniCarritoBox.addEventListener("click", irAlCarrito);
+}
+
+// ========= INICIO =========
 
 document.addEventListener("DOMContentLoaded", async () => {
   await cargarProductos();
