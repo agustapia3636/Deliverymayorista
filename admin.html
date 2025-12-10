@@ -85,8 +85,8 @@
        ====================== */
 
     .panel-estadisticas {
-      margin-bottom: 25px;
-      padding: 18px 18px 22px;
+      margin-bottom: 20px;
+      padding: 16px 16px 18px;
       border-radius: 16px;
       background: radial-gradient(circle at top left, #2b2440 0, #0b0b18 55%, #050510 100%);
       border: 1px solid rgba(255,255,255,0.04);
@@ -107,36 +107,36 @@
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
+      gap: 10px;
+      margin-bottom: 12px;
     }
 
     .stats-box {
       background: rgba(8, 8, 24, 0.95);
       border-radius: 12px;
-      padding: 10px 12px;
+      padding: 8px 10px;
       border: 1px solid rgba(255,255,255,0.04);
       font-size: 0.8rem;
     }
 
     .stats-box h3 {
       margin: 0 0 4px;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: #d8d8ff;
       font-weight: 500;
     }
 
     .stats-box span {
       display: block;
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 700;
       margin-top: 2px;
       color: #ffffff;
     }
 
     .panel-estadisticas h3 {
-      margin: 4px 0 6px;
-      font-size: 0.85rem;
+      margin: 4px 0 4px;
+      font-size: 0.82rem;
       font-weight: 500;
       color: #d8d8ff;
     }
@@ -149,7 +149,7 @@
     }
 
     .stats-ranking li {
-      padding: 4px 0;
+      padding: 3px 0;
       border-bottom: 1px dashed rgba(255,255,255,0.06);
       color: #e5e5ff;
     }
@@ -158,32 +158,32 @@
       border-bottom: none;
     }
 
-    /* Gráficos */
+    /* Gráficos – OCULTOS por defecto, los muestra JS cuando haya ventas */
     .charts-grid {
-      display: grid;
+      display: none; /* <- importante */
       grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 16px;
-      margin-top: 18px;
+      gap: 12px;
+      margin-top: 12px;
     }
 
     .chart-card {
       background: rgba(6, 6, 22, 0.95);
       border-radius: 14px;
-      padding: 10px 12px 14px;
+      padding: 8px 10px 12px;
       border: 1px solid rgba(255,255,255,0.05);
       font-size: 0.8rem;
     }
 
     .chart-card h3 {
-      margin: 0 0 6px;
-      font-size: 0.82rem;
+      margin: 0 0 4px;
+      font-size: 0.8rem;
       color: #d8d8ff;
       font-weight: 500;
     }
 
     .chart-card canvas {
       width: 100%;
-      min-height: 220px;
+      min-height: 170px;
     }
 
     /* ======================
@@ -194,7 +194,7 @@
       display: flex;
       justify-content: space-between;
       gap: 1rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.3rem;
       flex-wrap: wrap;
     }
 
@@ -517,7 +517,6 @@
   </div>
 
   <!-- Scripts -->
-  <!-- Chart.js CDN (global Chart) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script type="module" src="js/auth-guard.js"></script>
