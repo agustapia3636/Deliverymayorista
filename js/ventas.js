@@ -1,5 +1,6 @@
 // js/ventas.js
 // Panel de ventas PRO: listado, filtros, estados y alta rápida de ventas
+// con buscador de producto por nombre o código.
 
 import { auth, db } from "./firebase-init.js";
 import {
@@ -20,7 +21,10 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
+// ---------------------------------------------------------------------------
 // DOM
+// ---------------------------------------------------------------------------
+
 const logoutBtn       = document.getElementById("logoutBtn");
 const tablaVentasBody = document.getElementById("tablaVentas");
 const buscarVenta     = document.getElementById("buscarVenta");
@@ -28,20 +32,28 @@ const filtroEstado    = document.getElementById("filtroEstado");
 const msgVentas       = document.getElementById("msgVentas");
 const subTitulo       = document.getElementById("subTituloVentas");
 
-const btnNuevaVenta   = document.getElementById("btnNuevaVenta");
-const modalVenta      = document.getElementById("modalVenta");
-const selCliente      = document.getElementById("ventaCliente");
-const inpCodigo       = document.getElementById("ventaCodigo");
-const inpCantidad     = document.getElementById("ventaCantidad");
-const selEstado       = document.getElementById("ventaEstado");
-const txtNotas        = document.getElementById("ventaNotas");
-const btnCancelarVenta= document.getElementById("btnCancelarVenta");
-const btnGuardarVenta = document.getElementById("btnGuardarVenta");
+const btnNuevaVenta    = document.getElementById("btnNuevaVenta");
+const modalVenta       = document.getElementById("modalVenta");
+const selCliente       = document.getElementById("ventaCliente");
+const inpProducto      = document.getElementById("ventaProducto");
+const listaProducto    = document.getElementById("ventaProductoLista");
+const inpCantidad      = document.getElementById("ventaCantidad");
+const selEstado        = document.getElementById("ventaEstado");
+const txtNotas         = document.getElementById("ventaNotas");
+const btnCancelarVenta = document.getElementById("btnCancelarVenta");
+const btnGuardarVenta  = document.getElementById("btnGuardarVenta");
 
-let ventas  = []; // todas las ventas
-let clientes = []; // clientes para el combo
+// ---------------------------------------------------------------------------
+// Estado en memoria
+// ---------------------------------------------------------------------------
 
-// --------- Auth y carga inicial ----------
+let ventas            = [];   // todas las ventas cargadas
+let clientes          = [];   // clientes para el combo
+let productosCatalogo = [];   // productos para autocomplete (codigo + nombre)
+
+// ---------------------------------------------------------------------------
+// Auth y carga inicial
+// ---------------------------------------------------------------------------
 
 onAuthStateChanged(auth, (user) => {
   if (!user) {
@@ -65,7 +77,9 @@ if (logoutBtn) {
   });
 }
 
-// --------- Utilidades UI ----------
+// ---------------------------------------------------------------------------
+// Utilidades UI
+// ---------------------------------------------------------------------------
 
 function mostrarMensaje(texto, esError = false) {
   if (!msgVentas) return;
@@ -108,7 +122,9 @@ function crearBadgeEstado(estadoRaw) {
   return span;
 }
 
-// --------- Cargar CLIENTES para el selector ----------
+// ---------------------------------------------------------------------------
+// Carga de CLIENTES para el selector
+// ---------------------------------------------------------------------------
 
 async function cargarClientes() {
   if (!selCliente) return;
@@ -140,7 +156,39 @@ async function cargarClientes() {
   }
 }
 
-// --------- Cargar VENTAS desde Firestore ----------
+// ---------------------------------------------------------------------------
+// Carga de productos para el autocomplete
+// ---------------------------------------------------------------------------
+
+async function cargarProductosCatalogo() {
+  try {
+    const snap = await getDocs(collection(db, "productos"));
+    productosCatalogo = [];
+
+    snap.forEach((docSnap) => {
+      const d = docSnap.data();
+      const codigo = d.codigo || docSnap.id || "";
+      const nombre = d.nombre || d.Nombre || "";
+      const precio = Number(d.precio ?? d.PrecioMayorista ?? 0) || 0;
+      const stock  = Number(d.stock ?? d.Stock ?? 0) || 0;
+
+      if (!codigo) return;
+
+      productosCatalogo.push({
+        codigo,
+        nombre,
+        precio,
+        stock,
+      });
+    });
+  } catch (err) {
+    console.error("Error cargando catálogo para autocomplete:", err);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Carga de VENTAS
+// ---------------------------------------------------------------------------
 
 async function cargarVentas() {
   if (!tablaVentasBody) return;
@@ -152,8 +200,8 @@ async function cargarVentas() {
   `;
 
   try {
-    const ref = collection(db, "ventas");
-    const q   = query(ref, orderBy("fecha", "desc"));
+    const ref  = collection(db, "ventas");
+    const q    = query(ref, orderBy("fecha", "desc"));
     const snap = await getDocs(q);
 
     ventas = [];
@@ -166,12 +214,12 @@ async function cargarVentas() {
         fecha = data.fecha.toDate();
       }
 
-      const clienteId   = data.clienteId || "";
+      const clienteId     = data.clienteId || "";
       const clienteNombre = data.clienteNombre || "";
-      const total       = Number(data.total) || 0;
-      const estado      = data.estado || "pendiente";
-      const notas       = data.notas || "";
-      const productos   = Array.isArray(data.productos) ? data.productos : [];
+      const total         = Number(data.total) || 0;
+      const estado        = data.estado || "pendiente";
+      const notas         = data.notas || "";
+      const productos     = Array.isArray(data.productos) ? data.productos : [];
 
       ventas.push({
         id: docSnap.id,
@@ -186,7 +234,6 @@ async function cargarVentas() {
     });
 
     aplicarFiltros();
-
   } catch (err) {
     console.error("Error cargando ventas:", err);
     tablaVentasBody.innerHTML = `
@@ -198,19 +245,21 @@ async function cargarVentas() {
   }
 }
 
-// --------- Filtros y render ----------
+// ---------------------------------------------------------------------------
+// Filtros y render de tabla
+// ---------------------------------------------------------------------------
 
 function aplicarFiltros() {
-  const texto = (buscarVenta?.value || "").toLowerCase();
+  const texto        = (buscarVenta?.value || "").toLowerCase();
   const estadoFiltro = (filtroEstado?.value || "").toLowerCase();
 
   const filtradas = ventas.filter((v) => {
-    // filtro estado
+    // estado
     if (estadoFiltro && v.estado.toLowerCase() !== estadoFiltro) {
       return false;
     }
 
-    // búsqueda de texto
+    // texto
     if (texto) {
       const cliente = (v.clienteNombre || v.clienteId || "").toLowerCase();
       const estado  = (v.estado || "").toLowerCase();
@@ -253,27 +302,23 @@ function mostrarVentas(lista) {
   lista.forEach((v) => {
     const tr = document.createElement("tr");
 
-    // Fecha
     const tdFecha = document.createElement("td");
     tdFecha.textContent = v.fecha ? formatearFecha(v.fecha) : "-";
 
-    // Cliente
     const tdCliente = document.createElement("td");
     tdCliente.textContent = v.clienteNombre || v.clienteId || "-";
 
-    // Productos (primero y resumen)
     const tdProductos = document.createElement("td");
     if (!v.productos || !v.productos.length) {
       tdProductos.textContent = "-";
     } else {
       const primero = v.productos[0];
-      const resto = v.productos.length - 1;
-      const texto = `${primero.codigo || "Prod"} x${primero.cantidad || 1}` +
-                    (resto > 0 ? ` (+${resto} más)` : "");
+      const resto   = v.productos.length - 1;
+      const texto   = `${primero.codigo || "Prod"} x${primero.cantidad || 1}` +
+                      (resto > 0 ? ` (+${resto} más)` : "");
       tdProductos.textContent = texto;
     }
 
-    // Cantidad total
     const tdCant = document.createElement("td");
     const totalCant = (v.productos || []).reduce(
       (acc, p) => acc + (Number(p.cantidad) || 0),
@@ -281,23 +326,19 @@ function mostrarVentas(lista) {
     );
     tdCant.textContent = totalCant || "-";
 
-    // Total
     const tdTotal = document.createElement("td");
     tdTotal.textContent = "$ " + (v.total || 0).toLocaleString("es-AR");
 
-    // Estado con badge
     const tdEstado = document.createElement("td");
     tdEstado.appendChild(crearBadgeEstado(v.estado));
 
-    // Notas (resumen)
     const tdNotas = document.createElement("td");
-    const notas = v.notas || "";
-    const corto =
+    const notas   = v.notas || "";
+    const corto   =
       notas.length > 40 ? notas.slice(0, 40).trim() + "…" : notas;
     tdNotas.textContent = corto || "-";
     if (notas) tdNotas.title = notas;
 
-    // Acciones
     const tdAcciones = document.createElement("td");
 
     const btnEstado = document.createElement("button");
@@ -326,7 +367,9 @@ function mostrarVentas(lista) {
   });
 }
 
-// --------- Cambiar estado / eliminar ----------
+// ---------------------------------------------------------------------------
+// Cambiar estado / eliminar
+// ---------------------------------------------------------------------------
 
 async function cambiarEstadoVenta(v) {
   const estados = ["pendiente", "pagado", "entregado"];
@@ -366,17 +409,32 @@ async function eliminarVenta(v) {
   }
 }
 
-// --------- Modal NUEVA VENTA ----------
+// ---------------------------------------------------------------------------
+// Modal NUEVA VENTA
+// ---------------------------------------------------------------------------
 
-function abrirModalVenta() {
+async function abrirModalVenta() {
   if (!modalVenta) return;
   modalVenta.style.display = "flex";
+
   // reset campos
-  if (selCliente) selCliente.value = "";
-  if (inpCodigo)  inpCodigo.value = "";
+  if (selCliente)  selCliente.value = "";
+  if (inpProducto) {
+    inpProducto.value = "";
+    inpProducto.dataset.codigoReal = "";
+  }
+  if (listaProducto) {
+    listaProducto.style.display = "none";
+    listaProducto.innerHTML = "";
+  }
   if (inpCantidad) inpCantidad.value = "1";
-  if (selEstado)  selEstado.value = "pendiente";
-  if (txtNotas)   txtNotas.value = "";
+  if (selEstado)   selEstado.value = "pendiente";
+  if (txtNotas)    txtNotas.value = "";
+
+  // cargar catálogo si aún no se cargó (para autocomplete)
+  if (!productosCatalogo.length) {
+    await cargarProductosCatalogo();
+  }
 }
 
 function cerrarModalVenta() {
@@ -385,7 +443,10 @@ function cerrarModalVenta() {
 }
 
 if (btnNuevaVenta) {
-  btnNuevaVenta.addEventListener("click", abrirModalVenta);
+  btnNuevaVenta.addEventListener("click", () => {
+    // función async
+    abrirModalVenta();
+  });
 }
 if (btnCancelarVenta) {
   btnCancelarVenta.addEventListener("click", cerrarModalVenta);
@@ -398,21 +459,34 @@ if (btnGuardarVenta) {
 async function guardarVenta() {
   try {
     const clienteId = selCliente?.value || "";
-    const codigo    = inpCodigo?.value.trim().toUpperCase() || "";
-    const cantidad  = parseInt(inpCantidad?.value || "1", 10) || 1;
-    const estado    = selEstado?.value || "pendiente";
-    const notas     = txtNotas?.value.trim() || "";
+    // si se usó autocomplete, el código real va en dataset
+    let codigo = (inpProducto?.dataset.codigoReal || "").trim().toUpperCase();
+
+    // fallback por si todavía usás <input id="ventaCodigo">
+    if (!codigo) {
+      const oldInput = document.getElementById("ventaCodigo");
+      if (oldInput) {
+        codigo = oldInput.value.trim().toUpperCase();
+      }
+    }
+
+    const cantidad = parseInt(inpCantidad?.value || "1", 10) || 1;
+    const estado   = selEstado?.value || "pendiente";
+    const notas    = txtNotas?.value.trim() || "";
 
     if (!clienteId || !codigo || cantidad <= 0) {
-      mostrarMensaje("Completá cliente, código y cantidad.", true);
+      mostrarMensaje(
+        "Completá cliente, elegí un producto y poné una cantidad válida.",
+        true
+      );
       return;
     }
 
-    // Buscar info del cliente para guardar nombre
+    // Buscar info del cliente
     const cliente = clientes.find((c) => c.id === clienteId);
     const clienteNombre = cliente ? cliente.nombre : "";
 
-    // Buscar producto por código (id del doc = código)
+    // Buscar producto en Firestore (precio actualizado)
     const prodRef  = doc(db, "productos", codigo);
     const prodSnap = await getDoc(prodRef);
 
@@ -421,7 +495,7 @@ async function guardarVenta() {
       return;
     }
 
-    const prodData = prodSnap.data();
+    const prodData   = prodSnap.data();
     const precioUnit =
       Number(prodData.precio ?? prodData.PrecioMayorista ?? 0) || 0;
 
@@ -462,7 +536,82 @@ async function guardarVenta() {
   }
 }
 
-// --------- Eventos de filtros ----------
+// ---------------------------------------------------------------------------
+// Autocomplete de producto (nombre / código)
+// ---------------------------------------------------------------------------
+
+if (inpProducto && listaProducto) {
+  inpProducto.addEventListener("input", () => {
+    const texto = inpProducto.value.trim().toLowerCase();
+
+    // limpiar el código real cuando escribe
+    inpProducto.dataset.codigoReal = "";
+
+    if (!texto || !productosCatalogo.length) {
+      listaProducto.style.display = "none";
+      listaProducto.innerHTML = "";
+      return;
+    }
+
+    const filtrados = productosCatalogo
+      .filter((p) => {
+        const n = (p.nombre || "").toLowerCase();
+        const c = (p.codigo || "").toLowerCase();
+        return n.includes(texto) || c.includes(texto);
+      })
+      .slice(0, 12);
+
+    if (!filtrados.length) {
+      listaProducto.style.display = "none";
+      listaProducto.innerHTML = "";
+      return;
+    }
+
+    listaProducto.innerHTML = filtrados
+      .map(
+        (p) => `
+        <div class="autocomplete-item" data-codigo="${p.codigo}">
+          <strong>${p.codigo}</strong> — ${p.nombre || "Sin nombre"}
+          ${Number.isFinite(p.stock)
+            ? `<span style="opacity:0.7;"> · stock: ${p.stock}</span>`
+            : ""}
+        </div>`
+      )
+      .join("");
+
+    listaProducto.style.display = "block";
+  });
+
+  listaProducto.addEventListener("click", (e) => {
+    const item = e.target.closest(".autocomplete-item");
+    if (!item) return;
+
+    const codigo = item.dataset.codigo || "";
+    const prod   = productosCatalogo.find((p) => p.codigo === codigo);
+
+    if (!prod) return;
+
+    inpProducto.value = `${prod.codigo} — ${prod.nombre || ""}`.trim();
+    inpProducto.dataset.codigoReal = prod.codigo;
+
+    listaProducto.style.display = "none";
+    listaProducto.innerHTML = "";
+  });
+
+  // Cerrar la lista si clickeás fuera
+  document.addEventListener("click", (e) => {
+    if (
+      !listaProducto.contains(e.target) &&
+      e.target !== inpProducto
+    ) {
+      listaProducto.style.display = "none";
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Eventos de filtros
+// ---------------------------------------------------------------------------
 
 if (buscarVenta) {
   buscarVenta.addEventListener("input", aplicarFiltros);
