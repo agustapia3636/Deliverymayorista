@@ -73,6 +73,8 @@
       margin-bottom: 18px;
     }
 
+    /* BARRA DE ACCIONES */
+
     .acciones {
       display: flex;
       gap: 10px;
@@ -81,7 +83,8 @@
       align-items: center;
     }
 
-    .acciones input {
+    .acciones input,
+    .acciones select {
       padding: 8px 10px;
       border-radius: 999px;
       border: 1px solid #2b2b44;
@@ -95,6 +98,10 @@
       color: #77779a;
     }
 
+    .acciones select {
+      min-width: 170px;
+    }
+
     .btn-primario {
       border: none;
       border-radius: 999px;
@@ -104,7 +111,10 @@
       color: #051312;
       font-weight: 600;
       font-size: 0.9rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.45);
     }
+
+    /* TABLA */
 
     table {
       width: 100%;
@@ -131,14 +141,40 @@
       background: #17172a;
     }
 
-    .badge {
+    .texto-centro {
+      text-align: center;
+    }
+
+    /* BADGES ESTADO */
+
+    .badge-estado {
       display: inline-block;
-      padding: 3px 8px;
+      padding: 3px 9px;
       border-radius: 999px;
       font-size: 0.7rem;
-      background: #26263c;
-      color: #d8d8ff;
+      font-weight: 600;
     }
+
+    .estado-pendiente {
+      background: rgba(255, 184, 0, 0.18);
+      color: #ffd465;
+    }
+
+    .estado-pagado {
+      background: rgba(40, 212, 140, 0.18);
+      color: #7dffb4;
+    }
+
+    .estado-entregado {
+      background: rgba(77, 171, 255, 0.18);
+      color: #a8d7ff;
+    }
+
+    .badge-estado span {
+      opacity: 0.9;
+    }
+
+    /* BOTONES MINI */
 
     .btn-mini {
       border: none;
@@ -147,6 +183,7 @@
       font-size: 0.75rem;
       cursor: pointer;
       margin-right: 4px;
+      white-space: nowrap;
     }
 
     .btn-mini.estado {
@@ -166,82 +203,12 @@
       color: #7dffb4;
     }
 
-    /* Panel de estadísticas de ventas */
-    .panel-estadisticas {
-      margin-bottom: 20px;
-      padding: 16px 14px 18px;
-      border-radius: 16px;
-      background: radial-gradient(circle at top left, #2b2440 0, #0b0b18 55%, #050510 100%);
-      border: 1px solid rgba(255,255,255,0.04);
-      box-shadow: 0 18px 45px rgba(0,0,0,0.45);
-    }
-
-    .panel-estadisticas h2 {
-      margin: 0 0 6px;
-      font-size: 1rem;
-    }
-
-    .panel-estadisticas p {
-      margin: 0 0 14px;
-      font-size: 0.8rem;
-      color: #a3a3d5;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .stats-box {
-      background: rgba(8, 8, 24, 0.95);
-      border-radius: 12px;
-      padding: 10px 12px;
-      border: 1px solid rgba(255,255,255,0.04);
-      font-size: 0.8rem;
-    }
-
-    .stats-box h3 {
-      margin: 0 0 4px;
-      font-size: 0.8rem;
-      color: #d8d8ff;
-      font-weight: 500;
-    }
-
-    .stats-box span {
-      display: block;
-      font-size: 1.05rem;
-      font-weight: 700;
-      margin-top: 2px;
-      color: #ffffff;
-    }
-
-    .panel-estadisticas h3 {
-      margin: 4px 0 6px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: #d8d8ff;
-    }
-
-    .stats-ranking {
-      list-style: none;
-      padding-left: 0;
-      margin: 0;
-      font-size: 0.8rem;
-    }
-
-    .stats-ranking li {
-      padding: 4px 0;
-      border-bottom: 1px dashed rgba(255,255,255,0.06);
-      color: #e5e5ff;
-    }
-
-    .stats-ranking li:last-child {
-      border-bottom: none;
+    .msg.error {
+      color: #ff8ba3;
     }
 
     /* Modal simple */
+
     .modal-backdrop {
       position: fixed;
       inset: 0;
@@ -320,6 +287,21 @@
       font-weight: 600;
     }
 
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+
+      .nav-panel {
+        flex-wrap: wrap;
+      }
+
+      table {
+        font-size: 0.8rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -346,45 +328,23 @@
 <div class="contenedor">
   <h1>Ventas</h1>
   <div class="sub" id="subTituloVentas">
-    Registro de ventas. Usá el buscador para filtrar por cliente, producto o estado.
-  </div>
-
-  <!-- Panel de estadísticas de ventas -->
-  <div class="panel-estadisticas">
-    <h2>📊 Estadísticas de ventas</h2>
-    <p>Resumen general de tu rendimiento. Se alimenta automáticamente con la colección <strong>ventas</strong>.</p>
-
-    <div class="stats-grid">
-      <div class="stats-box">
-        <h3>Total vendido</h3>
-        <span id="stats-total-monto">-</span>
-      </div>
-      <div class="stats-box">
-        <h3>Pedidos totales</h3>
-        <span id="stats-total-pedidos">-</span>
-      </div>
-      <div class="stats-box">
-        <h3>Clientes únicos</h3>
-        <span id="stats-clientes">-</span>
-      </div>
-      <div class="stats-box">
-        <h3>Ventas de hoy</h3>
-        <span id="stats-hoy">-</span>
-      </div>
-      <div class="stats-box">
-        <h3>Ventas del mes</h3>
-        <span id="stats-mes">-</span>
-      </div>
-    </div>
-
-    <h3>🏆 Productos más vendidos</h3>
-    <ul id="stats-ranking" class="stats-ranking">
-      <!-- Se completa desde JS -->
-    </ul>
+    Registro de ventas. Usá el buscador y el filtro por estado.
   </div>
 
   <div class="acciones">
-    <input type="text" id="buscarVenta" placeholder="Buscar por cliente, producto o estado...">
+    <input
+      type="text"
+      id="buscarVenta"
+      placeholder="Buscar por cliente, producto o estado..."
+    />
+
+    <select id="filtroEstado">
+      <option value="">Todos los estados</option>
+      <option value="pendiente">Pendiente</option>
+      <option value="pagado">Pagado</option>
+      <option value="entregado">Entregado</option>
+    </select>
+
     <button id="btnNuevaVenta" class="btn-primario">+ Registrar venta</button>
   </div>
 
@@ -393,7 +353,7 @@
       <tr>
         <th>Fecha</th>
         <th>Cliente</th>
-        <th>Producto</th>
+        <th>Producto(s)</th>
         <th>Cant.</th>
         <th>Total</th>
         <th>Estado</th>
@@ -438,7 +398,7 @@
   </div>
 </div>
 
-<!-- Scripts del panel de ventas -->
+<!-- Scripts -->
 <script type="module" src="js/auth-guard.js"></script>
 <script type="module" src="js/ventas.js"></script>
 </body>
