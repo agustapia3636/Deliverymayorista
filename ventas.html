@@ -114,7 +114,7 @@
       box-shadow: 0 8px 20px rgba(0,0,0,0.45);
     }
 
-    /* TABLA */
+    /* TABLA PRINCIPAL */
 
     table {
       width: 100%;
@@ -170,10 +170,6 @@
       color: #a8d7ff;
     }
 
-    .badge-estado span {
-      opacity: 0.9;
-    }
-
     /* BOTONES MINI */
 
     .btn-mini {
@@ -207,7 +203,7 @@
       color: #ff8ba3;
     }
 
-    /* Modal simple */
+    /* MODAL */
 
     .modal-backdrop {
       position: fixed;
@@ -224,8 +220,9 @@
       border-radius: 18px;
       padding: 18px 18px 20px;
       width: 100%;
-      max-width: 420px;
+      max-width: 480px;
       box-shadow: 0 18px 45px rgba(0,0,0,0.5);
+      position: relative;
     }
 
     .modal h2 {
@@ -285,6 +282,109 @@
       cursor: pointer;
       font-size: 0.85rem;
       font-weight: 600;
+    }
+
+    /* Autocomplete producto */
+
+    .autocomplete-list {
+      position: absolute;
+      z-index: 25;
+      background: rgba(8,8,24,0.95);
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.1);
+      width: calc(100% - 20px);
+      max-height: 160px;
+      overflow-y: auto;
+      display: none;
+    }
+
+    .autocomplete-item {
+      padding: 7px 10px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.8rem;
+    }
+
+    .autocomplete-item strong {
+      font-weight: 600;
+    }
+
+    .autocomplete-item:hover {
+      background: rgba(255,255,255,0.07);
+    }
+
+    /* Mini carrito dentro del modal */
+
+    .productos-modal {
+      margin-top: 8px;
+      background: #141429;
+      border-radius: 10px;
+      padding: 8px 10px;
+      border: 1px solid #26263a;
+    }
+
+    .productos-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .productos-modal-header span {
+      font-size: 0.8rem;
+      opacity: 0.9;
+    }
+
+    .btn-add-producto {
+      border-radius: 999px;
+      border: none;
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      background: #28d48c;
+      color: #04120f;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .tabla-modal {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-top: 4px;
+    }
+
+    .tabla-modal th,
+    .tabla-modal td {
+      padding: 4px 6px;
+      border-bottom: 1px solid #26263a;
+    }
+
+    .tabla-modal th {
+      color: #c5c5e2;
+      font-weight: 500;
+    }
+
+    .tabla-modal td.texto-derecha {
+      text-align: right;
+    }
+
+    .btn-mini-quitar {
+      border-radius: 999px;
+      border: none;
+      padding: 3px 7px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      background: #ff5a5a;
+      color: #fff;
+    }
+
+    .total-modal {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      text-align: right;
+      color: #c6ffe4;
     }
 
     @media (max-width: 768px) {
@@ -375,11 +475,45 @@
     <label for="ventaCliente">Cliente</label>
     <select id="ventaCliente"></select>
 
-    <label for="ventaCodigo">Código de producto</label>
-    <input type="text" id="ventaCodigo" placeholder="Ej: N0001">
+    <label for="ventaProducto">Producto</label>
+    <div style="position: relative;">
+      <input
+        type="text"
+        id="ventaProducto"
+        placeholder="Buscar por nombre o código..."
+      />
+      <div id="ventaProductoLista" class="autocomplete-list"></div>
+    </div>
 
     <label for="ventaCantidad">Cantidad</label>
-    <input type="number" id="ventaCantidad" min="1" step="1" value="1">
+    <input type="number" id="ventaCantidad" min="1" step="1" value="1" />
+
+    <div class="productos-modal">
+      <div class="productos-modal-header">
+        <span>Productos de la venta</span>
+        <button id="btnAgregarProductoVenta" class="btn-add-producto">
+          + Agregar producto
+        </button>
+      </div>
+
+      <table class="tabla-modal">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Cant.</th>
+            <th>Precio</th>
+            <th>Subtotal</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="ventaProductosTabla"></tbody>
+      </table>
+
+      <div class="total-modal">
+        Total estimado: <strong id="ventaTotalPreview">$0</strong>
+      </div>
+    </div>
 
     <label for="ventaEstado">Estado</label>
     <select id="ventaEstado">
