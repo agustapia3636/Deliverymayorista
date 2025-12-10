@@ -35,6 +35,7 @@ const lblResumenConteo = document.getElementById("resumenConteo");
 // --------------------
 let ventasCliente = [];   // todas las ventas del cliente (o globales)
 let ventasFiltradas = []; // ventas después de filtros
+let productosCatalogo = []; // productos desde colección "productos"
 
 // --------------------
 // Helper: query string
@@ -73,10 +74,31 @@ btnLogout?.addEventListener("click", async () => {
 });
 
 // --------------------
+// Cargar catálogo de productos
+// --------------------
+async function cargarProductosCatalogo() {
+  try {
+    const snap = await getDocs(collection(db, "productos"));
+    productosCatalogo = snap.docs.map((docSnap) => {
+      const d = docSnap.data();
+      const codigo = d.codigo || docSnap.id || "";
+      const nombre = d.nombre || d.Nombre || "";
+      return { codigo, nombre };
+    });
+  } catch (error) {
+    console.error("Error cargando catálogo para historial:", error);
+    productosCatalogo = [];
+  }
+}
+
+// --------------------
 // Cargar ventas de Firestore
 // --------------------
 async function cargarHistorial() {
   try {
+    // Primero catálogo para poder mostrar nombres de productos
+    await cargarProductosCatalogo();
+
     const ventasRef = collection(db, "ventas");
     const snap = await getDocs(ventasRef);
 
@@ -151,21 +173,47 @@ function aplicarFiltros() {
       if (hastaDate && fechaJs > hastaDate) ok = false;
     }
 
-    // Producto (código o nombre)
+    // Producto (código o nombre) – soporta array "productos" del nuevo esquema
     if (textoProducto) {
-      const codigo = (
-        venta.productoCodigo ||
-        venta.codigoProducto ||
-        ""
-      ).toLowerCase();
-      const nombreProd = (
-        venta.productoNombre ||
-        venta.nombreProducto ||
-        ""
-      ).toLowerCase();
-      if (!codigo.includes(textoProducto) && !nombreProd.includes(textoProducto)) {
-        ok = false;
+      let coincideProducto = false;
+
+      if (Array.isArray(venta.productos) && venta.productos.length > 0) {
+        for (const p of venta.productos) {
+          const codigo = (p.codigo || "").toLowerCase();
+          const cat = productosCatalogo.find((c) => c.codigo === p.codigo);
+          const nombreProd = (cat?.nombre || "").toLowerCase();
+
+          if (
+            codigo.includes(textoProducto) ||
+            nombreProd.includes(textoProducto)
+          ) {
+            coincideProducto = true;
+            break;
+          }
+        }
+      } else {
+        // Compatibilidad con ventas viejas (solo un producto)
+        const codigo = (
+          venta.productoCodigo ||
+          venta.codigoProducto ||
+          ""
+        ).toLowerCase();
+        const nombreProd = (
+          venta.productoNombre ||
+          venta.nombreProducto ||
+          venta.producto ||
+          ""
+        ).toLowerCase();
+
+        if (
+          codigo.includes(textoProducto) ||
+          nombreProd.includes(textoProducto)
+        ) {
+          coincideProducto = true;
+        }
       }
+
+      if (!coincideProducto) ok = false;
     }
 
     // Estado
@@ -195,6 +243,33 @@ function formatearFecha(fecha) {
   return `${dia}/${mes}/${anio} ${hora}:${min}`;
 }
 
+function obtenerResumenProductos(venta) {
+  // Devuelve { textoProducto, totalCantidad }
+  if (Array.isArray(venta.productos) && venta.productos.length > 0) {
+    const totalCantidad = venta.productos.reduce(
+      (acc, p) => acc + (Number(p.cantidad) || 0),
+      0
+    );
+
+    const primero = venta.productos[0];
+    const cat = productosCatalogo.find((c) => c.codigo === primero.codigo);
+    const baseNombre = cat?.nombre || primero.codigo || "-";
+    const textoBase = `${baseNombre} x${primero.cantidad || 1}`;
+    const resto = venta.productos.length - 1;
+    const textoProducto =
+      resto > 0 ? `${textoBase} (+${resto} más)` : textoBase;
+
+    return { textoProducto, totalCantidad };
+  }
+
+  // Esquema viejo: un solo producto
+  const nombreProd =
+    venta.productoNombre || venta.nombreProducto || venta.producto || "-";
+  const cantidad = venta.cantidad || venta.cant || 0;
+
+  return { textoProducto: nombreProd, totalCantidad: cantidad };
+}
+
 function renderTabla(lista) {
   tbody.innerHTML = "";
 
@@ -211,19 +286,18 @@ function renderTabla(lista) {
     const tr = document.createElement("tr");
 
     const fechaTexto = formatearFecha(venta.fecha);
-    const nombreProd =
-      venta.productoNombre || venta.nombreProducto || venta.producto || "-";
-    const cantidad = venta.cantidad || venta.cant || 0;
+    const { textoProducto, totalCantidad } = obtenerResumenProductos(venta);
+
     const total = venta.total || 0;
-    const estado = venta.estado || "-";
+    const estado = (venta.estado || "-").toLowerCase();
     const notas = venta.notas || "-";
 
     const totalTexto = `$${total.toLocaleString("es-AR")}`;
 
     tr.innerHTML = `
       <td data-label="Fecha">${fechaTexto}</td>
-      <td data-label="Producto">${nombreProd}</td>
-      <td data-label="Cantidad">${cantidad}</td>
+      <td data-label="Producto(s)">${textoProducto}</td>
+      <td data-label="Cantidad">${totalCantidad}</td>
       <td data-label="Total">${totalTexto}</td>
       <td data-label="Estado">
         ${
