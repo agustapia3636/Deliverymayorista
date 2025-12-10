@@ -1,16 +1,9 @@
 // ========================================
 // CATÁLOGO + CARRITO (página catalogo.html)
-// Mega menú categorías tipo "Telefonía"
-// con 3er nivel de ETIQUETAS libres + iconos
-// + memoria de filtros en localStorage
-// + botón premium "Limpiar filtros"
-// + PAGINACIÓN PREMIUM
-// + DATOS DESDE FIRESTORE (colección "productos")
+// Versión FIRESTORE
 // ========================================
 
-// =======================
-// 🔥 FIREBASE + FIRESTORE
-// =======================
+// --- FIREBASE + FIRESTORE (CDN módulos) ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {
   getFirestore,
@@ -31,15 +24,16 @@ const app = initializeApp(firebaseConfig);
 const db  = getFirestore(app);
 
 // ========================================
-
-const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
+// CONFIG GENERAL
+// ========================================
+const BASE_IMG     = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 const CLAVE_CARRITO = "dm_carrito";
 
 // ===== DOM PRINCIPAL =====
 const grid               = document.getElementById("lista-productos");
 const buscador           = document.getElementById("buscador");
-const filtroCategoria    = document.getElementById("filtro-categoria");     // select oculto
-const filtroSubcategoria = document.getElementById("filtro-subcategoria");  // select oculto
+const filtroCategoria    = document.getElementById("filtro-categoria");
+const filtroSubcategoria = document.getElementById("filtro-subcategoria");
 
 // Mega menú
 const megaDropdown = document.getElementById("megaDropdown");
@@ -66,12 +60,10 @@ const ITEMS_POR_PAGINA = 24;
 let paginaActual = 1;
 let ultimoTotalFiltrado = 0;
 
-// mapa categoría → subcategorías
+// mapas categoría / subcategoría / etiquetas
 let MAPA_CAT_SUB   = {};
 let MAPA_CAT_LABEL = {};
-
-// mapa etiquetas: catKey -> subKey -> Set(etiquetas)
-let MAPA_TAGS = {};
+let MAPA_TAGS      = {};
 
 let TODOS_LOS_PRODUCTOS = [];
 
@@ -86,7 +78,6 @@ let labelEtiquetaActual     = null;
 // ========================
 // GUARDAR / LEER FILTROS
 // ========================
-
 const CLAVE_FILTROS = "dm_filtros";
 
 function guardarFiltrosActuales() {
@@ -108,8 +99,7 @@ function leerFiltrosGuardados() {
   try {
     const raw = localStorage.getItem(CLAVE_FILTROS);
     if (!raw) return null;
-    const data = JSON.parse(raw);
-    return data;
+    return JSON.parse(raw);
   } catch (e) {
     console.error("Error leyendo filtros", e);
     return null;
@@ -117,7 +107,6 @@ function leerFiltrosGuardados() {
 }
 
 // ========= UTILIDADES =========
-
 function safe(value, fallback = "") {
   return (value === undefined || value === null) ? fallback : value;
 }
@@ -192,7 +181,6 @@ function setImagenProducto(imgElement, codigo) {
 }
 
 // ========= CARRITO =========
-
 function leerCarrito() {
   try {
     const raw = localStorage.getItem(CLAVE_CARRITO);
@@ -222,7 +210,7 @@ function actualizarMiniCarrito() {
   );
 
   const totalPrecio = carrito.reduce((acc, p) => {
-    const precio = Number(p.precio) || 0;
+    const precio = Number(p.precioMayorista ?? p.precio ?? 0) || 0;
     return acc + precio * (p.cantidad || 0);
   }, 0);
 
@@ -250,12 +238,13 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, s
   } else {
     if (stockDisponible && cantidad > stockDisponible) cantidad = stockDisponible;
     carrito.push({
-      codigo:  productoBasico.codigo,
-      nombre:  productoBasico.nombre,
-      precio:  productoBasico.precio,
+      codigo:          productoBasico.codigo,
+      nombre:          productoBasico.nombre,
+      precioMayorista: productoBasico.precioMayorista,
+      precio:          productoBasico.precioMayorista,
       cantidad,
-      img:     productoBasico.img || null,
-      stock:   stockDisponible,
+      img:            productoBasico.img || null,
+      stock:          stockDisponible,
     });
   }
 
@@ -272,12 +261,14 @@ function agregarAlCarritoDesdeCatalogo(productoBasico, boton, cantidadElegida, s
 function irAlCarrito() {
   window.location.href = "carrito.html";
 }
+
+// mini-carrito (como módulo, sin onclick inline)
 const miniCarritoBox = document.getElementById("mini-carrito");
 if (miniCarritoBox) {
   miniCarritoBox.addEventListener("click", irAlCarrito);
 }
-// ========= RENDER PRODUCTOS =========
 
+// ========= RENDER PRODUCTOS =========
 function renderProductos(lista) {
   grid.innerHTML = "";
 
@@ -464,7 +455,7 @@ function renderProductos(lista) {
       const productoBasico = {
         codigo,
         nombre: nombreBase,
-        precio: precioNum,
+        precioMayorista: precioNum,
         img: (img && (img.dataset.srcOk || img.src)) || null
       };
 
@@ -488,8 +479,7 @@ function renderProductos(lista) {
   });
 }
 
-// ========= FILTROS (BUSCADOR + CAT + SUBCAT + TAG) =========
-
+// ========= FILTROS =========
 function aplicarFiltros() {
   const texto = buscador ? buscador.value.trim().toLowerCase() : "";
   const cat   = filtroCategoria ? filtroCategoria.value : "";
@@ -510,27 +500,20 @@ function aplicarFiltros() {
     const categoria = safe(
       prod.categoria ||
       prod.rubro ||
-      prod.cat ||
-      prod["Categoria Princ"] ||
-      prod["Categoria_Princ"],
+      prod.cat,
       ""
     ).toLowerCase();
 
     const subcategoria = safe(
       prod.subcategoria ||
-      prod.Subcategoria ||
-      prod.Sub_Categoria ||
-      prod["Sub_Categoria"] ||
-      prod["Subcategoria"],
+      prod.Subcategoria,
       ""
     ).toLowerCase();
 
     const etiquetasRaw =
       prod.etiquetas ||
       prod.tags ||
-      prod.tag ||
-      prod["Etiquetas"] ||
-      prod["etiquetas"];
+      prod.tag;
 
     const etiquetasNormalizadas = normalizarEtiquetasCampo(etiquetasRaw);
 
@@ -552,8 +535,7 @@ function aplicarFiltros() {
   renderConPaginador(filtrados);
 }
 
-// ========= PAGINACIÓN PREMIUM =========
-
+// ========= PAGINACIÓN =========
 function renderConPaginador(listaFiltrada) {
   ultimoTotalFiltrado = listaFiltrada.length;
 
@@ -570,10 +552,8 @@ function renderConPaginador(listaFiltrada) {
 
   const paginaLista = listaFiltrada.slice(inicio, fin);
 
-  // Render de tarjetas
   renderProductos(paginaLista);
 
-  // Resumen
   if (resumenResultados) {
     if (ultimoTotalFiltrado === 0) {
       resumenResultados.textContent = "0 productos encontrados";
@@ -584,7 +564,6 @@ function renderConPaginador(listaFiltrada) {
     }
   }
 
-  // Configuración visual del contenedor del paginador (sticky + ocultar si 1 sola página)
   if (contenedorPaginador) {
     if (totalPaginas <= 1) {
       contenedorPaginador.style.display = "none";
@@ -599,14 +578,11 @@ function renderConPaginador(listaFiltrada) {
 
   if (!contenedorNumeros) return;
 
-  // Animación suave
   contenedorNumeros.style.transition = "opacity 0.15s ease, transform 0.15s ease";
   contenedorNumeros.style.opacity    = "0";
   contenedorNumeros.style.transform  = "translateY(4px)";
-
   contenedorNumeros.innerHTML = "";
 
-  // Si no hay más de una página, terminamos acá
   if (totalPaginas <= 1) {
     if (btnPaginaAnterior) btnPaginaAnterior.disabled = true;
     if (btnPaginaSiguiente) btnPaginaSiguiente.disabled = true;
@@ -617,7 +593,6 @@ function renderConPaginador(listaFiltrada) {
     return;
   }
 
-  // Helper para crear botón numerado
   function crearBotonPagina(num) {
     const btn = document.createElement("button");
     btn.type = "button";
@@ -637,10 +612,8 @@ function renderConPaginador(listaFiltrada) {
   const rango = 3;
   const total = totalPaginas;
 
-  // 1) Primera página
   crearBotonPagina(1);
 
-  // 2) "..." inicial
   if (paginaActual - rango > 2) {
     const dots = document.createElement("span");
     dots.textContent = "…";
@@ -649,7 +622,6 @@ function renderConPaginador(listaFiltrada) {
     contenedorNumeros.appendChild(dots);
   }
 
-  // 3) Páginas intermedias alrededor de la actual
   for (
     let i = Math.max(2, paginaActual - rango);
     i <= Math.min(total - 1, paginaActual + rango);
@@ -658,7 +630,6 @@ function renderConPaginador(listaFiltrada) {
     crearBotonPagina(i);
   }
 
-  // 4) "..." final
   if (paginaActual + rango < total - 1) {
     const dots2 = document.createElement("span");
     dots2.textContent = "…";
@@ -667,10 +638,8 @@ function renderConPaginador(listaFiltrada) {
     contenedorNumeros.appendChild(dots2);
   }
 
-  // 5) Última página
   if (total > 1) crearBotonPagina(total);
 
-  // Prev / Next
   if (btnPaginaAnterior) {
     btnPaginaAnterior.disabled = paginaActual <= 1;
   }
@@ -678,15 +647,13 @@ function renderConPaginador(listaFiltrada) {
     btnPaginaSiguiente.disabled = paginaActual >= totalPaginas;
   }
 
-  // Terminar animación
   requestAnimationFrame(() => {
     contenedorNumeros.style.opacity   = "1";
     contenedorNumeros.style.transform = "translateY(0)";
   });
 }
 
-// ========= ICONOS PARA CATEGORÍAS =========
-
+// ========= ICONOS CATEGORÍAS (igual que antes) =========
 function iconoParaCategoria(catLabel) {
   if (!catLabel) return "•";
 
@@ -741,8 +708,7 @@ function iconoParaCategoria(catLabel) {
   return "•";
 }
 
-// ========= MEGA MENÚ: CATEGORÍAS / SUBCATEGORÍAS / ETIQUETAS =========
-
+// ========= MEGA MENÚ (categorías / subcategorías / etiquetas) =========
 function cerrarMegaMenu() {
   if (megaDropdown) megaDropdown.classList.remove("open");
 }
@@ -850,7 +816,6 @@ function seleccionarEtiqueta(catKey, subKey, tagKey, tagLabel) {
   cerrarMegaMenu();
 }
 
-// Botón Premium: limpiar filtros
 function resetearFiltrosMega() {
   if (buscador) buscador.value = "";
   paginaActual = 1;
@@ -994,42 +959,25 @@ function construirMenuCategorias(categoriasUnicas) {
 }
 
 // ========= CARGA INICIAL DESDE FIRESTORE =========
-
-async function cargarProductosFirestore() {
+async function cargarProductos() {
   try {
     const ref = collection(db, "productos");
     const snapshot = await getDocs(ref);
 
-    // Versión básica que vos mencionaste:
-    // TODOS_LOS_PRODUCTOS = snapshot.docs.map(d => d.data());
-    // Pero además agregamos id y preparamos datos para filtros/mega menú
-    const data = snapshot.docs.map(doc => {
-      const p = doc.data();
-      return {
-        id: doc.id,
-        ...p
-      };
-    });
+    TODOS_LOS_PRODUCTOS = snapshot.docs.map(d => d.data());
 
-    TODOS_LOS_PRODUCTOS = Array.isArray(data) ? data : [];
-
-    // Construir mapas de categorías / subcategorías / tags
     MAPA_CAT_SUB   = {};
     MAPA_CAT_LABEL = {};
     MAPA_TAGS      = {};
 
     TODOS_LOS_PRODUCTOS.forEach(p => {
       const catOriginal = safe(
-        p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
+        p.categoria || p.rubro || p.cat,
         ""
       ).toString().trim();
 
       const subOriginal = safe(
-        p.subcategoria ||
-        p.Subcategoria ||
-        p.Sub_Categoria ||
-        p["Sub_Categoria"] ||
-        p["Subcategoria"],
+        p.subcategoria || p.Subcategoria,
         ""
       ).toString().trim();
 
@@ -1046,29 +994,24 @@ async function cargarProductosFirestore() {
       const etiquetasRaw =
         p.etiquetas ||
         p.tags ||
-        p.tag ||
-        p["Etiquetas"] ||
-        p["etiquetas"];
+        p.tag;
 
       const etiquetasNorm = normalizarEtiquetasCampo(etiquetasRaw);
       if (etiquetasNorm.length) {
         if (!MAPA_TAGS[catKey]) MAPA_TAGS[catKey] = {};
         if (!MAPA_TAGS[catKey][subKey]) MAPA_TAGS[catKey][subKey] = new Set();
-        etiquetasNorm.forEach(t =>
-          MAPA_TAGS[catKey][subKey].add(
-            t.charAt(0).toUpperCase() + t.slice(1)
-          )
-        );
+        etiquetasNorm.forEach(t => MAPA_TAGS[catKey][subKey].add(
+          t.charAt(0).toUpperCase() + t.slice(1)
+        ));
       }
     });
 
-    // Armar selects / mega menú
     if (filtroCategoria) {
       const categoriasUnicas = Array.from(
         new Set(
           TODOS_LOS_PRODUCTOS.map(p =>
             safe(
-              p.categoria || p.rubro || p.cat || p["Categoria Princ"] || p["Categoria_Princ"],
+              p.categoria || p.rubro || p.cat,
               ""
             ).toString()
           ).filter(c => c !== "")
@@ -1103,13 +1046,12 @@ async function cargarProductosFirestore() {
     aplicarFiltros();
     actualizarMiniCarrito();
   } catch (err) {
-    console.error("Error cargando productos desde Firestore:", err);
-    grid.innerHTML = `<p>Error cargando productos: ${err.message}</p>`;
+    console.error(err);
+    grid.innerHTML = `<p>Error cargando productos Firestore: ${err.message}</p>`;
   }
 }
 
 // ========= EVENTOS =========
-
 if (buscador) {
   buscador.addEventListener("input", () => {
     paginaActual = 1;
@@ -1165,7 +1107,6 @@ if (megaToggle && megaDropdown) {
   });
 }
 
-// Botón reset filtros
 if (megaResetBtn) {
   megaResetBtn.addEventListener("click", (e) => {
     e.preventDefault();
@@ -1174,10 +1115,9 @@ if (megaResetBtn) {
   });
 }
 
-// ========= INICIO: CARGA + RESTAURAR FILTROS =========
-
+// ========= INICIO =========
 document.addEventListener("DOMContentLoaded", async () => {
-  await cargarProductosFirestore();
+  await cargarProductos();
   actualizarMiniCarrito();
 
   const guardados = leerFiltrosGuardados();
