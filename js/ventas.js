@@ -1,7 +1,7 @@
 // js/ventas.js
 // Panel de ventas PRO: listado, filtros, estados y alta de ventas
 // con soporte para varios productos por venta (mini carrito en el modal)
-// y DESCUENTO AUTOMÁTICO DE STOCK en Firestore.
+// DESCARGA AUTOMÁTICA DE STOCK y control de stock insuficiente.
 
 import { auth, db } from "./firebase-init.js";
 import {
@@ -485,10 +485,22 @@ function agregarProductoALaVenta() {
     return;
   }
 
-  // Si ya está en la lista, sumamos cantidades
+  // ====== CONTROL DE STOCK AL ARMAR EL CARRITO ======
   const existente = ventaProductosTmp.find((p) => p.codigo === codigoReal);
+  const yaEnCarrito = existente ? existente.cantidad : 0;
+  const totalDeseado = yaEnCarrito + cantidad;
+
+  if (totalDeseado > prod.stock) {
+    mostrarMensaje(
+      `Stock insuficiente para ${prod.codigo}. Disponible: ${prod.stock}, intentás vender: ${totalDeseado}.`,
+      true
+    );
+    return;
+  }
+  // ==================================================
+
   if (existente) {
-    existente.cantidad += cantidad;
+    existente.cantidad = totalDeseado;
   } else {
     ventaProductosTmp.push({
       codigo: prod.codigo,
@@ -579,7 +591,7 @@ function renderProductosModal() {
 }
 
 // ---------------------------------------------------------------------------
-// Guardar venta + DESCUENTO DE STOCK
+// Guardar venta + DESCUENTO DE STOCK (con control de stock insuficiente)
 // ---------------------------------------------------------------------------
 
 async function guardarVenta() {
@@ -604,9 +616,9 @@ async function guardarVenta() {
     const productosFinal = [];
     let total = 0;
 
-    // Vamos a acumular aquí las refs y nuevos stocks
     const stockUpdates = [];
 
+    // Recorremos cada producto de la venta
     for (const p of ventaProductosTmp) {
       let precioUnit = p.precio || 0;
 
@@ -621,6 +633,17 @@ async function guardarVenta() {
 
           const stockActual =
             Number(data.stock ?? data.Stock ?? 0) || 0;
+
+          // ====== CONTROL DE STOCK EN FIRESTORE ANTES DE GUARDAR ======
+          if (p.cantidad > stockActual) {
+            mostrarMensaje(
+              `No hay stock suficiente para ${p.codigo}. Disponible: ${stockActual}, intentás vender: ${p.cantidad}.`,
+              true
+            );
+            return; // cancelamos toda la venta
+          }
+          // ==============================================================
+
           let nuevoStock = stockActual - p.cantidad;
           if (nuevoStock < 0) nuevoStock = 0;
 
@@ -629,12 +652,10 @@ async function guardarVenta() {
             nuevoStock,
           });
         } else {
-          // Si por algún motivo no existe el doc, igual registramos la venta
           console.warn("Producto no encontrado al actualizar stock:", p.codigo);
         }
       } catch (err) {
         console.error("Error leyendo producto para stock:", p.codigo, err);
-        // Si falla, seguimos con el precio que ya teníamos y no tocamos stockUpdates para ese producto
       }
 
       const subtotal = precioUnit * p.cantidad;
@@ -666,7 +687,6 @@ async function guardarVenta() {
         await updateDoc(u.ref, { stock: u.nuevoStock });
       } catch (err) {
         console.error("Error actualizando stock para producto:", err);
-        // No frenamos todo por un error de stock, pero queda en consola
       }
     }
 
