@@ -448,6 +448,9 @@ btnCompartirWhatsapp?.addEventListener("click", () => {
   const venta = ventaActualDetalle;
   let texto = `🧾 *Comprobante de compra*\n\n`;
 
+  // 👉 NUEVA LÍNEA: NÚMERO INTERNO
+  texto += `N° Interno: ${venta.numeroInterno || "-"}\n`;
+
   texto += `👤 Cliente: ${venta.clienteNombre || "-"}\n`;
   texto += `📅 Fecha: ${formatearFecha(venta.fecha)}\n\n`;
 
