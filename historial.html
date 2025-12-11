@@ -5,426 +5,304 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Historial de compras - Delivery Mayorista</title>
   <link rel="stylesheet" href="css/estilos.css" />
+
   <style>
-    /* Contenedor general */
+    /* =============== HISTORIAL UI =============== */
     main {
       padding: 30px 16px 40px;
     }
-
     .historial-wrapper {
       max-width: 1100px;
       margin: 0 auto;
     }
-
     .historial-card {
       background: #0f0f1c;
       border-radius: 18px;
       padding: 22px 22px 26px;
       box-shadow: 0 26px 60px rgba(0, 0, 0, 0.6);
     }
-
-    /* Títulos */
     .historial-header {
       margin-bottom: 18px;
     }
-
     .historial-header h1 {
       margin: 0;
       font-size: 1.4rem;
     }
-
     .historial-header p {
       margin: 4px 0 0;
       font-size: 0.85rem;
       color: #a6a6d4;
     }
 
-    /* Filtros */
-    .filtros-grid {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 18px;
-      align-items: end;
-    }
-
-    .filtro-block label {
-      display: block;
-      font-size: 0.78rem;
-      color: #c3c3ec;
-      margin-bottom: 4px;
-    }
-
-    .filtro-input,
-    .filtro-select {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 10px;
-      border: 1px solid #26263d;
-      background: #151526;
-      color: #fff;
-      font-size: 0.86rem;
-      outline: none;
-    }
-
-    .filtro-input:focus,
-    .filtro-select:focus {
-      border-color: #ff8a4a;
-      box-shadow: 0 0 0 1px rgba(255, 138, 74, 0.35);
-    }
-
-    /* Botón volver */
     .top-actions {
       display: flex;
       justify-content: flex-end;
       margin-bottom: 18px;
     }
-
     .btn-volver {
       background: #16162a;
       border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255,255,255,0.08);
       padding: 8px 18px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      color: #f5f5ff;
+      font-size:0.85rem;
+      cursor:pointer;
+      color:#f5f5ff;
     }
 
-    .btn-volver:hover {
-      background: #1d1d33;
+    /* =============== FILTROS =============== */
+    .filtros-grid {
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+      margin-bottom:18px;
+      align-items:end;
+    }
+    .filtro-block label {
+      display:block;
+      font-size:0.78rem;
+      color:#c3c3ec;
+      margin-bottom:4px;
+    }
+    .filtro-input,
+    .filtro-select {
+      width:100%;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid #26263d;
+      background:#151526;
+      color:#fff;
+      font-size:0.86rem;
+      outline:none;
     }
 
-    /* Resúmenes */
+    /* =============== RESUMEN =============== */
     .resumen-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-      margin-bottom: 18px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+      margin-bottom:18px;
     }
-
     .resumen-card {
-      background: #141427;
-      border-radius: 14px;
-      padding: 10px 14px;
-      border: 1px solid rgba(255, 255, 255, 0.04);
+      background:#141427;
+      border-radius:14px;
+      padding:10px 14px;
+      border:1px solid rgba(255,255,255,0.04);
     }
-
     .resumen-label {
-      font-size: 0.75rem;
-      color: #a0a0d4;
-      margin-bottom: 4px;
+      font-size:0.75rem;
+      color:#a0a0d4;
     }
-
     .resumen-value {
-      font-size: 1rem;
-      font-weight: 600;
+      font-size:1rem;
+      font-weight:600;
     }
-
     .resumen-extra {
-      font-size: 0.75rem;
-      color: #8c8cb5;
-      margin-top: 2px;
+      font-size:0.75rem;
+      color:#8c8cb5;
     }
 
-    /* Tabla desktop */
+    /* =============== TABLA =============== */
     .tabla-historial-wrapper {
-      margin-top: 6px;
-      border-radius: 16px;
-      overflow: hidden;
-      background: #121224;
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+      margin-top:6px;
+      border-radius:16px;
+      overflow:hidden;
+      background:#121224;
+      box-shadow:0 18px 50px rgba(0,0,0,0.6);
     }
-
     .tabla-historial {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.86rem;
+      width:100%;
+      border-collapse:collapse;
+      font-size:0.86rem;
     }
-
     .tabla-historial thead {
-      background: #181832;
+      background:#181832;
     }
-
     .tabla-historial th,
     .tabla-historial td {
-      padding: 10px 14px;
-      border-bottom: 1px solid #20203a;
-      text-align: left;
+      padding:10px 14px;
+      border-bottom:1px solid #20203a;
+      text-align:left;
     }
-
-    .tabla-historial th {
-      font-weight: 600;
-      color: #d0d0f6;
-      font-size: 0.8rem;
-    }
-
-    .tabla-historial tbody tr:last-child td {
-      border-bottom: none;
-    }
-
-    .tabla-historial tbody tr:hover td {
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    /* Estado pill */
     .estado-pill {
-      display: inline-block;
-      padding: 3px 10px;
-      border-radius: 999px;
-      font-size: 0.72rem;
-      background: #26263c;
-      color: #ffd08a;
-      text-transform: capitalize;
+      display:inline-block;
+      padding:3px 10px;
+      border-radius:999px;
+      font-size:0.72rem;
+      background:#26263c;
+      color:#ffd08a;
+      text-transform:capitalize;
     }
 
-    /* --------- MÓVIL --------- */
-    @media (max-width: 768px) {
-      .historial-card {
-        padding: 18px 14px 22px;
-      }
-
-      .filtros-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .resumen-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .tabla-historial-wrapper {
-        background: transparent;
-        box-shadow: none;
-      }
-
+    /* ----------- MÓVIL ----------- */
+    @media (max-width:768px) {
+      .filtros-grid { grid-template-columns:1fr; }
+      .resumen-grid { grid-template-columns:1fr; }
       .tabla-historial,
       .tabla-historial thead,
       .tabla-historial tbody,
       .tabla-historial tr,
       .tabla-historial th,
       .tabla-historial td {
-        display: block;
-        width: 100%;
+        display:block;
+        width:100%;
       }
-
-      .tabla-historial thead {
-        display: none;
-      }
-
-      .tabla-historial tbody {
-        margin-top: 10px;
-      }
-
+      .tabla-historial thead { display:none; }
       .tabla-historial tbody tr {
-        background: #111121;
-        border-radius: 14px;
-        padding: 10px 12px;
-        margin-bottom: 10px;
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65);
+        background:#111121;
+        border-radius:14px;
+        padding:10px 12px;
+        margin-bottom:10px;
+        box-shadow:0 16px 40px rgba(0,0,0,0.65);
       }
-
       .tabla-historial tbody tr td {
-        border-bottom: none;
-        padding: 4px 0;
-        font-size: 0.83rem;
+        border-bottom:none;
+        padding:4px 0;
       }
-
       .tabla-historial tbody tr td::before {
-        content: attr(data-label);
-        display: inline-block;
-        min-width: 90px;
-        margin-right: 6px;
-        font-size: 0.74rem;
-        font-weight: 500;
-        color: #9b9bcb;
-      }
-
-      .tabla-historial tbody tr td[data-label="Total"] {
-        margin-top: 4px;
-        font-weight: 600;
+        content:attr(data-label);
+        display:inline-block;
+        min-width:90px;
+        margin-right:6px;
+        font-size:0.74rem;
+        color:#9b9bcb;
       }
     }
 
-    /* ---------------------------------------------------
-       MODAL – COMPROBANTE DE VENTA
-       --------------------------------------------------- */
+    /* =============== MODAL COMPROBANTE =============== */
     .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.65);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 50;
+      position:fixed;
+      inset:0;
+      background:rgba(0,0,0,0.65);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      z-index:900;
     }
-
     .modal-detalle {
-      background: #111121;
-      border-radius: 16px;
-      width: 100%;
-      max-width: 650px;
-      padding: 18px 20px;
-      box-shadow: 0 18px 45px rgba(0,0,0,0.5);
+      background:#111121;
+      border-radius:16px;
+      width:100%;
+      max-width:650px;
+      padding:18px 20px;
     }
-
     .modal-header-detalle {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
     }
-
     .btn-cerrar {
-      background: transparent;
-      border: none;
-      color: #eee;
-      font-size: 18px;
-      cursor: pointer;
+      background:transparent;
+      border:none;
+      color:#eee;
+      font-size:18px;
+      cursor:pointer;
     }
-
     .detalle-info {
-      margin-top: 12px;
-      display: grid;
-      grid-template-columns: repeat(3,1fr);
-      gap: 6px;
-      font-size: .85rem;
+      margin-top:12px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:6px;
+      font-size:.85rem;
     }
-
     .detalle-tabla {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 14px;
-      font-size: .85rem;
+      width:100%;
+      border-collapse:collapse;
+      margin-top:14px;
+      font-size:.85rem;
     }
-
     .detalle-tabla th,
     .detalle-tabla td {
-      padding: 6px 8px;
-      border-bottom: 1px solid #26263a;
+      padding:6px 8px;
+      border-bottom:1px solid #26263a;
     }
-
     .detalle-totales {
-      margin-top: 12px;
-      text-align: right;
-      font-size: 1rem;
-      font-weight: 600;
+      margin-top:12px;
+      text-align:right;
+      font-size:1rem;
+      font-weight:600;
     }
-
     .detalle-notas {
-      margin-top: 8px;
-      font-size: .8rem;
+      margin-top:8px;
+      font-size:.8rem;
     }
-
     .modal-acciones {
-      margin-top: 14px;
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
+      margin-top:16px;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
     }
-
     .btn-primario {
-      border: none;
-      padding: 7px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      background: linear-gradient(90deg,#28d48c,#21bcb4);
+      border:none;
+      padding:7px 14px;
+      border-radius:999px;
+      cursor:pointer;
+      background:linear-gradient(90deg,#28d48c,#21bcb4);
+      font-weight:600;
+      color:#000;
     }
-
     .btn-secundario {
-      border: none;
-      padding: 7px 14px;
-      border-radius: 999px;
-      cursor: pointer;
-      background: #2b2b44;
+      border:none;
+      padding:7px 14px;
+      border-radius:999px;
+      cursor:pointer;
+      background:#2b2b44;
+      color:#fff;
     }
 
-    /* ======= IMPRESIÓN ======= */
+    /* IMPRESIÓN */
     @media print {
-      body * {
-        visibility: hidden;
-      }
-      #areaImprimible, #areaImprimible * {
-        visibility: visible;
-      }
+      body * { visibility:hidden; }
+      #areaImprimible, #areaImprimible * { visibility:visible; }
       #areaImprimible {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
+        position:absolute;
+        left:0;
+        top:0;
+        width:100%;
       }
     }
   </style>
 </head>
+
 <body>
+
   <header>
     <div class="titulo">Historial de compras</div>
 
     <div class="nav-panel">
-      <button class="btn-secundario" onclick="window.location.href='admin.html'">
-        Productos
-      </button>
-
-      <button class="btn-secundario" onclick="window.location.href='clientes.html'">
-        Clientes
-      </button>
-
-      <button class="btn-secundario" onclick="window.location.href='ventas.html'">
-        Ventas
-      </button>
-
-      <button id="logoutBtn" class="btn-sesion">
-        Cerrar sesión
-      </button>
+      <button class="btn-secundario" onclick="window.location.href='admin.html'">Productos</button>
+      <button class="btn-secundario" onclick="window.location.href='clientes.html'">Clientes</button>
+      <button class="btn-secundario" onclick="window.location.href='ventas.html'">Ventas</button>
+      <button id="logoutBtn" class="btn-sesion">Cerrar sesión</button>
     </div>
   </header>
 
   <main>
     <div class="historial-wrapper">
+
       <div class="top-actions">
-        <button class="btn-volver" onclick="window.location.href='clientes.html'">
-          ← Volver a clientes
-        </button>
+        <button class="btn-volver" onclick="window.location.href='clientes.html'">← Volver a clientes</button>
       </div>
 
       <section class="historial-card">
-        <!-- Títulos -->
         <div class="historial-header">
           <h1 id="tituloCliente">Historial de compras</h1>
-          <p id="subtituloCliente">
-            Seleccioná un cliente desde el panel de Clientes.
-          </p>
+          <p id="subtituloCliente">Seleccioná un cliente desde el panel de Clientes.</p>
         </div>
 
-        <!-- Filtros -->
+        <!-- FILTROS -->
         <div class="filtros-grid">
           <div class="filtro-block">
             <label for="filtroDesde">Desde</label>
-            <input
-              id="filtroDesde"
-              type="text"
-              class="filtro-input"
-              placeholder="dd/mm/aaaa"
-            />
+            <input id="filtroDesde" type="text" class="filtro-input" placeholder="dd/mm/aaaa" />
           </div>
-
           <div class="filtro-block">
             <label for="filtroHasta">Hasta</label>
-            <input
-              id="filtroHasta"
-              type="text"
-              class="filtro-input"
-              placeholder="dd/mm/aaaa"
-            />
+            <input id="filtroHasta" type="text" class="filtro-input" placeholder="dd/mm/aaaa" />
           </div>
-
           <div class="filtro-block">
             <label for="filtroProducto">Producto (código o nombre)</label>
-            <input
-              id="filtroProducto"
-              type="text"
-              class="filtro-input"
-              placeholder="Ej: N0001, llavero..."
-            />
+            <input id="filtroProducto" type="text" class="filtro-input" placeholder="Ej: N0001..." />
           </div>
-
           <div class="filtro-block">
             <label for="filtroEstado">Estado</label>
             <select id="filtroEstado" class="filtro-select">
@@ -436,24 +314,22 @@
           </div>
         </div>
 
-        <!-- Resúmenes -->
+        <!-- RESUMEN -->
         <div class="resumen-grid">
           <div class="resumen-card">
             <div class="resumen-label">Total gastado (cliente)</div>
             <div class="resumen-value" id="totalCliente">$0,00</div>
             <div class="resumen-extra">Sumando todas las compras del cliente.</div>
           </div>
-
           <div class="resumen-card">
             <div class="resumen-label">Total en resultados filtrados</div>
             <div class="resumen-value" id="totalFiltrado">$0,00</div>
-            <div class="resumen-extra">Lo que ves en la tabla / tarjetas.</div>
+            <div class="resumen-extra">Lo que ves en la tabla.</div>
           </div>
-
           <div class="resumen-card">
-            <div class="resumen-label">Resumen de registros</div>
+            <div class="resumen-label">Resumen</div>
             <div class="resumen-value" id="resumenConteo">0 ventas</div>
-            <div class="resumen-extra">Cantidad de ventas en el listado.</div>
+            <div class="resumen-extra">Cantidad de ventas listadas.</div>
           </div>
         </div>
 
@@ -470,26 +346,22 @@
                 <th>Notas</th>
               </tr>
             </thead>
-            <tbody id="tablaHistorial">
-            </tbody>
+            <tbody id="tablaHistorial"></tbody>
           </table>
         </div>
+
       </section>
     </div>
   </main>
 
-  <!-- =======================================================
-       📄 MODAL – COMPROBANTE DE VENTA (NO FISCAL)
-       ======================================================= -->
+  <!-- =============== MODAL COMPROBANTE =============== -->
   <div id="modalDetalle" class="modal-backdrop" style="display:none;">
     <div class="modal-detalle" id="areaImprimible">
 
       <div class="modal-header-detalle">
         <div>
-          <h3 style="margin:0; font-size:1.2rem;">Comprobante de Venta</h3>
-          <div style="margin-top:5px; font-size:.75rem; opacity:.7;">
-            Documento no fiscal - Uso interno
-          </div>
+          <h3 style="margin:0; font-size:1.15rem;">Comprobante de Venta</h3>
+          <div style="margin-top:5px; font-size:.75rem; opacity:.7;">Documento no fiscal - Uso interno</div>
         </div>
         <button id="cerrarModalDetalle" class="btn-cerrar">✕</button>
       </div>
@@ -522,6 +394,7 @@
       </div>
 
       <div class="modal-acciones">
+        <button id="btnCompartirWhatsapp" class="btn-primario">💬 WhatsApp</button>
         <button id="btnImprimir" class="btn-primario">🖨 Imprimir</button>
         <button id="btnCerrarDetalle" class="btn-secundario">Cerrar</button>
       </div>
@@ -529,7 +402,7 @@
     </div>
   </div>
 
-  <!-- SCRIPTS -->
+  <!-- ================== SCRIPTS ================== -->
   <script type="module" src="js/auth-guard.js"></script>
   <script type="module" src="js/historial.js"></script>
 </body>
