@@ -312,21 +312,18 @@ function renderTabla(lista) {
 
     const totalTexto = `$${total.toLocaleString("es-AR")}`;
 
-    tr.innerHTML = `
-      <td data-label="Fecha">${fechaTexto}</td>
-      <td data-label="Producto(s)">${textoProducto}</td>
-      <td data-label="Cantidad">${totalCantidad}</td>
-      <td data-label="Total">${totalTexto}</td>
-      <td data-label="Estado">
-        ${
-          estado && estado !== "-"
-            ? `<span class="estado-pill">${estado}</span>`
-            : "-"
-        }
-      </td>
-      <td data-label="Notas">${notas}</td>
-    `;
-
+ tr.innerHTML = `
+  <td data-label="Fecha">${fechaTexto}</td>
+  <td data-label="N° interno">${venta.numeroInterno || "-"}</td>
+  <td data-label="Producto(s)">${textoProducto}</td>
+  <td data-label="Cantidad">${totalCantidad}</td>
+  <td data-label="Total">${totalTexto}</td>
+  <td data-label="Estado">
+    ${estado ? `<span class="estado-pill">${estado}</span>` : "-"}
+  </td>
+  <td data-label="Notas">${notas}</td>
+`;
+    
     tr.addEventListener("click", () => {
       abrirDetalleVenta(venta);
     });
