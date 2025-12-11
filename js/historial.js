@@ -30,12 +30,27 @@ const lblTotalCliente = document.getElementById("totalCliente");
 const lblTotalFiltrado = document.getElementById("totalFiltrado");
 const lblResumenConteo = document.getElementById("resumenConteo");
 
+// Modal comprobante
+const modalDetalle = document.getElementById("modalDetalle");
+const lblDetalleCliente = document.getElementById("detalleCliente");
+const lblDetalleFecha = document.getElementById("detalleFecha");
+const lblDetalleEstado = document.getElementById("detalleEstado");
+const tbodyDetalleProductos = document.getElementById("detalleProductos");
+const lblDetalleTotal = document.getElementById("detalleTotal");
+const lblDetalleNotas = document.getElementById("detalleNotas");
+
+const btnCerrarModalX = document.getElementById("cerrarModalDetalle");
+const btnCerrarModal = document.getElementById("btnCerrarDetalle");
+const btnImprimir = document.getElementById("btnImprimir");
+const btnCompartirWhatsapp = document.getElementById("btnCompartirWhatsapp");
+
 // --------------------
 // Estado en memoria
 // --------------------
-let ventasCliente = [];   // todas las ventas del cliente (o globales)
-let ventasFiltradas = []; // ventas después de filtros
+let ventasCliente = [];     // todas las ventas del cliente (o globales)
+let ventasFiltradas = [];   // ventas después de filtros
 let productosCatalogo = []; // productos desde colección "productos"
+let ventaActualDetalle = null; // venta seleccionada para comprobante
 
 // --------------------
 // Helper: query string
@@ -129,11 +144,13 @@ async function cargarHistorial() {
     aplicarFiltros();
   } catch (error) {
     console.error("Error al cargar historial:", error);
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="6">Ocurrió un error al cargar el historial.</td>
-      </tr>
-    `;
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6">Ocurrió un error al cargar el historial.</td>
+        </tr>
+      `;
+    }
   }
 }
 
@@ -271,6 +288,8 @@ function obtenerResumenProductos(venta) {
 }
 
 function renderTabla(lista) {
+  if (!tbody) return;
+
   tbody.innerHTML = "";
 
   if (!lista || lista.length === 0) {
@@ -309,6 +328,11 @@ function renderTabla(lista) {
       <td data-label="Notas">${notas}</td>
     `;
 
+    // Al hacer click en la fila, abrir comprobante
+    tr.addEventListener("click", () => {
+      abrirDetalleVenta(venta);
+    });
+
     tbody.appendChild(tr);
   });
 }
@@ -338,10 +362,118 @@ function recalcularTotales() {
 }
 
 // --------------------
+// Detalle / comprobante
+// --------------------
+function abrirDetalleVenta(venta) {
+  if (!modalDetalle) return;
+
+  ventaActualDetalle = venta;
+
+  // Cliente / fecha / estado
+  if (lblDetalleCliente) {
+    lblDetalleCliente.textContent = venta.clienteNombre || "-";
+  }
+  if (lblDetalleFecha) {
+    lblDetalleFecha.textContent = formatearFecha(venta.fecha);
+  }
+  if (lblDetalleEstado) {
+    lblDetalleEstado.textContent = venta.estado || "-";
+  }
+
+  // Total y notas
+  if (lblDetalleTotal) {
+    lblDetalleTotal.textContent =
+      "$" + (venta.total || 0).toLocaleString("es-AR");
+  }
+  if (lblDetalleNotas) {
+    lblDetalleNotas.textContent = venta.notas || "-";
+  }
+
+  // Productos
+  if (tbodyDetalleProductos) {
+    tbodyDetalleProductos.innerHTML = "";
+
+    if (Array.isArray(venta.productos) && venta.productos.length > 0) {
+      venta.productos.forEach((p) => {
+        const prodInfo = productosCatalogo.find(
+          (c) => c.codigo === p.codigo
+        );
+        const nombre = prodInfo?.nombre || p.codigo || "-";
+        const subtotal = (p.precio || 0) * (p.cantidad || 0);
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${p.codigo || "-"}</td>
+          <td>${nombre}</td>
+          <td>${p.cantidad || 0}</td>
+          <td>$${(p.precio || 0).toLocaleString("es-AR")}</td>
+          <td>$${subtotal.toLocaleString("es-AR")}</td>
+        `;
+        tbodyDetalleProductos.appendChild(tr);
+      });
+    }
+  }
+
+  modalDetalle.style.display = "flex";
+}
+
+function cerrarModalDetalle() {
+  if (modalDetalle) {
+    modalDetalle.style.display = "none";
+  }
+}
+
+// --------------------
 // Listeners de filtros
 // --------------------
 [inputDesde, inputHasta, inputProducto, selectEstado].forEach((el) => {
   if (!el) return;
   el.addEventListener("input", aplicarFiltros);
   el.addEventListener("change", aplicarFiltros);
+});
+
+// --------------------
+// Listeners del modal
+// --------------------
+btnCerrarModalX?.addEventListener("click", cerrarModalDetalle);
+btnCerrarModal?.addEventListener("click", cerrarModalDetalle);
+
+btnImprimir?.addEventListener("click", () => {
+  window.print();
+});
+
+// --------------------
+// Compartir por WhatsApp
+// --------------------
+btnCompartirWhatsapp?.addEventListener("click", () => {
+  if (!ventaActualDetalle) return;
+
+  const venta = ventaActualDetalle;
+  let texto = `🧾 *Comprobante de compra*\n\n`;
+
+  texto += `👤 Cliente: ${venta.clienteNombre || "-"}\n`;
+  texto += `📅 Fecha: ${formatearFecha(venta.fecha)}\n\n`;
+
+  texto += `🛒 *Productos:*\n`;
+
+  if (Array.isArray(venta.productos) && venta.productos.length > 0) {
+    venta.productos.forEach((p) => {
+      const subtotal = (p.precio || 0) * (p.cantidad || 0);
+      texto += `- ${p.codigo || "-"} x${p.cantidad || 0} = $${subtotal.toLocaleString(
+        "es-AR"
+      )}\n`;
+    });
+  }
+
+  texto += `\n💰 Total: $${(venta.total || 0).toLocaleString("es-AR")}\n`;
+  texto += `🟢 Estado: ${venta.estado || "-"}\n`;
+
+  if (venta.notas) {
+    texto += `\n📝 Notas: ${venta.notas}\n`;
+  }
+
+  texto += `\n¡Gracias por su compra! 😊`;
+
+  const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
+  window.open(url, "_blank");
 });
