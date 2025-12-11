@@ -190,7 +190,7 @@ function aplicarFiltros() {
       if (hastaDate && fechaJs > hastaDate) ok = false;
     }
 
-    // Producto (código o nombre) – soporta array "productos" del nuevo esquema
+    // Producto (código o nombre) – soporta array "productos"
     if (textoProducto) {
       let coincideProducto = false;
 
@@ -209,7 +209,7 @@ function aplicarFiltros() {
           }
         }
       } else {
-        // Compatibilidad con ventas viejas (solo un producto)
+        // Compatibilidad con ventas viejas (un solo producto)
         const codigo = (
           venta.productoCodigo ||
           venta.codigoProducto ||
@@ -247,7 +247,7 @@ function aplicarFiltros() {
 }
 
 // --------------------
-// Render tabla / tarjetas
+// Render tabla
 // --------------------
 function formatearFecha(fecha) {
   if (!fecha) return "-";
@@ -261,7 +261,6 @@ function formatearFecha(fecha) {
 }
 
 function obtenerResumenProductos(venta) {
-  // Devuelve { textoProducto, totalCantidad }
   if (Array.isArray(venta.productos) && venta.productos.length > 0) {
     const totalCantidad = venta.productos.reduce(
       (acc, p) => acc + (Number(p.cantidad) || 0),
@@ -279,7 +278,7 @@ function obtenerResumenProductos(venta) {
     return { textoProducto, totalCantidad };
   }
 
-  // Esquema viejo: un solo producto
+  // Esquema viejo
   const nombreProd =
     venta.productoNombre || venta.nombreProducto || venta.producto || "-";
   const cantidad = venta.cantidad || venta.cant || 0;
@@ -328,7 +327,6 @@ function renderTabla(lista) {
       <td data-label="Notas">${notas}</td>
     `;
 
-    // Al hacer click en la fila, abrir comprobante
     tr.addEventListener("click", () => {
       abrirDetalleVenta(venta);
     });
@@ -369,7 +367,6 @@ function abrirDetalleVenta(venta) {
 
   ventaActualDetalle = venta;
 
-  // Cliente / fecha / estado
   if (lblDetalleCliente) {
     lblDetalleCliente.textContent = venta.clienteNombre || "-";
   }
@@ -380,7 +377,6 @@ function abrirDetalleVenta(venta) {
     lblDetalleEstado.textContent = venta.estado || "-";
   }
 
-  // Total y notas
   if (lblDetalleTotal) {
     lblDetalleTotal.textContent =
       "$" + (venta.total || 0).toLocaleString("es-AR");
@@ -389,7 +385,6 @@ function abrirDetalleVenta(venta) {
     lblDetalleNotas.textContent = venta.notas || "-";
   }
 
-  // Productos
   if (tbodyDetalleProductos) {
     tbodyDetalleProductos.innerHTML = "";
 
@@ -418,9 +413,7 @@ function abrirDetalleVenta(venta) {
 }
 
 function cerrarModalDetalle() {
-  if (modalDetalle) {
-    modalDetalle.style.display = "none";
-  }
+  if (modalDetalle) modalDetalle.style.display = "none";
 }
 
 // --------------------
