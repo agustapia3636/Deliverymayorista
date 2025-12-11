@@ -177,7 +177,7 @@
       text-transform: capitalize;
     }
 
-    /* --------- MÓVIL: tabla -> tarjetas --------- */
+    /* --------- MÓVIL --------- */
     @media (max-width: 768px) {
       .historial-card {
         padding: 18px 14px 22px;
@@ -241,6 +241,114 @@
       .tabla-historial tbody tr td[data-label="Total"] {
         margin-top: 4px;
         font-weight: 600;
+      }
+    }
+
+    /* ---------------------------------------------------
+       MODAL – COMPROBANTE DE VENTA
+       --------------------------------------------------- */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.65);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal-detalle {
+      background: #111121;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 650px;
+      padding: 18px 20px;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.5);
+    }
+
+    .modal-header-detalle {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-cerrar {
+      background: transparent;
+      border: none;
+      color: #eee;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .detalle-info {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 6px;
+      font-size: .85rem;
+    }
+
+    .detalle-tabla {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: .85rem;
+    }
+
+    .detalle-tabla th,
+    .detalle-tabla td {
+      padding: 6px 8px;
+      border-bottom: 1px solid #26263a;
+    }
+
+    .detalle-totales {
+      margin-top: 12px;
+      text-align: right;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .detalle-notas {
+      margin-top: 8px;
+      font-size: .8rem;
+    }
+
+    .modal-acciones {
+      margin-top: 14px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .btn-primario {
+      border: none;
+      padding: 7px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      background: linear-gradient(90deg,#28d48c,#21bcb4);
+    }
+
+    .btn-secundario {
+      border: none;
+      padding: 7px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      background: #2b2b44;
+    }
+
+    /* ======= IMPRESIÓN ======= */
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #areaImprimible, #areaImprimible * {
+        visibility: visible;
+      }
+      #areaImprimible {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
       }
     }
   </style>
@@ -349,7 +457,7 @@
           </div>
         </div>
 
-        <!-- Tabla / tarjetas -->
+        <!-- TABLA -->
         <div class="tabla-historial-wrapper">
           <table class="tabla-historial">
             <thead>
@@ -363,7 +471,6 @@
               </tr>
             </thead>
             <tbody id="tablaHistorial">
-              <!-- Filas dinámicas -->
             </tbody>
           </table>
         </div>
@@ -371,7 +478,58 @@
     </div>
   </main>
 
-  <!-- Scripts del panel -->
+  <!-- =======================================================
+       📄 MODAL – COMPROBANTE DE VENTA (NO FISCAL)
+       ======================================================= -->
+  <div id="modalDetalle" class="modal-backdrop" style="display:none;">
+    <div class="modal-detalle" id="areaImprimible">
+
+      <div class="modal-header-detalle">
+        <div>
+          <h3 style="margin:0; font-size:1.2rem;">Comprobante de Venta</h3>
+          <div style="margin-top:5px; font-size:.75rem; opacity:.7;">
+            Documento no fiscal - Uso interno
+          </div>
+        </div>
+        <button id="cerrarModalDetalle" class="btn-cerrar">✕</button>
+      </div>
+
+      <div class="detalle-info">
+        <div><strong>Cliente:</strong> <span id="detalleCliente">-</span></div>
+        <div><strong>Fecha:</strong> <span id="detalleFecha">-</span></div>
+        <div><strong>Estado:</strong> <span id="detalleEstado">-</span></div>
+      </div>
+
+      <table class="detalle-tabla">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Producto</th>
+            <th>Cant.</th>
+            <th>Precio</th>
+            <th>Subtotal</th>
+          </tr>
+        </thead>
+        <tbody id="detalleProductos"></tbody>
+      </table>
+
+      <div class="detalle-totales">
+        <strong>Total:</strong> <span id="detalleTotal">$0</span>
+      </div>
+
+      <div class="detalle-notas">
+        <strong>Notas:</strong> <span id="detalleNotas">-</span>
+      </div>
+
+      <div class="modal-acciones">
+        <button id="btnImprimir" class="btn-primario">🖨 Imprimir</button>
+        <button id="btnCerrarDetalle" class="btn-secundario">Cerrar</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
   <script type="module" src="js/auth-guard.js"></script>
   <script type="module" src="js/historial.js"></script>
 </body>
