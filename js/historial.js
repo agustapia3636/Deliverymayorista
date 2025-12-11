@@ -432,8 +432,177 @@ function cerrarModalDetalle() {
 btnCerrarModalX?.addEventListener("click", cerrarModalDetalle);
 btnCerrarModal?.addEventListener("click", cerrarModalDetalle);
 
+// --------------------
+// Imprimir comprobante lindo
+// --------------------
 btnImprimir?.addEventListener("click", () => {
-  window.print();
+  if (!ventaActualDetalle) return;
+
+  const v = ventaActualDetalle;
+
+  const fechaTexto = formatearFecha(v.fecha);
+  const numeroInterno = v.numeroInterno || "-";
+  const cliente = v.clienteNombre || "-";
+  const estado = v.estado || "-";
+  const totalTexto = "$" + (v.total || 0).toLocaleString("es-AR");
+
+  // filas de productos
+  let filasProductos = "";
+
+  if (Array.isArray(v.productos) && v.productos.length > 0) {
+    v.productos.forEach((p) => {
+      const infoProd = productosCatalogo.find(
+        (c) => c.codigo === p.codigo
+      );
+      const nombre = infoProd?.nombre || p.codigo || "-";
+      const precio = p.precio || 0;
+      const cant = p.cantidad || 0;
+      const subtotal = precio * cant;
+
+      filasProductos += `
+        <tr>
+          <td>${p.codigo || "-"}</td>
+          <td>${nombre}</td>
+          <td class="num">${cant}</td>
+          <td class="num">$${precio.toLocaleString("es-AR")}</td>
+          <td class="num">$${subtotal.toLocaleString("es-AR")}</td>
+        </tr>
+      `;
+    });
+  } else {
+    filasProductos = `
+      <tr>
+        <td colspan="5">Sin productos.</td>
+      </tr>
+    `;
+  }
+
+  const notasHtml = v.notas
+    ? `<p><strong>Notas:</strong> ${v.notas}</p>`
+    : "";
+
+  const win = window.open("", "_blank");
+  win.document.write(`
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Comprobante de Venta</title>
+      <style>
+        * { box-sizing: border-box; }
+        body {
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          margin: 20px;
+          color: #111827;
+          background: #ffffff;
+        }
+        h1 {
+          font-size: 20px;
+          margin: 0 0 4px 0;
+        }
+        .subtitulo {
+          font-size: 11px;
+          color: #6b7280;
+          margin: 0 0 16px 0;
+        }
+        .header {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 4px 32px;
+          font-size: 13px;
+          margin-bottom: 12px;
+        }
+        .header div span {
+          font-weight: 600;
+        }
+        .box {
+          border: 1px solid #e5e7eb;
+          border-radius: 8px;
+          padding: 16px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 8px;
+          font-size: 13px;
+        }
+        th, td {
+          border-bottom: 1px solid #e5e7eb;
+          padding: 6px 8px;
+          text-align: left;
+        }
+        th {
+          background: #f9fafb;
+          font-weight: 600;
+        }
+        td.num {
+          text-align: right;
+          white-space: nowrap;
+        }
+        .totales {
+          margin-top: 10px;
+          text-align: right;
+          font-size: 14px;
+          font-weight: 600;
+        }
+        .footer {
+          margin-top: 24px;
+          font-size: 11px;
+          color: #6b7280;
+          text-align: center;
+        }
+        @media print {
+          body { margin: 14mm; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Comprobante de Venta</h1>
+      <p class="subtitulo">Documento no fiscal · Uso interno</p>
+
+      <div class="box">
+        <div class="header">
+          <div><span>Fecha:</span> ${fechaTexto}</div>
+          <div><span>N° Interno:</span> ${numeroInterno}</div>
+          <div><span>Cliente:</span> ${cliente}</div>
+          <div><span>Estado:</span> ${estado}</div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Producto</th>
+              <th>Cant.</th>
+              <th>Precio</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filasProductos}
+          </tbody>
+        </table>
+
+        <div class="totales">
+          Total: ${totalTexto}
+        </div>
+
+        ${notasHtml}
+      </div>
+
+      <div class="footer">
+        Delivery Mayorista · Comprobante interno de venta
+      </div>
+
+      <script>
+        window.onload = function () {
+          window.print();
+        };
+      </script>
+    </body>
+    </html>
+  `);
+  win.document.close();
 });
 
 // --------------------
