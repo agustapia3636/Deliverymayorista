@@ -47,8 +47,8 @@ const btnCompartirWhatsapp = document.getElementById("btnCompartirWhatsapp");
 // --------------------
 // Estado en memoria
 // --------------------
-let ventasCliente = [];     // todas las ventas del cliente (o globales)
-let ventasFiltradas = [];   // ventas después de filtros
+let ventasCliente = []; // todas las ventas del cliente (o globales)
+let ventasFiltradas = []; // ventas después de filtros
 let productosCatalogo = []; // productos desde colección "productos"
 let ventaActualDetalle = null; // venta seleccionada para comprobante
 
@@ -147,7 +147,7 @@ async function cargarHistorial() {
     if (tbody) {
       tbody.innerHTML = `
         <tr>
-          <td colspan="6">Ocurrió un error al cargar el historial.</td>
+          <td colspan="7">Ocurrió un error al cargar el historial.</td>
         </tr>
       `;
     }
@@ -294,7 +294,7 @@ function renderTabla(lista) {
   if (!lista || lista.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6">No hay ventas registradas para este cliente.</td>
+        <td colspan="7">No hay ventas registradas para este cliente.</td>
       </tr>
     `;
     return;
@@ -312,18 +312,18 @@ function renderTabla(lista) {
 
     const totalTexto = `$${total.toLocaleString("es-AR")}`;
 
- tr.innerHTML = `
-  <td data-label="Fecha">${fechaTexto}</td>
-  <td data-label="N° interno">${venta.numeroInterno || "-"}</td>
-  <td data-label="Producto(s)">${textoProducto}</td>
-  <td data-label="Cantidad">${totalCantidad}</td>
-  <td data-label="Total">${totalTexto}</td>
-  <td data-label="Estado">
-    ${estado ? `<span class="estado-pill">${estado}</span>` : "-"}
-  </td>
-  <td data-label="Notas">${notas}</td>
-`;
-    
+    tr.innerHTML = `
+      <td data-label="Fecha">${fechaTexto}</td>
+      <td data-label="N° interno">${venta.numeroInterno || "-"}</td>
+      <td data-label="Producto(s)">${textoProducto}</td>
+      <td data-label="Cantidad">${totalCantidad}</td>
+      <td data-label="Total">${totalTexto}</td>
+      <td data-label="Estado">
+        ${estado ? `<span class="estado-pill">${estado}</span>` : "-"}
+      </td>
+      <td data-label="Notas">${notas}</td>
+    `;
+
     tr.addEventListener("click", () => {
       abrirDetalleVenta(venta);
     });
@@ -361,11 +361,11 @@ function recalcularTotales() {
 // --------------------
 function abrirDetalleVenta(venta) {
   const lblDetalleNumero = document.getElementById("detalleNumero");
-if (lblDetalleNumero) {
-  lblDetalleNumero.textContent = venta.numeroInterno || "-";
-}
+  if (lblDetalleNumero) {
+    lblDetalleNumero.textContent = venta.numeroInterno || "-";
+  }
   if (!modalDetalle) return;
- 
+
   ventaActualDetalle = venta;
 
   if (lblDetalleCliente) {
@@ -445,7 +445,7 @@ btnCompartirWhatsapp?.addEventListener("click", () => {
   const venta = ventaActualDetalle;
   let texto = `🧾 *Comprobante de compra*\n\n`;
 
-  // 👉 NUEVA LÍNEA: NÚMERO INTERNO
+  // 👉 NÚMERO INTERNO EN EL COMPROBANTE
   texto += `N° Interno: ${venta.numeroInterno || "-"}\n`;
 
   texto += `👤 Cliente: ${venta.clienteNombre || "-"}\n`;
