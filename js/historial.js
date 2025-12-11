@@ -363,8 +363,12 @@ function recalcularTotales() {
 // Detalle / comprobante
 // --------------------
 function abrirDetalleVenta(venta) {
+  const lblDetalleNumero = document.getElementById("detalleNumero");
+if (lblDetalleNumero) {
+  lblDetalleNumero.textContent = venta.numeroInterno || "-";
+}
   if (!modalDetalle) return;
-
+ 
   ventaActualDetalle = venta;
 
   if (lblDetalleCliente) {
