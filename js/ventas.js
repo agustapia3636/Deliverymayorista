@@ -22,6 +22,7 @@ import {
   query,
   orderBy,
   serverTimestamp,
+  runTransaction, // 👈 para numeración incremental segura
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
 // ---------------------------------------------------------------------------
@@ -65,6 +66,34 @@ let clientes          = [];   // clientes para el combo
 let productosCatalogo = [];   // productos para autocomplete
 let ventaProductosTmp = [];   // productos de la venta actual {codigo, nombre, precio, cantidad}
 let ventas7dChart     = null; // instancia del gráfico de últimos 7 días
+
+// ---------------------------------------------------------------------------
+// Numeración incremental de comprobantes (N° interno)
+// ---------------------------------------------------------------------------
+
+async function obtenerNuevoNumeroInterno() {
+  const ref = doc(db, "configuracion", "numerador");
+
+  const nuevoNumero = await runTransaction(db, async (transaction) => {
+    const snap = await transaction.get(ref);
+
+    // Primera vez: arranca en 1
+    if (!snap.exists()) {
+      transaction.set(ref, { ultimoNumero: 1 });
+      return 1;
+    }
+
+    const data        = snap.data() || {};
+    const ultimo      = Number(data.ultimoNumero || 0);
+    const siguiente   = ultimo + 1;
+
+    transaction.update(ref, { ultimoNumero: siguiente });
+
+    return siguiente;
+  });
+
+  return nuevoNumero;
+}
 
 // ---------------------------------------------------------------------------
 // Auth y carga inicial
@@ -236,6 +265,7 @@ async function cargarVentas() {
       const estado        = data.estado || "pendiente";
       const notas         = data.notas || "";
       const productos     = Array.isArray(data.productos) ? data.productos : [];
+      const numeroInterno = data.numeroInterno || null; // 👈 traemos N° interno
 
       ventas.push({
         id: docSnap.id,
@@ -246,6 +276,7 @@ async function cargarVentas() {
         estado,
         notas,
         productos,
+        numeroInterno,
       });
     });
 
@@ -430,6 +461,7 @@ function aplicarFiltros() {
       const cliente = (v.clienteNombre || v.clienteId || "").toLowerCase();
       const estado  = (v.estado || "").toLowerCase();
       const notas   = (v.notas || "").toLowerCase();
+      const numero  = v.numeroInterno != null ? String(v.numeroInterno) : "";
 
       const productosTexto = (v.productos || [])
         .map((p) => `${p.codigo || ""} ${p.nombre || ""}`)
@@ -440,7 +472,8 @@ function aplicarFiltros() {
         cliente.includes(texto) ||
         estado.includes(texto) ||
         notas.includes(texto) ||
-        productosTexto.includes(texto);
+        productosTexto.includes(texto) ||
+        numero.includes(texto); // 👈 buscar también por N° interno
 
       if (!hayCoincidencia) return false;
     }
@@ -833,6 +866,9 @@ async function guardarVenta() {
       });
     }
 
+    // 🔢 obtenemos el nuevo número interno SEGURO
+    const numeroInterno = await obtenerNuevoNumeroInterno();
+
     const ventaData = {
       fecha: serverTimestamp(),
       clienteId,
@@ -841,7 +877,7 @@ async function guardarVenta() {
       notas,
       total,
       productos: productosFinal,
-      numeroInterno: Date.now(), // o contador incremental si querés más adelante
+      numeroInterno, // 👈 ahora es incremental, no Date.now()
     };
 
     // 1) Registramos la venta
