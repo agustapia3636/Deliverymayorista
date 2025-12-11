@@ -841,6 +841,7 @@ async function guardarVenta() {
       notas,
       total,
       productos: productosFinal,
+      numeroInterno: Date.now(), // o contador incremental si querés más adelante
     };
 
     // 1) Registramos la venta
