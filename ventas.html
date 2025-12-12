@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Punto de Venta | Delivery Mayorista</title>
 
+  <!-- PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
@@ -37,7 +38,7 @@
     .btn-header{
       background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);
       padding:8px 12px;border-radius:10px;cursor:pointer;font-weight:1000;color:#fff;display:flex;align-items:center;gap:6px;
-      font-size:.85rem;transition:.2s
+      font-size:.85rem;transition:.2s; user-select:none
     }
     .btn-header:hover{background:rgba(255,255,255,.28)}
     .date-display{font-size:.85rem;font-weight:1000;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.28);padding:6px 12px;border-radius:999px}
@@ -58,7 +59,6 @@
     .right-column{width:clamp(360px,28vw,520px);min-width:320px;display:flex;flex-direction:column;overflow:hidden;background:#fff;border-left:1px solid var(--border)}
     .panel-top{flex:1;overflow:hidden;padding:18px;display:flex;flex-direction:column}
     .panel-bottom{height:260px;min-height:120px;overflow:hidden;display:flex;flex-direction:column;background:#fff;border-top:1px solid var(--border)}
-
     .fullscreen-mode .panel-bottom{display:none!important}
     .fullscreen-mode .resizer-horiz{display:none!important}
 
@@ -141,18 +141,24 @@
 
     .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);backdrop-filter:blur(4px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:.2s}
     .modal-overlay.active{opacity:1;pointer-events:auto}
-    .modal-card{background:#fff;width:90%;max-width:420px;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;position:relative}
-    .modal-header-hero{padding:20px;text-align:center;background:#f8fafc;border-bottom:1px solid #e2e8f0}
-    .modal-header-hero h2{margin:0;font-size:.9rem;text-transform:uppercase;color:var(--muted);letter-spacing:1px}
-    .modal-price-hero{font-size:2.5rem;font-weight:1000;color:#1e293b;margin:5px 0 0}
-    .modal-body{padding:20px}
-    .input-field{width:100%;padding:12px;border:2px solid #e2e8f0;border-radius:14px;font-size:1.05rem;outline:none;font-weight:900}
-    .input-field:focus{border-color:rgba(255,0,93,.55);box-shadow:0 0 0 4px rgba(255,0,93,.10)}
-    .modal-footer{padding:15px 20px;background:#f8fafc;border-top:1px solid #e2e8f0;display:grid;grid-template-columns:1fr 1.5fr;gap:10px}
-    .btn-modal-cancel{background:#fff;border:1px solid #cbd5e1;padding:10px;border-radius:12px;font-weight:1000;cursor:pointer;color:#475569}
-    .btn-modal-confirm{background:#0f172a;color:#fff;border:none;padding:10px;border-radius:12px;font-weight:1000;cursor:pointer}
-    .vuelto-box{margin-top:10px;background:#dcfce7;color:#166534;padding:8px;border-radius:12px;font-weight:1000;display:none}
-    .close-x{position:absolute;right:15px;top:15px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#94a3b8}
+    .modal-card{background:#fff;width:92%;max-width:980px;border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;position:relative}
+    .modal-header-hero{padding:16px 18px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .modal-header-hero h2{margin:0;font-size:.95rem;text-transform:uppercase;color:var(--muted);letter-spacing:1px}
+    .modal-body{padding:16px 18px;max-height:72vh;overflow:auto}
+    .modal-footer{padding:12px 18px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+    .btn-soft{background:#fff;border:1px solid #cbd5e1;padding:10px 12px;border-radius:12px;font-weight:1000;cursor:pointer;color:#475569}
+    .btn-soft:hover{border-color:rgba(255,0,93,.35)}
+    .btn-dark{background:#0f172a;color:#fff;border:none;padding:10px 12px;border-radius:12px;font-weight:1000;cursor:pointer}
+    .close-x{position:absolute;right:12px;top:10px;background:none;border:none;font-size:1.6rem;cursor:pointer;color:#94a3b8}
+
+    .report-box{
+      background:#fff;border:1px solid #e2e8f0;border-radius:16px;padding:16px;
+    }
+    .report-title{font-size:18px;font-weight:1000;margin:0 0 10px}
+    .report-sub{color:var(--muted);font-weight:900;margin-bottom:10px}
+    .report-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0}
+    .kv{display:flex;justify-content:space-between;border:1px dashed #e2e8f0;border-radius:12px;padding:10px;font-weight:1000}
+    .kv span{color:var(--muted);font-weight:900}
 
     @media (max-width:900px){
       body{overflow:auto;height:auto}
@@ -163,6 +169,7 @@
       .search-box{width:100%}
       .cliente-inline input{width:100%;max-width:58vw}
       .caja-pill input{width:120px}
+      .report-grid{grid-template-columns:1fr}
     }
   </style>
 </head>
@@ -256,8 +263,8 @@
 
     <div class="panel-bottom" id="summaryPanel">
       <div class="panel-header">
-        <span>📊 Resumen del Día</span>
-        <button id="btnReporte" style="border:none;background:none;cursor:pointer;font-size:18px">📄</button>
+        <span>📊 Resumen del Turno</span>
+        <button id="btnReporte" style="border:none;background:none;cursor:pointer;font-size:18px" title="PDF del turno">📄</button>
       </div>
       <div style="padding:15px;">
         <div class="sum-row"><span>Total General</span><b id="sumTotal">$0</b></div>
@@ -265,69 +272,118 @@
         <div class="sum-row"><span>Transferencia</span><b id="sumTr">$0</b></div>
         <div class="sum-row"><span>Mixto</span><b id="sumMx">$0</b></div>
         <div class="sum-total"><span>Ventas</span><span id="sumVentas">0</span></div>
-        <button class="btn-close-box" id="btnCerrarDia">🔒 Cerrar Caja del Día</button>
+        <button class="btn-close-box" id="btnCerrarDia">🔒 Cerrar Caja del Turno</button>
       </div>
     </div>
   </div>
 </div>
 
 <!-- MODAL PAGO -->
-<div class="modal-overlay" id="pagoModal">
-  <div class="modal-card">
-    <div class="modal-header-hero">
-      <h2>Total a Cobrar</h2>
-      <div class="modal-price-hero">$<span id="modalTotal">0</span></div>
+<div class="modal-overlay" id="pagoModal" style="z-index:2500;">
+  <div class="modal-card" style="max-width:420px;">
+    <div class="modal-header-hero" style="justify-content:center;">
+      <h2 style="text-align:center;">Total a Cobrar</h2>
     </div>
 
     <div class="modal-body">
-      <input class="input-field" id="clienteInput" placeholder="Cliente (opcional)">
-      <div style="height:10px"></div>
-      <input class="input-field" id="montoInput" type="number" placeholder="Monto recibido (solo efectivo)">
-      <div class="vuelto-box" id="vueltoBox">Vuelto: $0</div>
+      <div style="font-size:2.2rem;font-weight:1000;text-align:center;margin-bottom:12px;">$<span id="modalTotal">0</span></div>
 
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:12px;gap:10px;">
-        <div style="font-weight:1000;color:#475569;">📲 Enviar comprobante por WhatsApp</div>
+      <input class="btn-soft" style="width:100%;text-align:left;font-weight:1000;" id="clienteInput" placeholder="Cliente (opcional)">
+      <div style="height:10px"></div>
+      <input class="btn-soft" style="width:100%;text-align:left;font-weight:1000;" id="montoInput" type="number" placeholder="Monto recibido (solo efectivo)">
+      <div id="vueltoBox" style="margin-top:10px;background:#dcfce7;color:#166534;padding:8px;border-radius:12px;font-weight:1000;display:none">Vuelto: $0</div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;gap:10px;">
+        <div style="font-weight:1000;color:#475569;">📲 WhatsApp</div>
         <label style="display:flex;align-items:center;gap:8px;font-weight:1000;">
           <input type="checkbox" id="chkWhats" checked><span>Enviar</span>
         </label>
       </div>
-
       <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:10px;">
-        <div style="font-weight:1000;color:#475569;">🧾 Imprimir ticket 80mm</div>
+        <div style="font-weight:1000;color:#475569;">🧾 Ticket 80mm</div>
         <label style="display:flex;align-items:center;gap:8px;font-weight:1000;">
           <input type="checkbox" id="chkTicket" checked><span>Imprimir</span>
         </label>
       </div>
     </div>
 
-    <div class="modal-footer">
-      <button class="btn-modal-cancel" id="btnPagoCancel">Cancelar</button>
-      <button class="btn-modal-confirm" id="btnConfirmPago">Confirmar</button>
+    <div class="modal-footer" style="justify-content:space-between">
+      <button class="btn-soft" id="btnPagoCancel">Cancelar</button>
+      <button class="btn-dark" id="btnConfirmPago">Confirmar</button>
     </div>
-
     <button class="close-x" id="btnPagoX">×</button>
   </div>
 </div>
 
 <!-- MODAL ALERT -->
-<div class="modal-overlay" id="alertModal">
+<div class="modal-overlay" id="alertModal" style="z-index:3000;">
   <div class="modal-card" style="max-width:380px;text-align:center;">
     <div class="modal-header-hero"><h2>Mensaje</h2></div>
     <div class="modal-body"><div id="alertMsg"></div></div>
-    <div class="modal-footer" style="grid-template-columns:1fr;">
-      <button class="btn-modal-confirm" id="btnAlertOk">OK</button>
-    </div>
+    <div class="modal-footer"><button class="btn-dark" id="btnAlertOk">OK</button></div>
   </div>
 </div>
 
 <!-- MODAL CONFIRM -->
-<div class="modal-overlay" id="confirmModal">
+<div class="modal-overlay" id="confirmModal" style="z-index:3000;">
   <div class="modal-card" style="max-width:380px;text-align:center;">
     <div class="modal-header-hero"><h2 id="confirmTitle">Confirmar</h2></div>
     <div class="modal-body"><div id="confirmMsg"></div></div>
-    <div class="modal-footer">
-      <button class="btn-modal-cancel" id="btnConfirmNo">No</button>
-      <button class="btn-modal-confirm" id="btnConfirmYes">Sí</button>
+    <div class="modal-footer" style="justify-content:space-between">
+      <button class="btn-soft" id="btnConfirmNo">No</button>
+      <button class="btn-dark" id="btnConfirmYes">Sí</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HISTORIAL CIERRES -->
+<div class="modal-overlay" id="cierresModal" style="z-index:2600;">
+  <div class="modal-card">
+    <div class="modal-header-hero">
+      <h2>Historial de Cierres</h2>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn-soft" id="btnReloadCierres">🔄 Recargar</button>
+        <button class="btn-dark" id="btnCerrarCierres">Cerrar</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom:10px;color:var(--muted);font-weight:900;">
+        Se listan los últimos cierres guardados en <b>cierres_caja</b>.
+      </div>
+      <div class="table-container" style="border:1px solid #e2e8f0;border-radius:14px;overflow:hidden">
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Turno</th>
+              <th>Cajero</th>
+              <th>Total</th>
+              <th>Ventas</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-cierres"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALLE CIERRE + PDF -->
+<div class="modal-overlay" id="cierreDetalleModal" style="z-index:2700;">
+  <div class="modal-card">
+    <div class="modal-header-hero">
+      <h2>Detalle de Cierre</h2>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <button class="btn-soft" id="btnPDFDetalle">📄 Descargar PDF</button>
+        <button class="btn-dark" id="btnCerrarDetalle">Cerrar</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div id="cierreDetalleContenido"></div>
+      <!-- zona “lista para PDF” -->
+      <div style="height:12px"></div>
+      <div id="cierrePDFZone" class="report-box" style="display:none"></div>
     </div>
   </div>
 </div>
@@ -366,7 +422,8 @@
   let panelesVisibles = true;
   let ddIndex = -1;
 
-  let totalDiaEfectivo=0, totalDiaTransf=0, totalDiaMixto=0, totalDiaGeneral=0;
+  let ventasTurno = []; // ventas del turno en memoria
+  let totalEf=0, totalTr=0, totalMx=0, totalGen=0;
 
   // Reloj
   setInterval(()=>{
@@ -374,7 +431,7 @@
     if(el) el.innerText = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   }, 1000);
 
-  // Modales
+  // Modales base
   function cerrarModales(){
     document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('active'));
   }
@@ -392,11 +449,11 @@
     document.getElementById('confirmModal').classList.add('active');
   }
 
-  // Botones modales
-  document.getElementById('btnAlertOk').onclick = cerrarModales;
-  document.getElementById('btnConfirmNo').onclick = cerrarModales;
-  document.getElementById('btnPagoCancel').onclick = cerrarModales;
-  document.getElementById('btnPagoX').onclick = cerrarModales;
+  // Botones modales base
+  document.getElementById('btnAlertOk').onclick = ()=> document.getElementById('alertModal').classList.remove('active');
+  document.getElementById('btnConfirmNo').onclick = ()=> document.getElementById('confirmModal').classList.remove('active');
+  document.getElementById('btnPagoCancel').onclick = ()=> document.getElementById('pagoModal').classList.remove('active');
+  document.getElementById('btnPagoX').onclick = ()=> document.getElementById('pagoModal').classList.remove('active');
 
   // Paneles
   function togglePaneles(){
@@ -430,16 +487,14 @@
     localStorage.setItem('pos_turno', turno);
     turnoTag.textContent = 'Turno: ' + turno;
     customAlert('✅ Turno iniciado: ' + turno);
+    cargarHistorialTurno(); // refrescar resumen
   }
   cajeroInput.addEventListener('input', saveCaja);
 
-  // ✅ ADMIN (PIN) para anulación
-  function isAdminActivo(){
-    return localStorage.getItem('pos_is_admin') === 'true';
-  }
+  // ✅ ADMIN PIN (para anular y para cerrar si querés)
+  function isAdminActivo(){ return localStorage.getItem('pos_is_admin') === 'true'; }
   async function pedirPINAdmin(){
     const guardado = (localStorage.getItem('pos_admin_pin') || '').trim();
-
     if(!guardado){
       const nuevo = prompt('Crear PIN de Admin (se guarda en este dispositivo):');
       if(!nuevo || nuevo.trim().length < 4) throw new Error('PIN inválido (mínimo 4).');
@@ -447,32 +502,25 @@
       localStorage.setItem('pos_is_admin', 'true');
       return true;
     }
-
     const pin = prompt('PIN de Admin:');
     if(!pin) throw new Error('Cancelado.');
     if(pin.trim() !== guardado) throw new Error('PIN incorrecto.');
     localStorage.setItem('pos_is_admin', 'true');
     return true;
   }
-  window.salirAdmin = ()=>{
-    localStorage.setItem('pos_is_admin','false');
-    customAlert('🔒 Saliste del modo Admin.');
-  };
+  window.salirAdmin = ()=>{ localStorage.setItem('pos_is_admin','false'); customAlert('🔒 Saliste del modo Admin.'); };
 
   // Cliente (autocomplete)
   const clienteHeader = document.getElementById('clienteHeader');
   const clienteDropdown = document.getElementById('clienteDropdown');
   const btnClearCliente = document.getElementById('btnClearCliente');
 
-  function openDD(){ clienteDropdown.classList.remove('hidden'); }
   function closeDD(){ ddIndex = -1; clienteDropdown.classList.add('hidden'); }
+  function openDD(){ clienteDropdown.classList.remove('hidden'); }
   function setDDActive(i){
     const items = clienteDropdown.querySelectorAll('.item');
     items.forEach(el=>el.classList.remove('active'));
-    if(i>=0 && i<items.length){
-      items[i].classList.add('active');
-      items[i].scrollIntoView({block:'nearest'});
-    }
+    if(i>=0 && i<items.length){ items[i].classList.add('active'); items[i].scrollIntoView({block:'nearest'}); }
   }
   function pickCliente(c){
     if(!c) return;
@@ -540,19 +588,16 @@
       console.error('clientes error', e);
     }
   }
-
   clienteHeader.addEventListener('focus', ()=>{ renderDD(filteredClientes()); openDD(); });
   clienteHeader.addEventListener('input', ()=>{ syncClienteSeleccionado(); renderDD(filteredClientes()); openDD(); });
   clienteHeader.addEventListener('keydown', (e)=>{
     const list = filteredClientes();
     const max = list.length - 1;
-
     if(e.key==='ArrowDown'){ e.preventDefault(); ddIndex = Math.min(max, ddIndex+1); setDDActive(ddIndex); openDD(); }
     if(e.key==='ArrowUp'){ e.preventDefault(); ddIndex = Math.max(0, ddIndex-1); setDDActive(ddIndex); openDD(); }
     if(e.key==='Enter'){
       if(!clienteDropdown.classList.contains('hidden') && ddIndex>=0 && ddIndex<=max){
-        e.preventDefault();
-        pickCliente(list[ddIndex]);
+        e.preventDefault(); pickCliente(list[ddIndex]);
       }else closeDD();
     }
     if(e.key==='Escape') closeDD();
@@ -597,9 +642,7 @@
     try{
       const snap = await getDocs(collection(db,'productos'));
       listaProductos = [];
-      snap.forEach(d=>{
-        const p = d.data(); p.id = d.id; listaProductos.push(p);
-      });
+      snap.forEach(d=>{ const p = d.data(); p.id = d.id; listaProductos.push(p); });
       renderCatalogo(listaProductos);
     }catch(e){
       console.error(e);
@@ -652,6 +695,7 @@
     renderCart();
   }
   function modQty(i,delta){
+    if(!carrito[i]) return;
     carrito[i].cantidad += delta;
     if(carrito[i].cantidad<=0) carrito.splice(i,1);
     renderCart();
@@ -694,7 +738,6 @@
       list.appendChild(row);
     });
 
-    // Delegación
     list.querySelectorAll('[data-act]').forEach(el=>{
       el.addEventListener('click', ()=>{
         const i = Number(el.dataset.i);
@@ -717,11 +760,10 @@
     document.getElementById('modalTotal').innerText = totalRaw.toLocaleString('es-AR');
     document.getElementById('montoInput').value='';
     document.getElementById('vueltoBox').style.display='none';
-
     document.getElementById('clienteInput').value = getClienteActual();
-    document.getElementById('pagoModal').classList.add('active');
 
     document.getElementById('montoInput').style.display = (modo==='efectivo') ? 'block' : 'none';
+    document.getElementById('pagoModal').classList.add('active');
   }
 
   document.addEventListener('input', ()=>{
@@ -740,7 +782,7 @@
     }else box.style.display='none';
   });
 
-  // Ticket 80mm
+  // Ticket 80mm (print)
   function buildTicketHTML(venta){
     const fecha = new Date(venta.fecha);
     const lines = (venta.items||[]).map(it=>{
@@ -869,7 +911,7 @@ ${items}
     try{
       const ventaRef = await addDoc(collection(db,'ventas'), payload);
 
-      // descuento stock (simple, como venías usando)
+      // descuento stock (simple)
       for(const it of carrito){
         const ref = doc(db,'productos', it.id);
         const nuevo = Math.max(0, Number(it.stock) - Number(it.cantidad));
@@ -883,11 +925,11 @@ ${items}
 
       carrito = [];
       renderCart();
-      cerrarModales();
+      document.getElementById('pagoModal').classList.remove('active');
 
       customAlert('✅ Venta guardada y stock actualizado.');
       await cargarProductos();
-      await cargarHistorial();
+      await cargarHistorialTurno();
 
       if(chkT) imprimirTicket80(ventaFinal);
       if(chkW) abrirWhatsApp(ventaFinal);
@@ -898,52 +940,61 @@ ${items}
     }
   }
 
-  // Historial del día
-  let ventasDia = [];
-  async function cargarHistorial(){
-    const hoy = new Date();
-    const start = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 0,0,0,0);
-    const end   = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 23,59,59,999);
-
-    const ref = collection(db,'ventas');
-    const qy = query(ref, where('fecha','>=',start), where('fecha','<=',end), orderBy('fecha','desc'), limit(200));
-    const snap = await getDocs(qy);
-
-    ventasDia = [];
-    totalDiaEfectivo=0; totalDiaTransf=0; totalDiaMixto=0; totalDiaGeneral=0;
-
-    snap.forEach(d=>{
-      const v = d.data();
-      ventasDia.push({ id:d.id, ...v });
-
-      if(!v.anulada){
-        const total = Number(v.total||0);
-        totalDiaGeneral += total;
-        const p = (v.pago||'').toLowerCase();
-        if(p.includes('efec')) totalDiaEfectivo += total;
-        else if(p.includes('transf')) totalDiaTransf += total;
-        else if(p.includes('mixt')) totalDiaMixto += total;
-      }
-    });
-
-    renderHistorial();
-    renderResumen();
-  }
-
-  function getVentaById(id){
-    return ventasDia.find(v=>v.id===id);
-  }
-
-  function renderHistorial(){
+  // ✅ HISTORIAL / RESUMEN POR TURNO (PRO)
+  async function cargarHistorialTurno(){
+    const caja = getCaja();
     const tb = document.getElementById('tbody-ventas');
-    tb.innerHTML='';
+    tb.innerHTML = `<tr><td colspan="5" style="color:var(--muted);">Cargando...</td></tr>`;
 
-    if(!ventasDia.length){
-      tb.innerHTML = `<tr><td colspan="5" style="color:var(--muted);">No hay ventas hoy.</td></tr>`;
+    if(!caja.turno){
+      ventasTurno = [];
+      totalEf=0; totalTr=0; totalMx=0; totalGen=0;
+      tb.innerHTML = `<tr><td colspan="5" style="color:var(--muted);">Abrí un turno para ver historial.</td></tr>`;
+      renderResumen();
       return;
     }
 
-    ventasDia.forEach(v=>{
+    try{
+      const ref = collection(db,'ventas');
+      const qy = query(ref, where('turno','==', caja.turno), orderBy('fecha','desc'), limit(300));
+      const snap = await getDocs(qy);
+
+      ventasTurno = [];
+      totalEf=0; totalTr=0; totalMx=0; totalGen=0;
+
+      snap.forEach(d=>{
+        const v = d.data();
+        ventasTurno.push({ id:d.id, ...v });
+
+        if(!v.anulada){
+          const total = Number(v.total||0);
+          totalGen += total;
+          const p = (v.pago||'').toLowerCase();
+          if(p.includes('efec')) totalEf += total;
+          else if(p.includes('transf')) totalTr += total;
+          else if(p.includes('mixt')) totalMx += total;
+        }
+      });
+
+      renderHistorialTurno();
+      renderResumen();
+    }catch(e){
+      console.error(e);
+      tb.innerHTML = `<tr><td colspan="5" style="color:var(--muted);">Error cargando ventas del turno.</td></tr>`;
+      renderResumen();
+    }
+  }
+
+  function renderHistorialTurno(){
+    const tb = document.getElementById('tbody-ventas');
+    tb.innerHTML='';
+
+    if(!ventasTurno.length){
+      tb.innerHTML = `<tr><td colspan="5" style="color:var(--muted);">No hay ventas en este turno.</td></tr>`;
+      return;
+    }
+
+    ventasTurno.forEach(v=>{
       const fecha = v.fecha?.toDate ? v.fecha.toDate() : (v.fecha instanceof Date ? v.fecha : new Date());
       const hora = fecha ? fecha.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}) : '—';
 
@@ -975,12 +1026,11 @@ ${items}
       tb.appendChild(tr);
     });
 
-    // Delegación
     tb.querySelectorAll('[data-act]').forEach(btn=>{
       btn.addEventListener('click', async ()=>{
         const id = btn.dataset.id;
         const act = btn.dataset.act;
-        const v = getVentaById(id);
+        const v = ventasTurno.find(x=>x.id===id);
         if(!v) return customAlert('No se encontró la venta.');
 
         const fecha = v.fecha?.toDate ? v.fecha.toDate() : (v.fecha instanceof Date ? v.fecha : new Date());
@@ -1004,11 +1054,11 @@ ${items}
   }
 
   function renderResumen(){
-    document.getElementById('sumTotal').innerText = money(totalDiaGeneral);
-    document.getElementById('sumEf').innerText = money(totalDiaEfectivo);
-    document.getElementById('sumTr').innerText = money(totalDiaTransf);
-    document.getElementById('sumMx').innerText = money(totalDiaMixto);
-    document.getElementById('sumVentas').innerText = ventasDia.filter(v=>!v.anulada).length;
+    document.getElementById('sumTotal').innerText = money(totalGen);
+    document.getElementById('sumEf').innerText = money(totalEf);
+    document.getElementById('sumTr').innerText = money(totalTr);
+    document.getElementById('sumMx').innerText = money(totalMx);
+    document.getElementById('sumVentas').innerText = ventasTurno.filter(v=>!v.anulada).length;
   }
 
   // ✅ ANULAR (MODO PERFECTO + ADMIN + MOTIVO + AUDITORÍA)
@@ -1057,7 +1107,7 @@ ${items}
 
           customAlert('✅ Venta anulada correctamente. Stock restaurado.');
           await cargarProductos();
-          await cargarHistorial();
+          await cargarHistorialTurno();
         }catch(e){
           console.error(e);
           customAlert('ERROR al anular venta: ' + (e?.message || e));
@@ -1069,30 +1119,370 @@ ${items}
     }
   }
 
-  // CIERRE: (si todavía no lo estás usando en esta versión, lo dejamos simple)
-  async function cerrarDia(){
-    customAlert('✅ (Opcional) Si querés cierres completos por turno, decime y lo dejamos 100% final.');
+  // ==========================
+  // ✅ CIERRE DE CAJA + PDF + HISTORIAL CIERRES
+  // ==========================
+
+  function fmtFecha(ts){
+    const d = ts?.toDate ? ts.toDate() : (ts instanceof Date ? ts : new Date(ts));
+    return d.toLocaleString('es-AR');
   }
 
+  function buildCierreHTML(cierre, ventas){
+    const fecha = fmtFecha(cierre.createdAt || cierre.fecha || new Date());
+    const items = (ventas||[]).flatMap(v => (v.items||[]).map(it=>({
+      nombre: it.nombre || it.codigo || 'Item',
+      cant: Number(it.cant||0),
+      precio: Number(it.precio||0)
+    })));
+
+    const top = `
+      <div class="report-title">Cierre de Caja</div>
+      <div class="report-sub">
+        <b>Fecha:</b> ${fecha} · <b>Turno:</b> ${cierre.turno || '—'} · <b>Cajero:</b> ${cierre.cajero || '—'}
+      </div>
+      <div class="report-grid">
+        <div class="kv"><span>Total General</span><b>${money(cierre.totalGeneral||0)}</b></div>
+        <div class="kv"><span>Ventas</span><b>${cierre.cantVentas||0}</b></div>
+        <div class="kv"><span>Efectivo</span><b>${money(cierre.totalEfectivo||0)}</b></div>
+        <div class="kv"><span>Transferencia</span><b>${money(cierre.totalTransferencia||0)}</b></div>
+        <div class="kv"><span>Mixto</span><b>${money(cierre.totalMixto||0)}</b></div>
+        <div class="kv"><span>Anuladas</span><b>${cierre.cantAnuladas||0}</b></div>
+      </div>
+    `;
+
+    const ventasHTML = (ventas||[]).map(v=>{
+      const f = v.fecha?.toDate ? v.fecha.toDate() : (v.fecha instanceof Date ? v.fecha : new Date());
+      const hora = f ? f.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}) : '—';
+      const estado = v.anulada ? 'ANULADA' : 'OK';
+      const det = (v.items||[]).map(it=>{
+        const sub = Number(it.precio||0)*Number(it.cant||0);
+        return `<div style="display:flex;justify-content:space-between;gap:10px;">
+          <div style="max-width:72%;font-weight:900">${it.cant} x ${it.nombre || it.codigo}</div>
+          <div style="font-weight:1000">${money(sub)}</div>
+        </div>`;
+      }).join('');
+      return `
+        <div style="border:1px solid #e2e8f0;border-radius:14px;padding:12px;margin:10px 0;">
+          <div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+            <div style="font-weight:1000">${hora} · ${v.cliente || 'Cliente'}</div>
+            <div style="font-weight:1000;color:#475569;">${v.pago || '—'} · <b>${money(v.total||0)}</b> · ${estado}</div>
+          </div>
+          <div style="margin-top:8px;color:#64748b;font-weight:900">Detalle</div>
+          <div style="margin-top:6px">${det || '<i style="color:#94a3b8">Sin items</i>'}</div>
+          ${v.anulada ? `<div style="margin-top:10px;color:#64748b;font-size:12px;font-weight:900">
+            Motivo: <b>${v.motivoAnulacion || '—'}</b> · Por: <b>${v.anuladaPor || '—'}</b>
+          </div>` : ``}
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="report-box" id="cierrePrintBox">
+        ${top}
+        <div style="margin-top:10px;font-weight:1000;color:#475569;">Ventas del turno</div>
+        ${ventasHTML || '<div style="color:#94a3b8;font-weight:900;margin-top:10px;">No hay ventas.</div>'}
+      </div>
+    `;
+  }
+
+  function descargarPDFDesdeHTML(html, nombre){
+    const zone = document.getElementById('cierrePDFZone');
+    zone.style.display = 'block';
+    zone.innerHTML = html;
+
+    const opt = {
+      margin:       8,
+      filename:     nombre,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(zone).save().then(()=>{
+      zone.style.display = 'none';
+    }).catch(()=>{
+      zone.style.display = 'none';
+    });
+  }
+
+  async function cerrarCajaTurno(){
+    const caja = getCaja();
+    if(!caja.turno) return customAlert('No hay turno activo. Abrí un turno primero.');
+    if(!caja.cajero || caja.cajero==='—') return customAlert('Poné el nombre del cajero.');
+
+    // (opcional) exigir admin para cerrar:
+    // if(!isAdminActivo()) await pedirPINAdmin();
+
+    // Recalcular desde Firestore (NO confiar sólo en memoria)
+    try{
+      const refV = collection(db,'ventas');
+      const qV = query(refV, where('turno','==', caja.turno), orderBy('fecha','asc'), limit(500));
+      const snap = await getDocs(qV);
+
+      const ventas = [];
+      let ef=0,tr=0,mx=0,gen=0;
+      let anuladas=0;
+
+      snap.forEach(d=>{
+        const v = d.data();
+        const row = { id:d.id, ...v };
+        ventas.push(row);
+
+        if(v.anulada){
+          anuladas++;
+        }else{
+          const total = Number(v.total||0);
+          gen += total;
+          const p = (v.pago||'').toLowerCase();
+          if(p.includes('efec')) ef += total;
+          else if(p.includes('transf')) tr += total;
+          else if(p.includes('mixt')) mx += total;
+        }
+      });
+
+      if(!ventas.length) return customAlert('No hay ventas en este turno para cerrar.');
+
+      customConfirm(
+        'Cerrar Caja del Turno',
+        `Turno: ${caja.turno}\nVentas: ${ventas.filter(v=>!v.anulada).length}\nTotal: ${money(gen)}\n\n¿Confirmás guardar el cierre?`,
+        async ()=>{
+          try{
+            const cierrePayload = {
+              turno: caja.turno,
+              cajero: caja.cajero,
+              totalGeneral: gen,
+              totalEfectivo: ef,
+              totalTransferencia: tr,
+              totalMixto: mx,
+              cantVentas: ventas.filter(v=>!v.anulada).length,
+              cantAnuladas: anuladas,
+              ventasIds: ventas.map(v=>v.id),
+              createdAt: serverTimestamp()
+            };
+
+            const cierreRef = await addDoc(collection(db,'cierres_caja'), cierrePayload);
+
+            // PDF opcional inmediato
+            const html = buildCierreHTML(
+              { ...cierrePayload, id: cierreRef.id, createdAt: new Date(), fecha: new Date() },
+              ventas
+            );
+            descargarPDFDesdeHTML(html, `cierre-${caja.turno}.pdf`);
+
+            customAlert('✅ Cierre guardado en Firestore + PDF generado.');
+          }catch(e){
+            console.error(e);
+            customAlert('ERROR guardando cierre: ' + (e?.message || e));
+          }
+        }
+      );
+
+    }catch(e){
+      console.error(e);
+      customAlert('ERROR consultando ventas del turno: ' + (e?.message || e));
+    }
+  }
+
+  // HISTORIAL CIERRES
+  const cierresModal = document.getElementById('cierresModal');
+  const cierreDetalleModal = document.getElementById('cierreDetalleModal');
+  const tbodyCierres = document.getElementById('tbody-cierres');
+  const cierreDetalleContenido = document.getElementById('cierreDetalleContenido');
+  const btnPDFDetalle = document.getElementById('btnPDFDetalle');
+
+  let cierresCache = [];
+  let cierreDetalleActual = null;
+
+  function openCierres(){ cierresModal.classList.add('active'); }
+  function closeCierres(){ cierresModal.classList.remove('active'); }
+  function openDetalle(){ cierreDetalleModal.classList.add('active'); }
+  function closeDetalle(){ cierreDetalleModal.classList.remove('active'); cierreDetalleActual=null; }
+
+  document.getElementById('btnCerrarCierres').onclick = closeCierres;
+  document.getElementById('btnReloadCierres').onclick = cargarCierres;
+  document.getElementById('btnCerrarDetalle').onclick = closeDetalle;
+
+  async function cargarCierres(){
+    tbodyCierres.innerHTML = `<tr><td colspan="6" style="color:var(--muted);">Cargando...</td></tr>`;
+    try{
+      const ref = collection(db,'cierres_caja');
+      const qy = query(ref, orderBy('createdAt','desc'), limit(80));
+      const snap = await getDocs(qy);
+      cierresCache = [];
+      snap.forEach(d=>{
+        cierresCache.push({ id:d.id, ...d.data() });
+      });
+      renderCierres();
+    }catch(e){
+      console.error(e);
+      tbodyCierres.innerHTML = `<tr><td colspan="6" style="color:var(--muted);">Error cargando cierres.</td></tr>`;
+    }
+  }
+
+  function renderCierres(){
+    if(!cierresCache.length){
+      tbodyCierres.innerHTML = `<tr><td colspan="6" style="color:var(--muted);">No hay cierres.</td></tr>`;
+      return;
+    }
+    tbodyCierres.innerHTML = '';
+    cierresCache.forEach(c=>{
+      const fecha = fmtFecha(c.createdAt || c.fecha || new Date());
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${fecha}</td>
+        <td style="font-weight:1000">${c.turno || '—'}</td>
+        <td>${c.cajero || '—'}</td>
+        <td><b>${money(c.totalGeneral||0)}</b></td>
+        <td>${c.cantVentas||0}</td>
+        <td>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="mini-btn" data-act="ver" data-id="${c.id}">👁️ Ver</button>
+            <button class="mini-btn" data-act="pdf" data-id="${c.id}">📄 PDF</button>
+          </div>
+        </td>
+      `;
+      tbodyCierres.appendChild(tr);
+    });
+
+    tbodyCierres.querySelectorAll('[data-act]').forEach(btn=>{
+      btn.addEventListener('click', async ()=>{
+        const id = btn.dataset.id;
+        const act = btn.dataset.act;
+        const cierre = cierresCache.find(x=>x.id===id);
+        if(!cierre) return customAlert('No se encontró el cierre.');
+
+        const ventas = await cargarVentasPorIds(cierre.ventasIds || []);
+        const html = buildCierreHTML({ ...cierre }, ventas);
+
+        if(act==='ver'){
+          cierreDetalleActual = { cierre, ventas, html };
+          cierreDetalleContenido.innerHTML = html;
+          openDetalle();
+        }
+        if(act==='pdf'){
+          descargarPDFDesdeHTML(html, `cierre-${(cierre.turno||id)}.pdf`);
+        }
+      });
+    });
+  }
+
+  async function cargarVentasPorIds(ids){
+    const out = [];
+    if(!ids || !ids.length) return out;
+
+    // Firestore limita "in" a 10, entonces lo hacemos por tandas
+    const chunks = [];
+    for(let i=0;i<ids.length;i+=10) chunks.push(ids.slice(i,i+10));
+
+    for(const ch of chunks){
+      try{
+        // No usamos where(documentId()) para mantener imports simples.
+        // Lo buscamos por lectura directa (doc por doc) usando getDocs no sirve; hacemos "getDocs" por query no.
+        // Entonces lo hacemos: traer ventas del turno si existe, como fallback:
+        // ✅ Como el cierre ya tiene turno, lo más rápido y confiable: traer por turno y filtrar IDs.
+        // (Esto evita traer docId queries y mantiene el archivo simple)
+        // NOTA: para eso necesitamos turno. Si no hay, hacemos doc por doc con getDocs no. (no disponible).
+      }catch(e){}
+    }
+
+    // ✅ método pro: traer por turno si existe (mejor)
+    const turno = (cierresCache.find(c=> (c.ventasIds||[]).includes(ids[0]))?.turno) || null;
+    if(turno){
+      try{
+        const ref = collection(db,'ventas');
+        const qy = query(ref, where('turno','==', turno), orderBy('fecha','asc'), limit(600));
+        const snap = await getDocs(qy);
+        snap.forEach(d=>{
+          if(ids.includes(d.id)) out.push({ id:d.id, ...d.data() });
+        });
+        return out;
+      }catch(e){
+        console.error(e);
+      }
+    }
+
+    // Fallback: si no hay turno, devolvemos vacío
+    return out;
+  }
+
+  // PDF desde detalle
+  btnPDFDetalle.onclick = ()=>{
+    if(!cierreDetalleContenido.innerHTML) return;
+    const cierre = cierreDetalleActual?.cierre;
+    const nombre = `cierre-${(cierre?.turno || cierre?.id || 'detalle')}.pdf`;
+    descargarPDFDesdeHTML(cierreDetalleContenido.innerHTML, nombre);
+  };
+
+  // ==========================
   // Eventos UI
+  // ==========================
   document.getElementById('btnTogglePaneles').onclick = togglePaneles;
   document.getElementById('btnNuevoTurno').onclick = nuevoTurno;
-  document.getElementById('btnReloadHist').onclick = cargarHistorial;
-  document.getElementById('btnReporte').onclick = ()=> customAlert('📄 Reporte: si querés lo reactivamos (PDF/print) como lo tenías.');
-  document.getElementById('btnCerrarDia').onclick = cerrarDia;
-  document.getElementById('btnHistCierres').onclick = ()=> customAlert('📜 Historial cierres: si querés lo reactivamos completo como lo tenías.');
+  document.getElementById('btnReloadHist').onclick = cargarHistorialTurno;
 
   document.getElementById('btnEfec').onclick = ()=> abrirModalPago('efectivo');
   document.getElementById('btnMixto').onclick = ()=> abrirModalPago('mixto');
   document.getElementById('btnTransf').onclick = ()=> abrirModalPago('transferencia');
-
   document.getElementById('btnConfirmPago').onclick = confirmarPago;
+
+  document.getElementById('btnCerrarDia').onclick = cerrarCajaTurno;
+
+  // Botón PDF (reporte rápido del turno, sin cerrar)
+  document.getElementById('btnReporte').onclick = async ()=>{
+    const caja = getCaja();
+    if(!caja.turno) return customAlert('Abrí un turno primero.');
+
+    // construir desde ventas del turno (igual que cierre pero sin guardar)
+    try{
+      const refV = collection(db,'ventas');
+      const qV = query(refV, where('turno','==', caja.turno), orderBy('fecha','asc'), limit(600));
+      const snap = await getDocs(qV);
+
+      const ventas = [];
+      let ef=0,tr=0,mx=0,gen=0; let anuladas=0;
+      snap.forEach(d=>{
+        const v=d.data(); const row={id:d.id,...v}; ventas.push(row);
+        if(v.anulada) anuladas++;
+        else{
+          const total=Number(v.total||0); gen+=total;
+          const p=(v.pago||'').toLowerCase();
+          if(p.includes('efec')) ef+=total;
+          else if(p.includes('transf')) tr+=total;
+          else if(p.includes('mixt')) mx+=total;
+        }
+      });
+      if(!ventas.length) return customAlert('No hay ventas en este turno.');
+
+      const fakeCierre = {
+        turno: caja.turno,
+        cajero: caja.cajero,
+        totalGeneral: gen,
+        totalEfectivo: ef,
+        totalTransferencia: tr,
+        totalMixto: mx,
+        cantVentas: ventas.filter(v=>!v.anulada).length,
+        cantAnuladas: anuladas,
+        createdAt: new Date()
+      };
+      const html = buildCierreHTML(fakeCierre, ventas);
+      descargarPDFDesdeHTML(html, `reporte-turno-${caja.turno}.pdf`);
+    }catch(e){
+      console.error(e);
+      customAlert('Error generando reporte: ' + (e?.message || e));
+    }
+  };
+
+  document.getElementById('btnHistCierres').onclick = async ()=>{
+    openCierres();
+    await cargarCierres();
+  };
 
   // Init
   loadCaja();
   await cargarClientes();
   await cargarProductos();
-  await cargarHistorial();
+  await cargarHistorialTurno();
 </script>
 </body>
 </html>
