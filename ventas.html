@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Delivery Mayorista</title>
+  <title>Punto de Venta | Delivery Mayorista</title>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -31,6 +31,35 @@
     .btn-historial { background: rgba(255,255,255,0.22); color: #fff; }
     .btn-historial:hover { background: rgba(255,255,255,0.30); }
     .date-display { font-size: 0.85rem; color: rgba(255,255,255,0.95); font-weight: 800; background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.28); padding: 6px 12px; border-radius: 999px; }
+
+    /* ✅ Cajero / Turno */
+    .caja-pill {
+      display:flex; align-items:center; gap:8px;
+      background: rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.28);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 900;
+      color:#fff;
+    }
+    .caja-pill input{
+      width: 140px;
+      border:none; outline:none;
+      background: rgba(255,255,255,0.16);
+      color:#fff;
+      font-weight: 900;
+      padding: 6px 10px;
+      border-radius: 999px;
+    }
+    .caja-pill input::placeholder{ color: rgba(255,255,255,0.85); }
+    .caja-pill .turno-tag{
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(0,0,0,0.18);
+      border: 1px solid rgba(255,255,255,0.24);
+      font-weight: 900;
+      white-space: nowrap;
+    }
 
     .main-wrapper { display: flex; flex: 1; overflow: hidden; position: relative; width:100%; }
     .left-column { flex: 1; display: flex; flex-direction: column; min-width: 320px; overflow: hidden; transition: all 0.3s ease; }
@@ -60,7 +89,6 @@
     .cart-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     .cart-header { padding: 12px 15px; font-weight: 900; background: #f8fafc; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
 
-    /* ✅ Cliente arriba al lado de "Orden Actual" */
     .cart-header-flex { display:flex; justify-content: space-between; align-items:center; gap:10px; }
     .cliente-inline { display:flex; gap:8px; align-items:center; }
     .cliente-inline input{
@@ -90,7 +118,6 @@
       border-color: rgba(255,0,93,0.55);
     }
 
-    /* ✅ AUTOCOMPLETE PRO (dropdown lindo) */
     .cliente-autocomplete{ position:relative; }
     .cliente-dd{
       position:absolute;
@@ -151,11 +178,33 @@
     table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
     thead { background: white; position: sticky; top: 0; z-index: 2; }
     th { text-align: left; padding: 10px 15px; color: #64748b; font-weight: 900; border-bottom: 1px solid #e2e8f0; }
-    td { padding: 8px 15px; border-bottom: 1px solid #f1f5f9; color: #0f172a; }
+    td { padding: 8px 15px; border-bottom: 1px solid #f1f5f9; color: #0f172a; vertical-align: top; }
     .sum-row { display: flex; justify-content: space-between; font-size: 0.95rem; color: #475569; margin-bottom: 6px; }
     .sum-total { margin-top: 10px; padding-top: 10px; border-top: 2px dashed #e2e8f0; font-weight: 1000; font-size: 1.2rem; color: #0f172a; display: flex; justify-content: space-between; }
     .btn-close-box { background: #fee2e2; color: #dc2626; border: none; padding: 10px; border-radius: 14px; font-weight: 900; cursor: pointer; margin-top: 10px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 5px; }
     .btn-close-box:hover { background: #dc2626; color: white; }
+
+    /* ✅ chips estado venta */
+    .chip {
+      display:inline-flex; align-items:center; gap:6px;
+      padding: 4px 8px; border-radius: 999px;
+      font-weight: 900; font-size: 11px;
+      border: 1px solid rgba(2,6,23,.10);
+      white-space: nowrap;
+    }
+    .chip-ok{ background:#ecfdf5; color:#047857; }
+    .chip-anulada{ background:#fee2e2; color:#dc2626; }
+    .mini-btn{
+      padding: 6px 10px; border-radius: 10px;
+      border: 1px solid rgba(2,6,23,.12);
+      background: #fff;
+      cursor:pointer;
+      font-weight: 900;
+      font-size: 12px;
+    }
+    .mini-btn:hover{ border-color: rgba(255,0,93,0.45); }
+    .mini-btn.danger{ background:#fee2e2; color:#dc2626; border-color:#fecaca; }
+    .mini-btn.danger:hover{ background:#dc2626; color:#fff; border-color:#dc2626; }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 2000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
     .modal-overlay.active { opacity: 1; pointer-events: auto; }
@@ -196,6 +245,11 @@
     #historialTable th { background: #f1f5f9; padding: 10px; text-align: left; }
     #historialTable td { padding: 10px; border-bottom: 1px solid #f1f5f9; }
 
+    /* ✅ PRINT TICKET 80mm (solo ventana ticket) */
+    @media print {
+      body { background:#fff; }
+    }
+
     @media (max-width: 900px) {
       body{overflow:auto;height:auto}
       .main-wrapper { display: block; overflow: auto; }
@@ -206,6 +260,7 @@
       .close-x { right: 5px; top: 5px; }
       .report-toolbar, .report-paper { width: 95%; }
       .cliente-inline input{ width: 100%; max-width: 58vw; }
+      .caja-pill input{ width: 120px; }
     }
   </style>
 </head>
@@ -215,12 +270,22 @@
 <header>
   <div class="header-left">
     <h1>🛒 Punto de Venta</h1>
+
     <div class="search-box">
       <span>🔍</span>
       <input type="text" id="buscador" placeholder="Buscar por nombre..." onkeyup="filtrarProductos()">
     </div>
   </div>
+
   <div class="header-controls">
+    <!-- ✅ CAJERO / TURNO -->
+    <div class="caja-pill" title="Cajero / Turno">
+      <span>👤</span>
+      <input id="cajeroInput" placeholder="Cajero..." autocomplete="off">
+      <span class="turno-tag" id="turnoTag">Turno: —</span>
+      <button class="btn-header" style="padding:6px 10px; border-radius:999px;" onclick="nuevoTurno()">🔄 Turno</button>
+    </div>
+
     <button class="btn-header btn-historial" onclick="abrirHistorialCierres()">📜 Historial Cierres</button>
     <button class="btn-header btn-toggle" onclick="togglePaneles()">👁️ Ocultar Paneles</button>
     <div class="date-display" id="reloj">--:--</div>
@@ -244,7 +309,15 @@
       </div>
       <div class="table-container">
         <table id="tabla-ventas">
-          <thead><tr><th>Hora</th><th>Cliente</th><th>Pago</th><th>Total</th></tr></thead>
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Cliente</th>
+              <th>Pago</th>
+              <th>Total</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
           <tbody id="tbody-ventas"></tbody>
         </table>
       </div>
@@ -256,7 +329,6 @@
   <div class="right-column" id="rightColumn">
     <div class="panel-top">
       <div class="cart-panel">
-        <!-- ✅ CABECERA CON CLIENTE VISIBLE + AUTOCOMPLETE PRO -->
         <div class="cart-header cart-header-flex">
           <span>Orden Actual</span>
 
@@ -313,6 +385,24 @@
       <div style="height:10px"></div>
       <input class="input-field" id="montoInput" type="number" placeholder="Monto recibido (solo efectivo)">
       <div class="vuelto-box" id="vueltoBox">Vuelto: $0</div>
+
+      <!-- ✅ WhatsApp toggle -->
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px; gap:10px;">
+        <div style="font-weight:900; color:#475569;">📲 Enviar comprobante por WhatsApp</div>
+        <label style="display:flex; align-items:center; gap:8px; font-weight:900; color:#0f172a;">
+          <input type="checkbox" id="chkWhats" checked>
+          <span>Enviar</span>
+        </label>
+      </div>
+
+      <!-- ✅ Ticket toggle -->
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px; gap:10px;">
+        <div style="font-weight:900; color:#475569;">🧾 Imprimir ticket 80mm</div>
+        <label style="display:flex; align-items:center; gap:8px; font-weight:900; color:#0f172a;">
+          <input type="checkbox" id="chkTicket" checked>
+          <span>Imprimir</span>
+        </label>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-modal-cancel" onclick="cerrarModales()">Cancelar</button>
@@ -355,6 +445,9 @@
         <div>
           <div style="font-weight:900; font-size:18px;">DELIVERY <span style="opacity:.7">MAYORISTA</span></div>
           <div style="font-size:12px; color:#64748b;">Reporte de ventas del día</div>
+          <div style="font-size:12px; color:#64748b; margin-top:4px;">
+            Cajero: <b id="repCajero">—</b> • Turno: <b id="repTurno">—</b>
+          </div>
         </div>
         <div style="text-align:right; font-size:12px; color:#64748b;">
           <div id="repFecha">—</div>
@@ -400,6 +493,8 @@
             <th>Efectivo</th>
             <th>Transferencia</th>
             <th>Mixto</th>
+            <th>Cajero</th>
+            <th>Turno</th>
           </tr>
         </thead>
         <tbody id="tbody-cierres"></tbody>
@@ -410,7 +505,11 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, getDocs, addDoc, updateDoc, doc, serverTimestamp, query, where, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+ import {
+  getFirestore, collection, getDocs, addDoc, updateDoc, doc,
+  serverTimestamp, query, where, orderBy, limit,
+  runTransaction, getDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCH2dJRTPXpOPUhaERNAkcj_avqbEYCSXE",
@@ -440,6 +539,42 @@
 
   const money = (n) => '$' + (Number(n||0)).toLocaleString('es-AR');
   const norm = (s) => (s || '').toString().trim().toLowerCase();
+  const digits = (s) => (s || '').toString().replace(/\D+/g,'');
+  const pad2 = (n) => String(n).padStart(2,'0');
+
+  // ===== CAJA / TURNO =====
+  const cajeroInput = document.getElementById('cajeroInput');
+  const turnoTag = document.getElementById('turnoTag');
+
+  function loadCaja(){
+    const caj = localStorage.getItem('pos_cajero') || '';
+    const turno = localStorage.getItem('pos_turno') || '';
+    if(cajeroInput) cajeroInput.value = caj;
+    if(turnoTag) turnoTag.textContent = 'Turno: ' + (turno || '—');
+  }
+
+  function saveCaja(){
+    const caj = (cajeroInput?.value || '').trim();
+    localStorage.setItem('pos_cajero', caj);
+  }
+
+  window.nuevoTurno = () => {
+    const caj = (cajeroInput?.value || '').trim();
+    if(!caj) return customAlert('Poné el nombre del cajero antes de abrir un turno.');
+    const d = new Date();
+    const turno = `${d.getFullYear()}${pad2(d.getMonth()+1)}${pad2(d.getDate())}-${pad2(d.getHours())}${pad2(d.getMinutes())}-${caj.replace(/\s+/g,'_')}`;
+    localStorage.setItem('pos_turno', turno);
+    if(turnoTag) turnoTag.textContent = 'Turno: ' + turno;
+    customAlert('✅ Turno iniciado: ' + turno);
+  };
+
+  function getCaja(){
+    const caj = (cajeroInput?.value || localStorage.getItem('pos_cajero') || '').trim();
+    const turno = (localStorage.getItem('pos_turno') || '').trim();
+    return { cajero: caj || '—', turno: turno || null };
+  }
+
+  cajeroInput?.addEventListener('input', saveCaja);
 
   setInterval(() => {
     const el = document.getElementById('reloj');
@@ -492,9 +627,9 @@
   if (CLIENTE_PRE) setClienteActual(CLIENTE_PRE);
 
   // ===============================
-  // ✅ AUTOCOMPLETE CLIENTES PRO (dropdown propio)
+  // ✅ AUTOCOMPLETE CLIENTES PRO
   // ===============================
-  let clientesCache = []; // [{id, nombre, tel}]
+  let clientesCache = [];
   let ddIndex = -1;
 
   const dd = document.getElementById('clienteDropdown');
@@ -585,12 +720,10 @@
 
       clientesCache.sort((a,b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity:'base' }));
 
-      // si venía por URL con clienteId/tel
       if (clienteHeader){
         if (CLIENTE_ID_PRE) clienteHeader.dataset.clienteId = CLIENTE_ID_PRE;
         if (TEL_PRE) clienteHeader.dataset.tel = TEL_PRE;
       }
-      // si venía por URL con nombre, intentamos matchear
       syncClienteSeleccionado();
 
     }catch(e){
@@ -806,7 +939,6 @@
     document.getElementById('montoInput').value = "";
     document.getElementById('vueltoBox').style.display = "none";
 
-    // ✅ sincroniza cliente header → modal + dataset
     setClienteActual(getClienteActual());
     syncClienteSeleccionado();
 
@@ -843,6 +975,207 @@
     }
   });
 
+  // ===============================
+  // ✅ 1) TICKET 80mm
+  // ===============================
+  function buildTicketHTML(venta){
+    const fecha = new Date(venta.fecha);
+    const items = (venta.items||[]);
+    const lines = items.map(it => {
+      const sub = Number(it.precio||0) * Number(it.cant||0);
+      return `
+        <div class="row">
+          <div class="name">${it.nombre || it.codigo}</div>
+          <div class="meta">${it.cant} x ${money(it.precio)} = <b>${money(sub)}</b></div>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <html>
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Ticket</title>
+        <style>
+          @page { size: 80mm auto; margin: 6mm; }
+          body { font-family: Arial, sans-serif; color:#000; }
+          .wrap { width: 68mm; }
+          .center { text-align:center; }
+          .h1 { font-size: 16px; font-weight: 900; }
+          .sub { font-size: 12px; margin-top: 2px; }
+          .hr { border-top: 1px dashed #000; margin: 8px 0; }
+          .row { margin: 6px 0; }
+          .name { font-size: 13px; font-weight: 900; }
+          .meta { font-size: 12px; }
+          .tot { display:flex; justify-content:space-between; font-size: 14px; font-weight: 900; margin-top: 8px; }
+          .small { font-size: 11px; }
+        </style>
+      </head>
+      <body onload="window.print(); setTimeout(()=>window.close(), 300);">
+        <div class="wrap">
+          <div class="center">
+            <div class="h1">DELIVERY MAYORISTA</div>
+            <div class="sub">Comprobante de venta</div>
+          </div>
+          <div class="hr"></div>
+
+          <div class="small"><b>Fecha:</b> ${fecha.toLocaleString('es-AR')}</div>
+          <div class="small"><b>Cliente:</b> ${venta.cliente || 'Cliente'}</div>
+          <div class="small"><b>Pago:</b> ${venta.pago || '—'}</div>
+          <div class="small"><b>Cajero:</b> ${venta.cajero || '—'}</div>
+          <div class="small"><b>Turno:</b> ${venta.turno || '—'}</div>
+
+          <div class="hr"></div>
+          ${lines}
+          <div class="hr"></div>
+
+          <div class="tot"><span>TOTAL</span><span>${money(venta.total||0)}</span></div>
+
+          <div class="hr"></div>
+          <div class="center small">¡Gracias por su compra!</div>
+        </div>
+      </body>
+      </html>
+    `;
+  }
+
+  function imprimirTicket80(venta){
+    const w = window.open('', '_blank', 'width=380,height=650');
+    if(!w) return;
+    w.document.open();
+    w.document.write(buildTicketHTML(venta));
+    w.document.close();
+  }
+
+  // ===============================
+  // ✅ 2) WHATSAPP
+  // ===============================
+  function normalizePhoneAR(raw){
+    const d = digits(raw);
+    if(!d) return '';
+    // Si ya trae 54...
+    if(d.startsWith('54')) return d;
+    // Si trae 0...
+    if(d.startsWith('0')) return '54' + d.slice(1);
+    // Default: asumir Argentina
+    return '54' + d;
+  }
+
+  function buildWhatsMsg(venta){
+    const fecha = new Date(venta.fecha).toLocaleString('es-AR');
+    const items = (venta.items||[]).map(it => {
+      const sub = Number(it.precio||0) * Number(it.cant||0);
+      return `- ${it.cant} x ${it.nombre || it.codigo} (${money(it.precio)}) = ${money(sub)}`;
+    }).join('\n');
+
+    return (
+`🧾 *Comprobante - Delivery Mayorista*
+📅 ${fecha}
+👤 Cliente: *${venta.cliente || 'Cliente'}*
+💳 Pago: *${venta.pago || '—'}*
+👤 Cajero: *${venta.cajero || '—'}*
+🔖 Turno: *${venta.turno || '—'}*
+
+🛒 *Detalle*
+${items}
+
+✅ *TOTAL:* ${money(venta.total||0)}`
+    );
+  }
+
+  function abrirWhatsApp(venta){
+    const tel = normalizePhoneAR(venta.tel || '');
+    const msg = encodeURIComponent(buildWhatsMsg(venta));
+    const url = tel ? `https://wa.me/${tel}?text=${msg}` : `https://wa.me/?text=${msg}`;
+    window.open(url, '_blank');
+  }
+
+  // ===============================
+  // ✅ 4) ANULAR VENTA (devuelve stock)
+  // ===============================
+window.anularVenta = async (ventaId) => {
+  if (!ventaId) return;
+
+  customConfirm(
+    'Anular venta',
+    '¿Confirmás anular esta venta?\nEl stock se devolverá de forma segura.',
+    async () => {
+      try {
+        await runTransaction(db, async (transaction) => {
+
+          // 1️⃣ Leer venta REAL desde Firestore
+          const ventaRef = doc(db, 'ventas', ventaId);
+          const ventaSnap = await transaction.get(ventaRef);
+
+          if (!ventaSnap.exists()) {
+            throw new Error('La venta no existe.');
+          }
+
+          const ventaData = ventaSnap.data();
+          if (ventaData.anulada) {
+            throw new Error('La venta ya estaba anulada.');
+          }
+
+          // 2️⃣ Devolver stock de cada producto
+          for (const it of (ventaData.items || [])) {
+            if (!it.id) continue;
+
+            const prodRef = doc(db, 'productos', it.id);
+            const prodSnap = await transaction.get(prodRef);
+
+            if (!prodSnap.exists()) {
+              throw new Error(`Producto eliminado: ${it.nombre || it.codigo}`);
+            }
+
+            const stockActual = Number(prodSnap.data().stock || 0);
+            const devolver = Number(it.cant || 0);
+
+            // Asegúrate de que el stock no se vuelva negativo
+            const nuevoStock = Math.max(stockActual + devolver, 0); // Evita stock negativo
+            transaction.update(prodRef, {
+              stock: nuevoStock
+            });
+          }
+
+          // 3️⃣ Marcar venta como anulada
+          transaction.update(ventaRef, {
+            anulada: true,
+            anuladaAt: serverTimestamp()
+          });
+        });
+
+        customAlert('✅ Venta anulada correctamente. Stock restaurado.');
+        await cargarProductos();
+        await cargarHistorial();
+
+      } catch (e) {
+        console.error(e);
+        customAlert('ERROR al anular venta: ' + (e.message || e));
+      }
+    }
+  );
+};
+
+          // 3️⃣ Marcar venta como anulada
+          transaction.update(ventaRef, {
+            anulada: true,
+            anuladaAt: serverTimestamp()
+          });
+        });
+
+        customAlert('✅ Venta anulada correctamente. Stock restaurado.');
+        await cargarProductos();
+        await cargarHistorial();
+
+      } catch (e) {
+        console.error(e);
+        customAlert('ERROR al anular venta: ' + (e.message || e));
+      }
+    }
+  );
+};
+  // ✅ Confirma venta
   async function confirmarPago(){
     const cliente = getClienteActual();
 
@@ -861,23 +1194,37 @@
       }
     }
 
+    // ✅ caja
+    const caja = getCaja();
+    if(!caja.cajero || caja.cajero === '—'){
+      return customAlert('Poné el nombre del CAJERO antes de cobrar.');
+    }
+    if(!caja.turno){
+      return customAlert('Abrí un TURNO (botón "Turno") antes de cobrar.');
+    }
+
+    const ventaPayload = {
+      fecha: new Date(),
+      cliente: cliente || 'Cliente',
+      clienteId: clienteIdSeleccionado || CLIENTE_ID_PRE || null,
+      tel: telSeleccionado || TEL_PRE || null,
+      pago: modoPago,
+      total: totalRaw,
+      items: carrito.map(p => ({
+        id: p.id,
+        codigo: p.codigo,
+        nombre: p.nombre,
+        precio: p.precio,
+        cant: p.cantidad
+      })),
+      cajero: caja.cajero,
+      turno: caja.turno,
+      anulada: false,
+      createdAt: serverTimestamp()
+    };
+
     try{
-      await addDoc(collection(db, 'ventas'), {
-        fecha: new Date(),
-        cliente: cliente || 'Cliente',
-        clienteId: clienteIdSeleccionado || CLIENTE_ID_PRE || null,
-        tel: telSeleccionado || TEL_PRE || null,
-        pago: modoPago,
-        total: totalRaw,
-        items: carrito.map(p => ({
-          id: p.id,
-          codigo: p.codigo,
-          nombre: p.nombre,
-          precio: p.precio,
-          cant: p.cantidad
-        })),
-        createdAt: serverTimestamp()
-      });
+      const ventaRef = await addDoc(collection(db, 'ventas'), ventaPayload);
 
       for(const it of carrito){
         const ref = doc(db, 'productos', it.id);
@@ -885,18 +1232,33 @@
         await updateDoc(ref, { stock: nuevo });
       }
 
+      // ✅ acciones post venta (ticket + whatsapp)
+      const chkW = document.getElementById('chkWhats');
+      const chkT = document.getElementById('chkTicket');
+      const ventaFinal = { ...ventaPayload, id: ventaRef.id, fecha: new Date() };
+
       carrito = [];
       renderCart();
       cerrarModales();
+
       customAlert("✅ Venta guardada y stock actualizado.");
+
       await cargarProductos();
       await cargarHistorial();
+
+      // ✅ ticket
+      if(chkT?.checked) imprimirTicket80(ventaFinal);
+
+      // ✅ whatsapp
+      if(chkW?.checked) abrirWhatsApp(ventaFinal);
+
     }catch(e){
       console.error(e);
       customAlert("ERROR: " + (e?.message || e));
     }
   }
 
+  // ===== Historial del día (incluye ID para anular) =====
   async function cargarHistorial(){
     const hoy = new Date();
     const start = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), 0,0,0,0);
@@ -911,15 +1273,18 @@
 
     snap.forEach(d => {
       const v = d.data();
-      ventas.push(v);
+      ventas.push({ id: d.id, ...v });
 
+      const anulada = !!v.anulada;
       const total = Number(v.total||0);
-      totalDiaGeneral += total;
 
-      const p = (v.pago||'').toLowerCase();
-      if(p.includes('efec')) totalDiaEfectivo += total;
-      else if(p.includes('transf')) totalDiaTransf += total;
-      else if(p.includes('mixt')) totalDiaMixto += total;
+      if(!anulada){
+        totalDiaGeneral += total;
+        const p = (v.pago||'').toLowerCase();
+        if(p.includes('efec')) totalDiaEfectivo += total;
+        else if(p.includes('transf')) totalDiaTransf += total;
+        else if(p.includes('mixt')) totalDiaMixto += total;
+      }
     });
 
     window._ventasDia = ventas;
@@ -933,19 +1298,51 @@
 
     const arr = window._ventasDia || [];
     if(!arr.length){
-      tb.innerHTML = `<tr><td colspan="4" style="color:#64748b;">No hay ventas hoy.</td></tr>`;
+      tb.innerHTML = `<tr><td colspan="5" style="color:#64748b;">No hay ventas hoy.</td></tr>`;
       return;
     }
 
     arr.forEach(v => {
       const fecha = v.fecha?.toDate ? v.fecha.toDate() : (v.fecha instanceof Date ? v.fecha : null);
       const hora = fecha ? fecha.toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'}) : '—';
+
+      const estado = v.anulada
+        ? `<span class="chip chip-anulada">⛔ ANULADA</span>`
+        : `<span class="chip chip-ok">✅ OK</span>`;
+
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${hora}</td>
-        <td>${v.cliente || 'Cliente'}</td>
+        <td>${hora}<div style="margin-top:6px;">${estado}</div></td>
+        <td>${v.cliente || 'Cliente'}<div style="color:#64748b;font-size:12px;margin-top:4px;">${v.cajero || '—'} • ${v.turno || '—'}</div></td>
         <td>${v.pago || '—'}</td>
         <td>${money(v.total || 0)}</td>
+        <td>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="mini-btn" onclick='imprimirTicket80(${JSON.stringify({
+              fecha: (v.fecha?.toDate ? v.fecha.toDate() : new Date()),
+              cliente: v.cliente || 'Cliente',
+              pago: v.pago || '—',
+              total: v.total || 0,
+              items: v.items || [],
+              cajero: v.cajero || '—',
+              turno: v.turno || '—',
+              tel: v.tel || ''
+            }).replaceAll("'", "\\'")})'>🧾 Ticket</button>
+
+            <button class="mini-btn" onclick='abrirWhatsApp(${JSON.stringify({
+              fecha: (v.fecha?.toDate ? v.fecha.toDate() : new Date()),
+              cliente: v.cliente || 'Cliente',
+              pago: v.pago || '—',
+              total: v.total || 0,
+              items: v.items || [],
+              cajero: v.cajero || '—',
+              turno: v.turno || '—',
+              tel: v.tel || ''
+            }).replaceAll("'", "\\'")})'>📲 Whats</button>
+
+            ${v.anulada ? '' : `<button class="mini-btn danger" onclick="anularVenta('${v.id}')">⛔ Anular</button>`}
+          </div>
+        </td>
       `;
       tb.appendChild(tr);
     });
@@ -956,7 +1353,7 @@
     document.getElementById('sumEf').innerText = money(totalDiaEfectivo);
     document.getElementById('sumTr').innerText = money(totalDiaTransf);
     document.getElementById('sumMx').innerText = money(totalDiaMixto);
-    document.getElementById('sumVentas').innerText = (window._ventasDia||[]).length;
+    document.getElementById('sumVentas').innerText = (window._ventasDia||[]).filter(v => !v.anulada).length;
   }
 
   window.abrirReporte = () => {
@@ -968,16 +1365,26 @@
     document.getElementById('repEf').innerText = money(totalDiaEfectivo);
     document.getElementById('repTr').innerText = money(totalDiaTransf);
     document.getElementById('repMx').innerText = money(totalDiaMixto);
-    document.getElementById('repVentas').innerText = (window._ventasDia||[]).length;
+    document.getElementById('repVentas').innerText = (window._ventasDia||[]).filter(v => !v.anulada).length;
+
+    const caja = getCaja();
+    document.getElementById('repCajero').innerText = caja.cajero || '—';
+    document.getElementById('repTurno').innerText = caja.turno || '—';
 
     const detalle = document.getElementById('repDetalle');
     detalle.innerHTML = '';
+
     (window._ventasDia||[]).forEach(v => {
+      const anulada = !!v.anulada;
       const items = (v.items||[]).map(it => `${it.cant}× ${it.nombre||it.codigo}`).join(', ');
       const div = document.createElement('div');
       div.style.padding = "8px 0";
       div.style.borderBottom = "1px solid #e2e8f0";
-      div.innerHTML = `<b>${money(v.total)}</b> • ${v.pago || '—'} • <span style="color:#64748b">${v.cliente||'Cliente'}</span><div style="color:#64748b;font-size:12px;margin-top:4px">${items}</div>`;
+      div.innerHTML = `
+        <b>${money(v.total)}</b> • ${v.pago || '—'} • <span style="color:#64748b">${v.cliente||'Cliente'}</span>
+        <div style="color:#64748b;font-size:12px;margin-top:4px">${items}</div>
+        <div style="margin-top:6px;">${anulada ? `<span class="chip chip-anulada">⛔ ANULADA</span>` : `<span class="chip chip-ok">✅ OK</span>`}</div>
+      `;
       detalle.appendChild(div);
     });
 
@@ -994,15 +1401,18 @@
   };
 
   window.cerrarDia = async () => {
+    const caja = getCaja();
     customConfirm('Cerrar día', '¿Confirmás cerrar el día y guardar el cierre?', async () => {
       try{
         await addDoc(collection(db, 'cierres_caja'), {
           fecha: new Date(),
           total: totalDiaGeneral,
-          ventas: (window._ventasDia||[]).length,
+          ventas: (window._ventasDia||[]).filter(v => !v.anulada).length,
           efectivo: totalDiaEfectivo,
           transferencia: totalDiaTransf,
           mixto: totalDiaMixto,
+          cajero: caja.cajero || '—',
+          turno: caja.turno || null,
           createdAt: serverTimestamp()
         });
         customAlert('✅ Cierre guardado.');
@@ -1032,6 +1442,8 @@
           <td>${money(d.efectivo||0)}</td>
           <td>${money(d.transferencia||0)}</td>
           <td>${money(d.mixto||0)}</td>
+          <td>${d.cajero || '—'}</td>
+          <td>${d.turno || '—'}</td>
         `;
         tb.appendChild(tr);
       });
@@ -1043,6 +1455,12 @@
   };
 
   // Init
+  loadCaja();
+  if(!localStorage.getItem('pos_turno')){
+    // no molestar, pero mostrar —
+    if(turnoTag) turnoTag.textContent = 'Turno: —';
+  }
+
   cargarClientes();
   cargarProductos();
   cargarHistorial();
