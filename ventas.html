@@ -297,7 +297,19 @@
 
         const firebaseConfig = { apiKey: "AIzaSyCH2dJRTPXpOPUhaERNAkcj_avqbEYCSXE", authDomain: "deliverymayorista-8c042.firebaseapp.com", projectId: "deliverymayorista-8c042", storageBucket: "deliverymayorista-8c042.firebasestorage.app", messagingSenderId: "98776210634", appId: "1:98776210634:web:6938a8cdbf497b2353e833" };
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const db = getFirestore(app)
+// ✅ AUTOCARGA CLIENTE desde Clientes (clientes.html -> ventas.html)
+(() => {
+  const sp = new URLSearchParams(location.search);
+  const nombre = sp.get('cliente') || '';
+  if (nombre) {
+    // esperamos un toque por si el input se dibuja después
+    setTimeout(() => {
+      const inp = document.getElementById('clienteInput');
+      if (inp) inp.value = nombre;
+    }, 0);
+  }
+})();
 
         let carrito = [];
         let listaProductos = [];
