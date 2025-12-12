@@ -59,6 +59,37 @@
 
     .cart-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
     .cart-header { padding: 12px 15px; font-weight: 900; background: #f8fafc; border-bottom: 1px solid var(--border); font-size: 0.95rem; }
+
+    /* ✅ Cliente arriba al lado de "Orden Actual" */
+    .cart-header-flex { display:flex; justify-content: space-between; align-items:center; gap:10px; }
+    .cliente-inline { display:flex; gap:8px; align-items:center; }
+    .cliente-inline input{
+      width: 220px; max-width: 34vw;
+      padding: 8px 10px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-weight: 900;
+      outline: none;
+      background: #fff;
+      color: #0f172a;
+    }
+    .cliente-inline input:focus{
+      border-color: rgba(255,0,93,0.55);
+      box-shadow: 0 0 0 4px rgba(255,0,93,0.10);
+    }
+    .cliente-inline button{
+      border: 1px solid var(--border);
+      background: #fff;
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-weight: 900;
+      color: #0f172a;
+    }
+    .cliente-inline button:hover{
+      border-color: rgba(255,0,93,0.55);
+    }
+
     .cart-items { flex: 1; overflow-y: auto; padding: 0 15px; }
     .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
     .qty-controls { display: flex; align-items: center; gap: 6px; background: #f1f5f9; border-radius: 12px; padding: 4px 6px; width: fit-content; margin-top: 6px; }
@@ -133,9 +164,11 @@
       .search-box { width: 100%; }
       .close-x { right: 5px; top: 5px; }
       .report-toolbar, .report-paper { width: 95%; }
+      .cliente-inline input{ width: 100%; max-width: 58vw; }
     }
   </style>
 </head>
+
 <body>
 
 <header>
@@ -182,10 +215,19 @@
   <div class="right-column" id="rightColumn">
     <div class="panel-top">
       <div class="cart-panel">
-        <div class="cart-header">Orden Actual</div>
+        <!-- ✅ CABECERA CON CLIENTE VISIBLE -->
+        <div class="cart-header cart-header-flex">
+          <span>Orden Actual</span>
+          <div class="cliente-inline">
+            <input id="clienteHeader" placeholder="Cliente..." />
+            <button id="btnClearCliente" title="Limpiar cliente">✕</button>
+          </div>
+        </div>
+
         <div class="cart-items" id="lista-carrito">
           <div style="text-align:center; color:var(--secondary); margin-top:40px;">Carrito vacío</div>
         </div>
+
         <div class="cart-footer">
           <div class="total-amount">$<span id="total-precio">0</span></div>
           <div class="payment-buttons">
@@ -222,6 +264,7 @@
       <div class="modal-price-hero">$<span id="modalTotal">0</span></div>
     </div>
     <div class="modal-body">
+      <!-- sigue existiendo por compatibilidad, pero se sincroniza con el header -->
       <input class="input-field" id="clienteInput" placeholder="Cliente (opcional)">
       <div style="height:10px"></div>
       <input class="input-field" id="montoInput" type="number" placeholder="Monto recibido (solo efectivo)">
@@ -384,6 +427,29 @@
     document.querySelector('.btn-toggle').innerHTML = panelesVisibles ? "👁️ Ocultar Paneles" : "👁️ Mostrar Paneles";
   };
 
+  // ✅ Cliente visible arriba (Orden Actual)
+  const clienteHeader = document.getElementById('clienteHeader');
+  const btnClearCliente = document.getElementById('btnClearCliente');
+
+  function getClienteActual(){
+    const h = (clienteHeader?.value || '').trim();
+    const m = (document.getElementById('clienteInput')?.value || '').trim();
+    return h || m || CLIENTE_PRE || '';
+  }
+
+  function setClienteActual(nombre){
+    const v = (nombre || '').trim();
+    if (clienteHeader) clienteHeader.value = v;
+    const mi = document.getElementById('clienteInput');
+    if (mi) mi.value = v;
+  }
+
+  if (CLIENTE_PRE) setClienteActual(CLIENTE_PRE);
+
+  btnClearCliente?.addEventListener('click', () => {
+    setClienteActual('');
+  });
+
   // ===== Helpers producto =====
   function getStock(p){
     if(p.stock !== undefined) return Number(p.stock||0);
@@ -403,15 +469,14 @@
   function getNombre(p){ return p.nombre || p.Nombre || p.name || 'Sin nombre'; }
   function getCodigo(p){ return (p.codigo || p.Codigo || p.code || p.id || '').toString().toUpperCase(); }
 
-  // ===== Cargar y render catálogo (FIX ✅) =====
+  // ===== Cargar y render catálogo =====
   async function cargarProductos(){
     try{
       const snap = await getDocs(collection(db, 'productos'));
       listaProductos = [];
       snap.forEach(d => {
         const p = d.data();
-        // IMPORTANTÍSIMO: id real del doc para carrito/stock/update ✅
-        p.id = d.id;
+        p.id = d.id; // ✅ id real doc
         p._id = d.id;
         listaProductos.push(p);
       });
@@ -455,7 +520,7 @@
   };
 
   window.addCart = (p) => {
-    const id = p.id; // ✅ ahora siempre existe
+    const id = p.id;
     const nombre = getNombre(p);
     const precio = getPrecio(p);
     const codigo = getCodigo(p);
@@ -535,9 +600,8 @@
     document.getElementById('montoInput').value = "";
     document.getElementById('vueltoBox').style.display = "none";
 
-    // ✅ No borrar cliente precargado
-    const ci = document.getElementById('clienteInput');
-    if (CLIENTE_PRE && !ci.value) ci.value = CLIENTE_PRE;
+    // ✅ sincroniza cliente del header → modal
+    setClienteActual(getClienteActual());
 
     const modal = document.getElementById('pagoModal');
     modal.classList.add('active');
@@ -573,7 +637,8 @@
   });
 
   async function confirmarPago(){
-    const cliente = (document.getElementById('clienteInput').value || '').trim();
+    // ✅ toma el cliente del header (siempre visible)
+    const cliente = getClienteActual();
 
     if(modoPago === 'efectivo'){
       const recibido = Number(document.getElementById('montoInput').value || 0);
@@ -591,7 +656,7 @@
       await addDoc(collection(db, 'ventas'), {
         fecha: new Date(),
         cliente: cliente || 'Cliente',
-        clienteId: CLIENTE_ID_PRE || null, // ✅ se guarda para historial perfecto
+        clienteId: CLIENTE_ID_PRE || null,
         tel: TEL_PRE || null,
         pago: modoPago,
         total: totalRaw,
@@ -771,12 +836,6 @@
   // Init
   cargarProductos();
   cargarHistorial();
-
-  // Si venís de Clientes, precargar cliente al abrir modal la primera vez
-  if (CLIENTE_PRE) {
-    // no abre modal solo; solo deja listo el input cuando se abra
-    // (ya lo setea abrirModalPago)
-  }
 </script>
 
 </body>
