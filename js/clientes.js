@@ -32,6 +32,11 @@ const btnCancelarEdicion  = document.getElementById("btnCancelarEdicion");
 const msgCliente          = document.getElementById("msgCliente");
 const btnLogout           = document.getElementById("logoutBtn");
 
+// Stats (nuevos)
+const statsTotalClientes  = document.getElementById("statsTotalClientes");
+const statsConTelefono    = document.getElementById("statsConTelefono");
+const statsConEmail       = document.getElementById("statsConEmail");
+
 let clientes   = [];
 let editandoId = null;
 
@@ -71,12 +76,26 @@ async function cargarClientes() {
       ...d.data(),
     }));
 
+    // Orden por nombre (más cómodo)
+    clientes.sort((a, b) => (a.nombre || "").localeCompare((b.nombre || ""), "es", { sensitivity: "base" }));
+
     renderClientes(clientes);
+    renderStats(clientes);
   } catch (err) {
     console.error("Error cargando clientes:", err);
     tablaClientes.innerHTML =
       `<tr><td colspan="5" class="texto-centro">Error al cargar clientes.</td></tr>`;
   }
+}
+
+function renderStats(lista){
+  if (statsTotalClientes) statsTotalClientes.textContent = String(lista.length);
+
+  const conTel = lista.filter(c => String(c.telefono || "").trim().length > 0).length;
+  const conMail = lista.filter(c => String(c.email || "").trim().length > 0).length;
+
+  if (statsConTelefono) statsConTelefono.textContent = String(conTel);
+  if (statsConEmail) statsConEmail.textContent = String(conMail);
 }
 
 function renderClientes(lista) {
@@ -94,28 +113,19 @@ function renderClientes(lista) {
     const tr = document.createElement("tr");
 
     const contacto = [c.telefono || "", c.email || ""]
+      .map(x => String(x).trim())
       .filter(Boolean)
       .join(" · ");
 
     tr.innerHTML = `
-      <td>${c.nombre || ""}</td>
+      <td><b>${c.nombre || ""}</b></td>
       <td>${contacto || "-"}</td>
-      <td>${c.direccion || "-"}</td>
-      <td>${c.notas ? `<span class="badge">${c.notas}</span>` : "-"}</td>
+      <td>${(c.direccion && String(c.direccion).trim()) ? c.direccion : "-"}</td>
+      <td>${(c.notas && String(c.notas).trim()) ? `<span class="badge">${c.notas}</span>` : "-"}</td>
       <td>
-        <button class="btn-mini historial"
-                data-id="${c.id}"
-                data-nombre="${c.nombre || ""}">
-          Historial
-        </button>
-        <button class="btn-mini editar"
-                data-id="${c.id}">
-          Editar
-        </button>
-        <button class="btn-mini eliminar"
-                data-id="${c.id}">
-          Eliminar
-        </button>
+        <button class="btn-mini historial" data-id="${c.id}" data-nombre="${c.nombre || ""}">Historial</button>
+        <button class="btn-mini editar" data-id="${c.id}">Editar</button>
+        <button class="btn-mini eliminar" data-id="${c.id}">Eliminar</button>
       </td>
     `;
 
@@ -130,20 +140,17 @@ function renderClientes(lista) {
 // ----------------------
 if (buscarCliente) {
   buscarCliente.addEventListener("input", () => {
-    const q = buscarCliente.value.toLowerCase();
+    const q = (buscarCliente.value || "").toLowerCase();
 
     const filtrados = clientes.filter((c) => {
       const nombre = (c.nombre || "").toLowerCase();
       const tel    = (c.telefono || "").toLowerCase();
       const mail   = (c.email || "").toLowerCase();
-      return (
-        nombre.includes(q) ||
-        tel.includes(q) ||
-        mail.includes(q)
-      );
+      return nombre.includes(q) || tel.includes(q) || mail.includes(q);
     });
 
     renderClientes(filtrados);
+    renderStats(filtrados);
   });
 }
 
@@ -155,11 +162,11 @@ if (formCliente) {
     e.preventDefault();
 
     const data = {
-      nombre:    cliNombre.value.trim(),
-      telefono:  cliTelefono.value.trim(),
-      email:     cliEmail.value.trim(),
-      direccion: cliDireccion.value.trim(),
-      notas:     cliNotas.value.trim(),
+      nombre:    (cliNombre.value || "").trim(),
+      telefono:  (cliTelefono.value || "").trim(),
+      email:     (cliEmail.value || "").trim(),
+      direccion: (cliDireccion.value || "").trim(),
+      notas:     (cliNotas.value || "").trim(),
     };
 
     if (!data.nombre) {
@@ -233,12 +240,11 @@ function activarBotonesFila() {
       if (cliDireccion)    cliDireccion.value = c.direccion || "";
       if (cliNotas)        cliNotas.value = c.notas || "";
 
-      if (btnGuardarCliente)
-        btnGuardarCliente.textContent = "Actualizar cliente";
-      if (btnCancelarEdicion)
-        btnCancelarEdicion.style.display = "block";
+      if (btnGuardarCliente) btnGuardarCliente.textContent = "Actualizar cliente";
+      if (btnCancelarEdicion) btnCancelarEdicion.style.display = "block";
 
       setMsg("Editando cliente...", "ok");
+      cliNombre?.focus();
     });
   });
 
@@ -268,10 +274,7 @@ function activarBotonesFila() {
       const id     = e.currentTarget.dataset.id;
       const nombre = e.currentTarget.dataset.nombre || "";
 
-      const url = `historial.html?clienteId=${encodeURIComponent(
-        id
-      )}&nombre=${encodeURIComponent(nombre)}`;
-
+      const url = `historial.html?clienteId=${encodeURIComponent(id)}&nombre=${encodeURIComponent(nombre)}`;
       window.location.href = url;
     });
   });
