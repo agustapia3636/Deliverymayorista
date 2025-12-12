@@ -1094,21 +1094,17 @@ ${items}
   // ===============================
   // ✅ 4) ANULAR VENTA (devuelve stock)
   // ===============================
-  window.anularVenta = async (ventaId) => {
+window.anularVenta = async (ventaId) => {
   if (!ventaId) return;
-
-  const venta = (window._ventasDia || []).find(v => v.id === ventaId);
-  if (!venta) return customAlert('No se encontró la venta.');
-  if (venta.anulada) return customAlert('Esta venta ya está anulada.');
 
   customConfirm(
     'Anular venta',
-    '¿Confirmás anular esta venta?\nSe devolverá el stock de forma segura.',
+    '¿Confirmás anular esta venta?\nEl stock se devolverá de forma segura.',
     async () => {
       try {
         await runTransaction(db, async (transaction) => {
 
-          // 1️⃣ Leer venta en tiempo real
+          // 1️⃣ Leer venta REAL desde Firestore
           const ventaRef = doc(db, 'ventas', ventaId);
           const ventaSnap = await transaction.get(ventaRef);
 
@@ -1121,7 +1117,7 @@ ${items}
             throw new Error('La venta ya estaba anulada.');
           }
 
-          // 2️⃣ Devolver stock producto por producto
+          // 2️⃣ Devolver stock de cada producto
           for (const it of (ventaData.items || [])) {
             if (!it.id) continue;
 
@@ -1135,10 +1131,31 @@ ${items}
             const stockActual = Number(prodSnap.data().stock || 0);
             const devolver = Number(it.cant || 0);
 
+            // Asegúrate de que el stock no se vuelva negativo
+            const nuevoStock = Math.max(stockActual + devolver, 0); // Evita stock negativo
             transaction.update(prodRef, {
-              stock: stockActual + devolver
+              stock: nuevoStock
             });
           }
+
+          // 3️⃣ Marcar venta como anulada
+          transaction.update(ventaRef, {
+            anulada: true,
+            anuladaAt: serverTimestamp()
+          });
+        });
+
+        customAlert('✅ Venta anulada correctamente. Stock restaurado.');
+        await cargarProductos();
+        await cargarHistorial();
+
+      } catch (e) {
+        console.error(e);
+        customAlert('ERROR al anular venta: ' + (e.message || e));
+      }
+    }
+  );
+};
 
           // 3️⃣ Marcar venta como anulada
           transaction.update(ventaRef, {
