@@ -215,7 +215,7 @@
   <div class="right-column" id="rightColumn">
     <div class="panel-top">
       <div class="cart-panel">
-        <!-- ✅ CABECERA CON CLIENTE VISIBLE -->
+        <!-- ✅ CABECERA CON CLIENTE VISIBLE + AUTOCOMPLETE -->
         <div class="cart-header cart-header-flex">
           <span>Orden Actual</span>
           <div class="cliente-inline">
@@ -255,6 +255,9 @@
     </div>
   </div>
 </div>
+
+<!-- ✅ DATALIST PARA AUTOCOMPLETE DE CLIENTES -->
+<datalist id="listaClientes"></datalist>
 
 <!-- MODALS -->
 <div class="modal-overlay" id="pagoModal">
@@ -447,8 +450,87 @@
   if (CLIENTE_PRE) setClienteActual(CLIENTE_PRE);
 
   btnClearCliente?.addEventListener('click', () => {
+    // limpia también el dataset de selección
+    if (clienteHeader){
+      clienteHeader.dataset.clienteId = '';
+      clienteHeader.dataset.tel = '';
+    }
     setClienteActual('');
   });
+
+  // ===============================
+  // ✅ AUTOCOMPLETE CLIENTES (Firestore)
+  // Colección: "clientes"
+  // Campos soportados: nombre/Nombre/name/cliente  |  tel/telefono/Telefono/whatsapp
+  // ===============================
+  let clientesCache = []; // [{id, nombre, tel}]
+
+  function norm(s){
+    return (s || '').toString().trim().toLowerCase();
+  }
+
+  async function cargarClientes(){
+    try{
+      const snap = await getDocs(collection(db, 'clientes'));
+      clientesCache = [];
+
+      snap.forEach(d => {
+        const c = d.data() || {};
+        const nombre = (c.nombre || c.Nombre || c.name || c.cliente || '').toString().trim();
+        if(!nombre) return;
+
+        const tel = (c.tel || c.telefono || c.Telefono || c.whatsapp || '').toString().trim();
+        clientesCache.push({ id: d.id, nombre, tel });
+      });
+
+      // orden alfabético
+      clientesCache.sort((a,b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity:'base' }));
+
+      // llena el datalist
+      const dl = document.getElementById('listaClientes');
+      if(dl){
+        dl.innerHTML = clientesCache.map(c => `<option value="${c.nombre}"></option>`).join('');
+      }
+
+      // si venía por URL con clienteId/tel, lo dejamos listo:
+      if (clienteHeader){
+        if (CLIENTE_ID_PRE) clienteHeader.dataset.clienteId = CLIENTE_ID_PRE;
+        if (TEL_PRE) clienteHeader.dataset.tel = TEL_PRE;
+      }
+
+      // si hay nombre precargado, intentamos matchear id/tel por nombre:
+      syncClienteSeleccionado();
+
+    }catch(e){
+      console.error('❌ Error cargando clientes:', e);
+      // no alert: que no moleste si no existe la colección todavía
+    }
+  }
+
+  function syncClienteSeleccionado(){
+    if(!clienteHeader) return;
+
+    const val = (clienteHeader.value || '').trim();
+    const target = norm(val);
+
+    const found = clientesCache.find(c => norm(c.nombre) === target);
+
+    if(found){
+      clienteHeader.dataset.clienteId = found.id;
+      clienteHeader.dataset.tel = found.tel || '';
+    }else{
+      // si escriben uno manual, no forzamos id/tel
+      clienteHeader.dataset.clienteId = '';
+      clienteHeader.dataset.tel = '';
+    }
+
+    // sincroniza modal
+    const mi = document.getElementById('clienteInput');
+    if(mi) mi.value = val;
+  }
+
+  clienteHeader?.addEventListener('input', syncClienteSeleccionado);
+  clienteHeader?.addEventListener('change', syncClienteSeleccionado);
 
   // ===== Helpers producto =====
   function getStock(p){
@@ -602,6 +684,8 @@
 
     // ✅ sincroniza cliente del header → modal
     setClienteActual(getClienteActual());
+    // ✅ y recalcula dataset si eligieron del datalist
+    syncClienteSeleccionado();
 
     const modal = document.getElementById('pagoModal');
     modal.classList.add('active');
@@ -637,8 +721,12 @@
   });
 
   async function confirmarPago(){
-    // ✅ toma el cliente del header (siempre visible)
+    // ✅ toma el cliente del header
     const cliente = getClienteActual();
+
+    // ✅ si eligió del datalist, toma id/tel reales
+    const clienteIdSeleccionado = (clienteHeader?.dataset?.clienteId || '').trim();
+    const telSeleccionado = (clienteHeader?.dataset?.tel || '').trim();
 
     if(modoPago === 'efectivo'){
       const recibido = Number(document.getElementById('montoInput').value || 0);
@@ -656,8 +744,8 @@
       await addDoc(collection(db, 'ventas'), {
         fecha: new Date(),
         cliente: cliente || 'Cliente',
-        clienteId: CLIENTE_ID_PRE || null,
-        tel: TEL_PRE || null,
+        clienteId: clienteIdSeleccionado || CLIENTE_ID_PRE || null,
+        tel: telSeleccionado || TEL_PRE || null,
         pago: modoPago,
         total: totalRaw,
         items: carrito.map(p => ({
@@ -834,6 +922,7 @@
   };
 
   // Init
+  cargarClientes();   // ✅ nuevo
   cargarProductos();
   cargarHistorial();
 </script>
