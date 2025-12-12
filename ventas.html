@@ -90,6 +90,47 @@
       border-color: rgba(255,0,93,0.55);
     }
 
+    /* ✅ AUTOCOMPLETE PRO (dropdown lindo) */
+    .cliente-autocomplete{ position:relative; }
+    .cliente-dd{
+      position:absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: min(360px, 60vw);
+      max-height: 280px;
+      overflow:auto;
+      background: #ffffff;
+      border: 1px solid rgba(2,6,23,.12);
+      border-radius: 14px;
+      box-shadow: 0 18px 50px rgba(2,6,23,.18);
+      padding: 6px;
+      z-index: 9999;
+    }
+    .cliente-dd.hidden{ display:none; }
+    .cliente-dd .item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      padding: 10px 10px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 900;
+      color:#0f172a;
+    }
+    .cliente-dd .item:hover{ background: rgba(255,0,93,.08); }
+    .cliente-dd .item.active{ background: rgba(255,0,93,.12); }
+    .cliente-dd .sub{
+      font-weight: 800;
+      font-size: 12px;
+      color:#64748b;
+    }
+    .cliente-dd .empty{
+      padding: 10px;
+      color:#64748b;
+      font-weight: 800;
+    }
+
     .cart-items { flex: 1; overflow-y: auto; padding: 0 15px; }
     .cart-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; }
     .qty-controls { display: flex; align-items: center; gap: 6px; background: #f1f5f9; border-radius: 12px; padding: 4px 6px; width: fit-content; margin-top: 6px; }
@@ -215,11 +256,15 @@
   <div class="right-column" id="rightColumn">
     <div class="panel-top">
       <div class="cart-panel">
-        <!-- ✅ CABECERA CON CLIENTE VISIBLE + AUTOCOMPLETE -->
+        <!-- ✅ CABECERA CON CLIENTE VISIBLE + AUTOCOMPLETE PRO -->
         <div class="cart-header cart-header-flex">
           <span>Orden Actual</span>
+
           <div class="cliente-inline">
-            <input id="clienteHeader" placeholder="Cliente..." list="listaClientes" autocomplete="off" />
+            <div class="cliente-autocomplete">
+              <input id="clienteHeader" placeholder="Cliente..." autocomplete="off" />
+              <div id="clienteDropdown" class="cliente-dd hidden"></div>
+            </div>
             <button id="btnClearCliente" title="Limpiar cliente">✕</button>
           </div>
         </div>
@@ -256,9 +301,6 @@
   </div>
 </div>
 
-<!-- ✅ DATALIST PARA AUTOCOMPLETE DE CLIENTES -->
-<datalist id="listaClientes"></datalist>
-
 <!-- MODALS -->
 <div class="modal-overlay" id="pagoModal">
   <div class="modal-card">
@@ -267,7 +309,6 @@
       <div class="modal-price-hero">$<span id="modalTotal">0</span></div>
     </div>
     <div class="modal-body">
-      <!-- sigue existiendo por compatibilidad, pero se sincroniza con el header -->
       <input class="input-field" id="clienteInput" placeholder="Cliente (opcional)">
       <div style="height:10px"></div>
       <input class="input-field" id="montoInput" type="number" placeholder="Monto recibido (solo efectivo)">
@@ -383,7 +424,7 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // ===== Cliente precargado desde Clientes =====
+  // ===== Cliente precargado desde URL =====
   const sp = new URLSearchParams(location.search);
   const CLIENTE_PRE = (sp.get('cliente') || '').trim();
   const CLIENTE_ID_PRE = (sp.get('clienteId') || '').trim();
@@ -398,6 +439,7 @@
   let panelesVisibles = true;
 
   const money = (n) => '$' + (Number(n||0)).toLocaleString('es-AR');
+  const norm = (s) => (s || '').toString().trim().toLowerCase();
 
   setInterval(() => {
     const el = document.getElementById('reloj');
@@ -449,24 +491,83 @@
 
   if (CLIENTE_PRE) setClienteActual(CLIENTE_PRE);
 
-  btnClearCliente?.addEventListener('click', () => {
-    // limpia también el dataset de selección
-    if (clienteHeader){
+  // ===============================
+  // ✅ AUTOCOMPLETE CLIENTES PRO (dropdown propio)
+  // ===============================
+  let clientesCache = []; // [{id, nombre, tel}]
+  let ddIndex = -1;
+
+  const dd = document.getElementById('clienteDropdown');
+
+  function openDD(){ dd?.classList.remove('hidden'); }
+  function closeDD(){ ddIndex = -1; dd?.classList.add('hidden'); }
+
+  function setDDActive(i){
+    const items = dd?.querySelectorAll('.item') || [];
+    items.forEach(el => el.classList.remove('active'));
+    if(i >= 0 && i < items.length){
+      items[i].classList.add('active');
+      items[i].scrollIntoView({block:'nearest'});
+    }
+  }
+
+  function pickCliente(c){
+    if(!c) return;
+    clienteHeader.value = c.nombre;
+    clienteHeader.dataset.clienteId = c.id;
+    clienteHeader.dataset.tel = c.tel || '';
+    const mi = document.getElementById('clienteInput');
+    if(mi) mi.value = c.nombre;
+    closeDD();
+  }
+
+  function renderDD(list){
+    if(!dd) return;
+    if(!list.length){
+      dd.innerHTML = `<div class="empty">Sin resultados</div>`;
+      return;
+    }
+    dd.innerHTML = list.map((c, idx) => `
+      <div class="item" data-idx="${idx}">
+        <div>
+          <div>${c.nombre}</div>
+          <div class="sub">${c.tel ? c.tel : '—'}</div>
+        </div>
+        <div class="sub">↵</div>
+      </div>
+    `).join('');
+
+    dd.querySelectorAll('.item').forEach(el=>{
+      el.addEventListener('mousedown', (e)=>{
+        e.preventDefault();
+        const i = Number(el.dataset.idx);
+        pickCliente(list[i]);
+      });
+    });
+  }
+
+  function filteredClientes(){
+    const q = norm(clienteHeader.value);
+    if(!q) return clientesCache.slice(0, 30);
+    return clientesCache.filter(c => norm(c.nombre).includes(q)).slice(0, 30);
+  }
+
+  function syncClienteSeleccionado(){
+    if(!clienteHeader) return;
+
+    const val = (clienteHeader.value || '').trim();
+    const exact = clientesCache.find(c => norm(c.nombre) === norm(val));
+
+    if(exact){
+      clienteHeader.dataset.clienteId = exact.id;
+      clienteHeader.dataset.tel = exact.tel || '';
+    } else {
       clienteHeader.dataset.clienteId = '';
       clienteHeader.dataset.tel = '';
     }
-    setClienteActual('');
-  });
 
-  // ===============================
-  // ✅ AUTOCOMPLETE CLIENTES (Firestore)
-  // Colección: "clientes"
-  // Campos soportados: nombre/Nombre/name/cliente  |  tel/telefono/Telefono/whatsapp
-  // ===============================
-  let clientesCache = []; // [{id, nombre, tel}]
-
-  function norm(s){
-    return (s || '').toString().trim().toLowerCase();
+    const mi = document.getElementById('clienteInput');
+    if(mi) mi.value = val;
   }
 
   async function cargarClientes(){
@@ -478,59 +579,83 @@
         const c = d.data() || {};
         const nombre = (c.nombre || c.Nombre || c.name || c.cliente || '').toString().trim();
         if(!nombre) return;
-
         const tel = (c.tel || c.telefono || c.Telefono || c.whatsapp || '').toString().trim();
         clientesCache.push({ id: d.id, nombre, tel });
       });
 
-      // orden alfabético
       clientesCache.sort((a,b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity:'base' }));
 
-      // llena el datalist
-      const dl = document.getElementById('listaClientes');
-      if(dl){
-        dl.innerHTML = clientesCache.map(c => `<option value="${c.nombre}"></option>`).join('');
-      }
-
-      // si venía por URL con clienteId/tel, lo dejamos listo:
+      // si venía por URL con clienteId/tel
       if (clienteHeader){
         if (CLIENTE_ID_PRE) clienteHeader.dataset.clienteId = CLIENTE_ID_PRE;
         if (TEL_PRE) clienteHeader.dataset.tel = TEL_PRE;
       }
-
-      // si hay nombre precargado, intentamos matchear id/tel por nombre:
+      // si venía por URL con nombre, intentamos matchear
       syncClienteSeleccionado();
 
     }catch(e){
       console.error('❌ Error cargando clientes:', e);
-      // no alert: que no moleste si no existe la colección todavía
     }
   }
 
-  function syncClienteSeleccionado(){
-    if(!clienteHeader) return;
+  clienteHeader?.addEventListener('focus', ()=>{
+    const list = filteredClientes();
+    renderDD(list);
+    openDD();
+  });
 
-    const val = (clienteHeader.value || '').trim();
-    const target = norm(val);
+  clienteHeader?.addEventListener('input', ()=>{
+    syncClienteSeleccionado();
+    const list = filteredClientes();
+    renderDD(list);
+    openDD();
+  });
 
-    const found = clientesCache.find(c => norm(c.nombre) === target);
+  clienteHeader?.addEventListener('keydown', (e)=>{
+    const list = filteredClientes();
+    const max = list.length - 1;
 
-    if(found){
-      clienteHeader.dataset.clienteId = found.id;
-      clienteHeader.dataset.tel = found.tel || '';
-    }else{
-      // si escriben uno manual, no forzamos id/tel
+    if(e.key === 'ArrowDown'){
+      e.preventDefault();
+      ddIndex = Math.min(max, ddIndex + 1);
+      setDDActive(ddIndex);
+      openDD();
+    }
+    if(e.key === 'ArrowUp'){
+      e.preventDefault();
+      ddIndex = Math.max(0, ddIndex - 1);
+      setDDActive(ddIndex);
+      openDD();
+    }
+    if(e.key === 'Enter'){
+      if(dd && !dd.classList.contains('hidden') && ddIndex >= 0 && ddIndex <= max){
+        e.preventDefault();
+        pickCliente(list[ddIndex]);
+      } else {
+        closeDD();
+      }
+    }
+    if(e.key === 'Escape'){
+      closeDD();
+    }
+  });
+
+  document.addEventListener('click', (e)=>{
+    const wrap = document.querySelector('.cliente-autocomplete');
+    if(!wrap) return;
+    if(!wrap.contains(e.target)) closeDD();
+  });
+
+  btnClearCliente?.addEventListener('click', () => {
+    if (clienteHeader){
       clienteHeader.dataset.clienteId = '';
       clienteHeader.dataset.tel = '';
+      clienteHeader.value = '';
     }
-
-    // sincroniza modal
     const mi = document.getElementById('clienteInput');
-    if(mi) mi.value = val;
-  }
-
-  clienteHeader?.addEventListener('input', syncClienteSeleccionado);
-  clienteHeader?.addEventListener('change', syncClienteSeleccionado);
+    if(mi) mi.value = '';
+    closeDD();
+  });
 
   // ===== Helpers producto =====
   function getStock(p){
@@ -558,11 +683,10 @@
       listaProductos = [];
       snap.forEach(d => {
         const p = d.data();
-        p.id = d.id; // ✅ id real doc
+        p.id = d.id;
         p._id = d.id;
         listaProductos.push(p);
       });
-
       renderCatalogo(listaProductos);
     }catch(e){
       console.error('❌ Error cargando productos:', e);
@@ -682,9 +806,8 @@
     document.getElementById('montoInput').value = "";
     document.getElementById('vueltoBox').style.display = "none";
 
-    // ✅ sincroniza cliente del header → modal
+    // ✅ sincroniza cliente header → modal + dataset
     setClienteActual(getClienteActual());
-    // ✅ y recalcula dataset si eligieron del datalist
     syncClienteSeleccionado();
 
     const modal = document.getElementById('pagoModal');
@@ -721,10 +844,8 @@
   });
 
   async function confirmarPago(){
-    // ✅ toma el cliente del header
     const cliente = getClienteActual();
 
-    // ✅ si eligió del datalist, toma id/tel reales
     const clienteIdSeleccionado = (clienteHeader?.dataset?.clienteId || '').trim();
     const telSeleccionado = (clienteHeader?.dataset?.tel || '').trim();
 
@@ -922,7 +1043,7 @@
   };
 
   // Init
-  cargarClientes();   // ✅ nuevo
+  cargarClientes();
   cargarProductos();
   cargarHistorial();
 </script>
