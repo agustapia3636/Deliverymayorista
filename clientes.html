@@ -505,10 +505,11 @@
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import {
-    getFirestore, collection, getDocs, addDoc, updateDoc, doc,
-    serverTimestamp, query, where, orderBy, limit
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+ import {
+  getFirestore, collection, getDocs, addDoc, updateDoc, doc,
+  serverTimestamp, query, where, orderBy, limit,
+  runTransaction, getDoc
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyCH2dJRTPXpOPUhaERNAkcj_avqbEYCSXE",
