@@ -655,7 +655,7 @@
         window.cerrarDia = async () => {
             customConfirm('Cerrar día', '¿Confirmás cerrar el día y guardar el cierre?', async () => {
                 try{
-                    await addDoc(collection(db, 'cierres'), {
+                      await addDoc(collection(db, 'cierres_caja'), {
                         fecha: new Date(),
                         total: totalDiaGeneral,
                         ventas: (window._ventasDia||[]).length,
@@ -673,7 +673,7 @@
 
         window.abrirHistorialCierres = async () => {
             try{
-                const ref = collection(db, 'cierres');
+                const ref = collection(db, 'cierres_caja');
                 const qy = query(ref, orderBy('fecha','desc'), limit(50));
                 const snap = await getDocs(qy);
 
