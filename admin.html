@@ -418,284 +418,146 @@
         align-self: flex-end;
       }
     }
-
-    /* ======================
-       LOGIN SIMPLE (2 CLAVES)
-       ====================== */
-
-    .login-container {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: radial-gradient(circle at top, #ff005d, #0b0b18 55%);
-    }
-
-    .login-box {
-      background: rgba(15, 23, 42, 0.96);
-      padding: 24px 22px 26px;
-      border-radius: 18px;
-      width: 100%;
-      max-width: 360px;
-      color: #e5e7eb;
-      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.7);
-    }
-
-    .login-box h1 {
-      font-size: 20px;
-      margin: 0 0 4px;
-      text-align: center;
-    }
-
-    .login-sub {
-      font-size: 13px;
-      color: #9ca3af;
-      text-align: center;
-      margin: 0 0 18px;
-    }
-
-    #passwordInput {
-      width: 100%;
-      border-radius: 999px;
-      border: 1px solid rgba(148, 163, 184, 0.7);
-      background: #020617;
-      color: #f9fafb;
-      padding: 10px 14px;
-      font-size: 14px;
-      outline: none;
-      margin-bottom: 12px;
-    }
-
-    #passwordInput:focus {
-      border-color: #22c55e;
-      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.35);
-    }
-
-    #btnLogin {
-      width: 100%;
-      border-radius: 999px;
-      border: none;
-      background: linear-gradient(90deg, #22c55e, #16a34a);
-      color: #022c13;
-      padding: 10px 14px;
-      font-size: 14px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-bottom: 6px;
-    }
-
-    #btnLogin:hover {
-      filter: brightness(1.03);
-    }
-
-    .login-error {
-      font-size: 13px;
-      color: #fca5a5;
-      text-align: center;
-    }
   </style>
 </head>
 
 <body>
-  <!-- LOGIN CON 2 CLAVES -->
-  <div id="loginContainer" class="login-container">
-    <div class="login-box">
-      <h1>Panel administrativo</h1>
-      <p class="login-sub">Ingresá la clave para continuar</p>
-
-      <input
-        type="password"
-        id="passwordInput"
-        placeholder="Contraseña"
-        autocomplete="off"
-      />
-
-      <button id="btnLogin">Entrar</button>
-
-      <p id="loginError" class="login-error" style="display:none;">
-        Contraseña incorrecta
-      </p>
+  <header>
+    <div class="titulo">
+      <div class="titulo-principal">DELIVERY MAYORISTA · Admin</div>
+      <div class="titulo-sub" id="subTituloHeader">
+        Gestión de productos y stock
+      </div>
     </div>
-  </div>
 
-  <!-- CONTENIDO REAL DEL PANEL ADMIN -->
-  <div id="adminContent" style="display:none;">
-    <header>
-      <div class="titulo">
-        <div class="titulo-principal">DELIVERY MAYORISTA · Admin</div>
-        <div class="titulo-sub" id="subTituloHeader">
-          Gestión de productos y stock
+    <div class="nav-panel">
+      <span>Sesión: <strong id="nombreUsuario">Cargando...</strong></span>
+      <button class="btn-secundario" onclick="window.location.href='https://agustapia3636.github.io/Deliverymayorista/catalogo.html'">
+        Ver sitio
+      </button>
+      <button class="btn-secundario" onclick="window.location.href='clientes.html'">Clientes</button>
+      <button class="btn-secundario" onclick="window.location.href='ventas.html'">Ventas</button>
+      <button class="btn-secundario" onclick="window.location.href='historial.html'">Historial</button>
+      <button id="btnLogout" class="btn-sesion">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <div class="contenedor">
+
+    <!-- ==========================
+         PANEL DE ESTADÍSTICAS
+    =========================== -->
+    <div class="panel-estadisticas">
+      <div class="panel-estadisticas-header">
+        <div>
+          <h2>📊 Estadísticas generales</h2>
+          <p>Resumen generado automáticamente desde Firestore (colección <strong>ventas</strong>).</p>
+        </div>
+        <button id="btnToggleCharts" class="btn-toggle-charts">Ver gráficos</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stats-box">
+          <h3>Total vendido</h3>
+          <span id="stats-total-monto">-</span>
+        </div>
+        <div class="stats-box">
+          <h3>Pedidos totales</h3>
+          <span id="stats-total-pedidos">-</span>
+        </div>
+        <div class="stats-box">
+          <h3>Clientes únicos</h3>
+          <span id="stats-clientes">-</span>
+        </div>
+        <div class="stats-box">
+          <h3>Ventas hoy</h3>
+          <span id="stats-hoy">-</span>
+        </div>
+        <div class="stats-box">
+          <h3>Ventas del mes</h3>
+          <span id="stats-mes">-</span>
         </div>
       </div>
 
-      <div class="nav-panel">
-        <span>Sesión: <strong id="nombreUsuario">Cargando...</strong></span>
-        <button class="btn-secundario" onclick="window.location.href='https://agustapia3636.github.io/Deliverymayorista/catalogo.html'">
-          Ver sitio
+      <h3>🏆 Productos más vendidos</h3>
+      <ul id="stats-ranking" class="stats-ranking">
+        <!-- dinámico -->
+      </ul>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <h3>📈 Ventas recientes por día</h3>
+          <canvas id="chart-ventas-dias"></canvas>
+        </div>
+        <div class="chart-card">
+          <h3>🍩 Top productos (unidades)</h3>
+          <canvas id="chart-productos-top"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================
+         SECCIÓN PRODUCTOS
+    =========================== -->
+
+    <h1 style="margin: 0 0 4px; font-size: 1.35rem;">Productos</h1>
+    <p style="margin: 0 0 16px; font-size: 0.85rem; opacity: 0.8;">
+      Administrá todos los productos del catálogo: precio, stock, imágenes y categorías.
+    </p>
+
+    <div class="admin-toolbar">
+      <div class="admin-toolbar-left">
+        <input
+          id="buscadorProductos"
+          type="text"
+          placeholder="Buscar por código, nombre o categoría..."
+          class="input-buscador-admin"
+        />
+
+        <select id="filtroCategoria" class="select-admin">
+          <option value="">Todas las categorías</option>
+        </select>
+
+        <select id="filtroSubcategoria" class="select-admin">
+          <option value="">Todas las subcategorías</option>
+        </select>
+
+        <label class="chk-admin">
+          <input type="checkbox" id="filtroSoloSinStock" />
+          Solo sin stock
+        </label>
+      </div>
+
+      <div class="admin-toolbar-right">
+        <button id="btnNuevoProducto" class="btn-primario">
+          + Nuevo producto
         </button>
-        <button class="btn-secundario" onclick="window.location.href='clientes.html'">Clientes</button>
-        <button class="btn-secundario" onclick="window.location.href='ventas.html'">Ventas</button>
-        <button class="btn-secundario" onclick="window.location.href='historial.html'">Historial</button>
-        <button id="btnLogout" class="btn-sesion">Cerrar sesión</button>
       </div>
-    </header>
-
-    <div class="contenedor">
-
-      <!-- ==========================
-           PANEL DE ESTADÍSTICAS
-      =========================== -->
-      <div class="panel-estadisticas">
-        <div class="panel-estadisticas-header">
-          <div>
-            <h2>📊 Estadísticas generales</h2>
-            <p>Resumen generado automáticamente desde Firestore (colección <strong>ventas</strong>).</p>
-          </div>
-          <button id="btnToggleCharts" class="btn-toggle-charts">Ver gráficos</button>
-        </div>
-
-        <div class="stats-grid">
-          <div class="stats-box">
-            <h3>Total vendido</h3>
-            <span id="stats-total-monto">-</span>
-          </div>
-          <div class="stats-box">
-            <h3>Pedidos totales</h3>
-            <span id="stats-total-pedidos">-</span>
-          </div>
-          <div class="stats-box">
-            <h3>Clientes únicos</h3>
-            <span id="stats-clientes">-</span>
-          </div>
-          <div class="stats-box">
-            <h3>Ventas hoy</h3>
-            <span id="stats-hoy">-</span>
-          </div>
-          <div class="stats-box">
-            <h3>Ventas del mes</h3>
-            <span id="stats-mes">-</span>
-          </div>
-        </div>
-
-        <h3>🏆 Productos más vendidos</h3>
-        <ul id="stats-ranking" class="stats-ranking">
-          <!-- dinámico -->
-        </ul>
-
-        <div class="charts-grid">
-          <div class="chart-card">
-            <h3>📈 Ventas recientes por día</h3>
-            <canvas id="chart-ventas-dias"></canvas>
-          </div>
-          <div class="chart-card">
-            <h3>🍩 Top productos (unidades)</h3>
-            <canvas id="chart-productos-top"></canvas>
-          </div>
-        </div>
-      </div>
-
-      <!-- ==========================
-           SECCIÓN PRODUCTOS
-      =========================== -->
-
-      <h1 style="margin: 0 0 4px; font-size: 1.35rem;">Productos</h1>
-      <p style="margin: 0 0 16px; font-size: 0.85rem; opacity: 0.8;">
-        Administrá todos los productos del catálogo: precio, stock, imágenes y categorías.
-      </p>
-
-      <div class="admin-toolbar">
-        <div class="admin-toolbar-left">
-          <input
-            id="buscadorProductos"
-            type="text"
-            placeholder="Buscar por código, nombre o categoría..."
-            class="input-buscador-admin"
-          />
-
-          <select id="filtroCategoria" class="select-admin">
-            <option value="">Todas las categorías</option>
-          </select>
-
-          <select id="filtroSubcategoria" class="select-admin">
-            <option value="">Todas las subcategorías</option>
-          </select>
-
-          <label class="chk-admin">
-            <input type="checkbox" id="filtroSoloSinStock" />
-            Solo sin stock
-          </label>
-        </div>
-
-        <div class="admin-toolbar-right">
-          <button id="btnNuevoProducto" class="btn-primario">
-            + Nuevo producto
-          </button>
-        </div>
-      </div>
-
-      <div class="tabla-admin-wrapper">
-        <table class="tabla-admin">
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Nombre</th>
-              <th>Categoría</th>
-              <th>Subcategoría</th>
-              <th>Precio mayorista</th>
-              <th>Stock</th>
-              <th>Imagen</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="tablaProductosBody">
-            <!-- dinámico -->
-          </tbody>
-        </table>
-      </div>
-
     </div>
+
+    <div class="tabla-admin-wrapper">
+      <table class="tabla-admin">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Subcategoría</th>
+            <th>Precio mayorista</th>
+            <th>Stock</th>
+            <th>Imagen</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody id="tablaProductosBody">
+          <!-- dinámico -->
+        </tbody>
+      </table>
+    </div>
+
   </div>
 
-  <!-- Script del login de 2 contraseñas -->
-  <script>
-    (function () {
-      const PASS_ADMIN = "1010";
-      const PASS_VENTAS = "2020";
-
-      const input = document.getElementById("passwordInput");
-      const btn = document.getElementById("btnLogin");
-      const errorLabel = document.getElementById("loginError");
-      const loginContainer = document.getElementById("loginContainer");
-      const adminContent = document.getElementById("adminContent");
-
-      function intentarLogin() {
-        const value = (input.value || "").trim();
-
-        if (value === PASS_ADMIN) {
-          // Mostrar panel admin
-          loginContainer.style.display = "none";
-          adminContent.style.display = "block";
-          errorLabel.style.display = "none";
-          input.value = "";
-        } else if (value === PASS_VENTAS) {
-          // Ir a la página especial de ventas fija
-          window.location.href = "ventas_fixedd.html";
-        } else {
-          errorLabel.style.display = "block";
-        }
-      }
-
-      btn.addEventListener("click", intentarLogin);
-
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          intentarLogin();
-        }
-      });
-    })();
-  </script>
-
-  <!-- Scripts existentes -->
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="js/auth-guard.js"></script>
   <script type="module" src="js/admin.js"></script>
