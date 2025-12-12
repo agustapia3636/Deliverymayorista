@@ -338,17 +338,25 @@
 
         const money = (n) => '$' + (Number(n||0)).toLocaleString('es-AR');
 
-        async function cargarProductos() {
-            try {
-                const qy = query(collection(db, "productos"));
-                const snap = await getDocs(qy);
-                listaProductos = [];
-                snap.forEach(d => listaProductos.push({...d.data(), id: d.id}));
-                renderCatalogo(listaProductos);
-            } catch(e){
-                document.getElementById('grid-productos').innerHTML = `<p style="color:red;padding:20px;">ERROR: ${e.message}</p>`;
-            }
-        }
+      async function cargarProductos(){
+  try{
+    const snap = await getDocs(collection(db, 'productos'));
+    listaProductos = [];
+    snap.forEach(d => {
+      const p = d.data();
+      p._id = d.id;
+      listaProductos.push(p);
+    });
+
+    const el = document.getElementById('cantProductos');
+    if (el) el.innerText = listaProductos.length;
+
+    renderProductos();
+  }catch(e){
+    console.error('❌ Error cargando productos:', e);
+    customAlert('ERROR cargando productos: ' + (e?.message || e));
+  }
+}
 
         function getStock(p){
             if(p.stock !== undefined) return Number(p.stock||0);
