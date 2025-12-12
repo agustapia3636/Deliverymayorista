@@ -1,632 +1,225 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <title>Ventas - Panel Delivery Mayorista</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <title>Ventas - Delivery Mayorista</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <!-- Firebase init -->
+  <script src="js/firebase-init.js"></script>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/ventas.css">
+
   <style>
     body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      background: #050510;
-      color: #fff;
     }
 
     header {
-      background: linear-gradient(90deg, #ff005d, #ffa400);
-      padding: 14px 22px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-weight: 600;
-    }
-
-    .titulo {
-      font-size: 1.2rem;
-    }
-
-    .nav-panel {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .btn-secundario {
-      border: none;
-      border-radius: 999px;
-      padding: 8px 14px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      background: rgba(0,0,0,0.1);
-      color: #fff;
-    }
-
-    .btn-secundario:hover {
-      background: rgba(0,0,0,0.25);
-    }
-
-    .btn-sesion {
-      border: none;
-      border-radius: 999px;
-      padding: 8px 16px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      background: #ffb24f;
-      color: #1b1305;
-      font-weight: 600;
-    }
-
-    .contenedor {
-      max-width: 1100px;
-      margin: 20px auto;
-      padding: 0 16px 30px;
-    }
-
-    h1 {
-      font-size: 1.35rem;
-      margin: 0 0 4px;
-    }
-
-    .sub {
-      font-size: 0.85rem;
-      color: #a3a3d5;
-      margin-bottom: 18px;
-    }
-
-    /* BARRA DE ACCIONES */
-
-    .acciones {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 14px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .acciones input,
-    .acciones select {
-      padding: 8px 10px;
-      border-radius: 999px;
-      border: 1px solid #2b2b44;
-      background: #121221;
-      color: #fff;
-      font-size: 0.9rem;
-      outline: none;
-    }
-
-    .acciones input::placeholder {
-      color: #77779a;
-    }
-
-    .acciones select {
-      min-width: 170px;
-    }
-
-    .btn-primario {
-      border: none;
-      border-radius: 999px;
-      padding: 8px 14px;
-      cursor: pointer;
-      background: linear-gradient(90deg,#28d48c,#21bcb4);
-      color: #051312;
-      font-weight: 600;
-      font-size: 0.9rem;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.45);
-    }
-
-    /* TABLA PRINCIPAL */
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-    }
-
-    thead {
-      background: #181828;
-    }
-
-    th, td {
-      padding: 8px 10px;
-      border-bottom: 1px solid #26263a;
-      text-align: left;
-    }
-
-    th {
-      font-weight: 600;
-      color: #c5c5e2;
-    }
-
-    tr:hover td {
-      background: #17172a;
-    }
-
-    .texto-centro {
-      text-align: center;
-    }
-
-    /* BADGES ESTADO */
-
-    .badge-estado {
-      display: inline-block;
-      padding: 3px 9px;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
-
-    .estado-pendiente {
-      background: rgba(255, 184, 0, 0.18);
-      color: #ffd465;
-    }
-
-    .estado-pagado {
-      background: rgba(40, 212, 140, 0.18);
-      color: #7dffb4;
-    }
-
-    .estado-entregado {
-      background: rgba(77, 171, 255, 0.18);
-      color: #a8d7ff;
-    }
-
-    /* BOTONES MINI */
-
-    .btn-mini {
-      border: none;
-      border-radius: 999px;
-      padding: 5px 9px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      margin-right: 4px;
-      white-space: nowrap;
-    }
-
-    .btn-mini.estado {
-      background: #ffb24f;
-      color: #1b1305;
-    }
-
-    .btn-mini.eliminar {
-      background: #ff5a5a;
-      color: #fff;
-    }
-
-    .msg {
-      margin-top: 6px;
-      font-size: 0.78rem;
-      min-height: 14px;
-      color: #7dffb4;
-    }
-
-    .msg.error {
-      color: #ff8ba3;
-    }
-
-    /* MODAL */
-
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.65);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 20;
-    }
-
-    .modal {
-      background: #11111f;
-      border-radius: 18px;
-      padding: 18px 18px 20px;
-      width: 100%;
-      max-width: 480px;
-      box-shadow: 0 18px 45px rgba(0,0,0,0.5);
-      position: relative;
-    }
-
-    .modal h2 {
-      margin: 0 0 8px;
-      font-size: 1rem;
-    }
-
-    .modal label {
-      display: block;
-      font-size: 0.8rem;
-      margin-top: 10px;
-      margin-bottom: 4px;
-      color: #d6d6f4;
-    }
-
-    .modal input,
-    .modal select,
-    .modal textarea {
-      width: 100%;
-      padding: 8px 10px;
-      border-radius: 10px;
-      border: 1px solid #2b2b44;
-      background: #151525;
-      color: #fff;
-      outline: none;
-      font-size: 0.9rem;
-    }
-
-    .modal textarea {
-      min-height: 70px;
-      resize: vertical;
-    }
-
-    .modal-botones {
-      display: flex;
-      gap: 10px;
-      margin-top: 14px;
-      justify-content: flex-end;
-    }
-
-    .btn-sec {
-      border-radius: 999px;
-      padding: 7px 14px;
-      border: 1px solid #3a3a52;
-      background: transparent;
-      color: #d0d0f0;
-      cursor: pointer;
-      font-size: 0.8rem;
-    }
-
-    .btn-pri {
-      border-radius: 999px;
-      padding: 7px 16px;
-      border: none;
-      background: linear-gradient(90deg,#28d48c,#21bcb4);
-      color: #051312;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: 600;
-    }
-
-    /* Autocomplete producto */
-
-    .autocomplete-list {
-      position: absolute;
-      z-index: 25;
-      background: rgba(8,8,24,0.95);
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.1);
-      width: calc(100% - 20px);
-      max-height: 160px;
-      overflow-y: auto;
-      display: none;
-    }
-
-    .autocomplete-item {
-      padding: 7px 10px;
-      cursor: pointer;
-      border-bottom: 1px solid rgba(255,255,255,0.04);
-      font-size: 0.8rem;
-    }
-
-    .autocomplete-item strong {
-      font-weight: 600;
-    }
-
-    .autocomplete-item:hover {
-      background: rgba(255,255,255,0.07);
-    }
-
-    /* Mini carrito dentro del modal */
-
-    .productos-modal {
-      margin-top: 8px;
-      background: #141429;
-      border-radius: 10px;
-      padding: 8px 10px;
-      border: 1px solid #26263a;
-    }
-
-    .productos-modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-    }
-
-    .productos-modal-header span {
-      font-size: 0.8rem;
-      opacity: 0.9;
-    }
-
-    .btn-add-producto {
-      border-radius: 999px;
-      border: none;
-      padding: 5px 10px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      background: #28d48c;
-      color: #04120f;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-
-    .tabla-modal {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.78rem;
-      margin-top: 4px;
-    }
-
-    .tabla-modal th,
-    .tabla-modal td {
-      padding: 4px 6px;
-      border-bottom: 1px solid #26263a;
-    }
-
-    .tabla-modal th {
-      color: #c5c5e2;
-      font-weight: 500;
-    }
-
-    .tabla-modal td.texto-derecha {
-      text-align: right;
-    }
-
-    .btn-mini-quitar {
-      border-radius: 999px;
-      border: none;
-      padding: 3px 7px;
-      font-size: 0.7rem;
-      cursor: pointer;
-      background: #ff5a5a;
-      color: #fff;
-    }
-
-    .total-modal {
-      margin-top: 6px;
-      font-size: 0.8rem;
-      text-align: right;
-      color: #c6ffe4;
-    }
-
-    @media (max-width: 768px) {
-      header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-      }
-
-      .nav-panel {
-        flex-wrap: wrap;
-      }
-
-      table {
-        font-size: 0.8rem;
-      }
-    }
-
-    /* ====== ESTADÍSTICAS (totales + toggle) ====== */
-
-    .estadisticas-toggle-bar {
-      display: flex;
-      justify-content: flex-end;
-      margin: 10px 0 6px;
-    }
-
-    .btn-toggle-estadisticas {
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      font-size: 13px;
-      font-weight: 600;
-      background: #111827;
-      color: #f9fafb;
-      box-shadow: 0 0 8px rgba(0,0,0,0.3);
-    }
-
-    .btn-toggle-estadisticas:hover {
-      opacity: 0.9;
-    }
-
-    .panel-estadisticas.oculto {
-      display: none;
-    }
-
-    .estadisticas-container {
-      display: flex;
-      gap: 20px;
-      margin: 10px 0 20px;
-      flex-wrap: wrap;
-    }
-
-    .estad-box {
-      flex: 1;
-      min-width: 200px;
-      padding: 15px;
-      border-radius: 10px;
-      background: #111827;
+      background: #1e88e5;
       color: white;
+      padding: 12px;
       text-align: center;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-    }
-
-    .estad-box h3 {
-      font-size: 16px;
-      margin-bottom: 10px;
-      opacity: 0.8;
-    }
-
-    .estad-box span {
-      font-size: 22px;
+      font-size: 20px;
       font-weight: bold;
+    }
+
+    .container {
+      padding: 15px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .buscador {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .buscador input {
+      flex: 1;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    .productos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+    }
+
+    .producto {
+      background: white;
+      border-radius: 6px;
+      padding: 10px;
+      border: 1px solid #ddd;
+    }
+
+    .producto h4 {
+      margin: 0 0 5px;
+    }
+
+    .producto button {
+      width: 100%;
+      padding: 8px;
+      background: #1e88e5;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .carrito {
+      background: white;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 6px;
+    }
+
+    .carrito-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .total {
+      font-size: 20px;
+      font-weight: bold;
+      text-align: right;
+      margin-top: 10px;
+    }
+
+    .confirmar {
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 18px;
+      background: #43a047;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
+
 <body>
 
-<header>
-  <div class="titulo">Panel de Ventas</div>
+<header>🛒 Punto de Venta</header>
 
-  <div class="nav-panel">
-    <button class="btn-secundario" onclick="window.location.href='admin.html'">
-      Productos
-    </button>
-    <button class="btn-secundario" onclick="window.location.href='clientes.html'">
-      Clientes
-    </button>
-    <button class="btn-secundario" onclick="window.location.href='ventas.html'">
-      Ventas
-    </button>
-    <button id="logoutBtn" class="btn-sesion">
-      Cerrar sesión
-    </button>
-  </div>
-</header>
+<div class="container">
 
-<div class="contenedor">
-  <h1>Ventas</h1>
-  <div class="sub" id="subTituloVentas">
-    Registro de ventas. Usá el buscador y el filtro por estado.
+  <!-- BUSCADOR -->
+  <div class="buscador">
+    <input type="text" id="buscador" placeholder="Buscar por código o nombre...">
   </div>
 
-  <!-- Barra y panel de ESTADÍSTICAS -->
-  <div class="estadisticas-toggle-bar">
-    <button id="btn-toggle-estadisticas" class="btn-toggle-estadisticas">
-      👁️ Ver estadísticas
-    </button>
+  <!-- PRODUCTOS -->
+  <div class="productos" id="grid-productos"></div>
+
+  <!-- CARRITO -->
+  <div class="carrito">
+    <h3>🧾 Venta actual</h3>
+    <div id="lista-carrito"></div>
+    <div class="total">Total: $<span id="total">0</span></div>
+    <button class="confirmar" id="btn-confirmar">Confirmar venta</button>
   </div>
 
-  <div id="panel-estadisticas" class="panel-estadisticas oculto">
-    <div class="estadisticas-container">
-      <div class="estad-box">
-        <h3>Total vendido (Histórico)</h3>
-        <span id="estad-total-historico">$ 0.00</span>
-      </div>
-
-      <div class="estad-box">
-        <h3>Total vendido HOY</h3>
-        <span id="estad-total-hoy">$ 0.00</span>
-      </div>
-
-      <div class="estad-box">
-        <h3>Total vendido ESTE MES</h3>
-        <span id="estad-total-mes">$ 0.00</span>
-      </div>
-    </div>
-
-    <!-- 📊 Mini gráfico ventas últimos 7 días -->
-    <div style="margin-top: 10px;">
-      <h3 style="font-size: 14px; margin: 0 0 6px; opacity: .8;">
-        Ventas últimos 7 días
-      </h3>
-      <canvas id="chartVentas7Dias" height="120"></canvas>
-    </div>
-  </div>
-
-  <div class="acciones">
-    <input
-      type="text"
-      id="buscarVenta"
-      placeholder="Buscar por cliente, producto o estado..."
-    />
-
-    <select id="filtroEstado">
-      <option value="">Todos los estados</option>
-      <option value="pendiente">Pendiente</option>
-      <option value="pagado">Pagado</option>
-      <option value="entregado">Entregado</option>
-    </select>
-
-    <button id="btnNuevaVenta" class="btn-primario">+ Registrar venta</button>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Fecha</th>
-        <th>N° interno</th>    <!-- 👈 ESTA -->
-        <th>Cliente</th>
-        <th>Producto(s)</th>
-        <th>Cant.</th>
-        <th>Total</th>
-        <th>Estado</th>
-        <th>Notas</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody id="tablaVentas"></tbody>
-  </table>
-
-  <div id="msgVentas" class="msg"></div>
 </div>
 
-<!-- Modal nueva venta -->
-<div id="modalVenta" class="modal-backdrop">
-  <div class="modal">
-    <h2>Registrar venta</h2>
+<script>
+  const db = firebase.firestore();
 
-    <label for="ventaCliente">Cliente</label>
-    <select id="ventaCliente"></select>
+  let productos = [];
+  let carrito = [];
 
-    <label for="ventaProducto">Producto</label>
-    <div style="position: relative;">
-      <input
-        type="text"
-        id="ventaProducto"
-        placeholder="Buscar por nombre o código..."
-      />
-      <div id="ventaProductoLista" class="autocomplete-list"></div>
-    </div>
+  const grid = document.getElementById("grid-productos");
+  const buscador = document.getElementById("buscador");
+  const listaCarrito = document.getElementById("lista-carrito");
+  const totalSpan = document.getElementById("total");
 
-    <label for="ventaCantidad">Cantidad</label>
-    <input type="number" id="ventaCantidad" min="1" step="1" value="1" />
+  // 🔹 Cargar productos
+  db.collection("productos").get().then(snapshot => {
+    snapshot.forEach(doc => {
+      productos.push({ id: doc.id, ...doc.data() });
+    });
+    renderProductos(productos);
+  });
 
-    <div class="productos-modal">
-      <div class="productos-modal-header">
-        <span>Productos de la venta</span>
-        <button id="btnAgregarProductoVenta" class="btn-add-producto">
-          + Agregar producto
-        </button>
-      </div>
+  // 🔹 Render productos
+  function renderProductos(lista) {
+    grid.innerHTML = "";
+    lista.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "producto";
+      div.innerHTML = `
+        <h4>${p.nombre}</h4>
+        <p>$${p.precio}</p>
+        <button onclick="agregarCarrito('${p.id}')">Agregar</button>
+      `;
+      grid.appendChild(div);
+    });
+  }
 
-      <table class="tabla-modal">
-        <thead>
-          <tr>
-            <th>Código</th>
-            <th>Nombre</th>
-            <th>Cant.</th>
-            <th>Precio</th>
-            <th>Subtotal</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody id="ventaProductosTabla"></tbody>
-      </table>
+  // 🔹 Buscador nombre / código
+  buscador.addEventListener("input", e => {
+    const texto = e.target.value.toLowerCase();
+    const filtrados = productos.filter(p =>
+      p.nombre.toLowerCase().includes(texto) ||
+      (p.codigo && p.codigo.toLowerCase().includes(texto))
+    );
+    renderProductos(filtrados);
+  });
 
-      <div class="total-modal">
-        Total estimado: <strong id="ventaTotalPreview">$0</strong>
-      </div>
-    </div>
+  // 🔹 Agregar al carrito
+  window.agregarCarrito = function(id) {
+    const prod = productos.find(p => p.id === id);
+    carrito.push(prod);
+    renderCarrito();
+  }
 
-    <label for="ventaEstado">Estado</label>
-    <select id="ventaEstado">
-      <option value="pendiente">Pendiente</option>
-      <option value="pagado">Pagado</option>
-      <option value="entregado">Entregado</option>
-    </select>
+  // 🔹 Render carrito
+  function renderCarrito() {
+    listaCarrito.innerHTML = "";
+    let total = 0;
 
-    <label for="ventaNotas">Notas</label>
-    <textarea id="ventaNotas" placeholder="Ej: pago en efectivo, envío, etc."></textarea>
+    carrito.forEach(p => {
+      total += Number(p.precio);
+      const div = document.createElement("div");
+      div.className = "carrito-item";
+      div.innerHTML = `<span>${p.nombre}</span><span>$${p.precio}</span>`;
+      listaCarrito.appendChild(div);
+    });
 
-    <div class="modal-botones">
-      <button id="btnCancelarVenta" class="btn-sec">Cancelar</button>
-      <button id="btnGuardarVenta" class="btn-pri">Guardar</button>
-    </div>
-  </div>
-</div>
+    totalSpan.textContent = total.toFixed(2);
+  }
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="module" src="js/auth-guard.js"></script>
-<script type="module" src="js/ventas.js"></script>
+  // 🔹 Confirmar venta
+  document.getElementById("btn-confirmar").addEventListener("click", () => {
+    if (carrito.length === 0) {
+      alert("No hay productos en la venta");
+      return;
+    }
+
+    db.collection("ventas").add({
+      productos: carrito,
+      total: Number(totalSpan.textContent),
+      fecha: new Date()
+    }).then(() => {
+      alert("Venta registrada");
+      carrito = [];
+      renderCarrito();
+    });
+  });
+</script>
+
 </body>
 </html>
