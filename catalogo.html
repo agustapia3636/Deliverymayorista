@@ -1448,15 +1448,10 @@ card.querySelector(".producto-titulo")?.addEventListener("click", () => {
             <div class="producto-titulo" title="${escapeHtmlAttr(p.nombre || "")}">
               ${escapeHtml(p.nombre || "Producto")} ${chip}
             </div>
-
-            <div class="producto-descripcion">${desc}</div>
-
-            <div class="producto-precio-row">
-              <div class="producto-precio">${precioTxt}</div>
-              <div class="producto-stock">
-                <span class="badge-stock ${badge.cls}">${badge.txt}</span>
-                ${Number.isFinite(Number(p.stock)) ? ` · ${Number(p.stock)} u` : ""}
-              </div>
+             <div class="producto-stock" data-stock="${Number(p.stock)}">
+           <span class="badge-stock ${badge.cls}">${badge.txt}</span>
+            ·  <span class="stock-num">${Number(p.stock)}</span> u
+            </div>
 
               <div class="cantidad-container">
                 <button class="btn-cantidad" type="button" data-act="menos">−</button>
