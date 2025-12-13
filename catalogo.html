@@ -1330,13 +1330,20 @@
             }
           };
         }
+function irAProductoConBack(codigo){
+  const back = encodeURIComponent(
+    location.pathname + location.search
+  );
+  location.href = `producto.html?codigo=${encodeURIComponent(codigo)}&back=${back}`;
+}
 
-        card.querySelector(".producto-imagen-wrapper")?.addEventListener("click", () => {
-          location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
-        });
-        card.querySelector(".producto-titulo")?.addEventListener("click", () => {
-          location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
-        });
+card.querySelector(".producto-imagen-wrapper")?.addEventListener("click", () => {
+  irAProductoConBack(codigo);
+});
+
+card.querySelector(".producto-titulo")?.addEventListener("click", () => {
+  irAProductoConBack(codigo);
+});
 
         btnMenos?.addEventListener("click", () => {
           const v = Math.max(1, (Number(input.value) || 1) - 1);
