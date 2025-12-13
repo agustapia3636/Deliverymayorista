@@ -1363,32 +1363,38 @@ btnAgregar?.addEventListener("click", () => {
   // 🛒 carrito
   carritoAgregar(p, qty);
 
-  // 📉 bajar stock visual
-  const stockBox = card.querySelector(".producto-stock");
-  const stockNum = stockBox?.querySelector(".stock-num");
+// 📉 bajar stock visual
+const stockBox = card.querySelector('.producto-stock');
+const stockNum = stockBox?.querySelector('.stock-num');
 
-  if (stockBox && stockNum) {
-    let stockActual = Number(stockBox.getAttribute("data-stock")) || 0;
-    stockActual = Math.max(0, stockActual - qty);
+if (stockBox && stockNum) {
+  let stockActual = Number(stockBox.getAttribute('data-stock')) || 0;
 
-    stockBox.setAttribute("data-stock", stockActual);
-    stockNum.textContent = stockActual;
+  // 🔒 si ya no hay stock, no dejamos agregar
+  if (stockActual <= 0) return;
 
-    // badge dinámico
-    const badge = stockBox.querySelector(".badge-stock");
-    if (badge) {
-      if (stockActual <= 0) {
-        badge.textContent = "Sin stock";
-        badge.className = "badge-stock stock-cero";
-      } else if (stockActual <= 5) {
-        badge.textContent = "Stock bajo";
-        badge.className = "badge-stock stock-bajo";
-      } else {
-        badge.textContent = "En stock";
-        badge.className = "badge-stock stock-ok";
-      }
+  stockActual = Math.max(0, stockActual - qty);
+
+  stockBox.setAttribute('data-stock', stockActual);
+  stockNum.textContent = stockActual;
+
+  // badge dinámico
+  const badge = stockBox.querySelector('.badge-stock');
+  if (badge) {
+    if (stockActual <= 0) {
+      badge.textContent = 'Sin stock';
+      badge.className = 'badge-stock stock-cero';
+      btnAgregar.disabled = true;
+      btnAgregar.textContent = 'Sin stock';
+    } else if (stockActual <= 5) {
+      badge.textContent = 'Stock bajo';
+      badge.className = 'badge-stock stock-bajo';
+    } else {
+      badge.textContent = 'En stock';
+      badge.className = 'badge-stock stock-ok';
     }
   }
+}
 
   // feedback botón
   btnAgregar.classList.add("btn-agregar-carrito-activo");
