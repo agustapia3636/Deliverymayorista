@@ -27,6 +27,9 @@ const selectEstado = document.getElementById("filtroEstado");
 // búsqueda rápida
 const inputBusquedaRapida = document.getElementById("busquedaRapida");
 
+// ocultar anuladas
+const toggleOcultarAnuladas = document.getElementById("toggleOcultarAnuladas");
+
 // orden/paginación
 const selectOrden = document.getElementById("selectOrden");
 const selectPageSize = document.getElementById("selectPageSize");
@@ -206,7 +209,7 @@ function normalizeVenta(v) {
 }
 
 function getEstadoPill(estadoRaw, anulada) {
-  if (anulada) return `<span class="estado-pill estado-bad">anulada</span>`;
+  if (anulada) return `<span class="estado-pill estado-bad anulada" data-estado="anulada">anulada</span>`;
   const e = norm(estadoRaw);
   if (e === "pagado" || e === "entregado") return `<span class="estado-pill estado-ok">${e}</span>`;
   if (e === "pendiente") return `<span class="estado-pill estado-warn">pendiente</span>`;
@@ -332,6 +335,7 @@ async function cargarHistorial() {
 
     let all = raw.map(normalizeVenta);
 
+    // fallback por nombre si no hay clienteId
     if (!clienteId && nombreCliente) {
       const target = nombreCliente.trim();
       all = all.filter((v) => (v.cliente || "").trim() === target);
@@ -364,37 +368,44 @@ function aplicarFiltros() {
   const estadoSeleccionado = norm(selectEstado?.value || "todas");
   const pagoSeleccionado = norm(selectPago?.value || "todas");
   const qRapida = norm(inputBusquedaRapida?.value);
+  const ocultarAnuladas = !!toggleOcultarAnuladas?.checked;
 
   const ord = (selectOrden?.value || "fecha_desc").toLowerCase();
 
   ventasFiltradas = ventasBase.filter((v) => {
-    let ok = true;
+    // ✅ Ocultar anuladas (switch)
+    if (ocultarAnuladas && v.anulada) return false;
 
+    // Fecha
     const f = toDateJS(v.fecha);
-    if (desdeDate && f && f < desdeDate) ok = false;
-    if (hastaDate && f && f > hastaDate) ok = false;
+    if (desdeDate && f && f < desdeDate) return false;
+    if (hastaDate && f && f > hastaDate) return false;
 
+    // Estado
     if (estadoSeleccionado !== "todas") {
       if (estadoSeleccionado === "anulada") {
-        if (!v.anulada) ok = false;
+        if (!v.anulada) return false;
       } else {
-        if (norm(v.estado) !== estadoSeleccionado) ok = false;
+        if (norm(v.estado) !== estadoSeleccionado) return false;
       }
     }
 
+    // Pago
     if (pagoSeleccionado !== "todas") {
-      if (normPago(v.pago) !== pagoSeleccionado) ok = false;
+      if (normPago(v.pago) !== pagoSeleccionado) return false;
     }
 
+    // Producto
     if (textoProducto) {
       const hit = (v.lineas || []).some((it) => {
         const cod = norm(it.codigo);
         const nom = norm(guessProductoNombre(it.codigo, it.nombre));
         return cod.includes(textoProducto) || nom.includes(textoProducto);
       });
-      if (!hit) ok = false;
+      if (!hit) return false;
     }
 
+    // Búsqueda rápida
     if (qRapida) {
       const inCliente = norm(v.cliente).includes(qRapida);
       const inInterno = norm(v.numeroInterno).includes(qRapida);
@@ -404,10 +415,10 @@ function aplicarFiltros() {
         const nom = norm(guessProductoNombre(it.codigo, it.nombre));
         return cod.includes(qRapida) || nom.includes(qRapida);
       });
-      if (!(inCliente || inInterno || inPago || inProd)) ok = false;
+      if (!(inCliente || inInterno || inPago || inProd)) return false;
     }
 
-    return ok;
+    return true;
   });
 
   ventasFiltradas.sort((a, b) => {
@@ -546,7 +557,6 @@ function abrirDetalle(v) {
   lblDetalleTotal.textContent = money(v.total || 0);
   lblDetalleNotas.textContent = (v.notas && v.notas.toString().trim()) ? v.notas : (v.motivoAnulacion || "-");
 
-  // audit
   if (v.anulada) {
     boxAudit.style.display = "block";
     boxAudit.innerHTML = `
@@ -559,7 +569,6 @@ function abrirDetalle(v) {
     boxAudit.innerHTML = "";
   }
 
-  // botones
   btnAnular.style.display = v.anulada ? "none" : "inline-flex";
   btnRestaurar.style.display = v.anulada ? "inline-flex" : "none";
 
@@ -641,7 +650,7 @@ btnImprimir?.addEventListener("click", () => {
       *{box-sizing:border-box}
       body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;margin:18px;color:#111827}
       h1{font-size:20px;margin:0 0 4px}
-      .sub{font-size:11px;color:#6b7280;margin:0 0 14px}
+      .sub{font-size:11px consider; color:#6b7280;margin:0 0 14px}
       .box{border:1px solid #e5e7eb;border-radius:10px;padding:14px}
       .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 24px;font-size:13px;margin-bottom:10px}
       table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}
@@ -734,7 +743,6 @@ async function anularVentaActual() {
 
       const lineas = extractLineas(data);
 
-      // devolver stock si tenemos id o si podemos mapear por codigo
       for (const it of lineas) {
         const pid = it.productoId || guessProductoIdFromCodigo(it.codigo);
         if (!pid) continue;
@@ -783,7 +791,6 @@ async function restaurarVentaActual() {
 
       const lineas = extractLineas(data);
 
-      // descontar stock si tenemos id o si podemos mapear por codigo
       for (const it of lineas) {
         const pid = it.productoId || guessProductoIdFromCodigo(it.codigo);
         if (!pid) continue;
@@ -820,7 +827,7 @@ btnAnular?.addEventListener("click", anularVentaActual);
 btnRestaurar?.addEventListener("click", restaurarVentaActual);
 
 /* =========================
-   UI: paginación / reset / export / refrescar
+   UI: paginación / reset / export / refrescar / switch
 ========================= */
 function resetFiltros() {
   inputDesde.value = "";
@@ -831,6 +838,7 @@ function resetFiltros() {
   inputBusquedaRapida.value = "";
   selectOrden.value = "fecha_desc";
   selectPageSize.value = "20";
+  if (toggleOcultarAnuladas) toggleOcultarAnuladas.checked = true;
   pagina = 1;
   aplicarFiltros();
 }
@@ -862,6 +870,11 @@ btnExport?.addEventListener("click", () => {
   const stamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
   const csv = buildCSV(ventasFiltradas);
   downloadText(`historial-${stamp}.csv`, csv);
+});
+
+toggleOcultarAnuladas?.addEventListener("change", () => {
+  pagina = 1;
+  aplicarFiltros();
 });
 
 [inputDesde, inputHasta, inputProducto, selectPago, selectEstado, inputBusquedaRapida, selectOrden, selectPageSize]
