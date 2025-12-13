@@ -1,5 +1,6 @@
 // js/catalogo.js
 // Catálogo dinámico desde Firestore + filtros + mega dropdown + mini carrito
+// + CACHE instantáneo + imágenes lazy/async
 
 import { db } from "./firebase-init.js";
 import {
@@ -45,6 +46,48 @@ const miniCarritoCant = document.getElementById("mini-carrito-cantidad");
 const miniCarritoTotal = document.getElementById("mini-carrito-total");
 
 // -------------------------
+// CACHE catálogo (instantáneo)
+// -------------------------
+const CLAVE_CACHE_CATALOGO = "cache_catalogo_v1";
+
+function guardarCacheCatalogo(lista) {
+  try {
+    localStorage.setItem(
+      CLAVE_CACHE_CATALOGO,
+      JSON.stringify({ t: Date.now(), data: lista })
+    );
+  } catch (e) {
+    console.warn("No se pudo guardar cache de catálogo:", e);
+  }
+}
+
+function leerCacheCatalogo(maxHoras = 48) {
+  try {
+    const raw = localStorage.getItem(CLAVE_CACHE_CATALOGO);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    const edadMs = Date.now() - (obj?.t || 0);
+    if (edadMs > maxHoras * 3600 * 1000) return null;
+    if (!Array.isArray(obj?.data)) return null;
+    return obj.data;
+  } catch {
+    return null;
+  }
+}
+
+function reconstruirSetsDesdeProductos() {
+  categoriasSet = new Set();
+  subcategoriasSet = new Set();
+  etiquetasSet = new Set();
+
+  productos.forEach((p) => {
+    if (p.categoria) categoriasSet.add(p.categoria);
+    if (p.subcategoria) subcategoriasSet.add(p.subcategoria);
+    (p.etiquetas || []).forEach((tag) => etiquetasSet.add(tag));
+  });
+}
+
+// -------------------------
 // Estado
 // -------------------------
 let productos = []; // todos
@@ -58,10 +101,11 @@ let subcategoriaSeleccionada = "";
 let etiquetaSeleccionada = "";
 
 let paginaActual = 1;
+
+// Items por página dinámico (ya lo tenías)
 function calcularItemsPorPagina() {
   return window.innerWidth >= 1200 ? 28 : 16;
 }
-
 let ITEMS_POR_PAGINA = calcularItemsPorPagina();
 
 window.addEventListener("resize", () => {
@@ -154,18 +198,32 @@ window.irAlCarrito = function () {
 async function cargarProductos() {
   if (!grid) return;
 
-  grid.innerHTML =
-    '<p class="texto-centro">Cargando productos del catálogo...</p>';
+  // ✅ 1) Mostrar cache AL INSTANTE (si existe)
+  const cache = leerCacheCatalogo(48);
+  if (cache && cache.length) {
+    productos = cache;
 
+    // reconstruyo sets por si el cache ya viene armado
+    reconstruirSetsDesdeProductos();
+
+    construirMegaMenu();
+    aplicarFiltros();
+    actualizarMiniCarrito();
+  } else {
+    grid.innerHTML =
+      '<p class="texto-centro">Cargando productos del catálogo...</p>';
+  }
+
+  // ✅ 2) Actualizar desde Firestore (en segundo plano)
   try {
     const ref = collection(db, "productos");
     const q = query(ref, orderBy("nombre"));
     const snap = await getDocs(q);
 
-    productos = [];
-    categoriasSet = new Set();
-    subcategoriasSet = new Set();
-    etiquetasSet = new Set();
+    const nuevos = [];
+    const catSet = new Set();
+    const subSet = new Set();
+    const tagSet = new Set();
 
     snap.forEach((docSnap) => {
       const d = docSnap.data();
@@ -201,7 +259,7 @@ async function cargarProductos() {
           .filter(Boolean);
       }
 
-      productos.push({
+      const prod = {
         id: docSnap.id,
         codigo,
         nombre,
@@ -213,27 +271,48 @@ async function cargarProductos() {
         destacado,
         descripcion,
         etiquetas,
-      });
+      };
 
-      if (categoria) categoriasSet.add(categoria);
-      if (subcategoria) subcategoriasSet.add(subcategoria);
-      etiquetas.forEach((tag) => etiquetasSet.add(tag));
+      nuevos.push(prod);
+
+      if (categoria) catSet.add(categoria);
+      if (subcategoria) subSet.add(subcategoria);
+      etiquetas.forEach((tag) => tagSet.add(tag));
     });
 
-    construirMegaMenu();
-    aplicarFiltros();
-    actualizarMiniCarrito();
+    // Si cambió algo, actualizo estado + cache + render
+    // (comparación rápida por cantidad + primer/último id)
+    const cambioRapido =
+      nuevos.length !== productos.length ||
+      (nuevos[0]?.id || "") !== (productos[0]?.id || "") ||
+      (nuevos[nuevos.length - 1]?.id || "") !==
+        (productos[productos.length - 1]?.id || "");
+
+    productos = nuevos;
+    categoriasSet = catSet;
+    subcategoriasSet = subSet;
+    etiquetasSet = tagSet;
+
+    guardarCacheCatalogo(productos);
+
+    // si no había cache, o si hubo cambio, re-renderizo
+    if (!cache || cambioRapido) {
+      construirMegaMenu();
+      aplicarFiltros();
+      actualizarMiniCarrito();
+    }
   } catch (error) {
     console.error("Error cargando productos desde Firestore:", error);
-    grid.innerHTML =
-      '<p class="texto-centro">Error al cargar el catálogo. Revisá la consola.</p>';
+    if (!cache) {
+      grid.innerHTML =
+        '<p class="texto-centro">Error al cargar el catálogo. Revisá la consola.</p>';
+    }
   }
 }
 
 // -------------------------
 // Mega dropdown / filtros
 // -------------------------
-
 function construirMegaMenu() {
   if (selectCategoria) {
     selectCategoria.innerHTML = '<option value="">Todas</option>';
@@ -468,8 +547,6 @@ function renderizarPagina() {
   if (paginaActual > totalPaginas) paginaActual = totalPaginas;
 
   const inicio = (paginaActual - 1) * ITEMS_POR_PAGINA;
-
-  // ✅ FIX IMPORTANTE: que nunca se pase del total
   const fin = Math.min(inicio + ITEMS_POR_PAGINA, total);
 
   const pagina = productosFiltrados.slice(inicio, fin);
@@ -511,6 +588,8 @@ function actualizarPaginador(pagina, totalPaginas, totalItems) {
     btn.addEventListener("click", () => {
       paginaActual = i;
       renderizarPagina();
+      // opcional: subir arriba al cambiar página
+      window.scrollTo({ top: 0, behavior: "smooth" });
     });
     contNumeros.appendChild(btn);
   }
@@ -519,7 +598,6 @@ function actualizarPaginador(pagina, totalPaginas, totalItems) {
 // -------------------------
 // Render de card de producto
 // -------------------------
-
 function crearBadgeStock(stock) {
   const span = document.createElement("span");
   const valor = Number.isFinite(stock) ? stock : 0;
@@ -546,6 +624,10 @@ function crearCardProducto(p) {
     img.classList.add("producto-imagen");
     img.src = p.imagen;
     img.alt = p.nombre || "Producto";
+
+    // ✅ MEJORA: carga liviana (no bloquea el render)
+    img.loading = "lazy";
+    img.decoding = "async";
 
     img.onerror = () => {
       img.remove();
@@ -691,6 +773,7 @@ if (btnPrev) {
     if (paginaActual > 1) {
       paginaActual--;
       renderizarPagina();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   });
 }
@@ -701,6 +784,7 @@ if (btnNext) {
     if (paginaActual < totalPaginas) {
       paginaActual++;
       renderizarPagina();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   });
 }
