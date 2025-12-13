@@ -1605,7 +1605,13 @@
         setTimeout(() => render(), 60);
       }
     });
+    window.addEventListener("pageshow", () => {
+  actualizarStockVisualDesdeCarrito();
+});
 
+window.addEventListener("focus", () => {
+  actualizarStockVisualDesdeCarrito();
+});
     // =========================
     // INIT
     // =========================
