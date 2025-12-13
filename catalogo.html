@@ -6,11 +6,9 @@
   <title>Delivery Mayorista | Catálogo</title>
 
   <style>
-    /* Ocultamos los selects reales (se usan internamente para filtros) */
+    /* Ocultamos selects reales (se usan internamente) */
     #filtro-categoria,
-    #filtro-subcategoria {
-      display: none !important;
-    }
+    #filtro-subcategoria { display: none !important; }
 
     body {
       background: #0f0f1a;
@@ -47,11 +45,7 @@
     /* ===========================
        MEGA MENÚ CATEGORÍAS
     ============================*/
-
-    .mega-dropdown {
-      position: relative;
-      min-width: 260px;
-    }
+    .mega-dropdown { position: relative; min-width: 260px; }
 
     .mega-toggle {
       width: 100%;
@@ -76,10 +70,7 @@
       text-align: left;
     }
 
-    .mega-arrow {
-      font-size: 10px;
-      margin-left: 8px;
-    }
+    .mega-arrow { font-size: 10px; margin-left: 8px; }
 
     .mega-menu {
       position: absolute;
@@ -92,24 +83,19 @@
       display: none;
       min-width: 420px;
       max-width: 720px;
-      padding: 12px 8px 40px; /* extra abajo para el botón reset */
-      z-index: 999;
+      padding: 12px 8px 40px;
+      z-index: 999; /* base */
       column-gap: 4px;
     }
 
-    .mega-dropdown.open .mega-menu {
-      display: flex;
-    }
+    .mega-dropdown.open .mega-menu { display: flex; }
 
     .mega-col {
       flex: 1;
       padding: 4px 8px;
       border-right: 1px solid rgba(255, 255, 255, 0.08);
     }
-
-    .mega-col:last-child {
-      border-right: none;
-    }
+    .mega-col:last-child { border-right: none; }
 
     .mega-col h4 {
       font-size: 13px;
@@ -125,9 +111,7 @@
       overflow-y: auto;
     }
 
-    .mega-item,
-    .mega-subitem,
-    .mega-tagitem {
+    .mega-item, .mega-subitem, .mega-tagitem {
       padding: 7px 10px;
       border-radius: 10px;
       font-size: 13px;
@@ -137,26 +121,15 @@
       transition: background 0.12s ease, color 0.12s ease;
     }
 
-    .mega-item:hover,
-    .mega-subitem:hover,
-    .mega-tagitem:hover {
-      background: #1f2430;
-    }
+    .mega-item:hover, .mega-subitem:hover, .mega-tagitem:hover { background: #1f2430; }
 
-    .mega-item-activo,
-    .mega-subitem-activo,
-    .mega-tagitem-activo {
+    .mega-item-activo, .mega-subitem-activo, .mega-tagitem-activo {
       background: #ffa400;
       color: #000;
       font-weight: 600;
     }
 
-    /* Iconos en la columna de categorías */
-    .mega-item {
-      position: relative;
-      padding-left: 30px;
-    }
-
+    .mega-item { position: relative; padding-left: 30px; }
     .mega-item::before {
       content: attr(data-icon);
       position: absolute;
@@ -167,7 +140,6 @@
       opacity: 0.95;
     }
 
-    /* Botón reset filtros */
     .mega-reset-btn {
       position: absolute;
       right: 14px;
@@ -183,15 +155,9 @@
       align-items: center;
       gap: 6px;
     }
-
     .mega-reset-btn span { font-size: 12px; }
+    .mega-reset-btn:hover { background: #ffa400; color: #000; }
 
-    .mega-reset-btn:hover {
-      background: #ffa400;
-      color: #000;
-    }
-
-    /* Filtros extra catálogo */
     .chk-catalogo {
       display: flex;
       align-items: center;
@@ -199,22 +165,16 @@
       font-size: 0.8rem;
       color: #c9c9ff;
     }
-
-    .chk-catalogo input {
-      accent-color: #ff5ca8;
-    }
+    .chk-catalogo input { accent-color: #ff5ca8; }
 
     /* ===========================
-       GRID + CARDS (FIX ALTURAS)
+       GRID + CARDS (MISMA ALTURA)
     ============================*/
-
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 25px;
       padding: 25px;
-
-      /* FIX: mismas alturas por fila */
       align-items: stretch;
       grid-auto-rows: 1fr;
     }
@@ -227,7 +187,6 @@
       text-align: center;
       min-height: 260px;
 
-      /* FIX: ocupar toda la altura */
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -235,8 +194,6 @@
       box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
       text-decoration: none;
       color: inherit;
-      opacity: 1;
-      translate: 0;
 
       transition: transform 0.12s ease, box-shadow 0.12s ease;
     }
@@ -257,6 +214,8 @@
       overflow: hidden;
       position: relative;
       margin-bottom: 10px;
+      color: #7777a7;
+      font-size: 13px;
     }
 
     .producto-imagen {
@@ -274,7 +233,6 @@
       line-height: 1.15;
       cursor: pointer;
 
-      /* títulos parejos */
       min-height: 34px;
       display: flex;
       align-items: center;
@@ -288,7 +246,6 @@
       margin-top: 6px;
       line-height: 1.25;
 
-      /* FIX: limitar a 3 líneas */
       min-height: 48px;
       display: -webkit-box;
       -webkit-line-clamp: 3;
@@ -296,9 +253,9 @@
       overflow: hidden;
     }
 
-    /* FIX: empuja el bloque de abajo */
+    /* empuja el bloque inferior hacia abajo */
     .producto-precio-row {
-      margin-top: auto; /* FIX */
+      margin-top: auto;
       padding-top: 10px;
     }
 
@@ -315,12 +272,12 @@
       margin-top: 4px;
     }
 
-    /* FIX: +/- centrados */
+    /* +/- centrado */
     .cantidad-container {
       margin-top: 8px;
       display: flex;
       align-items: center;
-      justify-content: center; /* FIX */
+      justify-content: center;
       gap: 8px;
       width: 100%;
     }
@@ -364,9 +321,7 @@
       gap: 6px;
     }
 
-    .btn-agregar-carrito-activo {
-      background: #1ebe57;
-    }
+    .btn-agregar-carrito-activo { background: #1ebe57; }
 
     .badge-stock {
       display: inline-block;
@@ -375,21 +330,9 @@
       font-size: 0.75rem;
       font-weight: 600;
     }
-
-    .badge-stock.stock-ok {
-      background: rgba(0, 200, 120, 0.16);
-      color: #7cffb5;
-    }
-
-    .badge-stock.stock-bajo {
-      background: rgba(255, 180, 0, 0.16);
-      color: #ffdd7c;
-    }
-
-    .badge-stock.stock-cero {
-      background: rgba(255, 0, 80, 0.16);
-      color: #ff7a9c;
-    }
+    .badge-stock.stock-ok { background: rgba(0, 200, 120, 0.16); color: #7cffb5; }
+    .badge-stock.stock-bajo { background: rgba(255, 180, 0, 0.16); color: #ffdd7c; }
+    .badge-stock.stock-cero { background: rgba(255, 0, 80, 0.16); color: #ff7a9c; }
 
     .chip-destacado {
       font-size: 0.7rem;
@@ -400,11 +343,13 @@
       margin-left: 0.5rem;
     }
 
-    /* MINI CARRITO */
+    /* ===========================
+       MINI CARRITO
+    ============================*/
     .mini-carrito {
       position: fixed;
       right: 16px;
-      bottom: 100px;
+      bottom: 90px;  /* para dejar lugar al WA abajo */
       display: flex;
       align-items: center;
       gap: 8px;
@@ -419,19 +364,12 @@
     }
 
     .mini-carrito-icono { font-size: 18px; }
+    .mini-carrito-texto { display: flex; flex-direction: column; line-height: 1.1; }
+    .mini-carrito-linea { white-space: nowrap; font-weight: 500; }
 
-    .mini-carrito-texto {
-      display: flex;
-      flex-direction: column;
-      line-height: 1.1;
-    }
-
-    .mini-carrito-linea {
-      white-space: nowrap;
-      font-weight: 500;
-    }
-
-    /* PAGINADOR */
+    /* ===========================
+       PAGINADOR
+    ============================*/
     .paginador-contenedor {
       padding: 0 25px 24px;
       display: flex;
@@ -455,8 +393,7 @@
       flex-wrap: wrap;
     }
 
-    .paginador-btn,
-    .paginador-numero {
+    .paginador-btn, .paginador-numero {
       border-radius: 999px;
       border: none;
       min-width: 32px;
@@ -479,18 +416,8 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
     }
 
-    .paginador-btn:disabled {
-      opacity: 0.4;
-      cursor: default;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .paginador-numero--activo {
-      background: #ffa400;
-      color: #000;
-      font-weight: 700;
-    }
+    .paginador-btn:disabled { opacity: 0.4; cursor: default; transform: none; box-shadow: none; }
+    .paginador-numero--activo { background: #ffa400; color: #000; font-weight: 700; }
 
     .paginador-numeros {
       display: flex;
@@ -499,12 +426,31 @@
       justify-content: center;
     }
 
-    /* MOBILE */
+    /* ===========================
+       WHATSAPP SIEMPRE VISIBLE
+    ============================*/
+    .btn-wa-flotante {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 99999; /* por encima de todo */
+      background: #25d366;
+      padding: 14px;
+      border-radius: 50%;
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+      transition: transform 0.1s ease, filter 0.1s ease;
+    }
+    .btn-wa-flotante:hover { filter: brightness(1.06); transform: translateY(-1px); }
+
+    /* ===========================
+       RESPONSIVE
+    ============================*/
     @media (max-width: 768px) {
-      header {
-        text-align: center;
-        font-size: 18px;
-      }
+      header { text-align: center; font-size: 18px; }
 
       .toolbar {
         padding: 18px 12px 10px;
@@ -519,15 +465,8 @@
         font-size: 14px;
       }
 
-      .mega-dropdown {
-        width: 100%;
-        max-width: 420px;
-      }
-
-      .mega-menu {
-        max-width: 100%;
-        min-width: 100%;
-      }
+      .mega-dropdown { width: 100%; max-width: 420px; }
+      .mega-menu { max-width: 100%; min-width: 100%; }
 
       .grid {
         padding: 16px 12px 12px;
@@ -539,12 +478,11 @@
     }
 
     @media (max-width: 480px) {
-      .grid {
-        grid-template-columns: 1fr;
-        gap: 22px;
-        align-items: stretch;
-        grid-auto-rows: 1fr;
-      }
+      .grid { grid-template-columns: 1fr; gap: 22px; }
+
+      /* WA arriba del mini carrito en mobile */
+      .btn-wa-flotante { bottom: 140px; right: 14px; }
+      .mini-carrito { bottom: 80px; }
     }
   </style>
 </head>
@@ -556,7 +494,7 @@
     <input id="buscador" type="text" placeholder="Buscar por código o descripción" />
 
     <div class="mega-dropdown" id="megaDropdown">
-      <button id="categoriaToggle" class="mega-toggle">
+      <button id="categoriaToggle" class="mega-toggle" type="button">
         <span class="mega-label">Todas las categorías</span>
         <span class="mega-arrow">▾</span>
       </button>
@@ -566,16 +504,18 @@
           <h4>Categorías</h4>
           <ul id="megaCategorias"></ul>
         </div>
+
         <div class="mega-col">
           <h4 id="megaSubTitle">Subcategorías</h4>
           <ul id="megaSubcategorias"></ul>
         </div>
+
         <div class="mega-col">
           <h4 id="megaTagTitle">Etiquetas</h4>
           <ul id="megaEtiquetas"></ul>
         </div>
 
-        <button id="megaReset" class="mega-reset-btn">
+        <button id="megaReset" class="mega-reset-btn" type="button">
           <span>🔄</span> Limpiar filtros
         </button>
       </div>
@@ -607,6 +547,7 @@
     </div>
   </div>
 
+  <!-- MINI CARRITO -->
   <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
     <div class="mini-carrito-icono">🛒</div>
     <div class="mini-carrito-texto">
@@ -619,6 +560,20 @@
     </div>
   </div>
 
-  <script type="module" src="js/catalogo.js?v=fix1"></script>
+  <!-- WHATSAPP (SIEMPRE VISIBLE) -->
+  <a
+    id="wa-flotante"
+    class="btn-wa-flotante"
+    href="https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista."
+    target="_blank"
+    aria-label="WhatsApp"
+    rel="noopener"
+  >
+    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="#ffffff" viewBox="0 0 32 32">
+      <path d="M16.019 2.594c-7.453 0-13.438 6.063-13.438 13.531 0 2.375.625 4.656 1.844 6.719l-1.969 7.219 7.453-1.969c1.969 1.063 4.219 1.625 6.375 1.625h.031c7.438 0 13.438-6.063 13.438-13.531 0-3.594-1.406-6.938-3.969-9.469-2.531-2.531-5.906-4.125-9.656-4.125zm0 24.844h-.031c-1.938 0-3.813-.5-5.469-1.406l-.406-.219-4.438 1.188 1.188-4.344-.25-.406c-1.188-1.906-1.813-4.094-1.813-6.375 0-6.563 5.344-11.906 11.906-11.906 3.188 0 6.156 1.25 8.406 3.5 2.25 2.25 3.5 5.219 3.5 8.406-.031 6.531-5.375 11.875-11.906 11.875zm6.344-8.531c-.344-.188-2.031-1-2.344-1.094-.313-.094-.531-.156-.75.188-.219.344-.875 1.094-1.063 1.313-.188.188-.375.219-.719.031-.344-.188-1.438-.531-2.75-1.656-1-.875-1.656-1.938-1.844-2.281-.188-.344-.016-.531.156-.719.156-.156.344-.406.5-.594.156-.188.219-.313.344-.531.094-.219.031-.406-.031-.594-.063-.188-.75-1.844-1.031-2.5-.281-.656-.563-.563-.75-.563h-.656c-.219 0-.594.094-.906.438-.313.344-1.188 1.156-1.188 2.813s1.219 3.25 1.406 3.469c.188.219 2.406 3.656 5.844 5 3.438 1.344 3.438.875 4.063.813.625-.063 2.031-.813 2.313-1.594.281-.781.281-1.438.219-1.594-.063-.156-.281-.25-.625-.438z"/>
+    </svg>
+  </a>
+
+  <script type="module" src="js/catalogo.js?v=wa1"></script>
 </body>
 </html>
