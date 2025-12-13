@@ -29,9 +29,7 @@
       transform: translateY(0);
     }
 
-    .producto-imagen {
-      flex: 0 0 48%;
-    }
+    .producto-imagen { flex: 0 0 48%; }
 
     .producto-imagen img {
       width: 100%;
@@ -42,9 +40,7 @@
       display: block;
     }
 
-    .producto-info {
-      flex: 0 0 42%;
-    }
+    .producto-info { flex: 0 0 42%; }
 
     .producto-acciones {
       display: flex;
@@ -67,21 +63,9 @@
       border: none;
     }
 
-    .btn-secundario {
-      background: #202432;
-      color: #fff;
-    }
-
-    .btn-whatsapp {
-      background: #1ebe57;
-      color: #fff;
-      font-weight: 600;
-    }
-
-    .btn-nav {
-      background: #202432;
-      color: #fff;
-    }
+    .btn-secundario { background: #202432; color: #fff; }
+    .btn-whatsapp { background: #1ebe57; color: #fff; font-weight: 600; }
+    .btn-nav { background: #202432; color: #fff; }
 
     .producto-nav {
       max-width: 1200px;
@@ -93,38 +77,17 @@
     }
 
     /* COLORES DE STOCK */
-    .producto-stock {
-      margin-top: 6px;
-    }
-    .producto-stock.stock-sin {
-      color: #ff4d4f;
-      font-weight: 600;
-    }
-    .producto-stock.stock-bajo {
-      color: #ffd666;
-      font-weight: 600;
-    }
+    .producto-stock { margin-top: 6px; }
+    .producto-stock.stock-sin { color: #ff4d4f; font-weight: 600; }
+    .producto-stock.stock-bajo { color: #ffd666; font-weight: 600; }
 
     /* ====== MOBILE / TABLET ====== */
     @media (max-width: 900px) {
-      main.producto-pagina {
-        padding: 24px 12px 36px;
-      }
+      main.producto-pagina { padding: 24px 12px 36px; }
+      main.producto-pagina .producto-wrapper { flex-direction: column; gap: 20px; }
 
-      main.producto-pagina .producto-wrapper {
-        flex-direction: column;
-        gap: 20px;
-      }
-
-      .producto-imagen,
-      .producto-info {
-        flex: 1 1 auto;
-        width: 100%;
-      }
-
-      .producto-info {
-        display: block !important;
-      }
+      .producto-imagen, .producto-info { flex: 1 1 auto; width: 100%; }
+      .producto-info { display: block !important; }
 
       .producto-info .producto-codigo,
       .producto-info .producto-titulo,
@@ -138,19 +101,10 @@
       }
 
       .producto-info .producto-precio,
-      .producto-info .producto-stock {
-        margin-top: 8px;
-      }
+      .producto-info .producto-stock { margin-top: 8px; }
 
-      .producto-acciones {
-        flex-direction: column;
-        width: 100%;
-      }
-
-      .producto-acciones a {
-        width: 100%;
-        text-align: center;
-      }
+      .producto-acciones { flex-direction: column; width: 100%; }
+      .producto-acciones a { width: 100%; text-align: center; }
     }
   </style>
 </head>
@@ -191,6 +145,14 @@
     const BASE_IMG =
       "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
+    // Cache del catálogo (viene del catalogo.js)
+    const CLAVE_CACHE_CATALOGO = "cache_catalogo_v1";
+
+    function mostrarWrapperVisibleSiempre() {
+      const wrapper = document.querySelector(".producto-wrapper");
+      if (wrapper) wrapper.classList.add("visible");
+    }
+
     // "1992,2" -> 1992.2
     function parsearPrecio(valor) {
       if (typeof valor === "number") return valor;
@@ -207,144 +169,178 @@
       return params.get("codigo");
     }
 
+    function leerCacheCatalogo() {
+      try {
+        const raw = localStorage.getItem(CLAVE_CACHE_CATALOGO);
+        if (!raw) return null;
+        const obj = JSON.parse(raw);
+        const data = Array.isArray(obj?.data) ? obj.data : null;
+        return data;
+      } catch {
+        return null;
+      }
+    }
+
+    function normalizarLista(data) {
+      if (Array.isArray(data)) return data;
+      if (data && Array.isArray(data.productos)) return data.productos;
+      return [];
+    }
+
+    function renderizarProducto(prod, productos, index) {
+      const infoDiv = document.getElementById("producto-info");
+      if (!infoDiv) return;
+
+      const codigo       = prod.codigo || "";
+      const nombreCorto  = prod.nombre || "";
+      const categoria    = prod.categoria || "";
+      const subcategoria = prod.subcategoria || "";
+      const descLarga    = prod.descripcionLarga || prod.descripcion || "";
+      const precioMayor  = parsearPrecio(prod.precio);
+      const precioUsado  = precioMayor ?? null;
+      const stock        = prod.stock ?? "";
+      const stockNum     = Number(stock);
+
+      /* ========== IMAGEN ========== */
+      const imgPrincipal = document.getElementById("imagen-principal");
+      if (imgPrincipal) {
+        const urls = [
+          prod.imagen, // URL directa desde el JSON/Firestore
+          `${BASE_IMG}/${codigo}.jpg`,
+          `${BASE_IMG}/${codigo}.JPG`,
+          `${BASE_IMG}/${codigo}.png`,
+          `${BASE_IMG}/${codigo}.PNG`,
+        ].filter(Boolean);
+
+        let intento = 0;
+        const probar = () => {
+          if (intento >= urls.length) return;
+          imgPrincipal.src = urls[intento];
+          intento++;
+        };
+
+        imgPrincipal.alt = nombreCorto || codigo;
+        imgPrincipal.loading = "lazy";
+        imgPrincipal.decoding = "async";
+        imgPrincipal.onerror = probar;
+        probar();
+      }
+
+      const miniaturasDiv = document.getElementById("miniaturas");
+      if (miniaturasDiv) miniaturasDiv.innerHTML = "";
+
+      /* ========== INFO ========== */
+      const precioTexto =
+        precioUsado != null
+          ? `$ ${precioUsado.toLocaleString("es-AR", {
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            })}`
+          : "";
+
+      let stockHtml = "";
+      if (stock !== "" && stock != null) {
+        let cls = "producto-stock";
+        if (!isNaN(stockNum)) {
+          if (stockNum === 0) cls += " stock-sin";
+          else if (stockNum > 0 && stockNum <= 5) cls += " stock-bajo";
+        }
+        stockHtml = `<p class="${cls}">Stock: ${stock} unidades</p>`;
+      }
+
+      const categoriaHtml =
+        categoria || subcategoria
+          ? `<p class="producto-categoria">
+               ${categoria}
+               ${categoria && subcategoria ? " · " : ""}
+               ${subcategoria}
+             </p>`
+          : "";
+
+      infoDiv.innerHTML = `
+        <p class="producto-codigo">${codigo}</p>
+        <h1 class="producto-titulo">${nombreCorto}</h1>
+        ${categoriaHtml}
+        ${descLarga ? `<p class="producto-descripcion">${descLarga}</p>` : ""}
+        ${precioTexto ? `<p class="producto-precio">${precioTexto}</p>` : ""}
+        ${stockHtml}
+        <div class="producto-acciones">
+          <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
+          <a href="${armarLinkWhatsApp(prod)}" target="_blank" class="btn-whatsapp" rel="noopener">
+            Consultar por WhatsApp
+          </a>
+        </div>
+      `;
+
+      /* ========== NAVEGACIÓN ========== */
+      const nav = document.getElementById("producto-nav");
+      if (nav && productos.length > 1) {
+        const anterior = productos[(index - 1 + productos.length) % productos.length];
+        const siguiente = productos[(index + 1) % productos.length];
+
+        const codAnt = (anterior && anterior.codigo) || "";
+        const codSig = (siguiente && siguiente.codigo) || "";
+
+        nav.innerHTML = `
+          <button class="btn-nav" onclick="irAProducto('${codAnt}')">← ${codAnt}</button>
+          <button class="btn-nav" onclick="window.location.href='catalogo.html'">Volver al listado</button>
+          <button class="btn-nav" onclick="irAProducto('${codSig}')">${codSig} →</button>
+        `;
+      }
+
+      // ✅ clave: SIEMPRE mostrar wrapper
+      mostrarWrapperVisibleSiempre();
+    }
+
     async function cargarProducto() {
       const codigoURL = obtenerCodigoDeURL();
       const infoDiv = document.getElementById("producto-info");
 
       if (!codigoURL) {
-        infoDiv.innerHTML =
-          "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
+        if (infoDiv) {
+          infoDiv.innerHTML =
+            "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
+        }
+        mostrarWrapperVisibleSiempre();
         return;
       }
 
-      try {
-        const resp = await fetch("data/productos.json");
-        if (!resp.ok) {
-          throw new Error("No se pudo cargar productos.json: " + resp.status);
+      // 1) Intentar desde CACHE (instantáneo)
+      const cache = leerCacheCatalogo();
+      if (cache && cache.length) {
+        const idx = cache.findIndex((p) => String(p.codigo) === String(codigoURL));
+        if (idx !== -1) {
+          renderizarProducto(cache[idx], cache, idx);
+          return;
         }
+      }
+
+      // 2) Fallback: intentar productos.json (por si todavía lo usás)
+      try {
+        const resp = await fetch("data/productos.json", { cache: "no-store" });
+        if (!resp.ok) throw new Error("No se pudo cargar productos.json: " + resp.status);
 
         const data = await resp.json();
-        const productos = Array.isArray(data) ? data : data.productos || [];
+        const productos = normalizarLista(data);
 
-        // buscamos por el campo "codigo"
-        const index = productos.findIndex((p) => p.codigo === codigoURL);
-
+        const index = productos.findIndex((p) => String(p.codigo) === String(codigoURL));
         if (index === -1) {
-          infoDiv.innerHTML =
-            "<h2>Producto no encontrado</h2><p>Verificá el código.</p>";
+          if (infoDiv) {
+            infoDiv.innerHTML =
+              "<h2>Producto no encontrado</h2><p>Verificá el código.</p><p>Tip: entrá al catálogo primero para que se guarde el cache.</p>";
+          }
+          mostrarWrapperVisibleSiempre();
           return;
         }
 
-        const prod = productos[index];
-
-        // datos del producto
-        const codigo       = prod.codigo || "";
-        const nombreCorto  = prod.nombre || "";
-        const categoria    = prod.categoria || "";
-        const subcategoria = prod.subcategoria || "";
-        const descLarga    = prod.descripcionLarga || "";
-        const precioMayor  = parsearPrecio(prod.precio);
-        const precioCliente = null;
-        const precioUsado  = precioMayor ?? precioCliente ?? null;
-        const stock        = prod.stock ?? "";
-        const stockNum     = Number(stock);
-
-        /* ========== IMAGEN ========== */
-        const imgPrincipal = document.getElementById("imagen-principal");
-        if (imgPrincipal) {
-          const urls = [
-            prod.imagen, // URL directa desde el JSON
-            `${BASE_IMG}/${codigo}.jpg`,
-            `${BASE_IMG}/${codigo}.JPG`,
-            `${BASE_IMG}/${codigo}.png`,
-            `${BASE_IMG}/${codigo}.PNG`,
-          ].filter(Boolean);
-
-          let intento = 0;
-          const probar = () => {
-            if (intento >= urls.length) return;
-            imgPrincipal.src = urls[intento];
-            intento++;
-          };
-
-          imgPrincipal.alt = nombreCorto || codigo;
-          imgPrincipal.loading = "lazy";
-          imgPrincipal.onerror = probar;
-          probar();
-        }
-
-        const miniaturasDiv = document.getElementById("miniaturas");
-        if (miniaturasDiv) miniaturasDiv.innerHTML = "";
-
-        /* ========== INFO ========== */
-        const precioTexto =
-          precioUsado != null
-            ? `$ ${precioUsado.toLocaleString("es-AR", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              })}`
-            : "";
-
-        let stockHtml = "";
-        if (stock !== "" && stock != null) {
-          let cls = "producto-stock";
-          if (!isNaN(stockNum)) {
-            if (stockNum === 0) cls += " stock-sin";
-            else if (stockNum > 0 && stockNum <= 5) cls += " stock-bajo";
-          }
-          stockHtml = `<p class="${cls}">Stock: ${stock} unidades</p>`;
-        }
-
-        // categoría + subcategoría en una sola línea
-        const categoriaHtml =
-          categoria || subcategoria
-            ? `<p class="producto-categoria">
-                 ${categoria}
-                 ${categoria && subcategoria ? " · " : ""}
-                 ${subcategoria}
-               </p>`
-            : "";
-
-        infoDiv.innerHTML = `
-          <p class="producto-codigo">${codigo}</p>
-          <h1 class="producto-titulo">${nombreCorto}</h1>
-          ${categoriaHtml}
-          ${descLarga ? `<p class="producto-descripcion">${descLarga}</p>` : ""}
-          ${precioTexto ? `<p class="producto-precio">${precioTexto}</p>` : ""}
-          ${stockHtml}
-          <div class="producto-acciones">
-            <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
-            <a href="${armarLinkWhatsApp(prod)}" target="_blank" class="btn-whatsapp">
-              Consultar por WhatsApp
-            </a>
-          </div>
-        `;
-
-        /* ========== NAVEGACIÓN ========== */
-        const nav = document.getElementById("producto-nav");
-        if (nav && productos.length > 1) {
-          const anterior =
-            productos[(index - 1 + productos.length) % productos.length];
-          const siguiente = productos[(index + 1) % productos.length];
-
-          const codAnt = (anterior && anterior.codigo) || "";
-          const codSig = (siguiente && siguiente.codigo) || "";
-
-          nav.innerHTML = `
-            <button class="btn-nav" onclick="irAProducto('${codAnt}')">← ${codAnt}</button>
-            <button class="btn-nav" onclick="window.location.href='catalogo.html'">Volver al listado</button>
-            <button class="btn-nav" onclick="irAProducto('${codSig}')">${codSig} →</button>
-          `;
-        }
-
-        // mostrar animación wrapper
-        const wrapper = document.querySelector(".producto-wrapper");
-        if (wrapper) wrapper.classList.add("visible");
+        renderizarProducto(productos[index], productos, index);
       } catch (err) {
         console.error("Error en cargarProducto:", err);
-        const infoDiv = document.getElementById("producto-info");
-        infoDiv.innerHTML =
-          "<h2>Error</h2><p>No se pudo cargar el producto.</p>";
+        if (infoDiv) {
+          infoDiv.innerHTML =
+            "<h2>Error</h2><p>No se pudo cargar el producto.</p><p>Entrá al catálogo primero para generar el cache, o revisá si existe <b>data/productos.json</b>.</p>";
+        }
+        mostrarWrapperVisibleSiempre();
       }
     }
 
@@ -374,16 +370,13 @@
     }
 
     function irAProducto(codigo) {
-      window.location.href = `producto.html?codigo=${encodeURIComponent(
-        codigo
-      )}`;
+      window.location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
     }
 
     cargarProducto();
   </script>
 
-  <!-- Si js/carrito.js no da errores en consola, podés dejarlo.
-       Si ves errores del carrito en esta página, borra la línea de abajo. -->
+  <!-- Si este script te tira errores en consola en producto.html, lo podés sacar -->
   <script src="js/carrito.js"></script>
 </body>
 </html>
