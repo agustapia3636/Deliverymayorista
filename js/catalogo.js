@@ -58,7 +58,20 @@ let subcategoriaSeleccionada = "";
 let etiquetaSeleccionada = "";
 
 let paginaActual = 1;
-const ITEMS_POR_PAGINA = 28;
+function calcularItemsPorPagina() {
+  return window.innerWidth >= 1200 ? 28 : 16;
+}
+
+let ITEMS_POR_PAGINA = calcularItemsPorPagina();
+
+window.addEventListener("resize", () => {
+  const nuevo = calcularItemsPorPagina();
+  if (nuevo !== ITEMS_POR_PAGINA) {
+    ITEMS_POR_PAGINA = nuevo;
+    paginaActual = 1;
+    renderizarPagina();
+  }
+});
 
 // -------------------------
 // Util carrito (localStorage)
