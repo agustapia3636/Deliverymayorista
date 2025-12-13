@@ -7,10 +7,7 @@
   <link rel="stylesheet" href="css/estilos.css" />
 
   <style>
-    /* ====== LAYOUT DESKTOP ====== */
-    main.producto-pagina {
-      padding: 40px 16px 60px;
-    }
+    main.producto-pagina { padding: 40px 16px 60px; }
 
     main.producto-pagina .producto-wrapper {
       max-width: 1200px;
@@ -22,7 +19,7 @@
 
       opacity: 0;
       transform: translateY(10px);
-      transition: opacity .35s ease, transform .35s ease;
+      transition: opacity .25s ease, transform .25s ease;
     }
     main.producto-pagina .producto-wrapper.visible {
       opacity: 1;
@@ -30,7 +27,6 @@
     }
 
     .producto-imagen { flex: 0 0 48%; }
-
     .producto-imagen img {
       width: 100%;
       height: auto;
@@ -41,7 +37,6 @@
     }
 
     .producto-info { flex: 0 0 42%; }
-
     .producto-acciones {
       display: flex;
       gap: 10px;
@@ -49,9 +44,7 @@
       flex-wrap: wrap;
     }
 
-    .btn-secundario,
-    .btn-whatsapp,
-    .btn-nav {
+    .btn-secundario, .btn-whatsapp {
       display: inline-flex;
       justify-content: center;
       align-items: center;
@@ -65,44 +58,21 @@
 
     .btn-secundario { background: #202432; color: #fff; }
     .btn-whatsapp { background: #1ebe57; color: #fff; font-weight: 600; }
-    .btn-nav { background: #202432; color: #fff; }
 
-    .producto-nav {
-      max-width: 1200px;
-      margin: 20px auto 0;
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    /* COLORES DE STOCK */
     .producto-stock { margin-top: 6px; }
     .producto-stock.stock-sin { color: #ff4d4f; font-weight: 600; }
     .producto-stock.stock-bajo { color: #ffd666; font-weight: 600; }
 
-    /* ====== MOBILE / TABLET ====== */
+    .producto-loading {
+      max-width: 1200px;
+      margin: 0 auto;
+      opacity: 0.85;
+    }
+
     @media (max-width: 900px) {
       main.producto-pagina { padding: 24px 12px 36px; }
       main.producto-pagina .producto-wrapper { flex-direction: column; gap: 20px; }
-
       .producto-imagen, .producto-info { flex: 1 1 auto; width: 100%; }
-      .producto-info { display: block !important; }
-
-      .producto-info .producto-codigo,
-      .producto-info .producto-titulo,
-      .producto-info .producto-categoria,
-      .producto-info .producto-descripcion,
-      .producto-info .producto-precio,
-      .producto-info .producto-stock {
-        display: block !important;
-        text-align: left;
-        float: none;
-      }
-
-      .producto-info .producto-precio,
-      .producto-info .producto-stock { margin-top: 8px; }
-
       .producto-acciones { flex-direction: column; width: 100%; }
       .producto-acciones a { width: 100%; text-align: center; }
     }
@@ -110,7 +80,6 @@
 </head>
 
 <body>
-  <!-- TOPBAR -->
   <header class="topbar">
     <div class="topbar-inner">
       <a href="index.html" class="logo-link">Delivery Mayorista</a>
@@ -118,42 +87,46 @@
     </div>
   </header>
 
-  <!-- PÁGINA DE PRODUCTO -->
   <main class="producto-pagina contenedor">
+    <div id="producto-loading" class="producto-loading">Cargando producto...</div>
+
     <div class="producto-wrapper">
-      <!-- Imagen -->
       <div id="producto-imagen" class="producto-imagen">
         <img id="imagen-principal" src="" alt="producto" />
-        <div id="miniaturas" class="miniaturas"></div>
       </div>
-
-      <!-- Info -->
       <div id="producto-info" class="producto-info"></div>
     </div>
-
-    <!-- Navegación anterior / siguiente -->
-    <div id="producto-nav" class="producto-nav"></div>
   </main>
 
-  <!-- FOOTER -->
-  <footer class="footer">
-    Catálogo mayorista · Delivery Mayorista
-  </footer>
+  <footer class="footer">Catálogo mayorista · Delivery Mayorista</footer>
 
-  <!-- ============ LÓGICA JS ============ -->
-  <script>
-    const BASE_IMG =
-      "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
+  <!-- =========================
+       LÓGICA FIRESTORE
+  ========================== -->
+  <script type="module">
+    import { db } from "./js/firebase-init.js";
+    import {
+      collection,
+      getDocs,
+      getDoc,
+      doc,
+      query,
+      where,
+      limit
+    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    // Cache del catálogo (viene del catalogo.js)
-    const CLAVE_CACHE_CATALOGO = "cache_catalogo_v1";
+    const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
-    function mostrarWrapperVisibleSiempre() {
-      const wrapper = document.querySelector(".producto-wrapper");
+    const loadingEl = document.getElementById("producto-loading");
+    const wrapper = document.querySelector(".producto-wrapper");
+    const infoDiv = document.getElementById("producto-info");
+    const imgPrincipal = document.getElementById("imagen-principal");
+
+    function visible() {
+      if (loadingEl) loadingEl.style.display = "none";
       if (wrapper) wrapper.classList.add("visible");
     }
 
-    // "1992,2" -> 1992.2
     function parsearPrecio(valor) {
       if (typeof valor === "number") return valor;
       if (typeof valor === "string") {
@@ -164,219 +137,152 @@
       return null;
     }
 
-    function obtenerCodigoDeURL() {
+    function getCodigoURL() {
       const params = new URLSearchParams(window.location.search);
       return params.get("codigo");
     }
 
-    function leerCacheCatalogo() {
-      try {
-        const raw = localStorage.getItem(CLAVE_CACHE_CATALOGO);
-        if (!raw) return null;
-        const obj = JSON.parse(raw);
-        const data = Array.isArray(obj?.data) ? obj.data : null;
-        return data;
-      } catch {
-        return null;
-      }
-    }
-
-    function normalizarLista(data) {
-      if (Array.isArray(data)) return data;
-      if (data && Array.isArray(data.productos)) return data.productos;
-      return [];
-    }
-
-    function renderizarProducto(prod, productos, index) {
-      const infoDiv = document.getElementById("producto-info");
-      if (!infoDiv) return;
-
-      const codigo       = prod.codigo || "";
-      const nombreCorto  = prod.nombre || "";
-      const categoria    = prod.categoria || "";
-      const subcategoria = prod.subcategoria || "";
-      const descLarga    = prod.descripcionLarga || prod.descripcion || "";
-      const precioMayor  = parsearPrecio(prod.precio);
-      const precioUsado  = precioMayor ?? null;
-      const stock        = prod.stock ?? "";
-      const stockNum     = Number(stock);
-
-      /* ========== IMAGEN ========== */
-      const imgPrincipal = document.getElementById("imagen-principal");
-      if (imgPrincipal) {
-        const urls = [
-          prod.imagen, // URL directa desde el JSON/Firestore
-          `${BASE_IMG}/${codigo}.jpg`,
-          `${BASE_IMG}/${codigo}.JPG`,
-          `${BASE_IMG}/${codigo}.png`,
-          `${BASE_IMG}/${codigo}.PNG`,
-        ].filter(Boolean);
-
-        let intento = 0;
-        const probar = () => {
-          if (intento >= urls.length) return;
-          imgPrincipal.src = urls[intento];
-          intento++;
-        };
-
-        imgPrincipal.alt = nombreCorto || codigo;
-        imgPrincipal.loading = "lazy";
-        imgPrincipal.decoding = "async";
-        imgPrincipal.onerror = probar;
-        probar();
-      }
-
-      const miniaturasDiv = document.getElementById("miniaturas");
-      if (miniaturasDiv) miniaturasDiv.innerHTML = "";
-
-      /* ========== INFO ========== */
-      const precioTexto =
-        precioUsado != null
-          ? `$ ${precioUsado.toLocaleString("es-AR", {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            })}`
-          : "";
-
-      let stockHtml = "";
-      if (stock !== "" && stock != null) {
-        let cls = "producto-stock";
-        if (!isNaN(stockNum)) {
-          if (stockNum === 0) cls += " stock-sin";
-          else if (stockNum > 0 && stockNum <= 5) cls += " stock-bajo";
-        }
-        stockHtml = `<p class="${cls}">Stock: ${stock} unidades</p>`;
-      }
-
-      const categoriaHtml =
-        categoria || subcategoria
-          ? `<p class="producto-categoria">
-               ${categoria}
-               ${categoria && subcategoria ? " · " : ""}
-               ${subcategoria}
-             </p>`
-          : "";
-
-      infoDiv.innerHTML = `
-        <p class="producto-codigo">${codigo}</p>
-        <h1 class="producto-titulo">${nombreCorto}</h1>
-        ${categoriaHtml}
-        ${descLarga ? `<p class="producto-descripcion">${descLarga}</p>` : ""}
-        ${precioTexto ? `<p class="producto-precio">${precioTexto}</p>` : ""}
-        ${stockHtml}
-        <div class="producto-acciones">
-          <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
-          <a href="${armarLinkWhatsApp(prod)}" target="_blank" class="btn-whatsapp" rel="noopener">
-            Consultar por WhatsApp
-          </a>
-        </div>
-      `;
-
-      /* ========== NAVEGACIÓN ========== */
-      const nav = document.getElementById("producto-nav");
-      if (nav && productos.length > 1) {
-        const anterior = productos[(index - 1 + productos.length) % productos.length];
-        const siguiente = productos[(index + 1) % productos.length];
-
-        const codAnt = (anterior && anterior.codigo) || "";
-        const codSig = (siguiente && siguiente.codigo) || "";
-
-        nav.innerHTML = `
-          <button class="btn-nav" onclick="irAProducto('${codAnt}')">← ${codAnt}</button>
-          <button class="btn-nav" onclick="window.location.href='catalogo.html'">Volver al listado</button>
-          <button class="btn-nav" onclick="irAProducto('${codSig}')">${codSig} →</button>
-        `;
-      }
-
-      // ✅ clave: SIEMPRE mostrar wrapper
-      mostrarWrapperVisibleSiempre();
-    }
-
-    async function cargarProducto() {
-      const codigoURL = obtenerCodigoDeURL();
-      const infoDiv = document.getElementById("producto-info");
-
-      if (!codigoURL) {
-        if (infoDiv) {
-          infoDiv.innerHTML =
-            "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
-        }
-        mostrarWrapperVisibleSiempre();
-        return;
-      }
-
-      // 1) Intentar desde CACHE (instantáneo)
-      const cache = leerCacheCatalogo();
-      if (cache && cache.length) {
-        const idx = cache.findIndex((p) => String(p.codigo) === String(codigoURL));
-        if (idx !== -1) {
-          renderizarProducto(cache[idx], cache, idx);
-          return;
-        }
-      }
-
-      // 2) Fallback: intentar productos.json (por si todavía lo usás)
-      try {
-        const resp = await fetch("data/productos.json", { cache: "no-store" });
-        if (!resp.ok) throw new Error("No se pudo cargar productos.json: " + resp.status);
-
-        const data = await resp.json();
-        const productos = normalizarLista(data);
-
-        const index = productos.findIndex((p) => String(p.codigo) === String(codigoURL));
-        if (index === -1) {
-          if (infoDiv) {
-            infoDiv.innerHTML =
-              "<h2>Producto no encontrado</h2><p>Verificá el código.</p><p>Tip: entrá al catálogo primero para que se guarde el cache.</p>";
-          }
-          mostrarWrapperVisibleSiempre();
-          return;
-        }
-
-        renderizarProducto(productos[index], productos, index);
-      } catch (err) {
-        console.error("Error en cargarProducto:", err);
-        if (infoDiv) {
-          infoDiv.innerHTML =
-            "<h2>Error</h2><p>No se pudo cargar el producto.</p><p>Entrá al catálogo primero para generar el cache, o revisá si existe <b>data/productos.json</b>.</p>";
-        }
-        mostrarWrapperVisibleSiempre();
-      }
-    }
-
     function armarLinkWhatsApp(prod) {
-      const codigo      = prod.codigo || "";
-      const nombreCorto = prod.nombre || "";
-      const precioMayor = parsearPrecio(prod.precio);
-      const precioTxt =
-        precioMayor != null
-          ? `$ ${precioMayor.toLocaleString("es-AR", {
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            })}`
-          : "Consultar";
+      const codigo = prod.codigo || "";
+      const nombre = prod.nombre || "";
+      const precio = parsearPrecio(prod.precio);
+      const precioTxt = (precio != null)
+        ? `$ ${precio.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`
+        : "Consultar";
 
       const mensaje = [
         "Hola! Me interesa este producto:",
         "",
         `Código: ${codigo}`,
-        `Producto: ${nombreCorto}`,
+        `Producto: ${nombre}`,
         `Precio mayorista: ${precioTxt}`,
         "",
-        "¿Me pasás disponibilidad y cantidades mínimas?",
+        "¿Me pasás disponibilidad y cantidades mínimas?"
       ].join("\n");
 
       return `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
     }
 
-    function irAProducto(codigo) {
-      window.location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
+    function setImagen(codigo, urlDirecta) {
+      const urls = [
+        urlDirecta,
+        `${BASE_IMG}/${codigo}.jpg`,
+        `${BASE_IMG}/${codigo}.JPG`,
+        `${BASE_IMG}/${codigo}.png`,
+        `${BASE_IMG}/${codigo}.PNG`,
+      ].filter(Boolean);
+
+      let i = 0;
+      const next = () => {
+        if (i >= urls.length) return;
+        imgPrincipal.src = urls[i];
+        i++;
+      };
+
+      imgPrincipal.loading = "lazy";
+      imgPrincipal.decoding = "async";
+      imgPrincipal.onerror = next;
+      next();
     }
 
-    cargarProducto();
-  </script>
+    function renderProducto(p) {
+      const codigo = p.codigo || "";
+      const nombre = p.nombre || "";
+      const categoria = p.categoria || "";
+      const subcategoria = p.subcategoria || "";
+      const descripcion = p.descripcionLarga || p.descripcion || "";
+      const precio = parsearPrecio(p.precio);
+      const stock = (p.stock ?? "");
+      const stockNum = Number(stock);
 
-  <!-- Si este script te tira errores en consola en producto.html, lo podés sacar -->
-  <script src="js/carrito.js"></script>
+      setImagen(codigo, p.imagen || "");
+
+      let stockCls = "producto-stock";
+      if (!isNaN(stockNum)) {
+        if (stockNum === 0) stockCls += " stock-sin";
+        else if (stockNum > 0 && stockNum <= 5) stockCls += " stock-bajo";
+      }
+
+      const categoriaHtml = (categoria || subcategoria)
+        ? `<p class="producto-categoria">${categoria}${(categoria && subcategoria) ? " · " : ""}${subcategoria}</p>`
+        : "";
+
+      const precioHtml = (precio != null)
+        ? `<p class="producto-precio">$ ${precio.toLocaleString("es-AR", { maximumFractionDigits: 0 })}</p>`
+        : "";
+
+      const stockHtml = (stock !== "" && stock != null)
+        ? `<p class="${stockCls}">Stock: ${stock} unidades</p>`
+        : "";
+
+      infoDiv.innerHTML = `
+        <p class="producto-codigo">${codigo}</p>
+        <h1 class="producto-titulo">${nombre}</h1>
+        ${categoriaHtml}
+        ${descripcion ? `<p class="producto-descripcion">${descripcion}</p>` : ""}
+        ${precioHtml}
+        ${stockHtml}
+        <div class="producto-acciones">
+          <a href="catalogo.html" class="btn-secundario">← Volver al catálogo</a>
+          <a href="${armarLinkWhatsApp(p)}" target="_blank" class="btn-whatsapp" rel="noopener">
+            Consultar por WhatsApp
+          </a>
+        </div>
+      `;
+
+      visible();
+    }
+
+    async function cargarDesdeFirestore(codigo) {
+      // 1) buscar por campo "codigo"
+      const ref = collection(db, "productos");
+      const q = query(ref, where("codigo", "==", codigo), limit(1));
+      const snap = await getDocs(q);
+
+      if (!snap.empty) {
+        const docSnap = snap.docs[0];
+        return { id: docSnap.id, ...docSnap.data() };
+      }
+
+      // 2) fallback: buscar por doc.id (si usás el código como id)
+      const docRef = doc(db, "productos", codigo);
+      const one = await getDoc(docRef);
+      if (one.exists()) {
+        return { id: one.id, ...one.data() };
+      }
+
+      return null;
+    }
+
+    async function init() {
+      const codigo = getCodigoURL();
+
+      if (!codigo) {
+        infoDiv.innerHTML = "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
+        visible();
+        return;
+      }
+
+      try {
+        const prod = await cargarDesdeFirestore(codigo);
+        if (!prod) {
+          infoDiv.innerHTML = `<h2>Producto no encontrado</h2><p>No existe el código <b>${codigo}</b> en Firestore.</p>`;
+          visible();
+          return;
+        }
+
+        // Aseguro codigo si no viene
+        prod.codigo = prod.codigo || codigo;
+
+        renderProducto(prod);
+      } catch (e) {
+        console.error("Error cargando producto:", e);
+        infoDiv.innerHTML = "<h2>Error</h2><p>No se pudo cargar el producto. Revisá consola.</p>";
+        visible();
+      }
+    }
+
+    init();
+  </script>
 </body>
 </html>
