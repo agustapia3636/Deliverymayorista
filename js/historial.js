@@ -387,15 +387,17 @@ function aplicarFiltros() {
       if (normPago(v.pago) !== pagoSeleccionado) return false;
     }
 
-    if (textoProducto) {
-      const hit = (v.lineas || []).some((it) => {
-        const cod = norm(it.codigo);
-        const nom = norm(guessProductoNombre(it.codigo, it.nombre));
-        return cod.includes(textoProducto) || nom.includes(textoProducto);
-      });
-      if (!hit) return false;
-    }
+   if (textoProducto) {
+  const matchProducto = (v.lineas || []).some((it) => {
+    const cod = norm(it.codigo);
+    const nom = norm(guessProductoNombre(it.codigo, it.nombre));
+    return cod.includes(textoProducto) || nom.includes(textoProducto);
+  });
 
+  const matchCliente = norm(v.cliente).includes(textoProducto);
+
+  if (!matchProducto && !matchCliente) return false;
+}
     if (qRapida) {
       const inCliente = norm(v.cliente).includes(qRapida);
       const inInterno = norm(v.numeroInterno).includes(qRapida);
