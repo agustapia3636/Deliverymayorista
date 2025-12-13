@@ -7,22 +7,22 @@
   <link rel="stylesheet" href="css/estilos.css" />
 
   <style>
-    main.producto-pagina { padding: 40px 16px 60px; }
+    main.producto-pagina {
+      padding: 40px 16px 60px;
+      min-height: 70vh;
+    }
 
-    main.producto-pagina .producto-wrapper {
+    .producto-wrapper {
       max-width: 1200px;
-      margin: 0 auto 24px;
+      margin: 0 auto;
       display: flex;
-      align-items: flex-start;
-      justify-content: center;
       gap: 48px;
-
+      align-items: flex-start;
       opacity: 0;
       transform: translateY(10px);
       transition: opacity .25s ease, transform .25s ease;
-      min-height: 420px;
     }
-    main.producto-pagina .producto-wrapper.visible {
+    .producto-wrapper.visible {
       opacity: 1;
       transform: translateY(0);
     }
@@ -30,14 +30,21 @@
     .producto-imagen { flex: 0 0 48%; }
     .producto-imagen img {
       width: 100%;
-      height: auto;
       border-radius: 22px;
-      object-fit: contain;
       background: #0a0a12;
-      display: block;
+      object-fit: contain;
     }
 
     .producto-info { flex: 0 0 42%; }
+
+    .producto-precio {
+      font-size: 26px;
+      font-weight: 800;
+      margin-top: 10px;
+    }
+
+    .producto-stock.stock-sin { color: #ff4d4f; font-weight: 700; }
+    .producto-stock.stock-bajo { color: #ffd666; font-weight: 700; }
 
     .producto-acciones {
       display: flex;
@@ -47,466 +54,195 @@
     }
 
     .btn-secundario, .btn-whatsapp, .btn-nav {
-      display: inline-flex;
-      justify-content: center;
-      align-items: center;
       padding: 10px 18px;
       border-radius: 10px;
+      border: none;
       cursor: pointer;
       font-size: 15px;
-      text-decoration: none;
-      border: none;
       background: #202432;
       color: #fff;
+      text-decoration: none;
     }
 
-    .btn-whatsapp { background: #1ebe57; color: #fff; font-weight: 700; }
-    .btn-secundario:hover, .btn-nav:hover { filter: brightness(1.05); }
-    .btn-whatsapp:hover { filter: brightness(1.05); }
-
-    .producto-stock { margin-top: 6px; }
-    .producto-stock.stock-sin { color: #ff4d4f; font-weight: 700; }
-    .producto-stock.stock-bajo { color: #ffd666; font-weight: 700; }
+    .btn-whatsapp {
+      background: #1ebe57;
+      font-weight: 700;
+    }
 
     .producto-nav {
       max-width: 1200px;
-      margin: 18px auto 0;
+      margin: 20px auto 0;
       display: flex;
       gap: 10px;
       justify-content: center;
       flex-wrap: wrap;
     }
 
-    /* ===== Loader PRO (solo si tarda) ===== */
     #producto-loading {
       max-width: 1200px;
-      margin: 0 auto 16px;
+      margin: 0 auto 12px;
       display: none;
-      opacity: 0.85;
-      color: #c9c9ff;
-      font-size: 14px;
-    }
-
-    /* Skeleton */
-    .skeleton {
-      max-width: 1200px;
-      margin: 0 auto 18px;
-      display: none;
-      gap: 48px;
-      align-items: flex-start;
-      justify-content: center;
-    }
-
-    .sk-img {
-      flex: 0 0 48%;
-      height: 360px;
-      border-radius: 22px;
-      background: #0a0a12;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .sk-info {
-      flex: 0 0 42%;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .sk-line {
-      height: 14px;
-      border-radius: 999px;
-      background: #0a0a12;
-      position: relative;
-      overflow: hidden;
-    }
-    .sk-line.big { height: 26px; width: 70%; border-radius: 12px; }
-    .sk-line.mid { width: 90%; }
-    .sk-line.small { width: 60%; }
-
-    .sk-img::after, .sk-line::after {
-      content: "";
-      position: absolute;
-      top: 0; left: -40%;
-      width: 40%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.06), transparent);
-      animation: shimmer 1.15s infinite;
-    }
-
-    @keyframes shimmer {
-      0% { left: -40%; }
-      100% { left: 120%; }
+      opacity: .85;
     }
 
     @media (max-width: 900px) {
-      main.producto-pagina { padding: 24px 12px 36px; }
-      main.producto-pagina .producto-wrapper { flex-direction: column; gap: 20px; }
-      .producto-imagen, .producto-info { flex: 1 1 auto; width: 100%; }
-      .producto-acciones { flex-direction: column; width: 100%; }
-      .producto-acciones a { width: 100%; text-align: center; }
-      .skeleton { flex-direction: column; gap: 18px; }
-      .sk-img, .sk-info { width: 100%; flex: 1 1 auto; }
-      .sk-img { height: 260px; }
+      .producto-wrapper {
+        flex-direction: column;
+        gap: 20px;
+      }
+      .producto-imagen, .producto-info {
+        width: 100%;
+      }
+      .producto-acciones a, .producto-acciones button {
+        width: 100%;
+        text-align: center;
+      }
     }
   </style>
 </head>
 
 <body>
-  <header class="topbar">
-    <div class="topbar-inner">
-      <a href="index.html" class="logo-link">Delivery Mayorista</a>
-      <a href="catalogo.html" class="topbar-link">Ver catálogo</a>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="index.html" class="logo-link">Delivery Mayorista</a>
+    <a href="catalogo.html" class="topbar-link">Ver catálogo</a>
+  </div>
+</header>
+
+<main class="producto-pagina">
+
+  <div id="producto-loading">Cargando producto...</div>
+
+  <div class="producto-wrapper">
+    <div class="producto-imagen">
+      <img id="imagen-principal" src="" alt="Producto" />
     </div>
-  </header>
+    <div id="producto-info" class="producto-info"></div>
+  </div>
 
-  <main class="producto-pagina contenedor">
+  <div id="producto-nav" class="producto-nav"></div>
 
-    <!-- Loader PRO (solo si tarda) -->
-    <div id="producto-loading">Cargando producto...</div>
+</main>
 
-    <!-- Skeleton PRO (solo si tarda) -->
-    <div id="producto-skeleton" class="skeleton">
-      <div class="sk-img"></div>
-      <div class="sk-info">
-        <div class="sk-line small"></div>
-        <div class="sk-line big"></div>
-        <div class="sk-line mid"></div>
-        <div class="sk-line mid"></div>
-        <div class="sk-line mid"></div>
-        <div class="sk-line small"></div>
-        <div class="sk-line small"></div>
-      </div>
-    </div>
+<footer class="footer">Catálogo mayorista · Delivery Mayorista</footer>
 
-    <div class="producto-wrapper">
-      <div class="producto-imagen">
-        <img id="imagen-principal" src="" alt="Producto" />
-      </div>
-      <div id="producto-info" class="producto-info"></div>
-    </div>
+<script type="module">
+  import { db } from "./js/firebase-init.js";
+  import {
+    collection,
+    getDocs,
+    getDoc,
+    doc,
+    query,
+    where,
+    limit
+  } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    <div id="producto-nav" class="producto-nav"></div>
+  const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
+  const COL = "productos";
 
-  </main>
+  const loadingEl = document.getElementById("producto-loading");
+  const wrapper = document.querySelector(".producto-wrapper");
+  const infoDiv = document.getElementById("producto-info");
+  const img = document.getElementById("imagen-principal");
+  const navEl = document.getElementById("producto-nav");
 
-  <footer class="footer">Catálogo mayorista · Delivery Mayorista</footer>
+  if (loadingEl) loadingEl.style.display = "none";
 
-  <script type="module">
-    import { db } from "./js/firebase-init.js";
-    import {
-      collection,
-      getDocs,
-      getDoc,
-      doc,
-      query,
-      where,
-      limit
-    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+  let tLoading = setTimeout(() => {
+    if (loadingEl) loadingEl.style.display = "block";
+  }, 300);
 
-    // ---------------------------
-    // Config
-    // ---------------------------
-    const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
-    const COL_PRODUCTOS = "productos";
-
-    // Cache catálogo (lo genera catalogo.js)
-    const CLAVE_CACHE_CATALOGO = "cache_catalogo_v1";
-
-    // Cache producto instantáneo
-    const CLAVE_CACHE_PRODUCTO_PREFIX = "cache_producto_v1_"; // + codigo
-
-    // ---------------------------
-    // DOM
-    // ---------------------------
-    const loadingEl  = document.getElementById("producto-loading");
-    const skeletonEl = document.getElementById("producto-skeleton");
-    const wrapper    = document.querySelector(".producto-wrapper");
-    const infoDiv    = document.getElementById("producto-info");
-    const imgPrincipal = document.getElementById("imagen-principal");
-    const navEl      = document.getElementById("producto-nav");
-
-    // ---------------------------
-    // Loader PRO: solo si tarda
-    // ---------------------------
-    // Arranca oculto
+  function visible() {
+    clearTimeout(tLoading);
     if (loadingEl) loadingEl.style.display = "none";
-    if (skeletonEl) skeletonEl.style.display = "none";
+    if (wrapper) wrapper.classList.add("visible");
+  }
 
-    // Mostrar recién si tarda (300ms)
-    let tLoading = setTimeout(() => {
-      if (loadingEl) loadingEl.style.display = "block";
-      if (skeletonEl) skeletonEl.style.display = "flex";
-    }, 300);
+  function getCodigo() {
+    return new URLSearchParams(location.search).get("codigo");
+  }
 
-    function visible() {
-      clearTimeout(tLoading);
-      if (loadingEl) loadingEl.style.display = "none";
-      if (skeletonEl) skeletonEl.style.display = "none";
-      if (wrapper) wrapper.classList.add("visible");
+  function volverCatalogo() {
+    if (document.referrer.includes("catalogo.html")) history.back();
+    else location.href = "catalogo.html";
+  }
+
+  window.__dm_back = volverCatalogo;
+
+  function setImagen(codigo) {
+    const urls = [
+      `${BASE_IMG}/${codigo}.jpg`,
+      `${BASE_IMG}/${codigo}.png`
+    ];
+    let i = 0;
+    img.onerror = () => { if (++i < urls.length) img.src = urls[i]; };
+    img.src = urls[0];
+  }
+
+  function renderProducto(p) {
+    setImagen(p.codigo);
+
+    let stockCls = "producto-stock";
+    if (p.stock === 0) stockCls += " stock-sin";
+    else if (p.stock > 0 && p.stock <= 5) stockCls += " stock-bajo";
+
+    infoDiv.innerHTML = `
+      <p>${p.codigo}</p>
+      <h1>${p.nombre}</h1>
+      <p>${p.descripcion || ""}</p>
+      <p class="producto-precio">$ ${Number(p.precio).toLocaleString("es-AR")}</p>
+      <p class="${stockCls}">Stock: ${p.stock}</p>
+      <div class="producto-acciones">
+        <button class="btn-secundario" onclick="window.__dm_back()">← Volver</button>
+        <a class="btn-whatsapp" target="_blank"
+          href="https://wa.me/?text=${encodeURIComponent(
+            `Hola! Me interesa el producto ${p.codigo} - ${p.nombre}`
+          )}">
+          Consultar por WhatsApp
+        </a>
+      </div>
+    `;
+
+    visible();
+  }
+
+  async function cargarProducto(codigo) {
+    const q = query(collection(db, COL), where("codigo", "==", codigo), limit(1));
+    const snap = await getDocs(q);
+    if (!snap.empty) return snap.docs[0].data();
+
+    const ref = doc(db, COL, codigo);
+    const one = await getDoc(ref);
+    if (one.exists()) return one.data();
+
+    return null;
+  }
+
+  async function init() {
+    const codigo = getCodigo();
+    if (!codigo) {
+      infoDiv.innerHTML = "<h2>Producto no encontrado</h2>";
+      visible();
+      return;
     }
 
-    // ---------------------------
-    // Utils
-    // ---------------------------
-    function getCodigoURL() {
-      const params = new URLSearchParams(window.location.search);
-      return params.get("codigo");
-    }
-
-    function parsearPrecio(valor) {
-      if (typeof valor === "number") return valor;
-      if (typeof valor === "string") {
-        const limpio = valor.replace(/\./g, "").replace(",", ".");
-        const num = Number(limpio);
-        return isNaN(num) ? null : num;
-      }
-      return null;
-    }
-
-    function normalizarProducto(raw, codigoFallback = "") {
-      // Unificamos nombres de campos
-      const p = raw || {};
-      const codigo = p.codigo || p.Codigo || codigoFallback || "";
-      const nombre = p.nombre || p.Nombre || "";
-      const categoria = p.categoria || p.Categoria_Princ || "";
-      const subcategoria = p.subcategoria || p.Sub_Categoria || "";
-      const descripcion = p.descripcionLarga || p.descripcion || p.Descripcion || "";
-      const precio = (p.precio != null) ? Number(p.precio)
-                  : (p.PrecioMayorista != null) ? Number(p.PrecioMayorista)
-                  : 0;
-      const stock = (p.stock != null) ? Number(p.stock)
-                 : (p.Stock != null) ? Number(p.Stock)
-                 : 0;
-      const imagen = p.imagen || p.Imagen || "";
-
-      return { ...p, codigo, nombre, categoria, subcategoria, descripcion, precio, stock, imagen };
-    }
-
-    function setImagen(codigo, urlDirecta) {
-      const urls = [
-        urlDirecta,
-        `${BASE_IMG}/${codigo}.jpg`,
-        `${BASE_IMG}/${codigo}.JPG`,
-        `${BASE_IMG}/${codigo}.png`,
-        `${BASE_IMG}/${codigo}.PNG`,
-      ].filter(Boolean);
-
-      let i = 0;
-      const next = () => {
-        if (i >= urls.length) return;
-        imgPrincipal.src = urls[i];
-        i++;
-      };
-
-      imgPrincipal.loading = "lazy";
-      imgPrincipal.decoding = "async";
-      imgPrincipal.onerror = next;
-      next();
-    }
-
-    function armarLinkWhatsApp(prod) {
-      const codigo = prod.codigo || "";
-      const nombre = prod.nombre || "";
-      const precio = parsearPrecio(prod.precio);
-      const precioTxt = (precio != null)
-        ? `$ ${precio.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`
-        : "Consultar";
-
-      const mensaje = [
-        "Hola! Me interesa este producto:",
-        "",
-        `Código: ${codigo}`,
-        `Producto: ${nombre}`,
-        `Precio mayorista: ${precioTxt}`,
-        "",
-        "¿Me pasás disponibilidad y cantidades mínimas?"
-      ].join("\n");
-
-      return `https://wa.me/?text=${encodeURIComponent(mensaje)}`;
-    }
-
-    function volverAlCatalogo() {
-      // PRO: si venís del catálogo, volver con el Back conserva filtros + página + scroll
-      const ref = document.referrer || "";
-      if (ref.includes("catalogo.html")) {
-        history.back();
-      } else {
-        window.location.href = "catalogo.html";
-      }
-    }
-
-    function irAProducto(codigo) {
-      window.location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
-    }
-
-    // ---------------------------
-    // Cache producto instantáneo
-    // ---------------------------
-    function guardarCacheProducto(codigo, prod) {
-      try {
-        localStorage.setItem(
-          CLAVE_CACHE_PRODUCTO_PREFIX + codigo,
-          JSON.stringify({ t: Date.now(), data: prod })
-        );
-      } catch {}
-    }
-
-    function leerCacheProducto(codigo, maxHoras = 72) {
-      try {
-        const raw = localStorage.getItem(CLAVE_CACHE_PRODUCTO_PREFIX + codigo);
-        if (!raw) return null;
-        const obj = JSON.parse(raw);
-        const edad = Date.now() - (obj?.t || 0);
-        if (edad > maxHoras * 3600 * 1000) return null;
-        return obj?.data || null;
-      } catch {
-        return null;
-      }
-    }
-
-    // ---------------------------
-    // Prev / Next PRO (desde cache catálogo)
-    // ---------------------------
-    function leerCacheCatalogo() {
-      try {
-        const raw = localStorage.getItem(CLAVE_CACHE_CATALOGO);
-        if (!raw) return null;
-        const obj = JSON.parse(raw);
-        const data = Array.isArray(obj?.data) ? obj.data : null;
-        return data;
-      } catch {
-        return null;
-      }
-    }
-
-    function renderNavConCatalogo(codigoActual) {
-      if (!navEl) return;
-
-      const catalogo = leerCacheCatalogo();
-      if (!catalogo || !catalogo.length) {
-        navEl.innerHTML = `
-          <button class="btn-nav" type="button" onclick="(${volverAlCatalogo.toString()})()">Volver al listado</button>
-        `;
-        return;
-      }
-
-      const idx = catalogo.findIndex(p => String(p.codigo) === String(codigoActual));
-      if (idx === -1) {
-        navEl.innerHTML = `
-          <button class="btn-nav" type="button" onclick="(${volverAlCatalogo.toString()})()">Volver al listado</button>
-        `;
-        return;
-      }
-
-      const ant = catalogo[(idx - 1 + catalogo.length) % catalogo.length]?.codigo || "";
-      const sig = catalogo[(idx + 1) % catalogo.length]?.codigo || "";
-
-      // Exponer global para onclick simple
-      window.__dm_ir = irAProducto;
-      window.__dm_back = volverAlCatalogo;
-
-      navEl.innerHTML = `
-        <button class="btn-nav" type="button" onclick="window.__dm_ir('${ant}')">← ${ant}</button>
-        <button class="btn-nav" type="button" onclick="window.__dm_back()">Volver al listado</button>
-        <button class="btn-nav" type="button" onclick="window.__dm_ir('${sig}')">${sig} →</button>
-      `;
-    }
-
-    // ---------------------------
-    // Render
-    // ---------------------------
-    function renderProducto(prod) {
-      const p = normalizarProducto(prod, prod?.codigo || "");
-
-      setImagen(p.codigo, p.imagen || "");
-
-      const precio = parsearPrecio(p.precio);
-      const stockNum = Number(p.stock);
-
-      let stockCls = "producto-stock";
-      if (!isNaN(stockNum)) {
-        if (stockNum === 0) stockCls += " stock-sin";
-        else if (stockNum > 0 && stockNum <= 5) stockCls += " stock-bajo";
-      }
-
-      const categoriaHtml = (p.categoria || p.subcategoria)
-        ? `<p class="producto-categoria">${p.categoria || ""}${(p.categoria && p.subcategoria) ? " · " : ""}${p.subcategoria || ""}</p>`
-        : "";
-
-      const precioHtml = (precio != null)
-        ? `<p class="producto-precio">$ ${precio.toLocaleString("es-AR", { maximumFractionDigits: 0 })}</p>`
-        : "";
-
-      const stockHtml = (p.stock !== "" && p.stock != null)
-        ? `<p class="${stockCls}">Stock: ${p.stock} unidades</p>`
-        : "";
-
-      // Exponer volver para no perder filtros
-      window.__dm_back = volverAlCatalogo;
-
+    try {
+      const prod = await cargarProducto(codigo);
+      if (!prod) throw new Error("No existe");
+      renderProducto(prod);
+    } catch {
       infoDiv.innerHTML = `
-        <p class="producto-codigo">${p.codigo}</p>
-        <h1 class="producto-titulo">${p.nombre || ""}</h1>
-        ${categoriaHtml}
-        ${p.descripcion ? `<p class="producto-descripcion">${p.descripcion}</p>` : ""}
-        ${precioHtml}
-        ${stockHtml}
-        <div class="producto-acciones">
-          <button class="btn-secundario" type="button" onclick="window.__dm_back()">← Volver al catálogo</button>
-          <a class="btn-whatsapp" href="${armarLinkWhatsApp(p)}" target="_blank" rel="noopener">
-            Consultar por WhatsApp
-          </a>
-        </div>
+        <h2>Error cargando producto</h2>
+        <button class="btn-secundario" onclick="window.__dm_back()">← Volver</button>
       `;
-
       visible();
     }
+  }
 
-    // ---------------------------
-    // Firestore (por codigo o doc.id)
-    // ---------------------------
-    async function cargarDesdeFirestore(codigo) {
-      // 1) por campo codigo
-      const ref = collection(db, COL_PRODUCTOS);
-      const q = query(ref, where("codigo", "==", codigo), limit(1));
-      const snap = await getDocs(q);
+  init();
+</script>
 
-      if (!snap.empty) {
-        const d = snap.docs[0];
-        return { id: d.id, ...d.data() };
-      }
-
-      // 2) fallback: por doc.id
-      const docRef = doc(db, COL_PRODUCTOS, codigo);
-      const one = await getDoc(docRef);
-      if (one.exists()) return { id: one.id, ...one.data() };
-
-      return null;
-    }
-
-    // ---------------------------
-    // Init PRO (cache + refresh + timeout)
-    // ---------------------------
-    async function init() {
-      const codigo = getCodigoURL();
-
-      if (!codigo) {
-        infoDiv.innerHTML = "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
-        visible();
-        return;
-      }
-
-      // 1) NAV inmediato (si existe cache catálogo)
-      renderNavConCatalogo(codigo);
-
-      // 2) Render instantáneo desde cache del producto (si existe)
-      const cacheProd = leerCacheProducto(codigo, 72);
-      if (cacheProd) {
-        try {
-          renderProducto(cacheProd);
-          // Nota: igual vamos a refrescar desde Firestore en segundo plano
-        } catch {}
-      }
-
-      // 3) Firestore con
+</body>
+</html>
