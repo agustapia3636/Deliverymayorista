@@ -524,6 +524,40 @@
       .btn-wa-flotante { bottom: 140px; right: 14px; }
       .mini-carrito { bottom: 80px; right: 14px; }
     }
+    /* ===========================
+   PIE DEL CATÁLOGO (UX LIMPIO)
+=========================== */
+.paginador-contenedor {
+  margin-top: 32px;
+  padding: 20px 0 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.paginador-resumen {
+  font-size: 12px;
+  opacity: 0.6;
+  color: #c9c9ff;
+  text-align: center;
+}
+
+.paginador-contenedor::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 160px;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255,255,255,0.25),
+    transparent
+  );
+}
   </style>
 </head>
 
