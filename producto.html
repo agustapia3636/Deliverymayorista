@@ -163,7 +163,13 @@
     // ====== CONFIG ======
     const COL_PRODUCTOS = "productos";
     const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
-    const CLAVE_CACHE_CATALOGO = "cache_catalogo_v1";
+
+    const CLAVE_CACHE_CATALOGO = "cache_catalogo_v2"; // mismo nombre que en catalogo.html
+    const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
+    const CACHE_IMG_NAME = "dm-img-v1";
+
+    // cache por producto
+    const cacheProdKey = (codigo) => `cache_producto_${String(codigo || "").trim()}_v1`;
 
     // ====== DOM ======
     const loadingEl = document.getElementById("producto-loading");
@@ -209,7 +215,7 @@
 
     function normalizarProducto(raw, codigoFallback) {
       const p = raw || {};
-      const codigo = p.codigo ?? p.Codigo ?? codigoFallback ?? "";
+      const codigo = p.codigo ?? p.Codigo ?? codigoFallback ?? p.id ?? "";
       const nombre = p.nombre ?? p.Nombre ?? "";
       const categoria = p.categoria ?? p.Categoria_Princ ?? "";
       const subcategoria = p.subcategoria ?? p.Sub_Categoria ?? "";
@@ -217,18 +223,45 @@
       const precio = parsearPrecio(p.precio ?? p.PrecioMayorista);
       const stock = Number(p.stock ?? p.Stock ?? 0);
       const imagen = p.imagen ?? p.Imagen ?? "";
-      return { ...p, codigo, nombre, categoria, subcategoria, descripcion, precio, stock, imagen };
+      return { ...p, codigo: String(codigo), nombre, categoria, subcategoria, descripcion, precio, stock, imagen };
     }
 
-    function setImagenProducto(p) {
+    // ====== Cache helpers (producto) ======
+    function cacheProductoLeer(codigo) {
+      try {
+        const raw = localStorage.getItem(cacheProdKey(codigo));
+        if (!raw) return null;
+        const obj = JSON.parse(raw);
+        if (!obj || !obj.ts || !obj.data) return null;
+        if ((Date.now() - obj.ts) > CACHE_TTL_MS) return null;
+        return obj.data;
+      } catch {
+        return null;
+      }
+    }
+
+    function cacheProductoGuardar(codigo, data) {
+      try {
+        localStorage.setItem(cacheProdKey(codigo), JSON.stringify({ ts: Date.now(), data }));
+      } catch {}
+    }
+
+    // ====== Imágenes: precarga + warm cache ======
+    async function warmCacheImage(url) {
+      try {
+        if (!("caches" in window)) return;
+        const cache = await caches.open(CACHE_IMG_NAME);
+        const hit = await cache.match(url, { ignoreSearch: true });
+        if (hit) return;
+        await cache.add(url);
+      } catch {}
+    }
+
+    function candidatosImagen(p) {
       const codigo = p.codigo || "";
       const urlDirecta = p.imagen || "";
 
-      imgEl.loading = "lazy";
-      imgEl.decoding = "async";
-      imgEl.referrerPolicy = "no-referrer";
-
-      const candidatos = [
+      const c = [
         urlDirecta,
         `${BASE_IMG}/${codigo}.jpg`,
         `${BASE_IMG}/${codigo}.JPG`,
@@ -240,14 +273,39 @@
         `${BASE_IMG}/${codigo}.WEBP`,
       ].filter(Boolean);
 
+      return [...new Set(c)];
+    }
+
+    async function setImagenProducto(p) {
+      const cands = candidatosImagen(p);
+
+      imgEl.loading = "eager";
+      imgEl.decoding = "async";
+      imgEl.referrerPolicy = "no-referrer";
+
+      // warm-up del primer candidato (si existe)
+      if (cands[0]) warmCacheImage(cands[0]);
+
+      // elegimos el primero que cargue OK
       let i = 0;
       const probar = () => {
-        if (i >= candidatos.length) return;
-        imgEl.src = candidatos[i];
+        if (i >= cands.length) return;
+        imgEl.src = cands[i];
         i++;
       };
 
       imgEl.onerror = probar;
+      imgEl.onload = () => warmCacheImage(imgEl.src);
+
+      // precarga paralela suave (no bloquea)
+      for (const u of cands.slice(0, 3)) {
+        const im = new Image();
+        im.decoding = "async";
+        im.referrerPolicy = "no-referrer";
+        im.onload = () => warmCacheImage(u);
+        im.src = u;
+      }
+
       probar();
     }
 
@@ -278,8 +336,24 @@
         if (raw) {
           const obj = JSON.parse(raw);
           if (Array.isArray(obj?.data)) catalogo = obj.data;
+          // si el cache está en formato {ts,data} (como en catalogo.html)
+          if (!catalogo && Array.isArray(obj?.data) === false && Array.isArray(obj?.data) !== true) {
+            // no hacemos nada
+          }
         }
       } catch {}
+
+      // soporta ambos formatos:
+      if (!catalogo || !catalogo.length) {
+        // intento formato {ts,data}
+        try {
+          const raw2 = localStorage.getItem(CLAVE_CACHE_CATALOGO);
+          if (raw2) {
+            const obj2 = JSON.parse(raw2);
+            if (Array.isArray(obj2?.data)) catalogo = obj2.data;
+          }
+        } catch {}
+      }
 
       if (!catalogo || !catalogo.length) {
         navEl.innerHTML = `
@@ -288,7 +362,13 @@
         return;
       }
 
-      const idx = catalogo.findIndex(x => String(x.codigo) === String(codigoActual));
+      // normalizamos para buscar por codigo
+      const catNorm = catalogo.map(x => (x && typeof x === "object") ? x : {}).map(x => ({
+        ...x,
+        codigo: String(x.codigo ?? x.Codigo ?? x.id ?? "")
+      }));
+
+      const idx = catNorm.findIndex(x => String(x.codigo) === String(codigoActual));
       if (idx === -1) {
         navEl.innerHTML = `
           <button class="btn-nav" type="button" onclick="window.__dm_back()">Volver al listado</button>
@@ -296,8 +376,8 @@
         return;
       }
 
-      const ant = catalogo[(idx - 1 + catalogo.length) % catalogo.length]?.codigo || "";
-      const sig = catalogo[(idx + 1) % catalogo.length]?.codigo || "";
+      const ant = catNorm[(idx - 1 + catNorm.length) % catNorm.length]?.codigo || "";
+      const sig = catNorm[(idx + 1) % catNorm.length]?.codigo || "";
 
       window.__dm_ir = (c) => location.href = `producto.html?codigo=${encodeURIComponent(c)}`;
 
@@ -329,12 +409,12 @@
         : "";
 
       const descHtml = p.descripcion
-        ? `<p class="producto-descripcion">${p.descripcion}</p>`
+        ? `<p class="producto-descripcion">${escapeHtml(p.descripcion)}</p>`
         : "";
 
       infoDiv.innerHTML = `
-        <p class="producto-codigo">${p.codigo}</p>
-        <h1 class="producto-titulo">${p.nombre || "Producto"}</h1>
+        <p class="producto-codigo">${escapeHtml(p.codigo)}</p>
+        <h1 class="producto-titulo">${escapeHtml(p.nombre || "Producto")}</h1>
         ${categoriaHtml}
         ${descHtml}
         ${precioHtml}
@@ -348,6 +428,15 @@
       `;
 
       visible();
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
     // ====== Firestore ======
@@ -382,13 +471,31 @@
 
       renderNav(codigo);
 
+      // 1) cache local por producto (instantáneo)
+      const cached = cacheProductoLeer(codigo);
+      if (cached) {
+        renderProducto(cached, codigo);
+
+        // 2) refresh background
+        cargarDesdeFirestore(codigo)
+          .then(prod => {
+            if (prod) {
+              cacheProductoGuardar(codigo, prod);
+              renderProducto(prod, codigo);
+            }
+          })
+          .catch(() => {});
+        return;
+      }
+
+      // 2) Firestore directo
       try {
         const prod = await cargarDesdeFirestore(codigo);
 
         if (!prod) {
           infoDiv.innerHTML = `
             <h2>Producto no encontrado</h2>
-            <p>No existe el código <b>${codigo}</b> en Firestore.</p>
+            <p>No existe el código <b>${escapeHtml(codigo)}</b> en Firestore.</p>
             <div class="producto-acciones">
               <button class="btn-secundario" type="button" onclick="window.__dm_back()">← Volver</button>
             </div>
@@ -397,6 +504,7 @@
           return;
         }
 
+        cacheProductoGuardar(codigo, prod);
         renderProducto(prod, codigo);
       } catch (e) {
         console.error("Error producto:", e);
