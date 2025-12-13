@@ -275,7 +275,6 @@
       min-height: 36px;
     }
 
-    /* FULL 3: descripción pareja (2 líneas) */
     .producto-descripcion {
       opacity: 0.85;
       font-size: 13px;
@@ -289,13 +288,11 @@
       min-height: 34px;
     }
 
-    /* empuja el bloque inferior hacia abajo */
     .producto-precio-row {
       margin-top: auto;
       padding-top: 10px;
     }
 
-    /* FULL 3: jerarquía precio */
     .producto-precio {
       color: var(--accent);
       font-weight: 900;
@@ -311,7 +308,6 @@
       color: var(--muted);
     }
 
-    /* +/- centrado */
     .cantidad-container {
       margin-top: 10px;
       display: flex;
@@ -434,7 +430,7 @@
     .mini-carrito {
       position: fixed;
       right: 16px;
-      bottom: 90px;  /* deja lugar al WA abajo */
+      bottom: 90px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -472,7 +468,7 @@
     .mini-carrito-linea { white-space: nowrap; font-weight: 800; }
 
     /* ===========================
-       PAGINADOR (UX LIMPIO)
+       PAGINADOR
     ============================*/
     .paginador-contenedor {
       margin-top: 32px;
@@ -498,12 +494,7 @@
       top: 0;
       width: 160px;
       height: 1px;
-      background: linear-gradient(
-        to right,
-        transparent,
-        rgba(255,255,255,0.25),
-        transparent
-      );
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.25), transparent);
     }
 
     .paginador {
@@ -549,7 +540,7 @@
     }
 
     /* ===========================
-       WHATSAPP SIEMPRE VISIBLE
+       WHATSAPP
     ============================*/
     .btn-wa-flotante {
       position: fixed;
@@ -599,7 +590,6 @@
 
     @media (max-width: 480px) {
       .grid { grid-template-columns: 1fr; gap: 18px; }
-      /* WA arriba del mini carrito en mobile */
       .btn-wa-flotante { bottom: 140px; right: 14px; }
       .mini-carrito { bottom: 80px; right: 14px; }
       .paginador-resumen { display: none; }
@@ -683,7 +673,7 @@
     </div>
   </div>
 
-  <!-- WHATSAPP (SIEMPRE VISIBLE) -->
+  <!-- WHATSAPP -->
   <a
     id="wa-flotante"
     class="btn-wa-flotante"
@@ -697,7 +687,6 @@
     </svg>
   </a>
 
-  <!-- ✅ SCRIPT COMPLETO (Nivel DIOS+) -->
   <script type="module">
     import { db } from "./js/firebase-init.js";
     import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
@@ -706,29 +695,19 @@
     // CONFIG / CONSTANTES
     // =========================
     const COL_PRODUCTOS = "productos";
-
-    // ✅ Repo de imágenes (RAW)
     const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
-    // Cache de catálogo
     const CACHE_KEY = "dm_catalogo_cache_v2";
     const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 horas
-
-    // Cache Storage (imágenes)
     const CACHE_IMG_NAME = "dm_img_cache_v1";
 
-    // Carrito
     const CART_KEY = "carrito_dm_v1";
-
-    // UI State (Nivel Dios+)
     const UI_STATE_KEY = "dm_catalogo_ui_state_v2";
 
     // =========================
-    // PAGINACIÓN DINÁMICA
+    // PAGINACIÓN
     // =========================
-    function calcularItemsPorPagina() {
-      return window.innerWidth >= 1200 ? 28 : 16;
-    }
+    function calcularItemsPorPagina() { return window.innerWidth >= 1200 ? 28 : 16; }
     let ITEMS_POR_PAGINA = calcularItemsPorPagina();
 
     // =========================
@@ -753,7 +732,6 @@
 
     const miniCantidad = document.getElementById("mini-carrito-cantidad");
     const miniTotal = document.getElementById("mini-carrito-total");
-
     const toolbar = document.querySelector(".toolbar");
 
     // =========================
@@ -808,7 +786,6 @@
     let filtroCategoria = "";
     let filtroSubcategoria = "";
     let filtroEtiqueta = "";
-
     let pagina = 1;
 
     // =========================
@@ -871,7 +848,8 @@
             .map(norm)
             .filter(Boolean);
 
-      const productosTexto = `${codigo} ${nombre} ${descripcion} ${categoria} ${subcategoria} ${tagsArr.join(" ")}`.toLowerCase();
+      const productosTexto =
+        `${codigo} ${nombre} ${descripcion} ${categoria} ${subcategoria} ${tagsArr.join(" ")}`.toLowerCase();
 
       return {
         ...p,
@@ -913,22 +891,17 @@
         if (!raw) return null;
         const obj = JSON.parse(raw);
         if (!obj || !Array.isArray(obj.data) || !obj.ts) return null;
-        const age = Date.now() - obj.ts;
-        if (age > CACHE_TTL_MS) return null;
+        if ((Date.now() - obj.ts) > CACHE_TTL_MS) return null;
         return obj.data;
-      } catch {
-        return null;
-      }
+      } catch { return null; }
     }
 
     function cacheGuardar(data) {
-      try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
-      } catch {}
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data })); } catch {}
     }
 
     // =========================
-    // IMÁGENES: candidatos + cache + precarga
+    // IMÁGENES
     // =========================
     function candidatosImagen(p) {
       const codigo = p.codigo || "";
@@ -997,7 +970,7 @@
     }
 
     // =========================
-    // UI STATE + URL (Nivel DIOS+)
+    // UI STATE + URL
     // =========================
     function uiStateReadLocal() {
       try {
@@ -1014,8 +987,7 @@
 
     function uiStateReadURL() {
       const sp = new URLSearchParams(location.search);
-      const hasAny =
-        ["q","cat","sub","tag","dest","stock","ord","page"].some(k => sp.has(k));
+      const hasAny = ["q","cat","sub","tag","dest","stock","ord","page"].some(k => sp.has(k));
       if (!hasAny) return null;
 
       return {
@@ -1072,7 +1044,6 @@
       const s = uiStateToObject();
       uiStateWriteLocal(s);
 
-      // URL shareable (sin recargar)
       const url = new URL(location.href);
       const sp = url.searchParams;
 
@@ -1258,7 +1229,7 @@
     }
 
     // =========================
-    // CARRITO (mini)
+    // CARRITO
     // =========================
     function leerCarrito() {
       try {
@@ -1271,6 +1242,9 @@
     function guardarCarrito(arr) {
       try { localStorage.setItem(CART_KEY, JSON.stringify(arr)); } catch {}
       actualizarMiniCarrito();
+
+      // 🔔 clave: avisamos a todo el catálogo que cambió el carrito
+      window.dispatchEvent(new CustomEvent("dm-carrito-update", { detail: arr }));
     }
 
     function carritoAgregar(p, cantidad) {
@@ -1278,7 +1252,14 @@
       const cart = leerCarrito();
       const idx = cart.findIndex(x => String(x.codigo) === String(p.codigo));
       if (idx >= 0) cart[idx].cantidad = (Number(cart[idx].cantidad) || 0) + qty;
-      else cart.push({ codigo: p.codigo, nombre: p.nombre, precio: p.precio ?? null, stock: p.stock ?? 0, imagen: p.imagen ?? "", cantidad: qty });
+      else cart.push({
+        codigo: p.codigo,
+        nombre: p.nombre,
+        precio: p.precio ?? null,
+        stock: p.stock ?? 0,
+        imagen: p.imagen ?? "",
+        cantidad: qty
+      });
       guardarCarrito(cart);
     }
 
@@ -1294,7 +1275,6 @@
       miniCantidad.textContent = String(cant);
       miniTotal.textContent = formatoARS(total);
 
-      // badge si existe en tu HTML
       const miniBadge = document.getElementById("mini-badge");
       if (miniBadge) miniBadge.textContent = String(cant);
     }
@@ -1304,7 +1284,68 @@
     };
 
     // =========================
-    // RENDER
+    // STOCK VISUAL DESDE CARRITO (sube/baja)
+    // =========================
+    function actualizarStockVisualDesdeCarrito() {
+      const cart = leerCarrito();
+
+      // map codigo -> cantidad en carrito
+      const enCarrito = {};
+      cart.forEach(it => {
+        const cod = String(it.codigo);
+        enCarrito[cod] = (enCarrito[cod] || 0) + (Number(it.cantidad) || 0);
+      });
+
+      grid.querySelectorAll(".producto-card").forEach(card => {
+        const codigo = card.getAttribute("data-codigo");
+        const stockBox = card.querySelector(".producto-stock");
+        const stockNum = stockBox?.querySelector(".stock-num");
+        const badge = stockBox?.querySelector(".badge-stock");
+        const btnAgregar = card.querySelector(".btn-agregar-carrito");
+
+        if (!codigo || !stockBox || !stockNum) return;
+
+        const stockOriginal = Number(stockBox.getAttribute("data-stock-original"));
+        if (!Number.isFinite(stockOriginal)) return;
+
+        const usado = enCarrito[String(codigo)] || 0;
+        const stockActual = Math.max(0, stockOriginal - usado);
+
+        stockBox.setAttribute("data-stock", stockActual);
+        stockNum.textContent = stockActual;
+
+        if (badge) {
+          if (stockActual <= 0) {
+            badge.textContent = "Sin stock";
+            badge.className = "badge-stock stock-cero";
+            if (btnAgregar) { btnAgregar.disabled = true; btnAgregar.textContent = "Sin stock"; }
+          } else if (stockActual <= 5) {
+            badge.textContent = "Stock bajo";
+            badge.className = "badge-stock stock-bajo";
+            if (btnAgregar) { btnAgregar.disabled = false; btnAgregar.textContent = "🛒 Agregar"; }
+          } else {
+            badge.textContent = "En stock";
+            badge.className = "badge-stock stock-ok";
+            if (btnAgregar) { btnAgregar.disabled = false; btnAgregar.textContent = "🛒 Agregar"; }
+          }
+        }
+      });
+    }
+
+    window.addEventListener("dm-carrito-update", () => {
+      actualizarStockVisualDesdeCarrito();
+    });
+
+    // =========================
+    // BACK (volver a catálogo desde producto)
+    // =========================
+    function irAProductoConBack(codigo){
+      const back = encodeURIComponent(location.pathname + location.search);
+      location.href = `producto.html?codigo=${encodeURIComponent(codigo)}&back=${back}`;
+    }
+
+    // =========================
+    // HANDLERS POR CARD
     // =========================
     function attachCardHandlers() {
       grid.querySelectorAll(".producto-card").forEach(card => {
@@ -1315,6 +1356,7 @@
         const btnAgregar = card.querySelector(".btn-agregar-carrito");
         const img = card.querySelector(".producto-imagen");
 
+        // imagen blur-up + fallback
         if (img) {
           img.addEventListener("load", () => img.classList.add("is-loaded"), { once: true });
 
@@ -1330,83 +1372,80 @@
             }
           };
         }
-function irAProductoConBack(codigo){
-  const back = encodeURIComponent(
-    location.pathname + location.search
-  );
-  location.href = `producto.html?codigo=${encodeURIComponent(codigo)}&back=${back}`;
-}
 
-card.querySelector(".producto-imagen-wrapper")?.addEventListener("click", () => {
-  irAProductoConBack(codigo);
-});
-
-card.querySelector(".producto-titulo")?.addEventListener("click", () => {
-  irAProductoConBack(codigo);
-});
+        // click a producto (con back)
+        card.querySelector(".producto-imagen-wrapper")?.addEventListener("click", () => irAProductoConBack(codigo));
+        card.querySelector(".producto-titulo")?.addEventListener("click", () => irAProductoConBack(codigo));
 
         btnMenos?.addEventListener("click", () => {
-          const v = Math.max(1, (Number(input.value) || 1) - 1);
-          input.value = String(v);
+          const v = Math.max(1, (Number(input?.value) || 1) - 1);
+          if (input) input.value = String(v);
         });
+
         btnMas?.addEventListener("click", () => {
-          const v = Math.max(1, (Number(input.value) || 1) + 1);
-          input.value = String(v);
+          const v = Math.max(1, (Number(input?.value) || 1) + 1);
+          if (input) input.value = String(v);
         });
 
-btnAgregar?.addEventListener("click", () => {
-  const p = catalogo.find(x => String(x.codigo) === String(codigo));
-  if (!p) return;
+        btnAgregar?.addEventListener("click", () => {
+          const p = catalogo.find(x => String(x.codigo) === String(codigo));
+          if (!p) return;
 
-  const qty = Math.max(1, Number(input.value) || 1);
+          const qty = Math.max(1, Number(input?.value) || 1);
 
-  // 🛒 carrito
-  carritoAgregar(p, qty);
+          // si ya estaba disabled, no hacemos nada
+          if (btnAgregar.disabled) return;
 
-// 📉 bajar stock visual
-const stockBox = card.querySelector('.producto-stock');
-const stockNum = stockBox?.querySelector('.stock-num');
+          // 🛒 carrito (esto dispara dm-carrito-update también)
+          carritoAgregar(p, qty);
 
-if (stockBox && stockNum) {
-  let stockActual = Number(stockBox.getAttribute('data-stock')) || 0;
+          // 📉 bajar stock visual de ESTA card (respuesta instantánea)
+          const stockBox = card.querySelector(".producto-stock");
+          const stockNum = stockBox?.querySelector(".stock-num");
 
-  // 🔒 si ya no hay stock, no dejamos agregar
-  if (stockActual <= 0) return;
+          if (stockBox && stockNum) {
+            let stockActual = Number(stockBox.getAttribute("data-stock")) || 0;
+            if (stockActual <= 0) return;
 
-  stockActual = Math.max(0, stockActual - qty);
+            stockActual = Math.max(0, stockActual - qty);
+            stockBox.setAttribute("data-stock", stockActual);
+            stockNum.textContent = stockActual;
 
-  stockBox.setAttribute('data-stock', stockActual);
-  stockNum.textContent = stockActual;
+            const badge = stockBox.querySelector(".badge-stock");
+            if (badge) {
+              if (stockActual <= 0) {
+                badge.textContent = "Sin stock";
+                badge.className = "badge-stock stock-cero";
+                btnAgregar.disabled = true;
+                btnAgregar.textContent = "Sin stock";
+              } else if (stockActual <= 5) {
+                badge.textContent = "Stock bajo";
+                badge.className = "badge-stock stock-bajo";
+                btnAgregar.disabled = false;
+              } else {
+                badge.textContent = "En stock";
+                badge.className = "badge-stock stock-ok";
+                btnAgregar.disabled = false;
+              }
+            }
+          }
 
-  // badge dinámico
-  const badge = stockBox.querySelector('.badge-stock');
-if (badge) {
-  if (stockActual <= 0) {
-    badge.textContent = 'Sin stock';
-    badge.className = 'badge-stock stock-cero';
-    btnAgregar.disabled = true;
-    btnAgregar.textContent = 'Sin stock';
-  } else if (stockActual <= 5) {
-    badge.textContent = 'Stock bajo';
-    badge.className = 'badge-stock stock-bajo';
-    btnAgregar.disabled = false;
-  } else {
-    badge.textContent = 'En stock';
-    badge.className = 'badge-stock stock-ok';
-    btnAgregar.disabled = false;
-  }
-}
+          // feedback botón (solo si NO quedó sin stock)
+          if (!btnAgregar.disabled) {
+            btnAgregar.classList.add("btn-agregar-carrito-activo");
+            btnAgregar.textContent = "✅ Agregado";
+            setTimeout(() => {
+              btnAgregar.classList.remove("btn-agregar-carrito-activo");
+              btnAgregar.textContent = "🛒 Agregar";
+            }, 900);
+          }
+        });
+      });
+    }
 
-  // feedback botón
- if (!btnAgregar.disabled) {
-  btnAgregar.classList.add("btn-agregar-carrito-activo");
-  btnAgregar.textContent = "✅ Agregado";
-  setTimeout(() => {
-    btnAgregar.classList.remove("btn-agregar-carrito-activo");
-    btnAgregar.textContent = "🛒 Agregar";
-  }, 900);
-}
-
+    // =========================
+    // RENDER
+    // =========================
     function render() {
       const total = filtrados.length;
       const totalPaginas = Math.max(1, Math.ceil(total / ITEMS_POR_PAGINA));
@@ -1423,6 +1462,7 @@ if (badge) {
       btnAnterior.disabled = pagina <= 1;
       btnSiguiente.disabled = pagina >= totalPaginas;
 
+      // numeritos
       paginadorNumeros.innerHTML = "";
       const maxBtns = 7;
       const half = Math.floor(maxBtns / 2);
@@ -1461,9 +1501,9 @@ if (badge) {
         setTimeout(() => { render(); window.scrollTo({ top: 0, behavior: "smooth" }); }, 60);
       };
 
+      // cards
       grid.innerHTML = pageItems.map(p => {
         const badge = stockBadge(Number(p.stock));
-        const precioTxt = (p.precio != null) ? `$ ${formatoARS(p.precio)}` : "";
         const chip = p.destacado ? `<span class="chip-destacado">Destacado</span>` : "";
         const desc = p.descripcion ? escapeHtml(p.descripcion) : "";
 
@@ -1486,27 +1526,32 @@ if (badge) {
             <div class="producto-titulo" title="${escapeHtmlAttr(p.nombre || "")}">
               ${escapeHtml(p.nombre || "Producto")} ${chip}
             </div>
-             <div class="producto-stock" data-stock="${Number(p.stock)}">
-           <span class="badge-stock ${badge.cls}">${badge.txt}</span>
-            ·  <span class="stock-num">${Number(p.stock)}</span> u
+
+            <div class="producto-descripcion">${desc}</div>
+
+            <div class="producto-stock"
+                 data-stock="${Number(p.stock)}"
+                 data-stock-original="${Number(p.stock)}">
+              <span class="badge-stock ${badge.cls}">${badge.txt}</span>
+              · <span class="stock-num">${Number(p.stock)}</span> u
             </div>
 
-              <div class="cantidad-container">
-                <button class="btn-cantidad" type="button" data-act="menos">−</button>
-                <input class="input-cantidad" type="number" min="1" value="1" />
-                <button class="btn-cantidad" type="button" data-act="mas">+</button>
-              </div>
-
-              <button class="btn-agregar-carrito" type="button">
-                🛒 Agregar
-              </button>
+            <div class="cantidad-container">
+              <button class="btn-cantidad" type="button" data-act="menos">−</button>
+              <input class="input-cantidad" type="number" min="1" value="1" />
+              <button class="btn-cantidad" type="button" data-act="mas">+</button>
             </div>
+
+            <button class="btn-agregar-carrito" type="button">🛒 Agregar</button>
           </div>
         `;
       }).join("");
 
       attachCardHandlers();
       precargarPagina(pageItems).catch(() => {});
+
+      // ✅ recalcula stock visual considerando lo que ya hay en carrito (SUBE/BAJA)
+      actualizarStockVisualDesdeCarrito();
     }
 
     // =========================
@@ -1568,12 +1613,10 @@ if (badge) {
       actualizarMiniCarrito();
       renderSkeleton(ITEMS_POR_PAGINA);
 
-      // 1) aplicar UI desde URL (prioridad) o local
       const sUrl = uiStateReadURL();
       const sLocal = uiStateReadLocal();
       uiStateApply(sUrl || sLocal);
 
-      // 2) cache primero
       const cached = cacheLeer();
       if (cached?.length) {
         catalogo = cached.map(normalizarProducto);
@@ -1582,7 +1625,6 @@ if (badge) {
         render();
         uiStateSaveNow();
 
-        // refresh background
         cargarCatalogoFirestore()
           .then(arr => {
             cacheGuardar(arr);
@@ -1596,7 +1638,6 @@ if (badge) {
         return;
       }
 
-      // 3) Firestore
       try {
         const arr = await cargarCatalogoFirestore();
         cacheGuardar(arr);
