@@ -22,7 +22,6 @@
 
     main.producto-pagina { padding: 28px 16px 60px; min-height: 70vh; }
 
-    /* contenedor central (mejor “uso del espacio”) */
     .producto-wrapper{
       max-width:1200px;
       margin: 0 auto;
@@ -36,7 +35,6 @@
     }
     .producto-wrapper.visible{ opacity:1; transform:translateY(0); }
 
-    /* caja de imagen */
     .producto-imagen{
       flex: 0 0 52%;
       background: radial-gradient(900px 520px at 50% 0%, rgba(255,164,0,.06), transparent 60%),
@@ -54,7 +52,6 @@
       display:block;
     }
 
-    /* caja info */
     .producto-info{
       flex: 0 0 42%;
       background: radial-gradient(900px 520px at 50% -120px, rgba(255,0,93,.05), transparent 60%),
@@ -69,6 +66,7 @@
     .producto-categoria{ opacity:.9; margin:0 0 12px; color: #c9c9ff; font-weight: 600; }
     .producto-descripcion{ opacity:.95; margin:0 0 14px; color: rgba(255,255,255,.88); line-height: 1.35; }
     .producto-precio{ font-size:30px; font-weight:900; margin:12px 0 10px; color: var(--accent); }
+
     .producto-stock{ margin:0; opacity:.95; color: rgba(255,255,255,.85); }
     .producto-stock.stock-sin{ color:#ff4d4f; font-weight:800; }
     .producto-stock.stock-bajo{ color:#ffd666; font-weight:800; }
@@ -79,7 +77,8 @@
       flex-wrap:wrap;
       margin-top:16px;
     }
-    .btn-secundario,.btn-whatsapp,.btn-nav{
+
+    .btn-secundario,.btn-whatsapp,.btn-nav,.btn-agregar{
       display:inline-flex;
       align-items:center;
       justify-content:center;
@@ -94,13 +93,26 @@
       box-shadow: 0 12px 26px rgba(0,0,0,.22);
       transition: transform .08s ease, filter .08s ease;
       white-space: nowrap;
+      user-select: none;
     }
-    .btn-secundario:hover,.btn-nav:hover{ filter: brightness(1.06); transform: translateY(-1px); }
+    .btn-secundario:hover,.btn-nav:hover,.btn-agregar:hover{ filter: brightness(1.06); transform: translateY(-1px); }
+
     .btn-whatsapp{
       background:#1ebe57;
       font-weight:900;
     }
     .btn-whatsapp:hover{ filter: brightness(1.05); transform: translateY(-1px); }
+
+    .btn-agregar{
+      font-weight: 900;
+      gap: 8px;
+    }
+    .btn-agregar:disabled{
+      opacity: .55;
+      cursor: not-allowed;
+      transform: none;
+      filter: none;
+    }
 
     .producto-nav{
       max-width:1200px;
@@ -119,6 +131,50 @@
       color:#c9c9ff;
     }
 
+    /* Qty */
+    .qty-row{
+      margin-top: 14px;
+      display:flex;
+      align-items:center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .qty-control{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      background: rgba(255,255,255,.06);
+      padding: 8px 10px;
+      border-radius: 999px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .qty-btn{
+      width: 34px; height: 34px;
+      border-radius: 999px;
+      border:none;
+      cursor:pointer;
+      background: var(--btn);
+      color:#fff;
+      font-size: 18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow: 0 10px 18px rgba(0,0,0,.2);
+      transition: transform .08s ease, filter .08s ease;
+    }
+    .qty-btn:hover{ filter: brightness(1.06); transform: translateY(-1px); }
+    .qty-input{
+      width: 70px;
+      text-align:center;
+      border-radius: 999px;
+      border:none;
+      padding: 8px 10px;
+      font-size: 15px;
+      outline:none;
+      background: #fff;
+      color:#000;
+    }
+
     /* mobile */
     @media (max-width: 900px){
       main.producto-pagina{ padding:18px 12px 42px; }
@@ -128,7 +184,6 @@
       .producto-titulo{ font-size:28px; }
     }
 
-    /* Acción secundaria del header */
     .topbar-link {
       padding: 6px 14px;
       border-radius: 999px;
@@ -175,17 +230,20 @@
 
   <script type="module">
     import { db } from "./js/firebase-init.js";
-    import {
-      collection, getDocs, getDoc, doc, query, where, limit
-    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { collection, getDocs, getDoc, doc, query, where, limit }
+      from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
     // ====== CONFIG ======
     const COL_PRODUCTOS = "productos";
     const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
-    const CLAVE_CACHE_CATALOGO = "cache_catalogo_v2"; // mismo nombre que en catalogo.html
+    // ✅ mismo cache que tu catalogo.html (el que armamos)
+    const CLAVE_CACHE_CATALOGO = "dm_catalogo_cache_v2";
     const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
-    const CACHE_IMG_NAME = "dm-img-v1";
+    const CACHE_IMG_NAME = "dm_img_cache_v1";
+
+    // ✅ misma key de carrito que tu catálogo
+    const CART_KEY = "carrito_dm_v1";
 
     // ====== BACK / VOLVER (con filtros) ======
     const linkCatalogo = document.getElementById("linkCatalogo");
@@ -196,28 +254,22 @@
 
     function sanitizeBackUrl(raw){
       if (!raw) return null;
-
       let v = String(raw).trim();
       if (!v) return null;
 
-      // decode seguro
       try { v = decodeURIComponent(v); } catch {}
 
-      // bloqueo protocolos / javascript / etc.
       const low = v.toLowerCase();
       if (low.startsWith("javascript:")) return null;
-      if (low.includes("://")) return null;          // http(s)://, etc.
+      if (low.includes("://")) return null;
       if (low.startsWith("//")) return null;
 
-      // permitimos solo rutas relativas y preferimos que apunten al catálogo
-      // (así evitamos open-redirect y mantenemos "volver con filtros")
       const ok =
         low.startsWith("catalogo.html") ||
         low.startsWith("./catalogo.html") ||
         low.startsWith("/catalogo.html");
 
       if (!ok) return null;
-
       return v;
     }
 
@@ -226,22 +278,12 @@
     const CATALOGO_FALLBACK = "catalogo.html";
     const CATALOGO_TARGET = backSafe || CATALOGO_FALLBACK;
 
-    // aplica al botón "Ver catálogo" del header
     if (linkCatalogo) linkCatalogo.href = CATALOGO_TARGET;
 
     function volverAlCatalogo(){
-      // 1) Si viene back, volvemos EXACTO a ese catálogo (con filtros/paginación/etc.)
-      if (backSafe) {
-        location.href = backSafe;
-        return;
-      }
-      // 2) Si venís desde el catálogo, history.back() mantiene estado (cuando aplica)
+      if (backSafe) { location.href = backSafe; return; }
       const ref = document.referrer || "";
-      if (ref.includes("catalogo.html")) {
-        history.back();
-        return;
-      }
-      // 3) Fallback duro
+      if (ref.includes("catalogo.html")) { history.back(); return; }
       location.href = CATALOGO_FALLBACK;
     }
     window.__dm_back = volverAlCatalogo;
@@ -283,10 +325,19 @@
       if (typeof v === "string") {
         const limpio = v.replace(/\./g, "").replace(",", ".");
         const n = Number(limpio);
-        return isNaN(n) ? null : n;
+        return Number.isFinite(n) ? n : null;
       }
       const n = Number(v);
-      return isNaN(n) ? null : n;
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
     function normalizarProducto(raw, codigoFallback) {
@@ -302,7 +353,49 @@
       return { ...p, codigo: String(codigo), nombre, categoria, subcategoria, descripcion, precio, stock, imagen };
     }
 
-    // ====== Cache helpers (producto) ======
+    function formatoARS(n) {
+      if (n == null || !Number.isFinite(n)) return "";
+      return n.toLocaleString("es-AR", { maximumFractionDigits: 0 });
+    }
+
+    // ====== Carrito helpers (sincronización stock) ======
+    function leerCarrito(){
+      try {
+        const raw = localStorage.getItem(CART_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+      } catch { return []; }
+    }
+
+    function guardarCarrito(arr){
+      try { localStorage.setItem(CART_KEY, JSON.stringify(arr)); } catch {}
+      // evento (sirve dentro de esta página; el catálogo recalcula al volver con pageshow/focus)
+      window.dispatchEvent(new CustomEvent("dm-carrito-update", { detail: arr }));
+    }
+
+    function carritoAgregar(p, cantidad){
+      const qty = Math.max(1, Math.floor(Number(cantidad) || 1));
+      const cart = leerCarrito();
+      const idx = cart.findIndex(x => String(x.codigo) === String(p.codigo));
+      if (idx >= 0) cart[idx].cantidad = (Number(cart[idx].cantidad) || 0) + qty;
+      else cart.push({
+        codigo: p.codigo,
+        nombre: p.nombre,
+        precio: p.precio ?? null,
+        stock: p.stock ?? 0,
+        imagen: p.imagen ?? "",
+        cantidad: qty
+      });
+      guardarCarrito(cart);
+    }
+
+    function cantidadEnCarrito(codigo){
+      const cart = leerCarrito();
+      const it = cart.find(x => String(x.codigo) === String(codigo));
+      return it ? (Number(it.cantidad) || 0) : 0;
+    }
+
+    // ====== Cache producto ======
     function cacheProductoLeer(codigo) {
       try {
         const raw = localStorage.getItem(cacheProdKey(codigo));
@@ -311,18 +404,14 @@
         if (!obj || !obj.ts || !obj.data) return null;
         if ((Date.now() - obj.ts) > CACHE_TTL_MS) return null;
         return obj.data;
-      } catch {
-        return null;
-      }
+      } catch { return null; }
     }
 
     function cacheProductoGuardar(codigo, data) {
-      try {
-        localStorage.setItem(cacheProdKey(codigo), JSON.stringify({ ts: Date.now(), data }));
-      } catch {}
+      try { localStorage.setItem(cacheProdKey(codigo), JSON.stringify({ ts: Date.now(), data })); } catch {}
     }
 
-    // ====== Imágenes: precarga + warm cache ======
+    // ====== Imágenes ======
     async function warmCacheImage(url) {
       try {
         if (!("caches" in window)) return;
@@ -336,7 +425,6 @@
     function candidatosImagen(p) {
       const codigo = p.codigo || "";
       const urlDirecta = p.imagen || "";
-
       const c = [
         urlDirecta,
         `${BASE_IMG}/${codigo}.jpg`,
@@ -348,7 +436,6 @@
         `${BASE_IMG}/${codigo}.webp`,
         `${BASE_IMG}/${codigo}.WEBP`,
       ].filter(Boolean);
-
       return [...new Set(c)];
     }
 
@@ -371,6 +458,7 @@
       imgEl.onerror = probar;
       imgEl.onload = () => warmCacheImage(imgEl.src);
 
+      // precarga liviana
       for (const u of cands.slice(0, 3)) {
         const im = new Image();
         im.decoding = "async";
@@ -384,7 +472,7 @@
 
     function armarWhatsApp(p) {
       const precioTxt = (p.precio != null)
-        ? `$ ${p.precio.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`
+        ? `$ ${formatoARS(p.precio)}`
         : "Consultar";
 
       const msg = [
@@ -400,6 +488,7 @@
       return `https://wa.me/?text=${encodeURIComponent(msg)}`;
     }
 
+    // ====== Nav anterior/siguiente (desde cache del catálogo) ======
     function renderNav(codigoActual) {
       if (!navEl) return;
 
@@ -413,9 +502,7 @@
       } catch {}
 
       if (!catalogo || !catalogo.length) {
-        navEl.innerHTML = `
-          <button class="btn-nav" type="button" onclick="window.__dm_back()">Volver al listado</button>
-        `;
+        navEl.innerHTML = `<button class="btn-nav" type="button" onclick="window.__dm_back()">Volver al listado</button>`;
         return;
       }
 
@@ -425,9 +512,7 @@
 
       const idx = catNorm.findIndex(x => String(x.codigo) === String(codigoActual));
       if (idx === -1) {
-        navEl.innerHTML = `
-          <button class="btn-nav" type="button" onclick="window.__dm_back()">Volver al listado</button>
-        `;
+        navEl.innerHTML = `<button class="btn-nav" type="button" onclick="window.__dm_back()">Volver al listado</button>`;
         return;
       }
 
@@ -443,24 +528,34 @@
       `;
     }
 
+    // ====== Render producto (sincronizado stock con carrito) ======
+    let productoActual = null;
+
+    function calcularDisponible(p){
+      const enCart = cantidadEnCarrito(p.codigo);
+      const disp = Math.max(0, (Number(p.stock) || 0) - enCart);
+      return { enCart, disp };
+    }
+
     function renderProducto(raw, codigoFallback) {
       const p = normalizarProducto(raw, codigoFallback);
+      productoActual = p;
 
       setImagenProducto(p);
       renderNav(p.codigo);
 
+      const { enCart, disp } = calcularDisponible(p);
+
       let stockCls = "producto-stock";
-      if (!isNaN(p.stock)) {
-        if (p.stock === 0) stockCls += " stock-sin";
-        else if (p.stock > 0 && p.stock <= 5) stockCls += " stock-bajo";
-      }
+      if (disp <= 0) stockCls += " stock-sin";
+      else if (disp <= 5) stockCls += " stock-bajo";
 
       const categoriaHtml = (p.categoria || p.subcategoria)
-        ? `<p class="producto-categoria">${p.categoria || ""}${(p.categoria && p.subcategoria) ? " · " : ""}${p.subcategoria || ""}</p>`
+        ? `<p class="producto-categoria">${escapeHtml(p.categoria || "")}${(p.categoria && p.subcategoria) ? " · " : ""}${escapeHtml(p.subcategoria || "")}</p>`
         : "";
 
       const precioHtml = (p.precio != null)
-        ? `<p class="producto-precio">$ ${p.precio.toLocaleString("es-AR", { maximumFractionDigits: 0 })}</p>`
+        ? `<p class="producto-precio">$ ${formatoARS(p.precio)}</p>`
         : "";
 
       const descHtml = p.descripcion
@@ -473,7 +568,24 @@
         ${categoriaHtml}
         ${descHtml}
         ${precioHtml}
-        <p class="${stockCls}">Stock: ${Number.isFinite(p.stock) ? p.stock : 0}</p>
+
+        <p id="stockLine" class="${stockCls}">
+          Stock: <b>${disp}</b> u
+          <span style="opacity:.7; font-weight:600;">(en carrito: ${enCart})</span>
+        </p>
+
+        <div class="qty-row">
+          <div class="qty-control">
+            <button id="btnMenos" class="qty-btn" type="button">−</button>
+            <input id="qtyInput" class="qty-input" type="number" min="1" value="1" />
+            <button id="btnMas" class="qty-btn" type="button">+</button>
+          </div>
+
+          <button id="btnAgregar" class="btn-agregar" type="button">
+            🛒 Agregar
+          </button>
+        </div>
+
         <div class="producto-acciones">
           <button class="btn-secundario" type="button" onclick="window.__dm_back()">← Volver</button>
           <a class="btn-whatsapp" href="${armarWhatsApp(p)}" target="_blank" rel="noopener">
@@ -482,16 +594,95 @@
         </div>
       `;
 
-      visible();
-    }
+      // Handlers qty + add
+      const btnMenos = document.getElementById("btnMenos");
+      const btnMas = document.getElementById("btnMas");
+      const qtyInput = document.getElementById("qtyInput");
+      const btnAgregar = document.getElementById("btnAgregar");
 
-    function escapeHtml(s) {
-      return String(s ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+      function clampQty(v){
+        const n = Math.max(1, Math.floor(Number(v) || 1));
+        return n;
+      }
+
+      function actualizarStockUI(){
+        if (!productoActual) return;
+        const { enCart, disp } = calcularDisponible(productoActual);
+
+        const stockLine = document.getElementById("stockLine");
+        if (stockLine){
+          let cls = "producto-stock";
+          if (disp <= 0) cls += " stock-sin";
+          else if (disp <= 5) cls += " stock-bajo";
+          stockLine.className = cls;
+          stockLine.innerHTML = `Stock: <b>${disp}</b> u <span style="opacity:.7; font-weight:600;">(en carrito: ${enCart})</span>`;
+        }
+
+        const q = clampQty(qtyInput?.value);
+        if (qtyInput) qtyInput.value = String(q);
+
+        if (btnAgregar){
+          if (disp <= 0){
+            btnAgregar.disabled = true;
+            btnAgregar.textContent = "Sin stock";
+          } else {
+            btnAgregar.disabled = false;
+            btnAgregar.textContent = "🛒 Agregar";
+          }
+        }
+
+        // si la qty es mayor que disponible, la ajustamos (UX pro)
+        if (qtyInput && disp > 0){
+          const q2 = Math.min(clampQty(qtyInput.value), disp);
+          qtyInput.value = String(q2);
+        }
+      }
+
+      btnMenos?.addEventListener("click", () => {
+        const v = clampQty(qtyInput.value) - 1;
+        qtyInput.value = String(Math.max(1, v));
+      });
+      btnMas?.addEventListener("click", () => {
+        const { disp } = calcularDisponible(productoActual);
+        const v = clampQty(qtyInput.value) + 1;
+        if (disp > 0) qtyInput.value = String(Math.min(v, disp));
+        else qtyInput.value = "1";
+      });
+
+      qtyInput?.addEventListener("input", () => {
+        actualizarStockUI();
+      });
+
+      btnAgregar?.addEventListener("click", () => {
+        if (!productoActual) return;
+        actualizarStockUI();
+        const { disp } = calcularDisponible(productoActual);
+        if (disp <= 0) return;
+
+        const qty = clampQty(qtyInput.value);
+        const qtyReal = Math.min(qty, disp);
+
+        carritoAgregar(productoActual, qtyReal);
+        // feedback rápido
+        btnAgregar.classList.add("btn-agregar-carrito-activo");
+        btnAgregar.textContent = "✅ Agregado";
+        setTimeout(() => {
+          btnAgregar.classList.remove("btn-agregar-carrito-activo");
+          actualizarStockUI();
+        }, 650);
+
+        actualizarStockUI();
+      });
+
+      // si cambia el carrito en esta misma página
+      window.addEventListener("dm-carrito-update", actualizarStockUI);
+
+      // y al volver desde otra página/caché
+      window.addEventListener("pageshow", actualizarStockUI);
+      window.addEventListener("focus", actualizarStockUI);
+
+      actualizarStockUI();
+      visible();
     }
 
     // ====== Firestore ======
