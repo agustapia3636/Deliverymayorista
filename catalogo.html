@@ -623,16 +623,25 @@
     // =========================
     // CONFIG
     // =========================
-    const COL_PRODUCTOS = "productos";
-    const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
+const COL_PRODUCTOS = "productos";
+const BASE_IMG = "...";
 
-    const CACHE_KEY = "cache_catalogo_v2";
-    const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
-    const CACHE_IMG_NAME = "dm-img-v1";
+// PAGINACIÓN DINÁMICA
+function calcularItemsPorPagina() {
+  return window.innerWidth >= 1200 ? 28 : 16;
+}
 
-    const CART_KEY = "carrito_dm_v1";
-    const ITEMS_POR_PAGINA = 21;
+let ITEMS_POR_PAGINA = calcularItemsPorPagina();
 
+// RESIZE
+window.addEventListener("resize", () => {
+  const nuevo = calcularItemsPorPagina();
+  if (nuevo !== ITEMS_POR_PAGINA) {
+    ITEMS_POR_PAGINA = nuevo;
+    pagina = 1;
+    render();
+  }
+});
     // =========================
     // DOM
     // =========================
