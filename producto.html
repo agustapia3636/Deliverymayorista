@@ -122,10 +122,12 @@
     const infoDiv = document.getElementById("producto-info");
     const imgPrincipal = document.getElementById("imagen-principal");
 
-    function visible() {
-      if (loadingEl) loadingEl.style.display = "none";
-      if (wrapper) wrapper.classList.add("visible");
-    }
+   let tLoading = setTimeout(() => {
+  if (loadingEl) loadingEl.style.display = "block";
+}, 250);
+
+// arranca oculto
+if (loadingEl) loadingEl.style.display = "none";
 
     function parsearPrecio(valor) {
       if (typeof valor === "number") return valor;
