@@ -1,40 +1,60 @@
 // js/historial.js
 import { auth, db } from "./firebase-init.js";
-import {
-  onAuthStateChanged,
-  signOut,
-} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
 import {
   collection,
   getDocs,
+  query,
+  where,
+  orderBy,
+  limit,
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-// --------------------
-// DOM
-// --------------------
+/* =========================
+   DOM
+========================= */
 const btnLogout = document.getElementById("logoutBtn");
 
 const tituloCliente = document.getElementById("tituloCliente");
 const subtituloCliente = document.getElementById("subtituloCliente");
+const badgeModo = document.getElementById("badgeModo");
 
 const tbody = document.getElementById("tablaHistorial");
 
-// Filtros
+// filtros
 const inputDesde = document.getElementById("filtroDesde");
 const inputHasta = document.getElementById("filtroHasta");
 const inputProducto = document.getElementById("filtroProducto");
 const selectEstado = document.getElementById("filtroEstado");
 
-// Totales
+// búsqueda rápida
+const inputBusquedaRapida = document.getElementById("busquedaRapida");
+
+// orden/paginación
+const selectOrden = document.getElementById("selectOrden");
+const selectPageSize = document.getElementById("selectPageSize");
+const btnPrev = document.getElementById("btnPrev");
+const btnNext = document.getElementById("btnNext");
+const lblPager = document.getElementById("lblPager");
+const lblHint = document.getElementById("lblHint");
+
+const btnReset = document.getElementById("btnReset");
+const btnExport = document.getElementById("btnExport");
+const btnRefrescar = document.getElementById("btnRefrescar");
+
+// totales
 const lblTotalCliente = document.getElementById("totalCliente");
 const lblTotalFiltrado = document.getElementById("totalFiltrado");
 const lblResumenConteo = document.getElementById("resumenConteo");
+const lblResumenPagina = document.getElementById("resumenPagina");
 
-// Modal comprobante
+// modal
 const modalDetalle = document.getElementById("modalDetalle");
 const lblDetalleCliente = document.getElementById("detalleCliente");
 const lblDetalleFecha = document.getElementById("detalleFecha");
 const lblDetalleEstado = document.getElementById("detalleEstado");
+const lblDetallePago = document.getElementById("detallePago");
+const lblDetalleNumero = document.getElementById("detalleNumero");
 const tbodyDetalleProductos = document.getElementById("detalleProductos");
 const lblDetalleTotal = document.getElementById("detalleTotal");
 const lblDetalleNotas = document.getElementById("detalleNotas");
@@ -44,17 +64,23 @@ const btnCerrarModal = document.getElementById("btnCerrarDetalle");
 const btnImprimir = document.getElementById("btnImprimir");
 const btnCompartirWhatsapp = document.getElementById("btnCompartirWhatsapp");
 
-// --------------------
-// Estado en memoria
-// --------------------
-let ventasCliente = []; // todas las ventas del cliente (o globales)
-let ventasFiltradas = []; // ventas después de filtros
-let productosCatalogo = []; // productos desde colección "productos"
-let ventaActualDetalle = null; // venta seleccionada para comprobante
+/* =========================
+   Estado
+========================= */
+let ventasBase = [];        // ventas “de origen” (cliente o global)
+let ventasFiltradas = [];   // luego de filtros/búsqueda
+let pagina = 1;
 
-// --------------------
-// Helper: query string
-// --------------------
+let productosCatalogo = []; // {codigo, nombre}
+let ventaActualDetalle = null;
+
+/* =========================
+   Helpers
+========================= */
+const money = (n) => "$" + Number(n || 0).toLocaleString("es-AR");
+const norm = (s) => (s || "").toString().trim().toLowerCase();
+const digits = (s) => (s || "").toString().replace(/\D+/g, "");
+
 function getQueryParams() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -63,583 +89,575 @@ function getQueryParams() {
   };
 }
 
-const { nombre: nombreCliente } = getQueryParams();
-
-// Título base
-if (nombreCliente) {
-  tituloCliente.textContent = `Historial de compras - ${nombreCliente}`;
-} else {
-  tituloCliente.textContent = "Historial de compras";
+function parseFechaFiltro(valor) {
+  // dd/mm/aaaa -> Date (00:00)
+  if (!valor) return null;
+  const v = valor.trim();
+  const [d, m, y] = v.split("/");
+  if (!d || !m || !y) return null;
+  const dt = new Date(`${y}-${m}-${d}T00:00:00`);
+  return isNaN(dt.getTime()) ? null : dt;
 }
 
-// --------------------
-// SESIÓN
-// --------------------
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    window.location.href = "login.html";
-    return;
-  }
-  await cargarHistorial();
-});
+function toDateJS(fecha) {
+  if (!fecha) return null;
+  if (typeof fecha?.toDate === "function") return fecha.toDate();
+  const d = new Date(fecha);
+  return isNaN(d.getTime()) ? null : d;
+}
 
+function formatearFecha(fecha) {
+  const f = toDateJS(fecha);
+  if (!f) return "-";
+  const dd = String(f.getDate()).padStart(2, "0");
+  const mm = String(f.getMonth() + 1).padStart(2, "0");
+  const yy = f.getFullYear();
+  const hh = String(f.getHours()).padStart(2, "0");
+  const mi = String(f.getMinutes()).padStart(2, "0");
+  return `${dd}/${mm}/${yy} ${hh}:${mi}`;
+}
+
+function getEstadoPill(estadoRaw, anulada) {
+  if (anulada) return `<span class="estado-pill estado-bad">anulada</span>`;
+
+  const e = norm(estadoRaw);
+  if (e === "pagado" || e === "entregado") return `<span class="estado-pill estado-ok">${e || "ok"}</span>`;
+  if (e === "pendiente") return `<span class="estado-pill estado-warn">pendiente</span>`;
+  if (e) return `<span class="estado-pill">${e}</span>`;
+  return `<span class="estado-pill">—</span>`;
+}
+
+function getPagoPill(pagoRaw) {
+  const p = norm(pagoRaw);
+  if (!p) return `<span class="pago-pill">—</span>`;
+  return `<span class="pago-pill">${p}</span>`;
+}
+
+function guessProductoNombre(codigo, fallback) {
+  const c = (codigo || "").toString();
+  if (!c) return fallback || "-";
+  const found = productosCatalogo.find((x) => (x.codigo || "").toString() === c);
+  return found?.nombre || fallback || c;
+}
+
+/**
+ * Normaliza una venta para soportar:
+ * - ventas nuevas de ventas.html: { items:[{codigo,nombre,precio,cant}] }
+ * - ventas viejas / alternativas: { productos:[{codigo, cantidad, precio}] }
+ * - nombres: cliente / clienteNombre
+ * - estado: estado (opcional) + anulada (boolean)
+ * - numeroInterno (si existe)
+ */
+function normalizeVenta(v) {
+  const cliente = (v.clienteNombre || v.cliente || "Cliente").toString();
+  const pago = (v.pago || v.metodoPago || v.formaPago || "").toString();
+  const estado = (v.estado || (v.anulada ? "anulada" : "") || "").toString();
+  const anulada = !!v.anulada;
+
+  // productos
+  let productos = [];
+  if (Array.isArray(v.productos) && v.productos.length) {
+    productos = v.productos.map((p) => ({
+      codigo: p.codigo || "",
+      nombre: p.nombre || p.producto || "",
+      cantidad: Number(p.cantidad || 0),
+      precio: Number(p.precio || 0),
+    }));
+  } else if (Array.isArray(v.items) && v.items.length) {
+    productos = v.items.map((it) => ({
+      codigo: it.codigo || it.id || "",
+      nombre: it.nombre || "",
+      cantidad: Number(it.cant || it.cantidad || 0),
+      precio: Number(it.precio || 0),
+    }));
+  }
+
+  const total =
+    Number(v.total || 0) ||
+    productos.reduce((acc, p) => acc + (Number(p.precio) || 0) * (Number(p.cantidad) || 0), 0);
+
+  const fecha = v.fecha || v.createdAt || null;
+
+  return {
+    id: v.id,
+    fecha,
+    cliente,
+    clienteId: v.clienteId || "",
+    tel: v.tel || "",
+    pago,
+    estado,
+    anulada,
+    notas: v.notas || "",
+    numeroInterno: v.numeroInterno || v.nroInterno || "",
+    productos,
+    total,
+  };
+}
+
+function obtenerResumenProductos(v) {
+  const arr = v.productos || [];
+  if (!arr.length) return { texto: "—", cant: 0 };
+
+  const totalCant = arr.reduce((acc, p) => acc + (Number(p.cantidad) || 0), 0);
+  const first = arr[0];
+  const nombre = guessProductoNombre(first.codigo, first.nombre || first.codigo || "-");
+  const base = `${nombre} x${first.cantidad || 1}`;
+  const resto = arr.length - 1;
+  return {
+    texto: resto > 0 ? `${base} (+${resto})` : base,
+    cant: totalCant,
+  };
+}
+
+function buildCSV(rows) {
+  const esc = (s) => `"${String(s ?? "").replace(/"/g, '""')}"`;
+  const header = [
+    "Fecha",
+    "NumeroInterno",
+    "Cliente",
+    "Pago",
+    "Estado",
+    "Total",
+    "Productos",
+    "Notas",
+  ].map(esc).join(",");
+
+  const lines = rows.map((v) => {
+    const prods = (v.productos || [])
+      .map((p) => `${p.codigo || ""} x${p.cantidad || 0}`)
+      .join(" | ");
+
+    return [
+      formatearFecha(v.fecha),
+      v.numeroInterno || "",
+      v.cliente || "",
+      v.pago || "",
+      v.anulada ? "anulada" : (v.estado || ""),
+      v.total || 0,
+      prods,
+      v.notas || "",
+    ].map(esc).join(",");
+  });
+
+  return [header, ...lines].join("\n");
+}
+
+function downloadText(filename, text) {
+  const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* =========================
+   Sesión
+========================= */
 btnLogout?.addEventListener("click", async () => {
   await signOut(auth);
   window.location.href = "login.html";
 });
 
-// --------------------
-// Cargar catálogo de productos
-// --------------------
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  // UX: foco búsqueda (Ctrl+K)
+  document.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      inputBusquedaRapida?.focus();
+    }
+    if (e.key === "Escape") cerrarModal();
+  });
+
+  await cargarProductosCatalogo();
+  await cargarHistorial();
+});
+
+/* =========================
+   Cargar catálogo (para mostrar nombres por código)
+========================= */
 async function cargarProductosCatalogo() {
   try {
     const snap = await getDocs(collection(db, "productos"));
     productosCatalogo = snap.docs.map((docSnap) => {
-      const d = docSnap.data();
+      const d = docSnap.data() || {};
       const codigo = d.codigo || docSnap.id || "";
-      const nombre = d.nombre || d.Nombre || "";
-      return { codigo, nombre };
+      const nombre = d.nombre || d.Nombre || d.name || "";
+      return { codigo: String(codigo), nombre: String(nombre) };
     });
-  } catch (error) {
-    console.error("Error cargando catálogo para historial:", error);
+  } catch (e) {
+    console.error("Error cargando catálogo para historial:", e);
     productosCatalogo = [];
   }
 }
 
-// --------------------
-// Cargar ventas de Firestore
-// --------------------
+/* =========================
+   Cargar ventas (Firestore)
+   - Si viene clienteId -> consulta por where('clienteId','==',...)
+   - Si viene clienteNombre -> filtra por nombre (fallback)
+========================= */
 async function cargarHistorial() {
+  const { nombre: nombreCliente, clienteId } = getQueryParams();
+
   try {
-    // Primero catálogo para poder mostrar nombres de productos
-    await cargarProductosCatalogo();
-
-    const ventasRef = collection(db, "ventas");
-    const snap = await getDocs(ventasRef);
-
-    const todasLasVentas = snap.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
-
-    if (nombreCliente) {
-      // Filtrar solo ventas de ese cliente por nombre
-      ventasCliente = todasLasVentas.filter((v) => {
-        const nombreVenta = (v.clienteNombre || v.cliente || "").trim();
-        return nombreVenta === nombreCliente;
-      });
-
-      if (subtituloCliente) {
-        subtituloCliente.textContent =
-          "Mostrando las compras del cliente seleccionado.";
-      }
+    // UI modo
+    if (nombreCliente || clienteId) {
+      badgeModo.textContent = "Cliente";
+      tituloCliente.textContent = `Historial de compras - ${nombreCliente || "Cliente"}`;
+      subtituloCliente.textContent = "Mostrando las compras del cliente seleccionado.";
     } else {
-      ventasCliente = todasLasVentas;
-      if (subtituloCliente) {
-        subtituloCliente.textContent =
-          "Mostrando el historial completo de ventas.";
-      }
+      badgeModo.textContent = "Completo";
+      tituloCliente.textContent = "Historial de compras";
+      subtituloCliente.textContent = "Mostrando el historial completo de ventas.";
     }
 
+    // ✅ Traemos últimas N (para no reventar si crece mucho)
+    // Si querés “TODO”, subí el limit. (recomendado mantener límite)
+    const ventasRef = collection(db, "ventas");
+    let qy;
+
+    if (clienteId) {
+      qy = query(ventasRef, where("clienteId", "==", clienteId), orderBy("fecha", "desc"), limit(1500));
+    } else {
+      qy = query(ventasRef, orderBy("fecha", "desc"), limit(2000));
+    }
+
+    const snap = await getDocs(qy);
+    const raw = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+    // normalizar
+    let all = raw.map(normalizeVenta);
+
+    // fallback: si no hubo clienteId pero hay nombreCliente => filtrar por nombre exacto
+    if (!clienteId && nombreCliente) {
+      const target = nombreCliente.trim();
+      all = all.filter((v) => (v.cliente || "").trim() === target);
+    }
+
+    ventasBase = all;
+    pagina = 1;
+
     aplicarFiltros();
-  } catch (error) {
-    console.error("Error al cargar historial:", error);
+
+  } catch (e) {
+    console.error("Error al cargar historial:", e);
     if (tbody) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="7">Ocurrió un error al cargar el historial.</td>
-        </tr>
-      `;
+      tbody.innerHTML = `<tr><td colspan="9">Ocurrió un error al cargar el historial.</td></tr>`;
     }
   }
 }
 
-// --------------------
-// Filtros
-// --------------------
-function parseFechaFiltro(valor) {
-  // dd/mm/aaaa -> Date
-  if (!valor) return null;
-  const [d, m, y] = valor.split("/");
-  if (!d || !m || !y) return null;
-  return new Date(`${y}-${m}-${d}T00:00:00`);
-}
-
+/* =========================
+   Filtros + búsqueda + orden
+========================= */
 function aplicarFiltros() {
-  const desdeDate = parseFechaFiltro(inputDesde?.value.trim());
-  const hastaDateRaw = parseFechaFiltro(inputHasta?.value.trim());
+  const desdeDate = parseFechaFiltro(inputDesde?.value);
+  const hastaDateRaw = parseFechaFiltro(inputHasta?.value);
+
   let hastaDate = hastaDateRaw;
   if (hastaDateRaw) {
     hastaDate = new Date(hastaDateRaw.getTime());
     hastaDate.setHours(23, 59, 59, 999);
   }
 
-  const textoProducto = (inputProducto?.value || "").toLowerCase();
-  const estadoSeleccionado = (selectEstado?.value || "todas").toLowerCase();
+  const textoProducto = norm(inputProducto?.value);
+  const estadoSeleccionado = norm(selectEstado?.value || "todas");
+  const qRapida = norm(inputBusquedaRapida?.value);
 
-  ventasFiltradas = ventasCliente.filter((venta) => {
+  // orden
+  const ord = (selectOrden?.value || "fecha_desc").toLowerCase();
+
+  ventasFiltradas = ventasBase.filter((v) => {
     let ok = true;
 
-    // Fecha
-    if (venta.fecha) {
-      const fechaJs = venta.fecha.toDate
-        ? venta.fecha.toDate()
-        : new Date(venta.fecha);
+    const f = toDateJS(v.fecha);
+    if (desdeDate && f && f < desdeDate) ok = false;
+    if (hastaDate && f && f > hastaDate) ok = false;
 
-      if (desdeDate && fechaJs < desdeDate) ok = false;
-      if (hastaDate && fechaJs > hastaDate) ok = false;
-    }
-
-    // Producto (código o nombre) – soporta array "productos"
-    if (textoProducto) {
-      let coincideProducto = false;
-
-      if (Array.isArray(venta.productos) && venta.productos.length > 0) {
-        for (const p of venta.productos) {
-          const codigo = (p.codigo || "").toLowerCase();
-          const cat = productosCatalogo.find((c) => c.codigo === p.codigo);
-          const nombreProd = (cat?.nombre || "").toLowerCase();
-
-          if (
-            codigo.includes(textoProducto) ||
-            nombreProd.includes(textoProducto)
-          ) {
-            coincideProducto = true;
-            break;
-          }
-        }
-      } else {
-        // Compatibilidad con ventas viejas (un solo producto)
-        const codigo = (
-          venta.productoCodigo ||
-          venta.codigoProducto ||
-          ""
-        ).toLowerCase();
-        const nombreProd = (
-          venta.productoNombre ||
-          venta.nombreProducto ||
-          venta.producto ||
-          ""
-        ).toLowerCase();
-
-        if (
-          codigo.includes(textoProducto) ||
-          nombreProd.includes(textoProducto)
-        ) {
-          coincideProducto = true;
-        }
-      }
-
-      if (!coincideProducto) ok = false;
-    }
-
-    // Estado
+    // estado
     if (estadoSeleccionado !== "todas") {
-      const estadoVenta = (venta.estado || "").toLowerCase();
-      if (estadoVenta !== estadoSeleccionado) ok = false;
+      if (estadoSeleccionado === "anulada") {
+        if (!v.anulada) ok = false;
+      } else {
+        if (norm(v.estado) !== estadoSeleccionado) ok = false;
+      }
+    }
+
+    // producto (código o nombre)
+    if (textoProducto) {
+      const arr = v.productos || [];
+      const hit = arr.some((p) => {
+        const cod = norm(p.codigo);
+        const nom = norm(guessProductoNombre(p.codigo, p.nombre));
+        return cod.includes(textoProducto) || nom.includes(textoProducto);
+      });
+      if (!hit) ok = false;
+    }
+
+    // búsqueda rápida (cliente / código / nombre / nro interno)
+    if (qRapida) {
+      const inCliente = norm(v.cliente).includes(qRapida);
+      const inInterno = norm(v.numeroInterno).includes(qRapida);
+      const inPago = norm(v.pago).includes(qRapida);
+      const inProd = (v.productos || []).some((p) => {
+        const cod = norm(p.codigo);
+        const nom = norm(guessProductoNombre(p.codigo, p.nombre));
+        return cod.includes(qRapida) || nom.includes(qRapida);
+      });
+      if (!(inCliente || inInterno || inPago || inProd)) ok = false;
     }
 
     return ok;
   });
 
-  renderTabla(ventasFiltradas);
+  // ordenar
+  ventasFiltradas.sort((a, b) => {
+    const da = toDateJS(a.fecha)?.getTime() || 0;
+    const dbb = toDateJS(b.fecha)?.getTime() || 0;
+
+    if (ord === "fecha_asc") return da - dbb;
+    if (ord === "fecha_desc") return dbb - da;
+
+    if (ord === "total_asc") return (Number(a.total) || 0) - (Number(b.total) || 0);
+    if (ord === "total_desc") return (Number(b.total) || 0) - (Number(a.total) || 0);
+
+    return dbb - da;
+  });
+
+  // si la página queda fuera
+  const pageSize = Number(selectPageSize?.value || 20);
+  const totalPages = Math.max(1, Math.ceil(ventasFiltradas.length / pageSize));
+  if (pagina > totalPages) pagina = totalPages;
+
+  renderTabla();
   recalcularTotales();
 }
 
-// --------------------
-// Render tabla
-// --------------------
-function formatearFecha(fecha) {
-  if (!fecha) return "-";
-  const f = fecha.toDate ? fecha.toDate() : new Date(fecha);
-  const dia = String(f.getDate()).padStart(2, "0");
-  const mes = String(f.getMonth() + 1).padStart(2, "0");
-  const anio = f.getFullYear();
-  const hora = String(f.getHours()).padStart(2, "0");
-  const min = String(f.getMinutes()).padStart(2, "0");
-  return `${dia}/${mes}/${anio} ${hora}:${min}`;
-}
+/* =========================
+   Render tabla + paginación
+========================= */
+function renderTabla() {
+  const pageSize = Number(selectPageSize?.value || 20);
+  const total = ventasFiltradas.length;
 
-function obtenerResumenProductos(venta) {
-  if (Array.isArray(venta.productos) && venta.productos.length > 0) {
-    const totalCantidad = venta.productos.reduce(
-      (acc, p) => acc + (Number(p.cantidad) || 0),
-      0
-    );
+  const start = (pagina - 1) * pageSize;
+  const end = Math.min(total, start + pageSize);
+  const slice = ventasFiltradas.slice(start, end);
 
-    const primero = venta.productos[0];
-    const cat = productosCatalogo.find((c) => c.codigo === primero.codigo);
-    const baseNombre = cat?.nombre || primero.codigo || "-";
-    const textoBase = `${baseNombre} x${primero.cantidad || 1}`;
-    const resto = venta.productos.length - 1;
-    const textoProducto =
-      resto > 0 ? `${textoBase} (+${resto} más)` : textoBase;
-
-    return { textoProducto, totalCantidad };
-  }
-
-  // Esquema viejo
-  const nombreProd =
-    venta.productoNombre || venta.nombreProducto || venta.producto || "-";
-  const cantidad = venta.cantidad || venta.cant || 0;
-
-  return { textoProducto: nombreProd, totalCantidad: cantidad };
-}
-
-function renderTabla(lista) {
   if (!tbody) return;
 
-  tbody.innerHTML = "";
-
-  if (!lista || lista.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="7">No hay ventas registradas para este cliente.</td>
-      </tr>
-    `;
+  if (!slice.length) {
+    tbody.innerHTML = `<tr><td colspan="9">Sin resultados.</td></tr>`;
+    lblPager.textContent = `0–0 de ${total}`;
+    lblResumenPagina.textContent = `1 / 1`;
+    lblHint.textContent = "";
     return;
   }
 
-  lista.forEach((venta) => {
-    const tr = document.createElement("tr");
+  tbody.innerHTML = slice.map((v) => {
+    const { texto, cant } = obtenerResumenProductos(v);
 
-    const fechaTexto = formatearFecha(venta.fecha);
-    const { textoProducto, totalCantidad } = obtenerResumenProductos(venta);
+    const estadoHtml = getEstadoPill(v.estado, v.anulada);
+    const pagoHtml = getPagoPill(v.pago);
 
-    const total = venta.total || 0;
-    const estado = (venta.estado || "-").toLowerCase();
-    const notas = venta.notas || "-";
+    const notas = (v.notas || "").toString().trim();
+    const notasShort = notas.length > 26 ? notas.slice(0, 26) + "…" : (notas || "—");
 
-    const totalTexto = `$${total.toLocaleString("es-AR")}`;
-
-    tr.innerHTML = `
-      <td data-label="Fecha">${fechaTexto}</td>
-      <td data-label="N° interno">${venta.numeroInterno || "-"}</td>
-      <td data-label="Producto(s)">${textoProducto}</td>
-      <td data-label="Cantidad">${totalCantidad}</td>
-      <td data-label="Total">${totalTexto}</td>
-      <td data-label="Estado">
-        ${estado ? `<span class="estado-pill">${estado}</span>` : "-"}
-      </td>
-      <td data-label="Notas">${notas}</td>
+    return `
+      <tr data-id="${v.id}">
+        <td>${formatearFecha(v.fecha)}</td>
+        <td class="mono">${v.numeroInterno || "—"}</td>
+        <td>${v.cliente || "—"}</td>
+        <td>${texto}</td>
+        <td class="num">${cant || 0}</td>
+        <td class="num">${money(v.total || 0)}</td>
+        <td>${pagoHtml}</td>
+        <td>${estadoHtml}</td>
+        <td class="muted" title="${notas.replaceAll('"', "'")}">${notasShort}</td>
+      </tr>
     `;
+  }).join("");
 
+  // click fila => modal comprobante
+  tbody.querySelectorAll("tr[data-id]").forEach((tr) => {
     tr.addEventListener("click", () => {
-      abrirDetalleVenta(venta);
+      const id = tr.dataset.id;
+      const v = ventasFiltradas.find((x) => x.id === id);
+      if (v) abrirDetalle(v);
     });
-
-    tbody.appendChild(tr);
   });
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  lblPager.textContent = `${start + 1}–${end} de ${total}`;
+  lblResumenPagina.textContent = `${pagina} / ${totalPages}`;
+  lblHint.textContent = totalPages > 1 ? `Mostrando pág ${pagina}.` : "";
 }
 
-// --------------------
-// Totales
-// --------------------
+/* =========================
+   Totales
+========================= */
 function recalcularTotales() {
-  const totalCliente = ventasCliente.reduce(
-    (acc, v) => acc + (v.total || 0),
-    0
-  );
-  const totalFiltrado = ventasFiltradas.reduce(
-    (acc, v) => acc + (v.total || 0),
-    0
-  );
+  // total cliente (de base)
+  const totalCliente = ventasBase.reduce((acc, v) => acc + (Number(v.total) || 0), 0);
+  lblTotalCliente.textContent = money(totalCliente);
 
-  if (lblTotalCliente) {
-    lblTotalCliente.textContent = `$${totalCliente.toLocaleString("es-AR")}`;
-  }
-  if (lblTotalFiltrado) {
-    lblTotalFiltrado.textContent = `$${totalFiltrado.toLocaleString("es-AR")}`;
-  }
-  if (lblResumenConteo) {
-    lblResumenConteo.textContent = `${ventasFiltradas.length} venta(s) en el resultado.`;
-  }
+  // total filtrado
+  const totalFiltrado = ventasFiltradas.reduce((acc, v) => acc + (Number(v.total) || 0), 0);
+  lblTotalFiltrado.textContent = money(totalFiltrado);
+
+  // conteo
+  lblResumenConteo.textContent = `${ventasFiltradas.length} ventas`;
 }
 
-// --------------------
-// Detalle / comprobante
-// --------------------
-function abrirDetalleVenta(venta) {
-  const lblDetalleNumero = document.getElementById("detalleNumero");
-  if (lblDetalleNumero) {
-    lblDetalleNumero.textContent = venta.numeroInterno || "-";
-  }
-  if (!modalDetalle) return;
+/* =========================
+   Modal detalle
+========================= */
+function abrirDetalle(v) {
+  ventaActualDetalle = v;
 
-  ventaActualDetalle = venta;
+  lblDetalleCliente.textContent = v.cliente || "-";
+  lblDetalleFecha.textContent = formatearFecha(v.fecha);
+  lblDetalleEstado.textContent = v.anulada ? "anulada" : (v.estado || "—");
+  lblDetallePago.textContent = v.pago || "—";
+  lblDetalleNumero.textContent = v.numeroInterno || "—";
 
-  if (lblDetalleCliente) {
-    lblDetalleCliente.textContent = venta.clienteNombre || "-";
-  }
-  if (lblDetalleFecha) {
-    lblDetalleFecha.textContent = formatearFecha(venta.fecha);
-  }
-  if (lblDetalleEstado) {
-    lblDetalleEstado.textContent = venta.estado || "-";
-  }
+  // productos
+  const arr = v.productos || [];
+  if (!arr.length) {
+    tbodyDetalleProductos.innerHTML = `<tr><td colspan="5">Sin productos.</td></tr>`;
+  } else {
+    tbodyDetalleProductos.innerHTML = arr.map((p) => {
+      const nombre = guessProductoNombre(p.codigo, p.nombre || p.codigo || "-");
+      const cant = Number(p.cantidad || 0);
+      const precio = Number(p.precio || 0);
+      const sub = precio * cant;
 
-  if (lblDetalleTotal) {
-    lblDetalleTotal.textContent =
-      "$" + (venta.total || 0).toLocaleString("es-AR");
-  }
-  if (lblDetalleNotas) {
-    lblDetalleNotas.textContent = venta.notas || "-";
-  }
-
-  if (tbodyDetalleProductos) {
-    tbodyDetalleProductos.innerHTML = "";
-
-    if (Array.isArray(venta.productos) && venta.productos.length > 0) {
-      venta.productos.forEach((p) => {
-        const prodInfo = productosCatalogo.find(
-          (c) => c.codigo === p.codigo
-        );
-        const nombre = prodInfo?.nombre || p.codigo || "-";
-        const subtotal = (p.precio || 0) * (p.cantidad || 0);
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${p.codigo || "-"}</td>
+      return `
+        <tr>
+          <td class="mono">${p.codigo || "-"}</td>
           <td>${nombre}</td>
-          <td>${p.cantidad || 0}</td>
-          <td>$${(p.precio || 0).toLocaleString("es-AR")}</td>
-          <td>$${subtotal.toLocaleString("es-AR")}</td>
-        `;
-        tbodyDetalleProductos.appendChild(tr);
-      });
-    }
+          <td class="num">${cant}</td>
+          <td class="num">${money(precio)}</td>
+          <td class="num">${money(sub)}</td>
+        </tr>
+      `;
+    }).join("");
   }
+
+  lblDetalleTotal.textContent = money(v.total || 0);
+  lblDetalleNotas.textContent = (v.notas && v.notas.toString().trim()) ? v.notas : "-";
 
   modalDetalle.style.display = "flex";
 }
 
-function cerrarModalDetalle() {
-  if (modalDetalle) modalDetalle.style.display = "none";
+function cerrarModal() {
+  modalDetalle.style.display = "none";
+  ventaActualDetalle = null;
 }
 
-// --------------------
-// Listeners de filtros
-// --------------------
-[inputDesde, inputHasta, inputProducto, selectEstado].forEach((el) => {
-  if (!el) return;
-  el.addEventListener("input", aplicarFiltros);
-  el.addEventListener("change", aplicarFiltros);
+btnCerrarModalX?.addEventListener("click", cerrarModal);
+btnCerrarModal?.addEventListener("click", cerrarModal);
+modalDetalle?.addEventListener("click", (e) => {
+  if (e.target === modalDetalle) cerrarModal();
 });
 
-// --------------------
-// Listeners del modal
-// --------------------
-btnCerrarModalX?.addEventListener("click", cerrarModalDetalle);
-btnCerrarModal?.addEventListener("click", cerrarModalDetalle);
-
-// --------------------
-// Imprimir comprobante lindo
-// --------------------
+/* =========================
+   Imprimir
+========================= */
 btnImprimir?.addEventListener("click", () => {
+  if (!ventaActualDetalle) return;
+  window.print();
+});
+
+/* =========================
+   WhatsApp (mensaje completo)
+========================= */
+btnCompartirWhatsapp?.addEventListener("click", () => {
   if (!ventaActualDetalle) return;
 
   const v = ventaActualDetalle;
 
-  const fechaTexto = formatearFecha(v.fecha);
-  const numeroInterno = v.numeroInterno || "-";
-  const cliente = v.clienteNombre || "-";
-  const estado = v.estado || "-";
-  const totalTexto = "$" + (v.total || 0).toLocaleString("es-AR");
+  let texto = `🧾 *Comprobante - Delivery Mayorista*\n`;
+  texto += `📅 ${formatearFecha(v.fecha)}\n`;
+  if (v.numeroInterno) texto += `🔢 N° Interno: *${v.numeroInterno}*\n`;
+  texto += `👤 Cliente: *${v.cliente || "Cliente"}*\n`;
+  if (v.pago) texto += `💳 Pago: *${v.pago}*\n`;
+  texto += `\n🛒 *Detalle*\n`;
 
-  // filas de productos
-  let filasProductos = "";
+  (v.productos || []).forEach((p) => {
+    const nombre = guessProductoNombre(p.codigo, p.nombre || p.codigo || "-");
+    const cant = Number(p.cantidad || 0);
+    const precio = Number(p.precio || 0);
+    const sub = cant * precio;
+    texto += `- ${cant} x ${nombre} (${money(precio)}) = ${money(sub)}\n`;
+  });
 
-  if (Array.isArray(v.productos) && v.productos.length > 0) {
-    v.productos.forEach((p) => {
-      const infoProd = productosCatalogo.find(
-        (c) => c.codigo === p.codigo
-      );
-      const nombre = infoProd?.nombre || p.codigo || "-";
-      const precio = p.precio || 0;
-      const cant = p.cantidad || 0;
-      const subtotal = precio * cant;
+  texto += `\n✅ *TOTAL:* ${money(v.total || 0)}\n`;
+  if (v.anulada) texto += `🔴 Estado: *anulada*\n`;
+  else if (v.estado) texto += `🟢 Estado: *${v.estado}*\n`;
 
-      filasProductos += `
-        <tr>
-          <td>${p.codigo || "-"}</td>
-          <td>${nombre}</td>
-          <td class="num">${cant}</td>
-          <td class="num">$${precio.toLocaleString("es-AR")}</td>
-          <td class="num">$${subtotal.toLocaleString("es-AR")}</td>
-        </tr>
-      `;
-    });
-  } else {
-    filasProductos = `
-      <tr>
-        <td colspan="5">Sin productos.</td>
-      </tr>
-    `;
-  }
+  if (v.notas) texto += `\n📝 Notas: ${v.notas}\n`;
 
-  const notasHtml = v.notas
-    ? `<p><strong>Notas:</strong> ${v.notas}</p>`
-    : "";
-
-  const win = window.open("", "_blank");
-  win.document.write(`
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-      <meta charset="UTF-8" />
-      <title>Comprobante de Venta</title>
-      <style>
-        * { box-sizing: border-box; }
-        body {
-          font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-          margin: 20px;
-          color: #111827;
-          background: #ffffff;
-        }
-        h1 {
-          font-size: 20px;
-          margin: 0 0 4px 0;
-        }
-        .subtitulo {
-          font-size: 11px;
-          color: #6b7280;
-          margin: 0 0 16px 0;
-        }
-        .header {
-          display: grid;
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 4px 32px;
-          font-size: 13px;
-          margin-bottom: 12px;
-        }
-        .header div span {
-          font-weight: 600;
-        }
-        .box {
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          padding: 16px;
-        }
-        table {
-          width: 100%;
-          border-collapse: collapse;
-          margin-top: 8px;
-          font-size: 13px;
-        }
-        th, td {
-          border-bottom: 1px solid #e5e7eb;
-          padding: 6px 8px;
-          text-align: left;
-        }
-        th {
-          background: #f9fafb;
-          font-weight: 600;
-        }
-        td.num {
-          text-align: right;
-          white-space: nowrap;
-        }
-        .totales {
-          margin-top: 10px;
-          text-align: right;
-          font-size: 14px;
-          font-weight: 600;
-        }
-        .footer {
-          margin-top: 24px;
-          font-size: 11px;
-          color: #6b7280;
-          text-align: center;
-        }
-        @media print {
-          body { margin: 14mm; }
-        }
-      </style>
-    </head>
-    <body>
-      <h1>Comprobante de Venta</h1>
-      <p class="subtitulo">Documento no fiscal · Uso interno</p>
-
-      <div class="box">
-        <div class="header">
-          <div><span>Fecha:</span> ${fechaTexto}</div>
-          <div><span>N° Interno:</span> ${numeroInterno}</div>
-          <div><span>Cliente:</span> ${cliente}</div>
-          <div><span>Estado:</span> ${estado}</div>
-        </div>
-
-        <table>
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Producto</th>
-              <th>Cant.</th>
-              <th>Precio</th>
-              <th>Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${filasProductos}
-          </tbody>
-        </table>
-
-        <div class="totales">
-          Total: ${totalTexto}
-        </div>
-
-        ${notasHtml}
-      </div>
-
-      <div class="footer">
-        Delivery Mayorista · Comprobante interno de venta
-      </div>
-
-      <script>
-        window.onload = function () {
-          window.print();
-        };
-      </script>
-    </body>
-    </html>
-  `);
-  win.document.close();
+  // Si hay tel (ventas.html guarda tel en la venta), lo usamos. Si no, wa.me sin número.
+  const tel = digits(v.tel || "");
+  const msg = encodeURIComponent(texto);
+  const url = tel ? `https://wa.me/${tel}?text=${msg}` : `https://wa.me/?text=${msg}`;
+  window.open(url, "_blank");
 });
 
-// --------------------
-// Compartir por WhatsApp
-// --------------------
-btnCompartirWhatsapp?.addEventListener("click", () => {
-  if (!ventaActualDetalle) return;
+/* =========================
+   Eventos UI
+========================= */
+function resetFiltros() {
+  inputDesde.value = "";
+  inputHasta.value = "";
+  inputProducto.value = "";
+  selectEstado.value = "todas";
+  inputBusquedaRapida.value = "";
+  selectOrden.value = "fecha_desc";
+  selectPageSize.value = "20";
+  pagina = 1;
+  aplicarFiltros();
+}
 
-  const venta = ventaActualDetalle;
-  let texto = `🧾 *Comprobante de compra*\n\n`;
+btnReset?.addEventListener("click", resetFiltros);
+btnRefrescar?.addEventListener("click", async () => {
+  await cargarProductosCatalogo();
+  await cargarHistorial();
+});
 
-  // 👉 NÚMERO INTERNO EN EL COMPROBANTE
-  texto += `N° Interno: ${venta.numeroInterno || "-"}\n`;
+[inputDesde, inputHasta, inputProducto, selectEstado, inputBusquedaRapida, selectOrden, selectPageSize]
+  .forEach((el) => el?.addEventListener("input", () => {
+    pagina = 1;
+    aplicarFiltros();
+  }));
 
-  texto += `👤 Cliente: ${venta.clienteNombre || "-"}\n`;
-  texto += `📅 Fecha: ${formatearFecha(venta.fecha)}\n\n`;
+btnPrev?.addEventListener("click", () => {
+  const pageSize = Number(selectPageSize.value || 20);
+  const totalPages = Math.max(1, Math.ceil(ventasFiltradas.length / pageSize));
+  pagina = Math.max(1, pagina - 1);
+  if (pagina > totalPages) pagina = totalPages;
+  renderTabla();
+});
 
-  texto += `🛒 *Productos:*\n`;
+btnNext?.addEventListener("click", () => {
+  const pageSize = Number(selectPageSize.value || 20);
+  const totalPages = Math.max(1, Math.ceil(ventasFiltradas.length / pageSize));
+  pagina = Math.min(totalPages, pagina + 1);
+  renderTabla();
+});
 
-  if (Array.isArray(venta.productos) && venta.productos.length > 0) {
-    venta.productos.forEach((p) => {
-      const subtotal = (p.precio || 0) * (p.cantidad || 0);
-      texto += `- ${p.codigo || "-"} x${p.cantidad || 0} = $${subtotal.toLocaleString(
-        "es-AR"
-      )}\n`;
-    });
-  }
-
-  texto += `\n💰 Total: $${(venta.total || 0).toLocaleString("es-AR")}\n`;
-  texto += `🟢 Estado: ${venta.estado || "-"}\n`;
-
-  if (venta.notas) {
-    texto += `\n📝 Notas: ${venta.notas}\n`;
-  }
-
-  texto += `\n¡Gracias por su compra! 😊`;
-
-  const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
-  window.open(url, "_blank");
+btnExport?.addEventListener("click", () => {
+  const now = new Date();
+  const stamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+  const csv = buildCSV(ventasFiltradas);
+  downloadText(`historial-${stamp}.csv`, csv);
 });
