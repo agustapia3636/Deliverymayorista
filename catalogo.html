@@ -29,9 +29,10 @@
       color: var(--txt);
     }
 
+    /* FULL 3: Header más compacto */
     header {
       background: linear-gradient(90deg, #ff005d, #ffa400);
-      padding: 15px 25px;
+      padding: 10px 18px;
       font-size: 20px;
       font-weight: 800;
       letter-spacing: .2px;
@@ -42,8 +43,8 @@
     ============================*/
     .toolbar {
       display: flex;
-      gap: 15px;
-      padding: 18px 25px;
+      gap: 12px;
+      padding: 14px 18px;
       justify-content: flex-start;
       align-items: center;
       flex-wrap: wrap;
@@ -63,6 +64,21 @@
       outline: none;
       font-size: 15px;
       min-width: 260px;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
+    }
+
+    /* Ordenar */
+    .toolbar-select {
+      padding: 12px 18px;
+      border-radius: 30px;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      background: #ffffff;
+      color: #000;
+      cursor: pointer;
+      min-width: 220px;
+      box-shadow: 0 8px 22px rgba(0,0,0,.18);
     }
 
     /* ===========================
@@ -198,8 +214,8 @@
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 22px;
-      padding: 22px 25px 12px;
+      gap: 20px;
+      padding: 18px 18px 12px;
       align-items: stretch;
       grid-auto-rows: 1fr;
     }
@@ -209,7 +225,7 @@
       background: radial-gradient(1200px 600px at 50% -100px, rgba(255,164,0,.06), transparent 60%),
                   var(--card);
       border-radius: 22px;
-      padding: 18px 16px 16px;
+      padding: 16px 14px 14px;
       text-align: center;
       height: 100%;
       display: flex;
@@ -229,7 +245,7 @@
 
     .producto-imagen-wrapper {
       width: 100%;
-      height: 170px;
+      height: 160px;
       border-radius: 18px;
       background: var(--card2);
       display: flex;
@@ -250,7 +266,13 @@
       display: block;
       cursor: pointer;
       transform: translateZ(0);
+
+      /* blur-up */
+      filter: blur(10px);
+      opacity: 0.85;
+      transition: filter .25s ease, opacity .25s ease;
     }
+    .producto-imagen.is-loaded { filter: blur(0); opacity: 1; }
 
     .producto-titulo {
       margin-top: 2px;
@@ -267,18 +289,18 @@
       min-height: 36px;
     }
 
+    /* FULL 3: descripción pareja (2 líneas) */
     .producto-descripcion {
-      opacity: 0.78;
+      opacity: 0.85;
       font-size: 13px;
       margin-top: 6px;
       line-height: 1.25;
 
-      /* clamp 3 líneas */
       display: -webkit-box;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      min-height: 48px;
+      min-height: 34px;
     }
 
     /* empuja el bloque inferior hacia abajo */
@@ -287,18 +309,19 @@
       padding-top: 10px;
     }
 
+    /* FULL 3: jerarquía precio */
     .producto-precio {
       color: var(--accent);
-      font-weight: 800;
+      font-weight: 900;
       margin-top: 4px;
-      font-size: 15px;
+      font-size: 18px;
       letter-spacing: .2px;
     }
 
     .producto-stock {
-      opacity: 0.85;
+      opacity: 0.9;
       font-size: 12px;
-      margin-top: 4px;
+      margin-top: 6px;
       color: var(--muted);
     }
 
@@ -366,7 +389,7 @@
       padding: 0.22rem 0.62rem;
       border-radius: 999px;
       font-size: 0.75rem;
-      font-weight: 700;
+      font-weight: 800;
     }
     .badge-stock.stock-ok { background: rgba(0, 200, 120, 0.16); color: #7cffb5; }
     .badge-stock.stock-bajo { background: rgba(255, 180, 0, 0.16); color: #ffdd7c; }
@@ -379,7 +402,44 @@
       background: rgba(255, 184, 0, 0.16);
       color: #ffd56c;
       margin-left: 0.5rem;
-      font-weight: 700;
+      font-weight: 800;
+    }
+
+    /* ===========================
+       SKELETON LOADER
+    ============================*/
+    .skeleton-card {
+      background: radial-gradient(1200px 600px at 50% -100px, rgba(255,164,0,.06), transparent 60%),
+                  var(--card);
+      border-radius: 22px;
+      padding: 16px 14px 14px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 10px 26px rgba(0,0,0,0.35);
+      overflow: hidden;
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sk-img { height: 160px; border-radius: 18px; background: rgba(255,255,255,0.06); }
+    .sk-line { height: 12px; border-radius: 999px; background: rgba(255,255,255,0.06); }
+    .sk-line.lg { height: 14px; }
+    .sk-line.w80 { width: 80%; margin: 0 auto; }
+    .sk-line.w60 { width: 60%; margin: 0 auto; }
+    .sk-line.w40 { width: 40%; margin: 0 auto; }
+
+    .skeleton-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      transform: translateX(-100%);
+      animation: shimmer 1.2s infinite;
+    }
+
+    @keyframes shimmer {
+      100% { transform: translateX(100%); }
     }
 
     /* ===========================
@@ -404,27 +464,60 @@
     }
     .mini-carrito:hover { filter: brightness(1.02); transform: translateY(-1px); }
 
-    .mini-carrito-icono { font-size: 18px; }
-    .mini-carrito-texto { display: flex; flex-direction: column; line-height: 1.1; }
-    .mini-carrito-linea { white-space: nowrap; font-weight: 700; }
-
-    /* ===========================
-       PAGINADOR
-    ============================*/
-    .paginador-contenedor {
-      padding: 0 25px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+    .mini-carrito-icono { font-size: 18px; position: relative; }
+    .mini-badge {
+      position: absolute;
+      top: -8px;
+      right: -10px;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: #ff005d;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 800;
+      display: inline-flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 6px 16px rgba(0,0,0,.25);
+    }
+    .mini-carrito-texto { display: flex; flex-direction: column; line-height: 1.1; }
+    .mini-carrito-linea { white-space: nowrap; font-weight: 800; }
+
+    /* ===========================
+       PAGINADOR (UX LIMPIO)
+    ============================*/
+    .paginador-contenedor {
+      margin-top: 32px;
+      padding: 18px 0 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      position: relative;
     }
 
     .paginador-resumen {
-      font-size: 13px;
-      opacity: 0.8;
+      font-size: 12px;
+      opacity: 0.6;
+      color: #c9c9ff;
       text-align: center;
-      color: var(--muted);
+    }
+
+    .paginador-contenedor::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 160px;
+      height: 1px;
+      background: linear-gradient(
+        to right,
+        transparent,
+        rgba(255,255,255,0.25),
+        transparent
+      );
     }
 
     .paginador {
@@ -460,7 +553,7 @@
     }
 
     .paginador-btn:disabled { opacity: 0.4; cursor: default; transform: none; box-shadow: none; }
-    .paginador-numero--activo { background: var(--accent); color: #000; font-weight: 800; }
+    .paginador-numero--activo { background: var(--accent); color: #000; font-weight: 900; }
 
     .paginador-numeros {
       display: flex;
@@ -496,7 +589,7 @@
       header { text-align: center; font-size: 18px; }
 
       .toolbar {
-        padding: 14px 12px 12px;
+        padding: 12px 12px 10px;
         gap: 10px;
         flex-direction: column;
         align-items: flex-start;
@@ -507,6 +600,8 @@
         max-width: 520px;
         font-size: 14px;
       }
+
+      .toolbar-select { width: 100%; max-width: 520px; }
 
       .mega-dropdown { width: 100%; max-width: 520px; }
       .mega-menu { max-width: 100%; min-width: 100%; }
@@ -523,41 +618,8 @@
       /* WA arriba del mini carrito en mobile */
       .btn-wa-flotante { bottom: 140px; right: 14px; }
       .mini-carrito { bottom: 80px; right: 14px; }
+      .paginador-resumen { display: none; }
     }
-    /* ===========================
-   PIE DEL CATÁLOGO (UX LIMPIO)
-=========================== */
-.paginador-contenedor {
-  margin-top: 32px;
-  padding: 20px 0 40px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.paginador-resumen {
-  font-size: 12px;
-  opacity: 0.6;
-  color: #c9c9ff;
-  text-align: center;
-}
-
-.paginador-contenedor::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  width: 160px;
-  height: 1px;
-  background: linear-gradient(
-    to right,
-    transparent,
-    rgba(255,255,255,0.25),
-    transparent
-  );
-}
   </style>
 </head>
 
@@ -605,6 +667,15 @@
       Solo con stock
     </label>
 
+    <select id="ordenar" class="toolbar-select" aria-label="Ordenar">
+      <option value="destacados">Orden: Destacados</option>
+      <option value="nombre_az">Orden: Nombre A→Z</option>
+      <option value="nombre_za">Orden: Nombre Z→A</option>
+      <option value="precio_asc">Orden: Precio ↑</option>
+      <option value="precio_desc">Orden: Precio ↓</option>
+      <option value="stock_desc">Orden: Stock ↓</option>
+    </select>
+
     <select id="filtro-categoria"></select>
     <select id="filtro-subcategoria"></select>
   </div>
@@ -623,7 +694,10 @@
 
   <!-- MINI CARRITO -->
   <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
-    <div class="mini-carrito-icono">🛒</div>
+    <div class="mini-carrito-icono">
+      🛒
+      <span id="mini-badge" class="mini-badge">0</span>
+    </div>
     <div class="mini-carrito-texto">
       <span class="mini-carrito-linea">
         <span id="mini-carrito-cantidad">0</span> productos
@@ -650,32 +724,27 @@
 
   <script type="module">
     import { db } from "./js/firebase-init.js";
-    import {
-      collection, getDocs, query, where, limit
-    } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+    import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
     // =========================
-    // CONFIG
+    // CONFIG / CONSTANTES
     // =========================
-const COL_PRODUCTOS = "productos";
-const BASE_IMG = "...";
+    const COL_PRODUCTOS = "productos";
 
-// PAGINACIÓN DINÁMICA
-function calcularItemsPorPagina() {
-  return window.innerWidth >= 1200 ? 28 : 16;
-}
+    // ✅ Repo de imágenes (RAW) - ajustalo si cambia tu estructura
+    const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
-let ITEMS_POR_PAGINA = calcularItemsPorPagina();
+    const CACHE_KEY = "cache_catalogo_v2";
+    const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hs
+    const CACHE_IMG_NAME = "dm-img-v1";
+    const CART_KEY = "carrito_dm_v1";
 
-// RESIZE
-window.addEventListener("resize", () => {
-  const nuevo = calcularItemsPorPagina();
-  if (nuevo !== ITEMS_POR_PAGINA) {
-    ITEMS_POR_PAGINA = nuevo;
-    pagina = 1;
-    render();
-  }
-});
+    // PAGINACIÓN DINÁMICA
+    function calcularItemsPorPagina() {
+      return window.innerWidth >= 1200 ? 28 : 16;
+    }
+    let ITEMS_POR_PAGINA = calcularItemsPorPagina();
+
     // =========================
     // DOM
     // =========================
@@ -683,10 +752,10 @@ window.addEventListener("resize", () => {
     const buscador = document.getElementById("buscador");
     const chkSoloDestacados = document.getElementById("chkSoloDestacados");
     const chkSoloConStock = document.getElementById("chkSoloConStock");
+    const ordenar = document.getElementById("ordenar");
 
     const megaDropdown = document.getElementById("megaDropdown");
     const categoriaToggle = document.getElementById("categoriaToggle");
-    const megaMenu = document.getElementById("megaMenu");
     const megaCategorias = document.getElementById("megaCategorias");
     const megaSubcategorias = document.getElementById("megaSubcategorias");
     const megaEtiquetas = document.getElementById("megaEtiquetas");
@@ -699,6 +768,7 @@ window.addEventListener("resize", () => {
 
     const miniCantidad = document.getElementById("mini-carrito-cantidad");
     const miniTotal = document.getElementById("mini-carrito-total");
+    const miniBadge = document.getElementById("mini-badge");
 
     // =========================
     // STATE
@@ -779,6 +849,31 @@ window.addEventListener("resize", () => {
       return { cls: "stock-ok", txt: "En stock" };
     }
 
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+    function escapeHtmlAttr(s){ return escapeHtml(s).replaceAll("\n"," "); }
+
+    // =========================
+    // SKELETON
+    // =========================
+    function renderSkeleton(count) {
+      const n = Math.max(8, Math.floor(count || ITEMS_POR_PAGINA));
+      grid.innerHTML = new Array(n).fill(0).map(() => `
+        <div class="skeleton-card">
+          <div class="sk-img"></div>
+          <div class="sk-line lg w80"></div>
+          <div class="sk-line w60"></div>
+          <div class="sk-line w40"></div>
+        </div>
+      `).join("");
+    }
+
     // =========================
     // CACHE (catálogo)
     // =========================
@@ -803,7 +898,7 @@ window.addEventListener("resize", () => {
     }
 
     // =========================
-    // IMÁGENES: candidatos + precarga
+    // IMÁGENES: candidatos + cache + precarga
     // =========================
     function candidatosImagen(p) {
       const codigo = p.codigo || "";
@@ -821,7 +916,6 @@ window.addEventListener("resize", () => {
         `${BASE_IMG}/${codigo}.WEBP`,
       ].filter(Boolean);
 
-      // de-dup
       return [...new Set(base)];
     }
 
@@ -847,10 +941,7 @@ window.addEventListener("resize", () => {
           img.decoding = "async";
           img.loading = "eager";
           img.referrerPolicy = "no-referrer";
-          img.onload = async () => {
-            warmCacheImage(url);
-            resolve(url);
-          };
+          img.onload = async () => { warmCacheImage(url); resolve(url); };
           img.onerror = tryNext;
           img.src = url;
         };
@@ -861,11 +952,10 @@ window.addEventListener("resize", () => {
 
     async function precargarPagina(items) {
       // precarga suave de imágenes de la página actual (y calienta cache)
-      const top = items.slice(0, 18);
+      const top = items.slice(0, Math.min(12, items.length));
       for (const p of top) {
         const cands = candidatosImagen(p);
         if (cands[0]) warmCacheImage(cands[0]);
-        // disparo “no bloqueante”
         preloadFirstOk(cands).catch(() => {});
       }
     }
@@ -874,8 +964,6 @@ window.addEventListener("resize", () => {
     // FIRESTORE
     // =========================
     async function cargarCatalogoFirestore() {
-      // Estrategia simple: trae todo.
-      // Si en el futuro necesitás paginar desde Firestore, lo ajustamos.
       const ref = collection(db, COL_PRODUCTOS);
       const snap = await getDocs(ref);
       const arr = [];
@@ -884,7 +972,7 @@ window.addEventListener("resize", () => {
     }
 
     // =========================
-    // FILTROS + MEGA MENU
+    // MEGA MENU
     // =========================
     function iconoCategoria(cat) {
       const c = lower(cat);
@@ -949,7 +1037,6 @@ window.addEventListener("resize", () => {
       const catActual = filtroCategoria || categorias[0] || "Sin categoría";
       renderSubsTags(catActual);
 
-      // listeners
       megaCategorias.querySelectorAll(".mega-item").forEach(li => {
         li.addEventListener("click", () => {
           filtroCategoria = li.getAttribute("data-cat") || "";
@@ -957,7 +1044,6 @@ window.addEventListener("resize", () => {
           filtroEtiqueta = "";
           pagina = 1;
 
-          // label
           const label = filtroCategoria ? filtroCategoria : "Todas las categorías";
           megaDropdown.querySelector(".mega-label").textContent = label;
 
@@ -999,13 +1085,14 @@ window.addEventListener("resize", () => {
       };
     }
 
+    // =========================
+    // FILTRADO + ORDEN
+    // =========================
     function aplicarFiltros() {
       const texto = lower(buscador.value || "");
 
       filtrados = catalogo.filter(p => {
-        if (texto) {
-          if (!p.productosTexto.includes(texto)) return false;
-        }
+        if (texto && !p.productosTexto.includes(texto)) return false;
 
         if (filtroCategoria) {
           const c = norm(p.categoria) || "Sin categoría";
@@ -1026,12 +1113,25 @@ window.addEventListener("resize", () => {
         return true;
       });
 
-      // orden: destacados primero, luego por nombre/código
+      const mode = ordenar.value || "destacados";
+
+      const getNombre = (x) => (x.nombre || x.codigo || "").toString();
+      const getPrecio = (x) => (Number.isFinite(Number(x.precio)) ? Number(x.precio) : Infinity);
+      const getStock = (x) => (Number.isFinite(Number(x.stock)) ? Number(x.stock) : -1);
+
       filtrados.sort((a,b) => {
-        const da = a.destacado ? 1 : 0;
-        const dbb = b.destacado ? 1 : 0;
-        if (da !== dbb) return dbb - da;
-        return (a.nombre || a.codigo).localeCompare((b.nombre || b.codigo), "es");
+        if (mode === "destacados") {
+          const da = a.destacado ? 1 : 0;
+          const dbb = b.destacado ? 1 : 0;
+          if (da !== dbb) return dbb - da;
+          return getNombre(a).localeCompare(getNombre(b), "es");
+        }
+        if (mode === "nombre_az") return getNombre(a).localeCompare(getNombre(b), "es");
+        if (mode === "nombre_za") return getNombre(b).localeCompare(getNombre(a), "es");
+        if (mode === "precio_asc") return getPrecio(a) - getPrecio(b);
+        if (mode === "precio_desc") return getPrecio(b) - getPrecio(a);
+        if (mode === "stock_desc") return getStock(b) - getStock(a);
+        return 0;
       });
     }
 
@@ -1043,9 +1143,7 @@ window.addEventListener("resize", () => {
         const raw = localStorage.getItem(CART_KEY);
         const arr = raw ? JSON.parse(raw) : [];
         return Array.isArray(arr) ? arr : [];
-      } catch {
-        return [];
-      }
+      } catch { return []; }
     }
 
     function guardarCarrito(arr) {
@@ -1085,26 +1183,74 @@ window.addEventListener("resize", () => {
       }
 
       miniCantidad.textContent = String(cant);
+      miniBadge.textContent = String(cant);
       miniTotal.textContent = formatoARS(total);
     }
 
     window.irAlCarrito = function() {
-      // si tu carrito está en otra ruta, cambiá acá
       location.href = "carrito.html";
     };
 
     // =========================
     // RENDER
     // =========================
-    function escapeHtml(s) {
-      return String(s ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    function attachCardHandlers() {
+      grid.querySelectorAll(".producto-card").forEach(card => {
+        const codigo = card.getAttribute("data-codigo") || "";
+        const input = card.querySelector(".input-cantidad");
+        const btnMenos = card.querySelector('[data-act="menos"]');
+        const btnMas = card.querySelector('[data-act="mas"]');
+        const btnAgregar = card.querySelector(".btn-agregar-carrito");
+        const img = card.querySelector(".producto-imagen");
+
+        // blur-up + fallback por candidatos
+        if (img) {
+          img.addEventListener("load", () => img.classList.add("is-loaded"), { once: true });
+
+          const raw = img.getAttribute("data-cands") || "[]";
+          let cands = [];
+          try { cands = JSON.parse(raw) || []; } catch {}
+          let idx = 0;
+          img.onerror = async () => {
+            idx++;
+            if (idx < cands.length) {
+              img.classList.remove("is-loaded");
+              img.src = cands[idx];
+            }
+          };
+        }
+
+        // click a producto
+        card.querySelector(".producto-imagen-wrapper")?.addEventListener("click", () => {
+          location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
+        });
+        card.querySelector(".producto-titulo")?.addEventListener("click", () => {
+          location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
+        });
+
+        btnMenos?.addEventListener("click", () => {
+          const v = Math.max(1, (Number(input.value) || 1) - 1);
+          input.value = String(v);
+        });
+        btnMas?.addEventListener("click", () => {
+          const v = Math.max(1, (Number(input.value) || 1) + 1);
+          input.value = String(v);
+        });
+
+        btnAgregar?.addEventListener("click", () => {
+          const p = catalogo.find(x => String(x.codigo) === String(codigo));
+          if (!p) return;
+          carritoAgregar(p, Number(input.value) || 1);
+
+          btnAgregar.classList.add("btn-agregar-carrito-activo");
+          btnAgregar.textContent = "✅ Agregado";
+          setTimeout(() => {
+            btnAgregar.classList.remove("btn-agregar-carrito-activo");
+            btnAgregar.textContent = "🛒 Agregar";
+          }, 900);
+        });
+      });
     }
-    function escapeHtmlAttr(s){ return escapeHtml(s).replaceAll("\n"," "); }
 
     function render() {
       if (!grid) return;
@@ -1118,13 +1264,11 @@ window.addEventListener("resize", () => {
 
       const pageItems = filtrados.slice(desde, hasta);
 
-      // resumen
       resumenResultados.textContent =
         total === 0
           ? "Sin resultados."
           : `Mostrando ${desde + 1}–${hasta} de ${total} productos`;
 
-      // paginador
       btnAnterior.disabled = pagina <= 1;
       btnSiguiente.disabled = pagina >= totalPaginas;
 
@@ -1142,23 +1286,32 @@ window.addEventListener("resize", () => {
         b.textContent = String(p);
         b.onclick = () => {
           pagina = p;
-          render();
-          window.scrollTo({ top: 0, behavior: "smooth" });
+          renderSkeleton(ITEMS_POR_PAGINA);
+          setTimeout(() => {
+            render();
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }, 60);
         };
         paginadorNumeros.appendChild(b);
       }
 
-      btnAnterior.onclick = () => { pagina--; render(); window.scrollTo({ top: 0, behavior: "smooth" }); };
-      btnSiguiente.onclick = () => { pagina++; render(); window.scrollTo({ top: 0, behavior: "smooth" }); };
+      btnAnterior.onclick = () => {
+        pagina--;
+        renderSkeleton(ITEMS_POR_PAGINA);
+        setTimeout(() => { render(); window.scrollTo({ top: 0, behavior: "smooth" }); }, 60);
+      };
+      btnSiguiente.onclick = () => {
+        pagina++;
+        renderSkeleton(ITEMS_POR_PAGINA);
+        setTimeout(() => { render(); window.scrollTo({ top: 0, behavior: "smooth" }); }, 60);
+      };
 
-      // cards
       grid.innerHTML = pageItems.map(p => {
         const badge = stockBadge(Number(p.stock));
         const precioTxt = (p.precio != null) ? `$ ${formatoARS(p.precio)}` : "";
         const chip = p.destacado ? `<span class="chip-destacado">Destacado</span>` : "";
         const desc = p.descripcion ? escapeHtml(p.descripcion) : "";
 
-        // imagen: ponemos 1er candidato y si falla, reintenta en runtime
         const imgCands = candidatosImagen(p);
         const img0 = imgCands[0] || "";
 
@@ -1202,59 +1355,7 @@ window.addEventListener("resize", () => {
         `;
       }).join("");
 
-      // handlers por card
-      grid.querySelectorAll(".producto-card").forEach(card => {
-        const codigo = card.getAttribute("data-codigo") || "";
-        const input = card.querySelector(".input-cantidad");
-        const btnMenos = card.querySelector('[data-act="menos"]');
-        const btnMas = card.querySelector('[data-act="mas"]');
-        const btnAgregar = card.querySelector(".btn-agregar-carrito");
-        const img = card.querySelector(".producto-imagen");
-
-        // fallback imagen por lista
-        if (img) {
-          const raw = img.getAttribute("data-cands") || "[]";
-          let cands = [];
-          try { cands = JSON.parse(raw) || []; } catch {}
-          let idx = 0;
-          img.onerror = async () => {
-            idx++;
-            if (idx < cands.length) img.src = cands[idx];
-          };
-        }
-
-        // click a producto
-        card.querySelector(".producto-imagen-wrapper")?.addEventListener("click", () => {
-          location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
-        });
-        card.querySelector(".producto-titulo")?.addEventListener("click", () => {
-          location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
-        });
-
-        btnMenos?.addEventListener("click", () => {
-          const v = Math.max(1, (Number(input.value) || 1) - 1);
-          input.value = String(v);
-        });
-        btnMas?.addEventListener("click", () => {
-          const v = Math.max(1, (Number(input.value) || 1) + 1);
-          input.value = String(v);
-        });
-
-        btnAgregar?.addEventListener("click", () => {
-          const p = catalogo.find(x => String(x.codigo) === String(codigo));
-          if (!p) return;
-          carritoAgregar(p, Number(input.value) || 1);
-
-          btnAgregar.classList.add("btn-agregar-carrito-activo");
-          btnAgregar.textContent = "✅ Agregado";
-          setTimeout(() => {
-            btnAgregar.classList.remove("btn-agregar-carrito-activo");
-            btnAgregar.textContent = "🛒 Agregar";
-          }, 900);
-        });
-      });
-
-      // precarga de imágenes de esta página
+      attachCardHandlers();
       precargarPagina(pageItems).catch(() => {});
     }
 
@@ -1287,13 +1388,33 @@ window.addEventListener("resize", () => {
       render();
     });
 
+    ordenar.addEventListener("change", () => {
+      pagina = 1;
+      aplicarFiltros();
+      render();
+    });
+
+    // RESIZE (28 desktop / 16 mobile)
+    window.addEventListener("resize", () => {
+      const nuevo = calcularItemsPorPagina();
+      if (nuevo !== ITEMS_POR_PAGINA) {
+        ITEMS_POR_PAGINA = nuevo;
+        pagina = 1;
+        renderSkeleton(ITEMS_POR_PAGINA);
+        setTimeout(() => render(), 60);
+      }
+    });
+
     // =========================
     // INIT
     // =========================
     async function init() {
       actualizarMiniCarrito();
 
-      // 1) cache primero (instantáneo)
+      // Loader inicial
+      renderSkeleton(ITEMS_POR_PAGINA);
+
+      // 1) cache primero
       const cached = cacheLeer();
       if (cached?.length) {
         catalogo = cached.map(normalizarProducto);
@@ -1301,37 +1422,21 @@ window.addEventListener("resize", () => {
         buildMegaMenu();
         render();
 
-        // 2) refresh en background (sin romper la UI)
+        // refresh background
         cargarCatalogoFirestore()
           .then(arr => {
             const normed = arr.map(normalizarProducto);
-            // si cambia cantidad o algo, refrescamos
-            if (normed.length !== catalogo.length) {
-              catalogo = normed;
-              cacheGuardar(arr);
-              aplicarFiltros();
-              buildMegaMenu();
-              render();
-            } else {
-              // igual guardamos y actualizamos (por stock/precios)
-              catalogo = normed;
-              cacheGuardar(arr);
-              aplicarFiltros();
-              buildMegaMenu();
-              render();
-            }
+            catalogo = normed;
+            cacheGuardar(arr);
+            aplicarFiltros();
+            buildMegaMenu();
+            render();
           })
           .catch(() => {});
         return;
       }
 
-      // 2) sin cache: Firestore (con loader simple)
-      grid.innerHTML = `
-        <div style="opacity:.85;color:#c9c9ff;padding:8px 2px;">
-          Cargando catálogo...
-        </div>
-      `;
-
+      // 2) Firestore
       try {
         const arr = await cargarCatalogoFirestore();
         cacheGuardar(arr);
