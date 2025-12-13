@@ -1,86 +1,75 @@
 // js/historial.js
 import { auth, db } from "./firebase-init.js";
-import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+import {
+  onAuthStateChanged,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/12.6.0/firebase-auth.js";
+
 import {
   collection,
   getDocs,
-  query,
-  where,
-  orderBy,
-  limit,
+  doc,
+  runTransaction,
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-/* =========================
-   DOM
-========================= */
+// --------------------
+// DOM
+// --------------------
 const btnLogout = document.getElementById("logoutBtn");
 
 const tituloCliente = document.getElementById("tituloCliente");
 const subtituloCliente = document.getElementById("subtituloCliente");
-const badgeModo = document.getElementById("badgeModo");
 
 const tbody = document.getElementById("tablaHistorial");
 
-// filtros
+// Filtros
 const inputDesde = document.getElementById("filtroDesde");
 const inputHasta = document.getElementById("filtroHasta");
 const inputProducto = document.getElementById("filtroProducto");
+const selectPago = document.getElementById("filtroPago");
 const selectEstado = document.getElementById("filtroEstado");
 
-// búsqueda rápida
-const inputBusquedaRapida = document.getElementById("busquedaRapida");
-
-// orden/paginación
-const selectOrden = document.getElementById("selectOrden");
-const selectPageSize = document.getElementById("selectPageSize");
-const btnPrev = document.getElementById("btnPrev");
-const btnNext = document.getElementById("btnNext");
-const lblPager = document.getElementById("lblPager");
-const lblHint = document.getElementById("lblHint");
-
-const btnReset = document.getElementById("btnReset");
-const btnExport = document.getElementById("btnExport");
-const btnRefrescar = document.getElementById("btnRefrescar");
-
-// totales
+// Totales
 const lblTotalCliente = document.getElementById("totalCliente");
 const lblTotalFiltrado = document.getElementById("totalFiltrado");
 const lblResumenConteo = document.getElementById("resumenConteo");
-const lblResumenPagina = document.getElementById("resumenPagina");
 
-// modal
+const lblSumEf = document.getElementById("sumEf");
+const lblSumTr = document.getElementById("sumTr");
+const lblSumMx = document.getElementById("sumMx");
+
+// Modal comprobante
 const modalDetalle = document.getElementById("modalDetalle");
+const lblDetalleNumero = document.getElementById("detalleNumero");
 const lblDetalleCliente = document.getElementById("detalleCliente");
 const lblDetalleFecha = document.getElementById("detalleFecha");
-const lblDetalleEstado = document.getElementById("detalleEstado");
 const lblDetallePago = document.getElementById("detallePago");
-const lblDetalleNumero = document.getElementById("detalleNumero");
+const lblDetalleEstado = document.getElementById("detalleEstado");
 const tbodyDetalleProductos = document.getElementById("detalleProductos");
 const lblDetalleTotal = document.getElementById("detalleTotal");
 const lblDetalleNotas = document.getElementById("detalleNotas");
+const boxAudit = document.getElementById("detalleAudit");
 
 const btnCerrarModalX = document.getElementById("cerrarModalDetalle");
 const btnCerrarModal = document.getElementById("btnCerrarDetalle");
 const btnImprimir = document.getElementById("btnImprimir");
 const btnCompartirWhatsapp = document.getElementById("btnCompartirWhatsapp");
 
-/* =========================
-   Estado
-========================= */
-let ventasBase = [];        // ventas “de origen” (cliente o global)
-let ventasFiltradas = [];   // luego de filtros/búsqueda
-let pagina = 1;
+const btnAnular = document.getElementById("btnAnular");
+const btnRestaurar = document.getElementById("btnRestaurar");
 
-let productosCatalogo = []; // {codigo, nombre}
+// --------------------
+// Estado en memoria
+// --------------------
+let ventasCliente = [];     // todas las ventas del cliente (o globales)
+let ventasFiltradas = [];   // ventas después de filtros
+let productosCatalogo = []; // productos desde colección "productos"
 let ventaActualDetalle = null;
 
-/* =========================
-   Helpers
-========================= */
-const money = (n) => "$" + Number(n || 0).toLocaleString("es-AR");
-const norm = (s) => (s || "").toString().trim().toLowerCase();
-const digits = (s) => (s || "").toString().replace(/\D+/g, "");
-
+// --------------------
+// Helper: query string
+// --------------------
 function getQueryParams() {
   const params = new URLSearchParams(window.location.search);
   return {
@@ -89,487 +78,430 @@ function getQueryParams() {
   };
 }
 
-function parseFechaFiltro(valor) {
-  // dd/mm/aaaa -> Date (00:00)
-  if (!valor) return null;
-  const v = valor.trim();
-  const [d, m, y] = v.split("/");
-  if (!d || !m || !y) return null;
-  const dt = new Date(`${y}-${m}-${d}T00:00:00`);
-  return isNaN(dt.getTime()) ? null : dt;
+const { nombre: nombreCliente } = getQueryParams();
+
+// Título base
+if (nombreCliente) {
+  tituloCliente.textContent = `Historial de compras - ${nombreCliente}`;
+} else {
+  tituloCliente.textContent = "Historial de compras";
 }
 
-function toDateJS(fecha) {
-  if (!fecha) return null;
-  if (typeof fecha?.toDate === "function") return fecha.toDate();
-  const d = new Date(fecha);
-  return isNaN(d.getTime()) ? null : d;
-}
-
-function formatearFecha(fecha) {
-  const f = toDateJS(fecha);
-  if (!f) return "-";
-  const dd = String(f.getDate()).padStart(2, "0");
-  const mm = String(f.getMonth() + 1).padStart(2, "0");
-  const yy = f.getFullYear();
-  const hh = String(f.getHours()).padStart(2, "0");
-  const mi = String(f.getMinutes()).padStart(2, "0");
-  return `${dd}/${mm}/${yy} ${hh}:${mi}`;
-}
-
-function getEstadoPill(estadoRaw, anulada) {
-  if (anulada) return `<span class="estado-pill estado-bad">anulada</span>`;
-
-  const e = norm(estadoRaw);
-  if (e === "pagado" || e === "entregado") return `<span class="estado-pill estado-ok">${e || "ok"}</span>`;
-  if (e === "pendiente") return `<span class="estado-pill estado-warn">pendiente</span>`;
-  if (e) return `<span class="estado-pill">${e}</span>`;
-  return `<span class="estado-pill">—</span>`;
-}
-
-function getPagoPill(pagoRaw) {
-  const p = norm(pagoRaw);
-  if (!p) return `<span class="pago-pill">—</span>`;
-  return `<span class="pago-pill">${p}</span>`;
-}
-
-function guessProductoNombre(codigo, fallback) {
-  const c = (codigo || "").toString();
-  if (!c) return fallback || "-";
-  const found = productosCatalogo.find((x) => (x.codigo || "").toString() === c);
-  return found?.nombre || fallback || c;
-}
-
-/**
- * Normaliza una venta para soportar:
- * - ventas nuevas de ventas.html: { items:[{codigo,nombre,precio,cant}] }
- * - ventas viejas / alternativas: { productos:[{codigo, cantidad, precio}] }
- * - nombres: cliente / clienteNombre
- * - estado: estado (opcional) + anulada (boolean)
- * - numeroInterno (si existe)
- */
-function normalizeVenta(v) {
-  const cliente = (v.clienteNombre || v.cliente || "Cliente").toString();
-  const pago = (v.pago || v.metodoPago || v.formaPago || "").toString();
-  const estado = (v.estado || (v.anulada ? "anulada" : "") || "").toString();
-  const anulada = !!v.anulada;
-
-  // productos
-  let productos = [];
-  if (Array.isArray(v.productos) && v.productos.length) {
-    productos = v.productos.map((p) => ({
-      codigo: p.codigo || "",
-      nombre: p.nombre || p.producto || "",
-      cantidad: Number(p.cantidad || 0),
-      precio: Number(p.precio || 0),
-    }));
-  } else if (Array.isArray(v.items) && v.items.length) {
-    productos = v.items.map((it) => ({
-      codigo: it.codigo || it.id || "",
-      nombre: it.nombre || "",
-      cantidad: Number(it.cant || it.cantidad || 0),
-      precio: Number(it.precio || 0),
-    }));
-  }
-
-  const total =
-    Number(v.total || 0) ||
-    productos.reduce((acc, p) => acc + (Number(p.precio) || 0) * (Number(p.cantidad) || 0), 0);
-
-  const fecha = v.fecha || v.createdAt || null;
-
-  return {
-    id: v.id,
-    fecha,
-    cliente,
-    clienteId: v.clienteId || "",
-    tel: v.tel || "",
-    pago,
-    estado,
-    anulada,
-    notas: v.notas || "",
-    numeroInterno: v.numeroInterno || v.nroInterno || "",
-    productos,
-    total,
-  };
-}
-
-function obtenerResumenProductos(v) {
-  const arr = v.productos || [];
-  if (!arr.length) return { texto: "—", cant: 0 };
-
-  const totalCant = arr.reduce((acc, p) => acc + (Number(p.cantidad) || 0), 0);
-  const first = arr[0];
-  const nombre = guessProductoNombre(first.codigo, first.nombre || first.codigo || "-");
-  const base = `${nombre} x${first.cantidad || 1}`;
-  const resto = arr.length - 1;
-  return {
-    texto: resto > 0 ? `${base} (+${resto})` : base,
-    cant: totalCant,
-  };
-}
-
-function buildCSV(rows) {
-  const esc = (s) => `"${String(s ?? "").replace(/"/g, '""')}"`;
-  const header = [
-    "Fecha",
-    "NumeroInterno",
-    "Cliente",
-    "Pago",
-    "Estado",
-    "Total",
-    "Productos",
-    "Notas",
-  ].map(esc).join(",");
-
-  const lines = rows.map((v) => {
-    const prods = (v.productos || [])
-      .map((p) => `${p.codigo || ""} x${p.cantidad || 0}`)
-      .join(" | ");
-
-    return [
-      formatearFecha(v.fecha),
-      v.numeroInterno || "",
-      v.cliente || "",
-      v.pago || "",
-      v.anulada ? "anulada" : (v.estado || ""),
-      v.total || 0,
-      prods,
-      v.notas || "",
-    ].map(esc).join(",");
-  });
-
-  return [header, ...lines].join("\n");
-}
-
-function downloadText(filename, text) {
-  const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
-}
-
-/* =========================
-   Sesión
-========================= */
-btnLogout?.addEventListener("click", async () => {
-  await signOut(auth);
-  window.location.href = "login.html";
-});
-
+// --------------------
+// SESIÓN
+// --------------------
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "login.html";
     return;
   }
-
-  // UX: foco búsqueda (Ctrl+K)
-  document.addEventListener("keydown", (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
-      e.preventDefault();
-      inputBusquedaRapida?.focus();
-    }
-    if (e.key === "Escape") cerrarModal();
-  });
-
-  await cargarProductosCatalogo();
   await cargarHistorial();
 });
 
-/* =========================
-   Cargar catálogo (para mostrar nombres por código)
-========================= */
+btnLogout?.addEventListener("click", async () => {
+  await signOut(auth);
+  window.location.href = "login.html";
+});
+
+// --------------------
+// Helpers generales
+// --------------------
+function money(n) {
+  return `$${Number(n || 0).toLocaleString("es-AR")}`;
+}
+
+function normPago(raw) {
+  const p = String(raw || "").toLowerCase();
+  if (p.includes("efec")) return "efectivo";
+  if (p.includes("transf")) return "transferencia";
+  if (p.includes("mixt")) return "mixto";
+  return p || "—";
+}
+
+function pickClienteNombre(v) {
+  const c = v.clienteNombre ?? v.cliente ?? v.clienteInfo ?? v.clienteData ?? "";
+  if (typeof c === "string") return c.trim() || "Cliente";
+  if (c && typeof c === "object") {
+    return (c.nombre || c.name || c.razonSocial || c.apellido || "Cliente").toString();
+  }
+  return "Cliente";
+}
+
+function getLineasVenta(v) {
+  // Soporta: v.productos (historial viejo) o v.items (ventas.html)
+  if (Array.isArray(v.productos) && v.productos.length) {
+    return v.productos.map(p => ({
+      id: p.id || null,
+      codigo: (p.codigo || "").toString(),
+      nombre: "",
+      precio: Number(p.precio || 0),
+      cant: Number(p.cantidad || 0),
+    }));
+  }
+  if (Array.isArray(v.items) && v.items.length) {
+    return v.items.map(it => ({
+      id: it.id || null,
+      codigo: (it.codigo || "").toString(),
+      nombre: (it.nombre || "").toString(),
+      precio: Number(it.precio || 0),
+      cant: Number(it.cant || it.cantidad || 0),
+    }));
+  }
+
+  // Compatibilidad con venta de 1 producto
+  const codigo = (v.productoCodigo || v.codigoProducto || "").toString();
+  const nombre = (v.productoNombre || v.nombreProducto || v.producto || "").toString();
+  const cant = Number(v.cantidad || v.cant || 0);
+  const precio = Number(v.precio || 0);
+  return [{ id: null, codigo, nombre, precio, cant }];
+}
+
+function nombreProductoDesdeCatalogo(codigo) {
+  const cat = productosCatalogo.find((c) => c.codigo === codigo);
+  return cat?.nombre || "";
+}
+
+// --------------------
+// Cargar catálogo de productos
+// --------------------
 async function cargarProductosCatalogo() {
   try {
     const snap = await getDocs(collection(db, "productos"));
     productosCatalogo = snap.docs.map((docSnap) => {
-      const d = docSnap.data() || {};
+      const d = docSnap.data();
       const codigo = d.codigo || docSnap.id || "";
-      const nombre = d.nombre || d.Nombre || d.name || "";
+      const nombre = d.nombre || d.Nombre || "";
       return { codigo: String(codigo), nombre: String(nombre) };
     });
-  } catch (e) {
-    console.error("Error cargando catálogo para historial:", e);
+  } catch (error) {
+    console.error("Error cargando catálogo para historial:", error);
     productosCatalogo = [];
   }
 }
 
-/* =========================
-   Cargar ventas (Firestore)
-   - Si viene clienteId -> consulta por where('clienteId','==',...)
-   - Si viene clienteNombre -> filtra por nombre (fallback)
-========================= */
+// --------------------
+// Cargar ventas de Firestore
+// --------------------
 async function cargarHistorial() {
-  const { nombre: nombreCliente, clienteId } = getQueryParams();
-
   try {
-    // UI modo
-    if (nombreCliente || clienteId) {
-      badgeModo.textContent = "Cliente";
-      tituloCliente.textContent = `Historial de compras - ${nombreCliente || "Cliente"}`;
-      subtituloCliente.textContent = "Mostrando las compras del cliente seleccionado.";
+    await cargarProductosCatalogo();
+
+    const snap = await getDocs(collection(db, "ventas"));
+    const todasLasVentas = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+    if (nombreCliente) {
+      ventasCliente = todasLasVentas.filter((v) => pickClienteNombre(v) === nombreCliente);
+
+      subtituloCliente && (subtituloCliente.textContent =
+        "Mostrando las compras del cliente seleccionado.");
     } else {
-      badgeModo.textContent = "Completo";
-      tituloCliente.textContent = "Historial de compras";
-      subtituloCliente.textContent = "Mostrando el historial completo de ventas.";
+      ventasCliente = todasLasVentas;
+      subtituloCliente && (subtituloCliente.textContent =
+        "Mostrando el historial completo de ventas.");
     }
-
-    // ✅ Traemos últimas N (para no reventar si crece mucho)
-    // Si querés “TODO”, subí el limit. (recomendado mantener límite)
-    const ventasRef = collection(db, "ventas");
-    let qy;
-
-    if (clienteId) {
-      qy = query(ventasRef, where("clienteId", "==", clienteId), orderBy("fecha", "desc"), limit(1500));
-    } else {
-      qy = query(ventasRef, orderBy("fecha", "desc"), limit(2000));
-    }
-
-    const snap = await getDocs(qy);
-    const raw = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-    // normalizar
-    let all = raw.map(normalizeVenta);
-
-    // fallback: si no hubo clienteId pero hay nombreCliente => filtrar por nombre exacto
-    if (!clienteId && nombreCliente) {
-      const target = nombreCliente.trim();
-      all = all.filter((v) => (v.cliente || "").trim() === target);
-    }
-
-    ventasBase = all;
-    pagina = 1;
 
     aplicarFiltros();
-
-  } catch (e) {
-    console.error("Error al cargar historial:", e);
+  } catch (error) {
+    console.error("Error al cargar historial:", error);
     if (tbody) {
       tbody.innerHTML = `<tr><td colspan="9">Ocurrió un error al cargar el historial.</td></tr>`;
     }
   }
 }
 
-/* =========================
-   Filtros + búsqueda + orden
-========================= */
-function aplicarFiltros() {
-  const desdeDate = parseFechaFiltro(inputDesde?.value);
-  const hastaDateRaw = parseFechaFiltro(inputHasta?.value);
+// --------------------
+// Filtros
+// --------------------
+function parseFechaFiltro(valor) {
+  if (!valor) return null;
+  const [d, m, y] = valor.split("/");
+  if (!d || !m || !y) return null;
+  return new Date(`${y}-${m}-${d}T00:00:00`);
+}
 
+function aplicarFiltros() {
+  const desdeDate = parseFechaFiltro(inputDesde?.value.trim());
+  const hastaDateRaw = parseFechaFiltro(inputHasta?.value.trim());
   let hastaDate = hastaDateRaw;
   if (hastaDateRaw) {
     hastaDate = new Date(hastaDateRaw.getTime());
     hastaDate.setHours(23, 59, 59, 999);
   }
 
-  const textoProducto = norm(inputProducto?.value);
-  const estadoSeleccionado = norm(selectEstado?.value || "todas");
-  const qRapida = norm(inputBusquedaRapida?.value);
+  const textoProducto = (inputProducto?.value || "").toLowerCase();
+  const pagoSeleccionado = (selectPago?.value || "todas").toLowerCase();
+  const estadoSeleccionado = (selectEstado?.value || "todas").toLowerCase();
 
-  // orden
-  const ord = (selectOrden?.value || "fecha_desc").toLowerCase();
-
-  ventasFiltradas = ventasBase.filter((v) => {
+  ventasFiltradas = ventasCliente.filter((venta) => {
     let ok = true;
 
-    const f = toDateJS(v.fecha);
-    if (desdeDate && f && f < desdeDate) ok = false;
-    if (hastaDate && f && f > hastaDate) ok = false;
+    // Fecha
+    if (venta.fecha) {
+      const fechaJs = venta.fecha.toDate ? venta.fecha.toDate() : new Date(venta.fecha);
+      if (desdeDate && fechaJs < desdeDate) ok = false;
+      if (hastaDate && fechaJs > hastaDate) ok = false;
+    }
 
-    // estado
+    // Producto (código o nombre)
+    if (textoProducto) {
+      let coincideProducto = false;
+
+      const lineas = getLineasVenta(venta);
+      for (const it of lineas) {
+        const cod = (it.codigo || "").toLowerCase();
+        const nom = (it.nombre || nombreProductoDesdeCatalogo(it.codigo) || "").toLowerCase();
+        if (cod.includes(textoProducto) || nom.includes(textoProducto)) {
+          coincideProducto = true;
+          break;
+        }
+      }
+
+      if (!coincideProducto) ok = false;
+    }
+
+    // Pago
+    if (pagoSeleccionado !== "todas") {
+      const p = normPago(venta.pago || venta.metodoPago || "");
+      if (p !== pagoSeleccionado) ok = false;
+    }
+
+    // Estado (incluye anulada)
+    const esAnulada = !!venta.anulada;
     if (estadoSeleccionado !== "todas") {
       if (estadoSeleccionado === "anulada") {
-        if (!v.anulada) ok = false;
+        if (!esAnulada) ok = false;
       } else {
-        if (norm(v.estado) !== estadoSeleccionado) ok = false;
+        const estadoVenta = String(venta.estado || "").toLowerCase();
+        if (estadoVenta !== estadoSeleccionado) ok = false;
       }
-    }
-
-    // producto (código o nombre)
-    if (textoProducto) {
-      const arr = v.productos || [];
-      const hit = arr.some((p) => {
-        const cod = norm(p.codigo);
-        const nom = norm(guessProductoNombre(p.codigo, p.nombre));
-        return cod.includes(textoProducto) || nom.includes(textoProducto);
-      });
-      if (!hit) ok = false;
-    }
-
-    // búsqueda rápida (cliente / código / nombre / nro interno)
-    if (qRapida) {
-      const inCliente = norm(v.cliente).includes(qRapida);
-      const inInterno = norm(v.numeroInterno).includes(qRapida);
-      const inPago = norm(v.pago).includes(qRapida);
-      const inProd = (v.productos || []).some((p) => {
-        const cod = norm(p.codigo);
-        const nom = norm(guessProductoNombre(p.codigo, p.nombre));
-        return cod.includes(qRapida) || nom.includes(qRapida);
-      });
-      if (!(inCliente || inInterno || inPago || inProd)) ok = false;
     }
 
     return ok;
   });
 
-  // ordenar
-  ventasFiltradas.sort((a, b) => {
-    const da = toDateJS(a.fecha)?.getTime() || 0;
-    const dbb = toDateJS(b.fecha)?.getTime() || 0;
-
-    if (ord === "fecha_asc") return da - dbb;
-    if (ord === "fecha_desc") return dbb - da;
-
-    if (ord === "total_asc") return (Number(a.total) || 0) - (Number(b.total) || 0);
-    if (ord === "total_desc") return (Number(b.total) || 0) - (Number(a.total) || 0);
-
-    return dbb - da;
-  });
-
-  // si la página queda fuera
-  const pageSize = Number(selectPageSize?.value || 20);
-  const totalPages = Math.max(1, Math.ceil(ventasFiltradas.length / pageSize));
-  if (pagina > totalPages) pagina = totalPages;
-
-  renderTabla();
+  renderTabla(ventasFiltradas);
   recalcularTotales();
 }
 
-/* =========================
-   Render tabla + paginación
-========================= */
-function renderTabla() {
-  const pageSize = Number(selectPageSize?.value || 20);
-  const total = ventasFiltradas.length;
+// --------------------
+// Render tabla
+// --------------------
+function formatearFecha(fecha) {
+  if (!fecha) return "-";
+  const f = fecha.toDate ? fecha.toDate() : new Date(fecha);
+  const dia = String(f.getDate()).padStart(2, "0");
+  const mes = String(f.getMonth() + 1).padStart(2, "0");
+  const anio = f.getFullYear();
+  const hora = String(f.getHours()).padStart(2, "0");
+  const min = String(f.getMinutes()).padStart(2, "0");
+  return `${dia}/${mes}/${anio} ${hora}:${min}`;
+}
 
-  const start = (pagina - 1) * pageSize;
-  const end = Math.min(total, start + pageSize);
-  const slice = ventasFiltradas.slice(start, end);
+function obtenerResumenProductos(venta) {
+  const lineas = getLineasVenta(venta).filter(x => x.cant > 0 || x.codigo || x.nombre);
 
+  const totalCantidad = lineas.reduce((acc, it) => acc + (Number(it.cant) || 0), 0);
+
+  if (!lineas.length) return { textoProducto: "—", totalCantidad: 0 };
+
+  const primero = lineas[0];
+  const nom = (primero.nombre || nombreProductoDesdeCatalogo(primero.codigo) || primero.codigo || "—");
+  const textoBase = `${nom} x${primero.cant || 1}`;
+  const resto = lineas.length - 1;
+  const textoProducto = resto > 0 ? `${textoBase} (+${resto} más)` : textoBase;
+
+  return { textoProducto, totalCantidad };
+}
+
+function pillPago(p) {
+  const x = normPago(p);
+  if (x === "efectivo") return `<span class="pill ok">efectivo</span>`;
+  if (x === "transferencia") return `<span class="pill neutral">transferencia</span>`;
+  if (x === "mixto") return `<span class="pill neutral">mixto</span>`;
+  return `<span class="pill neutral">${x || "—"}</span>`;
+}
+
+function pillEstado(v) {
+  if (v.anulada) return `<span class="pill bad">anulada</span>`;
+  const e = String(v.estado || "—").toLowerCase();
+  if (e === "pagado" || e === "entregado") return `<span class="pill ok">${e}</span>`;
+  return `<span class="pill neutral">${e}</span>`;
+}
+
+function renderTabla(lista) {
   if (!tbody) return;
 
-  if (!slice.length) {
-    tbody.innerHTML = `<tr><td colspan="9">Sin resultados.</td></tr>`;
-    lblPager.textContent = `0–0 de ${total}`;
-    lblResumenPagina.textContent = `1 / 1`;
-    lblHint.textContent = "";
+  tbody.innerHTML = "";
+
+  if (!lista || lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9">No hay ventas para estos filtros.</td></tr>`;
     return;
   }
 
-  tbody.innerHTML = slice.map((v) => {
-    const { texto, cant } = obtenerResumenProductos(v);
-
-    const estadoHtml = getEstadoPill(v.estado, v.anulada);
-    const pagoHtml = getPagoPill(v.pago);
-
-    const notas = (v.notas || "").toString().trim();
-    const notasShort = notas.length > 26 ? notas.slice(0, 26) + "…" : (notas || "—");
-
-    return `
-      <tr data-id="${v.id}">
-        <td>${formatearFecha(v.fecha)}</td>
-        <td class="mono">${v.numeroInterno || "—"}</td>
-        <td>${v.cliente || "—"}</td>
-        <td>${texto}</td>
-        <td class="num">${cant || 0}</td>
-        <td class="num">${money(v.total || 0)}</td>
-        <td>${pagoHtml}</td>
-        <td>${estadoHtml}</td>
-        <td class="muted" title="${notas.replaceAll('"', "'")}">${notasShort}</td>
-      </tr>
-    `;
-  }).join("");
-
-  // click fila => modal comprobante
-  tbody.querySelectorAll("tr[data-id]").forEach((tr) => {
-    tr.addEventListener("click", () => {
-      const id = tr.dataset.id;
-      const v = ventasFiltradas.find((x) => x.id === id);
-      if (v) abrirDetalle(v);
-    });
+  // Orden desc por fecha
+  const ordenadas = [...lista].sort((a, b) => {
+    const fa = a.fecha?.toDate ? a.fecha.toDate() : new Date(a.fecha || 0);
+    const fb = b.fecha?.toDate ? b.fecha.toDate() : new Date(b.fecha || 0);
+    return fb - fa;
   });
 
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  lblPager.textContent = `${start + 1}–${end} de ${total}`;
-  lblResumenPagina.textContent = `${pagina} / ${totalPages}`;
-  lblHint.textContent = totalPages > 1 ? `Mostrando pág ${pagina}.` : "";
+  ordenadas.forEach((venta) => {
+    const tr = document.createElement("tr");
+
+    const fechaTexto = formatearFecha(venta.fecha);
+    const { textoProducto, totalCantidad } = obtenerResumenProductos(venta);
+
+    const cliente = pickClienteNombre(venta);
+    const total = Number(venta.total || 0);
+    const notas = venta.notas || venta.motivoAnulacion || "—";
+
+    tr.innerHTML = `
+      <td data-label="Fecha">${fechaTexto}</td>
+      <td data-label="N° Interno">${venta.numeroInterno || "—"}</td>
+      <td data-label="Cliente">${cliente}</td>
+      <td data-label="Producto(s)">${textoProducto}</td>
+      <td data-label="Cantidad">${totalCantidad}</td>
+      <td data-label="Total">${money(total)}</td>
+      <td data-label="Pago">${pillPago(venta.pago || venta.metodoPago || "")}</td>
+      <td data-label="Estado">${pillEstado(venta)}</td>
+      <td data-label="Notas">${notas || "—"}</td>
+    `;
+
+    tr.addEventListener("click", () => abrirDetalleVenta(venta));
+    tbody.appendChild(tr);
+  });
 }
 
-/* =========================
-   Totales
-========================= */
+// --------------------
+// Totales
+// --------------------
 function recalcularTotales() {
-  // total cliente (de base)
-  const totalCliente = ventasBase.reduce((acc, v) => acc + (Number(v.total) || 0), 0);
-  lblTotalCliente.textContent = money(totalCliente);
+  // Totales globales del cliente: excluye anuladas
+  const totalCliente = ventasCliente.reduce((acc, v) => {
+    if (v.anulada) return acc;
+    return acc + Number(v.total || 0);
+    }, 0);
 
-  // total filtrado
-  const totalFiltrado = ventasFiltradas.reduce((acc, v) => acc + (Number(v.total) || 0), 0);
-  lblTotalFiltrado.textContent = money(totalFiltrado);
+  // Totales filtrados: excluye anuladas (para caja)
+  const totalFiltrado = ventasFiltradas.reduce((acc, v) => {
+    if (v.anulada) return acc;
+    return acc + Number(v.total || 0);
+  }, 0);
 
-  // conteo
-  lblResumenConteo.textContent = `${ventasFiltradas.length} ventas`;
+  let ef = 0, tr = 0, mx = 0;
+  ventasFiltradas.forEach(v => {
+    if (v.anulada) return;
+    const t = Number(v.total || 0);
+    const p = normPago(v.pago || v.metodoPago || "");
+    if (p === "efectivo") ef += t;
+    else if (p === "transferencia") tr += t;
+    else if (p === "mixto") mx += t;
+  });
+
+  lblTotalCliente && (lblTotalCliente.textContent = money(totalCliente));
+  lblTotalFiltrado && (lblTotalFiltrado.textContent = money(totalFiltrado));
+  lblResumenConteo && (lblResumenConteo.textContent = `${ventasFiltradas.length} venta(s) en el resultado.`);
+
+  lblSumEf && (lblSumEf.textContent = money(ef));
+  lblSumTr && (lblSumTr.textContent = money(tr));
+  lblSumMx && (lblSumMx.textContent = money(mx));
 }
 
-/* =========================
-   Modal detalle
-========================= */
-function abrirDetalle(v) {
-  ventaActualDetalle = v;
+// --------------------
+// Detalle / comprobante
+// --------------------
+function abrirDetalleVenta(venta) {
+  if (!modalDetalle) return;
 
-  lblDetalleCliente.textContent = v.cliente || "-";
-  lblDetalleFecha.textContent = formatearFecha(v.fecha);
-  lblDetalleEstado.textContent = v.anulada ? "anulada" : (v.estado || "—");
-  lblDetallePago.textContent = v.pago || "—";
-  lblDetalleNumero.textContent = v.numeroInterno || "—";
+  ventaActualDetalle = venta;
 
-  // productos
-  const arr = v.productos || [];
-  if (!arr.length) {
-    tbodyDetalleProductos.innerHTML = `<tr><td colspan="5">Sin productos.</td></tr>`;
-  } else {
-    tbodyDetalleProductos.innerHTML = arr.map((p) => {
-      const nombre = guessProductoNombre(p.codigo, p.nombre || p.codigo || "-");
-      const cant = Number(p.cantidad || 0);
-      const precio = Number(p.precio || 0);
-      const sub = precio * cant;
+  lblDetalleNumero && (lblDetalleNumero.textContent = venta.numeroInterno || "—");
+  lblDetalleCliente && (lblDetalleCliente.textContent = pickClienteNombre(venta));
+  lblDetalleFecha && (lblDetalleFecha.textContent = formatearFecha(venta.fecha));
+  lblDetallePago && (lblDetallePago.textContent = normPago(venta.pago || venta.metodoPago || "—"));
+  lblDetalleEstado && (lblDetalleEstado.textContent = venta.anulada ? "anulada" : (venta.estado || "—"));
+  lblDetalleTotal && (lblDetalleTotal.textContent = money(venta.total || 0));
+  lblDetalleNotas && (lblDetalleNotas.textContent = venta.notas || "—");
 
-      return `
-        <tr>
-          <td class="mono">${p.codigo || "-"}</td>
-          <td>${nombre}</td>
-          <td class="num">${cant}</td>
-          <td class="num">${money(precio)}</td>
-          <td class="num">${money(sub)}</td>
-        </tr>
+  // Audit box
+  if (boxAudit) {
+    if (venta.anulada) {
+      const motivo = venta.motivoAnulacion || "—";
+      const por = venta.anuladaPor || "—";
+      const turno = venta.anuladaTurno || "—";
+      boxAudit.style.display = "block";
+      boxAudit.innerHTML = `
+        <div><b>Venta ANULADA</b></div>
+        <div style="margin-top:6px;">Motivo: <b>${motivo}</b></div>
+        <div style="margin-top:6px;">Por: <b>${por}</b> • Turno: <b>${turno}</b></div>
       `;
-    }).join("");
+    } else {
+      boxAudit.style.display = "none";
+      boxAudit.innerHTML = "";
+    }
   }
 
-  lblDetalleTotal.textContent = money(v.total || 0);
-  lblDetalleNotas.textContent = (v.notas && v.notas.toString().trim()) ? v.notas : "-";
+  // Botones Anular / Restaurar
+  if (btnAnular) btnAnular.style.display = venta.anulada ? "none" : "inline-flex";
+  if (btnRestaurar) btnRestaurar.style.display = venta.anulada ? "inline-flex" : "none";
+
+  // Tabla productos (soporta productos o items)
+  if (tbodyDetalleProductos) {
+    tbodyDetalleProductos.innerHTML = "";
+    const lineas = getLineasVenta(venta);
+
+    if (lineas.length) {
+      lineas.forEach((it) => {
+        const nombre =
+          it.nombre ||
+          nombreProductoDesdeCatalogo(it.codigo) ||
+          it.codigo ||
+          "—";
+
+        const subtotal = Number(it.precio || 0) * Number(it.cant || 0);
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${it.codigo || "—"}</td>
+          <td>${nombre}</td>
+          <td>${Number(it.cant || 0)}</td>
+          <td>${money(it.precio || 0)}</td>
+          <td>${money(subtotal)}</td>
+        `;
+        tbodyDetalleProductos.appendChild(tr);
+      });
+    } else {
+      tbodyDetalleProductos.innerHTML = `<tr><td colspan="5">Sin productos.</td></tr>`;
+    }
+  }
 
   modalDetalle.style.display = "flex";
 }
 
-function cerrarModal() {
-  modalDetalle.style.display = "none";
-  ventaActualDetalle = null;
+function cerrarModalDetalle() {
+  if (modalDetalle) modalDetalle.style.display = "none";
 }
 
-btnCerrarModalX?.addEventListener("click", cerrarModal);
-btnCerrarModal?.addEventListener("click", cerrarModal);
-modalDetalle?.addEventListener("click", (e) => {
-  if (e.target === modalDetalle) cerrarModal();
-});
 // --------------------
-// Imprimir comprobante lindo (SIN abrir pestaña)
+// Listeners de filtros
+// --------------------
+[inputDesde, inputHasta, inputProducto, selectPago, selectEstado].forEach((el) => {
+  if (!el) return;
+  el.addEventListener("input", aplicarFiltros);
+  el.addEventListener("change", aplicarFiltros);
+});
+
+// --------------------
+// Listeners del modal
+// --------------------
+btnCerrarModalX?.addEventListener("click", cerrarModalDetalle);
+btnCerrarModal?.addEventListener("click", cerrarModalDetalle);
+modalDetalle?.addEventListener("click", (e) => {
+  if (e.target === modalDetalle) cerrarModalDetalle();
+});
+
+// --------------------
+// Imprimir (sin abrir pestaña extra)
 // --------------------
 function imprimirHTMLSinNuevaPestana(html) {
   const iframe = document.createElement("iframe");
@@ -581,23 +513,20 @@ function imprimirHTMLSinNuevaPestana(html) {
   iframe.style.border = "0";
   iframe.style.opacity = "0";
   iframe.setAttribute("aria-hidden", "true");
-
   document.body.appendChild(iframe);
 
-  const doc = iframe.contentDocument || iframe.contentWindow.document;
-  doc.open();
-  doc.write(html);
-  doc.close();
+  const docu = iframe.contentDocument || iframe.contentWindow.document;
+  docu.open();
+  docu.write(html);
+  docu.close();
 
-  // Esperar a que renderice y recién imprimir
   setTimeout(() => {
-    iframe.contentWindow.focus();
-    iframe.contentWindow.print();
-
-    // limpiar iframe
-    setTimeout(() => {
-      iframe.remove();
-    }, 800);
+    try {
+      iframe.contentWindow.focus();
+      iframe.contentWindow.print();
+    } finally {
+      setTimeout(() => iframe.remove(), 800);
+    }
   }, 250);
 }
 
@@ -605,43 +534,43 @@ btnImprimir?.addEventListener("click", () => {
   if (!ventaActualDetalle) return;
 
   const v = ventaActualDetalle;
-
   const fechaTexto = formatearFecha(v.fecha);
-  const numeroInterno = v.numeroInterno || "-";
-  const cliente = v.clienteNombre || "-";
-  const estado = v.estado || "-";
-  const totalTexto = "$" + (v.total || 0).toLocaleString("es-AR");
+  const numeroInterno = v.numeroInterno || "—";
+  const cliente = pickClienteNombre(v);
+  const estado = v.anulada ? "anulada" : (v.estado || "—");
+  const pago = normPago(v.pago || v.metodoPago || "—");
+  const totalTexto = money(v.total || 0);
 
-  // filas de productos
+  const lineas = getLineasVenta(v);
+
   let filasProductos = "";
-
-  if (Array.isArray(v.productos) && v.productos.length > 0) {
-    v.productos.forEach((p) => {
-      const infoProd = productosCatalogo.find((c) => c.codigo === p.codigo);
-      const nombre = infoProd?.nombre || p.codigo || "-";
-      const precio = p.precio || 0;
-      const cant = p.cantidad || 0;
+  if (lineas.length) {
+    lineas.forEach((it) => {
+      const nombre = it.nombre || nombreProductoDesdeCatalogo(it.codigo) || it.codigo || "—";
+      const precio = Number(it.precio || 0);
+      const cant = Number(it.cant || 0);
       const subtotal = precio * cant;
 
       filasProductos += `
         <tr>
-          <td>${p.codigo || "-"}</td>
+          <td>${it.codigo || "—"}</td>
           <td>${nombre}</td>
           <td class="num">${cant}</td>
-          <td class="num">$${precio.toLocaleString("es-AR")}</td>
-          <td class="num">$${subtotal.toLocaleString("es-AR")}</td>
+          <td class="num">${money(precio)}</td>
+          <td class="num">${money(subtotal)}</td>
         </tr>
       `;
     });
   } else {
-    filasProductos = `
-      <tr>
-        <td colspan="5">Sin productos.</td>
-      </tr>
-    `;
+    filasProductos = `<tr><td colspan="5">Sin productos.</td></tr>`;
   }
 
-  const notasHtml = v.notas ? `<p><strong>Notas:</strong> ${v.notas}</p>` : "";
+  const notasHtml = v.notas ? `<p style="margin-top:10px;"><strong>Notas:</strong> ${v.notas}</p>` : "";
+  const auditHtml = v.anulada
+    ? `<p style="margin-top:10px; font-size:12px; color:#6b7280;">
+        <strong>Anulada:</strong> ${v.motivoAnulacion || "—"} · ${v.anuladaPor || "—"} · Turno: ${v.anuladaTurno || "—"}
+      </p>`
+    : "";
 
   const html = `
     <!DOCTYPE html>
@@ -650,46 +579,44 @@ btnImprimir?.addEventListener("click", () => {
       <meta charset="UTF-8" />
       <title>Comprobante de Venta</title>
       <style>
-        * { box-sizing: border-box; }
+        * { box-sizing:border-box; }
         body {
-          font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-          margin: 0;
-          padding: 18px;
-          color: #111;
+          font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+          margin: 18px;
+          color:#111827;
+          background:#fff;
         }
-        h1 { font-size: 18px; margin: 0 0 4px 0; }
-        .subtitulo { font-size: 11px; color: #6b7280; margin: 0 0 16px 0; }
-        .header {
-          display: grid;
+        h1 { font-size:20px; margin:0 0 4px 0; }
+        .sub { font-size:11px; color:#6b7280; margin:0 0 14px 0; }
+        .box { border:1px solid #e5e7eb; border-radius:10px; padding:14px; }
+        .grid {
+          display:grid;
           grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 4px 32px;
+          gap: 6px 24px;
           font-size: 13px;
-          margin-bottom: 12px;
+          margin-bottom: 10px;
         }
-        .header div span { font-weight: 700; }
-        .box { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
-        th, td { border-bottom: 1px solid #e5e7eb; padding: 6px 8px; text-align: left; }
-        th { background: #f9fafb; font-weight: 700; }
-        td.num { text-align: right; white-space: nowrap; }
-        .totales { margin-top: 10px; text-align: right; font-size: 14px; font-weight: 800; }
-        .footer { margin-top: 24px; font-size: 11px; color: #6b7280; text-align: center; }
-
-        @media print {
-          body { margin: 14mm; }
-        }
+        .grid b { font-weight:700; }
+        table { width:100%; border-collapse:collapse; margin-top:8px; font-size:13px; }
+        th, td { border-bottom:1px solid #e5e7eb; padding:6px 8px; text-align:left; }
+        th { background:#f9fafb; font-weight:700; }
+        td.num { text-align:right; white-space:nowrap; }
+        .tot { margin-top:10px; text-align:right; font-size:14px; font-weight:800; }
+        .foot { margin-top:18px; font-size:11px; color:#6b7280; text-align:center; }
+        @media print { body { margin: 12mm; } }
       </style>
     </head>
     <body>
       <h1>Comprobante de Venta</h1>
-      <p class="subtitulo">Documento no fiscal · Uso interno</p>
+      <p class="sub">Documento no fiscal · Uso interno</p>
 
       <div class="box">
-        <div class="header">
-          <div><span>Fecha:</span> ${fechaTexto}</div>
-          <div><span>N° Interno:</span> ${numeroInterno}</div>
-          <div><span>Cliente:</span> ${cliente}</div>
-          <div><span>Estado:</span> ${estado}</div>
+        <div class="grid">
+          <div><b>Fecha:</b> ${fechaTexto}</div>
+          <div><b>N° Interno:</b> ${numeroInterno}</div>
+          <div><b>Cliente:</b> ${cliente}</div>
+          <div><b>Pago:</b> ${pago}</div>
+          <div><b>Estado:</b> ${estado}</div>
         </div>
 
         <table>
@@ -697,9 +624,9 @@ btnImprimir?.addEventListener("click", () => {
             <tr>
               <th>Código</th>
               <th>Producto</th>
-              <th class="num">Cant.</th>
-              <th class="num">Precio</th>
-              <th class="num">Subtotal</th>
+              <th>Cant.</th>
+              <th>Precio</th>
+              <th>Subtotal</th>
             </tr>
           </thead>
           <tbody>
@@ -707,99 +634,148 @@ btnImprimir?.addEventListener("click", () => {
           </tbody>
         </table>
 
-        <div class="totales">Total: ${totalTexto}</div>
+        <div class="tot">Total: ${totalTexto}</div>
         ${notasHtml}
+        ${auditHtml}
       </div>
 
-      <div class="footer">Delivery Mayorista · Comprobante interno de venta</div>
+      <div class="foot">Delivery Mayorista · Comprobante interno de venta</div>
     </body>
     </html>
   `;
 
+  // Cierra el modal (opcional pro) y abre directamente imprimir
+  cerrarModalDetalle();
   imprimirHTMLSinNuevaPestana(html);
 });
 
-/* =========================
-   WhatsApp (mensaje completo)
-========================= */
+// --------------------
+// WhatsApp (usa datos del detalle)
+// --------------------
 btnCompartirWhatsapp?.addEventListener("click", () => {
   if (!ventaActualDetalle) return;
 
   const v = ventaActualDetalle;
+  let texto = `🧾 *Comprobante - Delivery Mayorista*\n\n`;
+  texto += `N° Interno: ${v.numeroInterno || "—"}\n`;
+  texto += `👤 Cliente: ${pickClienteNombre(v)}\n`;
+  texto += `📅 Fecha: ${formatearFecha(v.fecha)}\n`;
+  texto += `💳 Pago: ${normPago(v.pago || v.metodoPago || "—")}\n`;
+  texto += `🟢 Estado: ${v.anulada ? "anulada" : (v.estado || "—")}\n\n`;
 
-  let texto = `🧾 *Comprobante - Delivery Mayorista*\n`;
-  texto += `📅 ${formatearFecha(v.fecha)}\n`;
-  if (v.numeroInterno) texto += `🔢 N° Interno: *${v.numeroInterno}*\n`;
-  texto += `👤 Cliente: *${v.cliente || "Cliente"}*\n`;
-  if (v.pago) texto += `💳 Pago: *${v.pago}*\n`;
-  texto += `\n🛒 *Detalle*\n`;
-
-  (v.productos || []).forEach((p) => {
-    const nombre = guessProductoNombre(p.codigo, p.nombre || p.codigo || "-");
-    const cant = Number(p.cantidad || 0);
-    const precio = Number(p.precio || 0);
-    const sub = cant * precio;
-    texto += `- ${cant} x ${nombre} (${money(precio)}) = ${money(sub)}\n`;
+  texto += `🛒 *Detalle:*\n`;
+  const lineas = getLineasVenta(v);
+  lineas.forEach((it) => {
+    const nombre = it.nombre || nombreProductoDesdeCatalogo(it.codigo) || it.codigo || "—";
+    const sub = Number(it.precio || 0) * Number(it.cant || 0);
+    texto += `- ${Number(it.cant || 0)} x ${nombre} = ${money(sub)}\n`;
   });
 
-  texto += `\n✅ *TOTAL:* ${money(v.total || 0)}\n`;
-  if (v.anulada) texto += `🔴 Estado: *anulada*\n`;
-  else if (v.estado) texto += `🟢 Estado: *${v.estado}*\n`;
+  texto += `\n✅ *TOTAL:* ${money(v.total || 0)}`;
 
-  if (v.notas) texto += `\n📝 Notas: ${v.notas}\n`;
-
-  // Si hay tel (ventas.html guarda tel en la venta), lo usamos. Si no, wa.me sin número.
-  const tel = digits(v.tel || "");
-  const msg = encodeURIComponent(texto);
-  const url = tel ? `https://wa.me/${tel}?text=${msg}` : `https://wa.me/?text=${msg}`;
+  const url = `https://wa.me/?text=${encodeURIComponent(texto)}`;
   window.open(url, "_blank");
 });
 
-/* =========================
-   Eventos UI
-========================= */
-function resetFiltros() {
-  inputDesde.value = "";
-  inputHasta.value = "";
-  inputProducto.value = "";
-  selectEstado.value = "todas";
-  inputBusquedaRapida.value = "";
-  selectOrden.value = "fecha_desc";
-  selectPageSize.value = "20";
-  pagina = 1;
-  aplicarFiltros();
+// --------------------
+// ANULAR / RESTAURAR (con stock)
+// --------------------
+async function anularVentaActual() {
+  const v = ventaActualDetalle;
+  if (!v?.id) return;
+
+  const motivo = prompt("Motivo de anulación (obligatorio):");
+  if (!motivo || !motivo.trim()) return;
+
+  const ok = confirm(`¿Confirmás anular esta venta?\n\nMotivo: ${motivo.trim()}`);
+  if (!ok) return;
+
+  try {
+    await runTransaction(db, async (transaction) => {
+      const ventaRef = doc(db, "ventas", v.id);
+      const snap = await transaction.get(ventaRef);
+      if (!snap.exists()) throw new Error("La venta no existe.");
+      const data = snap.data();
+      if (data.anulada) throw new Error("La venta ya estaba anulada.");
+
+      // Devolver stock
+      const lineas = getLineasVenta(data);
+      for (const it of lineas) {
+        if (!it.id) continue;
+        const prodRef = doc(db, "productos", it.id);
+        const prodSnap = await transaction.get(prodRef);
+        if (!prodSnap.exists()) continue;
+
+        const stockActual = Number(prodSnap.data().stock || 0);
+        const devolver = Number(it.cant || 0);
+        transaction.update(prodRef, { stock: stockActual + devolver });
+      }
+
+      transaction.update(ventaRef, {
+        anulada: true,
+        anuladaAt: serverTimestamp(),
+        motivoAnulacion: motivo.trim(),
+        anuladaPor: (localStorage.getItem("pos_cajero") || "—"),
+        anuladaTurno: (localStorage.getItem("pos_turno") || null),
+      });
+    });
+
+    alert("✅ Venta anulada. Stock restaurado.");
+    cerrarModalDetalle();
+    await cargarHistorial();
+  } catch (e) {
+    console.error(e);
+    alert("ERROR al anular: " + (e?.message || e));
+  }
 }
 
-btnReset?.addEventListener("click", resetFiltros);
-btnRefrescar?.addEventListener("click", async () => {
-  await cargarProductosCatalogo();
-  await cargarHistorial();
-});
+async function restaurarVentaActual() {
+  const v = ventaActualDetalle;
+  if (!v?.id) return;
 
-[inputDesde, inputHasta, inputProducto, selectEstado, inputBusquedaRapida, selectOrden, selectPageSize]
-  .forEach((el) => el?.addEventListener("input", () => {
-    pagina = 1;
-    aplicarFiltros();
-  }));
+  const ok = confirm("¿Restaurar esta venta? (vuelve a descontar stock)");
+  if (!ok) return;
 
-btnPrev?.addEventListener("click", () => {
-  const pageSize = Number(selectPageSize.value || 20);
-  const totalPages = Math.max(1, Math.ceil(ventasFiltradas.length / pageSize));
-  pagina = Math.max(1, pagina - 1);
-  if (pagina > totalPages) pagina = totalPages;
-  renderTabla();
-});
+  try {
+    await runTransaction(db, async (transaction) => {
+      const ventaRef = doc(db, "ventas", v.id);
+      const snap = await transaction.get(ventaRef);
+      if (!snap.exists()) throw new Error("La venta no existe.");
+      const data = snap.data();
+      if (!data.anulada) throw new Error("La venta no está anulada.");
 
-btnNext?.addEventListener("click", () => {
-  const pageSize = Number(selectPageSize.value || 20);
-  const totalPages = Math.max(1, Math.ceil(ventasFiltradas.length / pageSize));
-  pagina = Math.min(totalPages, pagina + 1);
-  renderTabla();
-});
+      // Volver a descontar stock
+      const lineas = getLineasVenta(data);
+      for (const it of lineas) {
+        if (!it.id) continue;
+        const prodRef = doc(db, "productos", it.id);
+        const prodSnap = await transaction.get(prodRef);
+        if (!prodSnap.exists()) continue;
 
-btnExport?.addEventListener("click", () => {
-  const now = new Date();
-  const stamp = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
-  const csv = buildCSV(ventasFiltradas);
-  downloadText(`historial-${stamp}.csv`, csv);
-});
+        const stockActual = Number(prodSnap.data().stock || 0);
+        const descontar = Number(it.cant || 0);
+        const nuevo = Math.max(0, stockActual - descontar);
+        transaction.update(prodRef, { stock: nuevo });
+      }
+
+      transaction.update(ventaRef, {
+        anulada: false,
+        motivoAnulacion: "",
+        anuladaAt: null,
+        anuladaPor: "",
+        anuladaTurno: null,
+      });
+    });
+
+    alert("✅ Venta restaurada. Stock vuelto a descontar.");
+    cerrarModalDetalle();
+    await cargarHistorial();
+  } catch (e) {
+    console.error(e);
+    alert("ERROR al restaurar: " + (e?.message || e));
+  }
+}
+
+btnAnular?.addEventListener("click", anularVentaActual);
+btnRestaurar?.addEventListener("click", restaurarVentaActual);
+
