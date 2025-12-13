@@ -7,66 +7,125 @@
   <link rel="stylesheet" href="css/estilos.css" />
 
   <style>
-    main.producto-pagina { padding: 40px 16px 60px; min-height: 70vh; }
+    :root{
+      --bg: #0f0f1a;
+      --card: #0c0c17;
+      --card2: #0a0a12;
+      --txt: #ffffff;
+      --muted: rgba(255,255,255,.75);
+      --accent: #ffa400;
+      --btn: #202432;
+      --shadow: rgba(0,0,0,.55);
+    }
 
+    body{ background: var(--bg); }
+
+    main.producto-pagina { padding: 28px 16px 60px; min-height: 70vh; }
+
+    /* contenedor central (mejor “uso del espacio”) */
     .producto-wrapper{
-      max-width:1200px;margin:0 auto;
-      display:flex;gap:48px;align-items:flex-start;
-      opacity:0;transform:translateY(10px);
+      max-width:1200px;
+      margin: 0 auto;
+      display:flex;
+      gap: 42px;
+      align-items:flex-start;
+
+      opacity:0;
+      transform:translateY(10px);
       transition:opacity .25s ease,transform .25s ease;
     }
     .producto-wrapper.visible{ opacity:1; transform:translateY(0); }
 
-    .producto-imagen{ flex:0 0 48%; }
+    /* caja de imagen */
+    .producto-imagen{
+      flex: 0 0 52%;
+      background: radial-gradient(900px 520px at 50% 0%, rgba(255,164,0,.06), transparent 60%),
+                  var(--card);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 18px 40px rgba(0,0,0,0.35);
+    }
     .producto-imagen img{
-      width:100%; height:auto;
-      border-radius:22px;
-      background:#0a0a12;
-      object-fit:contain;
+      width:100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 18px;
+      background: var(--card2);
+      object-fit: contain;
       display:block;
     }
 
-    .producto-info{ flex:0 0 42%; }
+    /* caja info */
+    .producto-info{
+      flex: 0 0 42%;
+      background: radial-gradient(900px 520px at 50% -120px, rgba(255,0,93,.05), transparent 60%),
+                  var(--card);
+      border-radius: 24px;
+      padding: 18px 18px 20px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 18px 40px rgba(0,0,0,0.35);
+    }
 
-    .producto-codigo{ opacity:.8; margin:0 0 6px; }
-    .producto-titulo{ margin:0 0 10px; font-size:34px; line-height:1.1; }
-    .producto-categoria{ opacity:.9; margin:0 0 12px; }
-    .producto-descripcion{ opacity:.95; margin:0 0 14px; }
-    .producto-precio{ font-size:28px; font-weight:900; margin:10px 0 10px; }
-    .producto-stock{ margin:0; opacity:.95; }
+    .producto-codigo{ opacity:.8; margin:0 0 6px; color: var(--muted); }
+    .producto-titulo{ margin:0 0 10px; font-size:34px; line-height:1.08; letter-spacing: .2px; }
+    .producto-categoria{ opacity:.9; margin:0 0 12px; color: #c9c9ff; font-weight: 600; }
+    .producto-descripcion{ opacity:.95; margin:0 0 14px; color: rgba(255,255,255,.88); line-height: 1.35; }
+    .producto-precio{ font-size:30px; font-weight:900; margin:12px 0 10px; color: var(--accent); }
+    .producto-stock{ margin:0; opacity:.95; color: rgba(255,255,255,.85); }
     .producto-stock.stock-sin{ color:#ff4d4f; font-weight:800; }
     .producto-stock.stock-bajo{ color:#ffd666; font-weight:800; }
 
     .producto-acciones{
-      display:flex; gap:10px; flex-wrap:wrap;
-      margin-top:18px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
     }
     .btn-secundario,.btn-whatsapp,.btn-nav{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:10px 18px; border-radius:10px;
-      border:none; cursor:pointer;
-      font-size:15px; text-decoration:none;
-      background:#202432; color:#fff;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px 18px;
+      border-radius: 12px;
+      border:none;
+      cursor:pointer;
+      font-size: 15px;
+      text-decoration:none;
+      background: var(--btn);
+      color:#fff;
+      box-shadow: 0 12px 26px rgba(0,0,0,.22);
+      transition: transform .08s ease, filter .08s ease;
+      white-space: nowrap;
     }
-    .btn-whatsapp{ background:#1ebe57; font-weight:800; }
+    .btn-secundario:hover,.btn-nav:hover{ filter: brightness(1.06); transform: translateY(-1px); }
+    .btn-whatsapp{
+      background:#1ebe57;
+      font-weight:900;
+    }
+    .btn-whatsapp:hover{ filter: brightness(1.05); transform: translateY(-1px); }
 
     .producto-nav{
-      max-width:1200px;margin:18px auto 0;
-      display:flex;gap:10px;justify-content:center;flex-wrap:wrap;
+      max-width:1200px;
+      margin: 18px auto 0;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
     }
 
     #producto-loading{
-      max-width:1200px;margin:0 auto 14px;
-      display:none; opacity:.85;
+      max-width:1200px;
+      margin: 0 auto 14px;
+      display:none;
+      opacity:.85;
       color:#c9c9ff;
     }
 
-    @media (max-width:900px){
-      main.producto-pagina{ padding:24px 12px 36px; }
-      .producto-wrapper{ flex-direction:column; gap:20px; }
+    /* mobile */
+    @media (max-width: 900px){
+      main.producto-pagina{ padding:18px 12px 42px; }
+      .producto-wrapper{ flex-direction:column; gap:16px; }
       .producto-imagen,.producto-info{ width:100%; flex:1 1 auto; }
       .producto-acciones a,.producto-acciones button{ width:100%; }
-      .producto-titulo{ font-size:30px; }
+      .producto-titulo{ font-size:28px; }
     }
   </style>
 </head>
@@ -86,6 +145,7 @@
       <div class="producto-imagen">
         <img id="imagen-principal" src="" alt="Producto" />
       </div>
+
       <div id="producto-info" class="producto-info"></div>
     </div>
 
@@ -164,15 +224,12 @@
       const codigo = p.codigo || "";
       const urlDirecta = p.imagen || "";
 
-      // iOS a veces falla con CORS/referrer en raw: agregamos referrerpolicy
       imgEl.loading = "lazy";
       imgEl.decoding = "async";
       imgEl.referrerPolicy = "no-referrer";
 
       const candidatos = [
         urlDirecta,
-
-        // Github raw con varias extensiones y mayúsculas
         `${BASE_IMG}/${codigo}.jpg`,
         `${BASE_IMG}/${codigo}.JPG`,
         `${BASE_IMG}/${codigo}.jpeg`,
@@ -323,7 +380,6 @@
         return;
       }
 
-      // nav rápido (si hay cache catálogo)
       renderNav(codigo);
 
       try {
