@@ -101,12 +101,10 @@ function getQueryParams() {
   };
 }
 
+/* ✅ type="date" devuelve YYYY-MM-DD */
 function parseFechaFiltro(valor) {
   if (!valor) return null;
-  const v = valor.trim();
-  const [d, m, y] = v.split("/");
-  if (!d || !m || !y) return null;
-  const dt = new Date(`${y}-${m}-${d}T00:00:00`);
+  const dt = new Date(valor + "T00:00:00");
   return isNaN(dt.getTime()) ? null : dt;
 }
 
@@ -156,7 +154,6 @@ function extractLineas(v){
       precio: Number(p.precio || 0),
     }));
   }
-  // fallback 1 producto
   return [{
     productoId: v.productoId || null,
     codigo: (v.codigo || v.productoCodigo || "").toString(),
@@ -335,7 +332,6 @@ async function cargarHistorial() {
 
     let all = raw.map(normalizeVenta);
 
-    // fallback por nombre si no hay clienteId
     if (!clienteId && nombreCliente) {
       const target = nombreCliente.trim();
       all = all.filter((v) => (v.cliente || "").trim() === target);
@@ -373,15 +369,12 @@ function aplicarFiltros() {
   const ord = (selectOrden?.value || "fecha_desc").toLowerCase();
 
   ventasFiltradas = ventasBase.filter((v) => {
-    // ✅ Ocultar anuladas (switch)
     if (ocultarAnuladas && v.anulada) return false;
 
-    // Fecha
     const f = toDateJS(v.fecha);
     if (desdeDate && f && f < desdeDate) return false;
     if (hastaDate && f && f > hastaDate) return false;
 
-    // Estado
     if (estadoSeleccionado !== "todas") {
       if (estadoSeleccionado === "anulada") {
         if (!v.anulada) return false;
@@ -390,12 +383,10 @@ function aplicarFiltros() {
       }
     }
 
-    // Pago
     if (pagoSeleccionado !== "todas") {
       if (normPago(v.pago) !== pagoSeleccionado) return false;
     }
 
-    // Producto
     if (textoProducto) {
       const hit = (v.lineas || []).some((it) => {
         const cod = norm(it.codigo);
@@ -405,7 +396,6 @@ function aplicarFiltros() {
       if (!hit) return false;
     }
 
-    // Búsqueda rápida
     if (qRapida) {
       const inCliente = norm(v.cliente).includes(qRapida);
       const inInterno = norm(v.numeroInterno).includes(qRapida);
@@ -522,7 +512,7 @@ function recalcularTotales() {
 }
 
 /* =========================
-   Modal detalle
+   Modal (sin cambios)
 ========================= */
 function abrirDetalle(v) {
   ventaActualDetalle = v;
@@ -585,7 +575,8 @@ btnCerrarModal?.addEventListener("click", cerrarModal);
 modalDetalle?.addEventListener("click", (e) => { if (e.target === modalDetalle) cerrarModal(); });
 
 /* =========================
-   Imprimir SIN abrir pestaña
+   (Imprimir / WhatsApp / Anular / Restaurar)
+   👉 pegás acá tu bloque actual tal cual (no cambia por el calendario)
 ========================= */
 function imprimirHTMLSinNuevaPestana(html) {
   const iframe = document.createElement("iframe");
