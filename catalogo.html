@@ -3,677 +3,204 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Delivery Mayorista | Catálogo</title>
+  <title>Producto | Delivery Mayorista</title>
+  <link rel="stylesheet" href="css/estilos.css" />
 
   <style>
-    /* Ocultamos selects reales (se usan internamente) */
-    #filtro-categoria,
-    #filtro-subcategoria { display: none !important; }
-
     :root{
       --bg: #0f0f1a;
       --card: #0c0c17;
       --card2: #0a0a12;
       --txt: #ffffff;
       --muted: rgba(255,255,255,.75);
-      --muted2: rgba(255,255,255,.55);
       --accent: #ffa400;
       --btn: #202432;
       --shadow: rgba(0,0,0,.55);
     }
 
-    body {
-      background: var(--bg);
-      margin: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-      color: var(--txt);
+    body{ background: var(--bg); }
+
+    main.producto-pagina { padding: 28px 16px 60px; min-height: 70vh; }
+
+    /* contenedor central (mejor “uso del espacio”) */
+    .producto-wrapper{
+      max-width:1200px;
+      margin: 0 auto;
+      display:flex;
+      gap: 42px;
+      align-items:flex-start;
+
+      opacity:0;
+      transform:translateY(10px);
+      transition:opacity .25s ease,transform .25s ease;
     }
+    .producto-wrapper.visible{ opacity:1; transform:translateY(0); }
 
-    header {
-      background: linear-gradient(90deg, #ff005d, #ffa400);
-      padding: 15px 25px;
-      font-size: 20px;
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
-
-    /* ===========================
-       TOOLBAR (STICKY PREMIUM)
-    ============================*/
-    .toolbar {
-      display: flex;
-      gap: 15px;
-      padding: 18px 25px;
-      justify-content: flex-start;
-      align-items: center;
-      flex-wrap: wrap;
-
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(12px);
-      background: rgba(10, 10, 18, 0.55);
-      border-bottom: 1px solid rgba(255,255,255,.06);
-    }
-
-    .toolbar input {
-      padding: 12px 18px;
-      border-radius: 30px;
-      border: none;
-      outline: none;
-      font-size: 15px;
-      min-width: 260px;
-    }
-
-    /* ===========================
-       MEGA MENÚ CATEGORÍAS
-    ============================*/
-    .mega-dropdown { position: relative; min-width: 260px; }
-
-    .mega-toggle {
-      width: 100%;
-      padding: 12px 18px;
-      border-radius: 30px;
-      border: none;
-      outline: none;
-      font-size: 15px;
-      background: #ffffff;
-      color: #000;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 8px 22px rgba(0,0,0,.18);
-    }
-
-    .mega-label {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      max-width: 230px;
-      text-align: left;
-    }
-
-    .mega-arrow { font-size: 10px; margin-left: 8px; }
-
-    .mega-menu {
-      position: absolute;
-      top: 110%;
-      left: 0;
-      background: #111217;
-      color: #fff;
-      border-radius: 16px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
-      display: none;
-      min-width: 420px;
-      max-width: 720px;
-      padding: 12px 8px 40px;
-      z-index: 999;
-      column-gap: 4px;
-    }
-
-    .mega-dropdown.open .mega-menu { display: flex; }
-
-    .mega-col {
-      flex: 1;
-      padding: 4px 8px;
-      border-right: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .mega-col:last-child { border-right: none; }
-
-    .mega-col h4 {
-      font-size: 13px;
-      margin: 4px 4px 8px;
-      opacity: 0.75;
-    }
-
-    .mega-col ul {
-      list-style: none;
-      margin: 0;
-      padding: 0;
-      max-height: 260px;
-      overflow-y: auto;
-    }
-
-    .mega-item, .mega-subitem, .mega-tagitem {
-      padding: 7px 10px;
-      border-radius: 10px;
-      font-size: 13px;
-      cursor: pointer;
-      white-space: nowrap;
-      margin: 2px 0;
-      transition: background 0.12s ease, color 0.12s ease, transform .08s ease;
-    }
-
-    .mega-item:hover, .mega-subitem:hover, .mega-tagitem:hover { background: #1f2430; transform: translateY(-1px); }
-
-    .mega-item-activo, .mega-subitem-activo, .mega-tagitem-activo {
-      background: var(--accent);
-      color: #000;
-      font-weight: 700;
-    }
-
-    .mega-item { position: relative; padding-left: 30px; }
-    .mega-item::before {
-      content: attr(data-icon);
-      position: absolute;
-      left: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      font-size: 15px;
-      opacity: 0.95;
-    }
-
-    .mega-reset-btn {
-      position: absolute;
-      right: 14px;
-      bottom: 10px;
-      padding: 5px 12px;
-      font-size: 11px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      background: transparent;
-      color: var(--accent);
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .mega-reset-btn span { font-size: 12px; }
-    .mega-reset-btn:hover { background: var(--accent); color: #000; }
-
-    .chk-catalogo {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-size: 0.8rem;
-      color: #c9c9ff;
-      user-select: none;
-    }
-    .chk-catalogo input { accent-color: #ff5ca8; }
-
-    /* ===========================
-       GRID + CARDS (PREMIUM)
-    ============================*/
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 22px;
-      padding: 22px 25px 12px;
-      align-items: stretch;
-      grid-auto-rows: 1fr;
-    }
-
-    .producto-card {
-      position: relative;
-      background: radial-gradient(1200px 600px at 50% -100px, rgba(255,164,0,.06), transparent 60%),
+    /* caja de imagen */
+    .producto-imagen{
+      flex: 0 0 52%;
+      background: radial-gradient(900px 520px at 50% 0%, rgba(255,164,0,.06), transparent 60%),
                   var(--card);
-      border-radius: 22px;
-      padding: 18px 16px 16px;
-      text-align: center;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 10px 26px rgba(0,0,0,0.35);
-      text-decoration: none;
-      color: inherit;
-      transition: transform 0.12s ease, box-shadow 0.12s ease;
-      overflow: hidden;
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 18px 40px rgba(0,0,0,0.35);
     }
-
-    .producto-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 16px 36px rgba(0,0,0,0.55);
-    }
-
-    .producto-imagen-wrapper {
-      width: 100%;
-      height: 170px;
+    .producto-imagen img{
+      width:100%;
+      aspect-ratio: 1 / 1;
       border-radius: 18px;
       background: var(--card2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      position: relative;
-      margin-bottom: 10px;
-      color: #7777a7;
-      font-size: 13px;
-    }
-
-    .producto-imagen {
-      max-width: 100%;
-      max-height: 100%;
       object-fit: contain;
-      border-radius: 16px;
-      display: block;
-      cursor: pointer;
-      transform: translateZ(0);
+      display:block;
     }
 
-    .producto-titulo {
-      margin-top: 2px;
+    /* caja info */
+    .producto-info{
+      flex: 0 0 42%;
+      background: radial-gradient(900px 520px at 50% -120px, rgba(255,0,93,.05), transparent 60%),
+                  var(--card);
+      border-radius: 24px;
+      padding: 18px 18px 20px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.04), 0 18px 40px rgba(0,0,0,0.35);
+    }
+
+    .producto-codigo{ opacity:.8; margin:0 0 6px; color: var(--muted); }
+    .producto-titulo{ margin:0 0 10px; font-size:34px; line-height:1.08; letter-spacing: .2px; }
+    .producto-categoria{ opacity:.9; margin:0 0 12px; color: #c9c9ff; font-weight: 600; }
+    .producto-descripcion{ opacity:.95; margin:0 0 14px; color: rgba(255,255,255,.88); line-height: 1.35; }
+    .producto-precio{ font-size:30px; font-weight:900; margin:12px 0 10px; color: var(--accent); }
+    .producto-stock{ margin:0; opacity:.95; color: rgba(255,255,255,.85); }
+    .producto-stock.stock-sin{ color:#ff4d4f; font-weight:800; }
+    .producto-stock.stock-bajo{ color:#ffd666; font-weight:800; }
+
+    .producto-acciones{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:16px;
+    }
+    .btn-secundario,.btn-whatsapp,.btn-nav{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding: 10px 18px;
+      border-radius: 12px;
+      border:none;
+      cursor:pointer;
       font-size: 15px;
-      line-height: 1.15;
-      cursor: pointer;
-      padding: 0 4px;
-
-      /* clamp 2 líneas */
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      min-height: 36px;
-    }
-
-    .producto-descripcion {
-      opacity: 0.78;
-      font-size: 13px;
-      margin-top: 6px;
-      line-height: 1.25;
-
-      /* clamp 3 líneas */
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      min-height: 48px;
-    }
-
-    /* empuja el bloque inferior hacia abajo */
-    .producto-precio-row {
-      margin-top: auto;
-      padding-top: 10px;
-    }
-
-    .producto-precio {
-      color: var(--accent);
-      font-weight: 800;
-      margin-top: 4px;
-      font-size: 15px;
-      letter-spacing: .2px;
-    }
-
-    .producto-stock {
-      opacity: 0.85;
-      font-size: 12px;
-      margin-top: 4px;
-      color: var(--muted);
-    }
-
-    /* +/- centrado */
-    .cantidad-container {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      width: 100%;
-    }
-
-    .btn-cantidad {
-      border-radius: 999px;
-      border: none;
-      width: 30px;
-      height: 30px;
-      font-size: 18px;
-      cursor: pointer;
+      text-decoration:none;
       background: var(--btn);
-      color: #fff;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 8px 18px rgba(0,0,0,.25);
+      color:#fff;
+      box-shadow: 0 12px 26px rgba(0,0,0,.22);
       transition: transform .08s ease, filter .08s ease;
+      white-space: nowrap;
     }
-    .btn-cantidad:hover { filter: brightness(1.07); transform: translateY(-1px); }
-
-    .input-cantidad {
-      width: 58px;
-      text-align: center;
-      border-radius: 999px;
-      border: none;
-      padding: 6px 8px;
-      font-size: 14px;
-      outline: none;
-      box-shadow: inset 0 0 0 1px rgba(0,0,0,.25);
+    .btn-secundario:hover,.btn-nav:hover{ filter: brightness(1.06); transform: translateY(-1px); }
+    .btn-whatsapp{
+      background:#1ebe57;
+      font-weight:900;
     }
+    .btn-whatsapp:hover{ filter: brightness(1.05); transform: translateY(-1px); }
 
-    .btn-agregar-carrito {
-      margin-top: 10px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: none;
-      font-size: 12px;
-      cursor: pointer;
-      background: var(--btn);
-      color: #fff;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      justify-content: center;
-      box-shadow: 0 10px 22px rgba(0,0,0,.22);
-      transition: transform .08s ease, filter .08s ease;
-    }
-    .btn-agregar-carrito:hover { filter: brightness(1.06); transform: translateY(-1px); }
-
-    .btn-agregar-carrito-activo { background: #1ebe57; }
-
-    .badge-stock {
-      display: inline-block;
-      padding: 0.22rem 0.62rem;
-      border-radius: 999px;
-      font-size: 0.75rem;
-      font-weight: 700;
-    }
-    .badge-stock.stock-ok { background: rgba(0, 200, 120, 0.16); color: #7cffb5; }
-    .badge-stock.stock-bajo { background: rgba(255, 180, 0, 0.16); color: #ffdd7c; }
-    .badge-stock.stock-cero { background: rgba(255, 0, 80, 0.16); color: #ff7a9c; }
-
-    .chip-destacado {
-      font-size: 0.7rem;
-      padding: 0.22rem 0.62rem;
-      border-radius: 999px;
-      background: rgba(255, 184, 0, 0.16);
-      color: #ffd56c;
-      margin-left: 0.5rem;
-      font-weight: 700;
+    .producto-nav{
+      max-width:1200px;
+      margin: 18px auto 0;
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
     }
 
-    /* ===========================
-       MINI CARRITO
-    ============================*/
-    .mini-carrito {
-      position: fixed;
-      right: 16px;
-      bottom: 90px;  /* deja lugar al WA abajo */
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #ffffff;
-      padding: 8px 12px;
-      border-radius: 999px;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
-      cursor: pointer;
-      z-index: 9999;
-      font-size: 13px;
-      color: #000;
-      transition: transform .08s ease, filter .08s ease;
-    }
-    .mini-carrito:hover { filter: brightness(1.02); transform: translateY(-1px); }
-
-    .mini-carrito-icono { font-size: 18px; }
-    .mini-carrito-texto { display: flex; flex-direction: column; line-height: 1.1; }
-    .mini-carrito-linea { white-space: nowrap; font-weight: 700; }
-
-    /* ===========================
-       PAGINADOR
-    ============================*/
-    .paginador-contenedor {
-      padding: 0 25px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      align-items: center;
-      justify-content: center;
+    #producto-loading{
+      max-width:1200px;
+      margin: 0 auto 14px;
+      display:none;
+      opacity:.85;
+      color:#c9c9ff;
     }
 
-    .paginador-resumen {
-      font-size: 13px;
-      opacity: 0.8;
-      text-align: center;
-      color: var(--muted);
-    }
-
-    .paginador {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .paginador-btn, .paginador-numero {
-      border-radius: 999px;
-      border: none;
-      min-width: 32px;
-      height: 32px;
-      padding: 0 10px;
-      font-size: 13px;
-      cursor: pointer;
-      background: var(--btn);
-      color: #ffffff;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.12s ease, transform 0.08s ease, box-shadow 0.08s ease;
-      box-shadow: 0 10px 18px rgba(0,0,0,.2);
-    }
-
-    .paginador-btn:hover:not(:disabled),
-    .paginador-numero:hover {
-      background: #2c3244;
-      transform: translateY(-1px);
-      box-shadow: 0 14px 22px rgba(0, 0, 0, 0.35);
-    }
-
-    .paginador-btn:disabled { opacity: 0.4; cursor: default; transform: none; box-shadow: none; }
-    .paginador-numero--activo { background: var(--accent); color: #000; font-weight: 800; }
-
-    .paginador-numeros {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-
-    /* ===========================
-       WHATSAPP SIEMPRE VISIBLE
-    ============================*/
-    .btn-wa-flotante {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      z-index: 99999;
-      background: #25d366;
-      padding: 14px;
-      border-radius: 50%;
-      display: flex !important;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-      transition: transform 0.1s ease, filter 0.1s ease;
-    }
-    .btn-wa-flotante:hover { filter: brightness(1.06); transform: translateY(-1px); }
-
-    /* ===========================
-       RESPONSIVE
-    ============================*/
-    @media (max-width: 768px) {
-      header { text-align: center; font-size: 18px; }
-
-      .toolbar {
-        padding: 14px 12px 12px;
-        gap: 10px;
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .toolbar input {
-        width: 100%;
-        max-width: 520px;
-        font-size: 14px;
-      }
-
-      .mega-dropdown { width: 100%; max-width: 520px; }
-      .mega-menu { max-width: 100%; min-width: 100%; }
-
-      .grid {
-        padding: 14px 12px 10px;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 16px;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .grid { grid-template-columns: 1fr; gap: 18px; }
-      /* WA arriba del mini carrito en mobile */
-      .btn-wa-flotante { bottom: 140px; right: 14px; }
-      .mini-carrito { bottom: 80px; right: 14px; }
+    /* mobile */
+    @media (max-width: 900px){
+      main.producto-pagina{ padding:18px 12px 42px; }
+      .producto-wrapper{ flex-direction:column; gap:16px; }
+      .producto-imagen,.producto-info{ width:100%; flex:1 1 auto; }
+      .producto-acciones a,.producto-acciones button{ width:100%; }
+      .producto-titulo{ font-size:28px; }
     }
   </style>
 </head>
 
 <body>
-  <header>DELIVERY MAYORISTA</header>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <a href="index.html" class="logo-link">Delivery Mayorista</a>
+      <a href="catalogo.html" class="topbar-link">Ver catálogo</a>
+    </div>
+  </header>
 
-  <div class="toolbar">
-    <input id="buscador" type="text" placeholder="Buscar por código o descripción" />
+  <main class="producto-pagina contenedor">
+    <div id="producto-loading">Cargando producto...</div>
 
-    <div class="mega-dropdown" id="megaDropdown">
-      <button id="categoriaToggle" class="mega-toggle" type="button">
-        <span class="mega-label">Todas las categorías</span>
-        <span class="mega-arrow">▾</span>
-      </button>
-
-      <div id="megaMenu" class="mega-menu">
-        <div class="mega-col">
-          <h4>Categorías</h4>
-          <ul id="megaCategorias"></ul>
-        </div>
-
-        <div class="mega-col">
-          <h4 id="megaSubTitle">Subcategorías</h4>
-          <ul id="megaSubcategorias"></ul>
-        </div>
-
-        <div class="mega-col">
-          <h4 id="megaTagTitle">Etiquetas</h4>
-          <ul id="megaEtiquetas"></ul>
-        </div>
-
-        <button id="megaReset" class="mega-reset-btn" type="button">
-          <span>🔄</span> Limpiar filtros
-        </button>
+    <div class="producto-wrapper">
+      <div class="producto-imagen">
+        <img id="imagen-principal" src="" alt="Producto" />
       </div>
+
+      <div id="producto-info" class="producto-info"></div>
     </div>
 
-    <label class="chk-catalogo">
-      <input type="checkbox" id="chkSoloDestacados" />
-      Solo destacados
-    </label>
+    <div id="producto-nav" class="producto-nav"></div>
+  </main>
 
-    <label class="chk-catalogo">
-      <input type="checkbox" id="chkSoloConStock" />
-      Solo con stock
-    </label>
-
-    <select id="filtro-categoria"></select>
-    <select id="filtro-subcategoria"></select>
-  </div>
-
-  <div id="catalogoGrid" class="grid"></div>
-
-  <div class="paginador-contenedor">
-    <div id="resumen-resultados" class="paginador-resumen"></div>
-
-    <div id="paginador" class="paginador">
-      <button id="btn-pagina-anterior" class="paginador-btn" type="button" disabled>‹</button>
-      <div id="paginador-numeros" class="paginador-numeros"></div>
-      <button id="btn-pagina-siguiente" class="paginador-btn" type="button" disabled>›</button>
-    </div>
-  </div>
-
-  <!-- MINI CARRITO -->
-  <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
-    <div class="mini-carrito-icono">🛒</div>
-    <div class="mini-carrito-texto">
-      <span class="mini-carrito-linea">
-        <span id="mini-carrito-cantidad">0</span> productos
-      </span>
-      <span class="mini-carrito-linea">
-        $<span id="mini-carrito-total">0</span>
-      </span>
-    </div>
-  </div>
-
-  <!-- WHATSAPP (SIEMPRE VISIBLE) -->
-  <a
-    id="wa-flotante"
-    class="btn-wa-flotante"
-    href="https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista."
-    target="_blank"
-    aria-label="WhatsApp"
-    rel="noopener"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="#ffffff" viewBox="0 0 32 32">
-      <path d="M16.019 2.594c-7.453 0-13.438 6.063-13.438 13.531 0 2.375.625 4.656 1.844 6.719l-1.969 7.219 7.453-1.969c1.969 1.063 4.219 1.625 6.375 1.625h.031c7.438 0 13.438-6.063 13.438-13.531 0-3.594-1.406-6.938-3.969-9.469-2.531-2.531-5.906-4.125-9.656-4.125zm0 24.844h-.031c-1.938 0-3.813-.5-5.469-1.406l-.406-.219-4.438 1.188 1.188-4.344-.25-.406c-1.188-1.906-1.813-4.094-1.813-6.375 0-6.563 5.344-11.906 11.906-11.906 3.188 0 6.156 1.25 8.406 3.5 2.25 2.25 3.5 5.219 3.5 8.406-.031 6.531-5.375 11.875-11.906 11.875zm6.344-8.531c-.344-.188-2.031-1-2.344-1.094-.313-.094-.531-.156-.75.188-.219.344-.875 1.094-1.063 1.313-.188.188-.375.219-.719.031-.344-.188-1.438-.531-2.75-1.656-1-.875-1.656-1.938-1.844-2.281-.188-.344-.016-.531.156-.719.156-.156.344-.406.5-.594.156-.188.219-.313.344-.531.094-.219.031-.406-.031-.594-.063-.188-.75-1.844-1.031-2.5-.281-.656-.563-.563-.75-.563h-.656c-.219 0-.594.094-.906.438-.313.344-1.188 1.156-1.188 2.813s1.219 3.25 1.406 3.469c.188.219 2.406 3.656 5.844 5 3.438 1.344 3.438.875 4.063.813.625-.063 2.031-.813 2.313-1.594.281-.781.281-1.438.219-1.594-.063-.156-.281-.25-.625-.438z"/>
-    </svg>
-  </a>
+  <footer class="footer">Catálogo mayorista · Delivery Mayorista</footer>
 
   <script type="module">
     import { db } from "./js/firebase-init.js";
     import {
-      collection, getDocs, query, where, limit
+      collection, getDocs, getDoc, doc, query, where, limit
     } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    // =========================
-    // CONFIG
-    // =========================
+    // ====== CONFIG ======
     const COL_PRODUCTOS = "productos";
     const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
-    const CACHE_KEY = "cache_catalogo_v2";
+    const CLAVE_CACHE_CATALOGO = "cache_catalogo_v2"; // mismo nombre que en catalogo.html
     const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
     const CACHE_IMG_NAME = "dm-img-v1";
 
-    const CART_KEY = "carrito_dm_v1";
-    const ITEMS_POR_PAGINA = 18;
+    // cache por producto
+    const cacheProdKey = (codigo) => `cache_producto_${String(codigo || "").trim()}_v1`;
 
-    // =========================
-    // DOM
-    // =========================
-    const grid = document.getElementById("catalogoGrid");
-    const buscador = document.getElementById("buscador");
-    const chkSoloDestacados = document.getElementById("chkSoloDestacados");
-    const chkSoloConStock = document.getElementById("chkSoloConStock");
+    // ====== DOM ======
+    const loadingEl = document.getElementById("producto-loading");
+    const wrapper   = document.querySelector(".producto-wrapper");
+    const infoDiv   = document.getElementById("producto-info");
+    const imgEl     = document.getElementById("imagen-principal");
+    const navEl     = document.getElementById("producto-nav");
 
-    const megaDropdown = document.getElementById("megaDropdown");
-    const categoriaToggle = document.getElementById("categoriaToggle");
-    const megaMenu = document.getElementById("megaMenu");
-    const megaCategorias = document.getElementById("megaCategorias");
-    const megaSubcategorias = document.getElementById("megaSubcategorias");
-    const megaEtiquetas = document.getElementById("megaEtiquetas");
-    const megaReset = document.getElementById("megaReset");
+    // ====== Loader solo si tarda ======
+    if (loadingEl) loadingEl.style.display = "none";
+    let tLoading = setTimeout(() => {
+      if (loadingEl) loadingEl.style.display = "block";
+    }, 300);
 
-    const resumenResultados = document.getElementById("resumen-resultados");
-    const btnAnterior = document.getElementById("btn-pagina-anterior");
-    const btnSiguiente = document.getElementById("btn-pagina-siguiente");
-    const paginadorNumeros = document.getElementById("paginador-numeros");
+    function visible() {
+      clearTimeout(tLoading);
+      if (loadingEl) loadingEl.style.display = "none";
+      if (wrapper) wrapper.classList.add("visible");
+    }
 
-    const miniCantidad = document.getElementById("mini-carrito-cantidad");
-    const miniTotal = document.getElementById("mini-carrito-total");
+    // ====== Helpers ======
+    function getCodigoURL() {
+      return new URLSearchParams(location.search).get("codigo");
+    }
 
-    // =========================
-    // STATE
-    // =========================
-    let catalogo = [];
-    let filtrados = [];
-
-    let filtroCategoria = "";
-    let filtroSubcategoria = "";
-    let filtroEtiqueta = "";
-
-    let pagina = 1;
-
-    // =========================
-    // HELPERS
-    // =========================
-    const norm = (s) => String(s ?? "").trim();
-    const lower = (s) => norm(s).toLowerCase();
+    function volverAlCatalogo() {
+      const ref = document.referrer || "";
+      if (ref.includes("catalogo.html")) history.back();
+      else location.href = "catalogo.html";
+    }
+    window.__dm_back = volverAlCatalogo;
 
     function parsearPrecio(v) {
       if (typeof v === "number") return v;
@@ -686,102 +213,40 @@
       return isNaN(n) ? null : n;
     }
 
-    function normalizarProducto(raw) {
+    function normalizarProducto(raw, codigoFallback) {
       const p = raw || {};
-      const codigo = p.codigo ?? p.Codigo ?? p.id ?? "";
+      const codigo = p.codigo ?? p.Codigo ?? codigoFallback ?? p.id ?? "";
       const nombre = p.nombre ?? p.Nombre ?? "";
       const categoria = p.categoria ?? p.Categoria_Princ ?? "";
       const subcategoria = p.subcategoria ?? p.Sub_Categoria ?? "";
-      const etiquetas = p.etiquetas ?? p.Etiquetas ?? p.tags ?? "";
-      const destacado = Boolean(p.destacado ?? p.Destacado ?? false);
-
-      const descripcion = p.descripcion ?? p.Descripcion ?? p.descripcionLarga ?? "";
+      const descripcion = p.descripcionLarga ?? p.descripcion ?? p.Descripcion ?? "";
       const precio = parsearPrecio(p.precio ?? p.PrecioMayorista);
       const stock = Number(p.stock ?? p.Stock ?? 0);
       const imagen = p.imagen ?? p.Imagen ?? "";
-
-      const tagsArr = Array.isArray(etiquetas)
-        ? etiquetas.map(norm).filter(Boolean)
-        : String(etiquetas || "")
-            .split(/[;,|]/g)
-            .map(norm)
-            .filter(Boolean);
-
-      const productosTexto = `${codigo} ${nombre} ${descripcion} ${categoria} ${subcategoria} ${tagsArr.join(" ")}`.toLowerCase();
-
-      return {
-        ...p,
-        codigo: String(codigo),
-        nombre,
-        categoria,
-        subcategoria,
-        tagsArr,
-        destacado,
-        descripcion,
-        precio,
-        stock,
-        imagen,
-        productosTexto
-      };
+      return { ...p, codigo: String(codigo), nombre, categoria, subcategoria, descripcion, precio, stock, imagen };
     }
 
-    function formatoARS(n) {
-      if (n == null || !Number.isFinite(n)) return "";
-      return n.toLocaleString("es-AR", { maximumFractionDigits: 0 });
-    }
-
-    function stockBadge(stock) {
-      if (!Number.isFinite(stock) || stock <= 0) return { cls: "stock-cero", txt: "Sin stock" };
-      if (stock <= 5) return { cls: "stock-bajo", txt: "Stock bajo" };
-      return { cls: "stock-ok", txt: "En stock" };
-    }
-
-    // =========================
-    // CACHE (catálogo)
-    // =========================
-    function cacheLeer() {
+    // ====== Cache helpers (producto) ======
+    function cacheProductoLeer(codigo) {
       try {
-        const raw = localStorage.getItem(CACHE_KEY);
+        const raw = localStorage.getItem(cacheProdKey(codigo));
         if (!raw) return null;
         const obj = JSON.parse(raw);
-        if (!obj || !Array.isArray(obj.data) || !obj.ts) return null;
-        const age = Date.now() - obj.ts;
-        if (age > CACHE_TTL_MS) return null;
+        if (!obj || !obj.ts || !obj.data) return null;
+        if ((Date.now() - obj.ts) > CACHE_TTL_MS) return null;
         return obj.data;
       } catch {
         return null;
       }
     }
 
-    function cacheGuardar(data) {
+    function cacheProductoGuardar(codigo, data) {
       try {
-        localStorage.setItem(CACHE_KEY, JSON.stringify({ ts: Date.now(), data }));
+        localStorage.setItem(cacheProdKey(codigo), JSON.stringify({ ts: Date.now(), data }));
       } catch {}
     }
 
-    // =========================
-    // IMÁGENES: candidatos + precarga
-    // =========================
-    function candidatosImagen(p) {
-      const codigo = p.codigo || "";
-      const directa = p.imagen || "";
-
-      const base = [
-        directa,
-        `${BASE_IMG}/${codigo}.jpg`,
-        `${BASE_IMG}/${codigo}.JPG`,
-        `${BASE_IMG}/${codigo}.jpeg`,
-        `${BASE_IMG}/${codigo}.JPEG`,
-        `${BASE_IMG}/${codigo}.png`,
-        `${BASE_IMG}/${codigo}.PNG`,
-        `${BASE_IMG}/${codigo}.webp`,
-        `${BASE_IMG}/${codigo}.WEBP`,
-      ].filter(Boolean);
-
-      // de-dup
-      return [...new Set(base)];
-    }
-
+    // ====== Imágenes: precarga + warm cache ======
     async function warmCacheImage(url) {
       try {
         if (!("caches" in window)) return;
@@ -792,267 +257,179 @@
       } catch {}
     }
 
-    function preloadFirstOk(cands) {
-      return new Promise((resolve) => {
-        if (!cands?.length) return resolve("");
-        let i = 0;
+    function candidatosImagen(p) {
+      const codigo = p.codigo || "";
+      const urlDirecta = p.imagen || "";
 
-        const tryNext = () => {
-          if (i >= cands.length) return resolve("");
-          const url = cands[i++];
-          const img = new Image();
-          img.decoding = "async";
-          img.loading = "eager";
-          img.referrerPolicy = "no-referrer";
-          img.onload = async () => {
-            warmCacheImage(url);
-            resolve(url);
-          };
-          img.onerror = tryNext;
-          img.src = url;
-        };
+      const c = [
+        urlDirecta,
+        `${BASE_IMG}/${codigo}.jpg`,
+        `${BASE_IMG}/${codigo}.JPG`,
+        `${BASE_IMG}/${codigo}.jpeg`,
+        `${BASE_IMG}/${codigo}.JPEG`,
+        `${BASE_IMG}/${codigo}.png`,
+        `${BASE_IMG}/${codigo}.PNG`,
+        `${BASE_IMG}/${codigo}.webp`,
+        `${BASE_IMG}/${codigo}.WEBP`,
+      ].filter(Boolean);
 
-        tryNext();
-      });
+      return [...new Set(c)];
     }
 
-    async function precargarPagina(items) {
-      // precarga suave de imágenes de la página actual (y calienta cache)
-      const top = items.slice(0, 18);
-      for (const p of top) {
-        const cands = candidatosImagen(p);
-        if (cands[0]) warmCacheImage(cands[0]);
-        // disparo “no bloqueante”
-        preloadFirstOk(cands).catch(() => {});
-      }
-    }
+    async function setImagenProducto(p) {
+      const cands = candidatosImagen(p);
 
-    // =========================
-    // FIRESTORE
-    // =========================
-    async function cargarCatalogoFirestore() {
-      // Estrategia simple: trae todo.
-      // Si en el futuro necesitás paginar desde Firestore, lo ajustamos.
-      const ref = collection(db, COL_PRODUCTOS);
-      const snap = await getDocs(ref);
-      const arr = [];
-      snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
-      return arr;
-    }
+      imgEl.loading = "eager";
+      imgEl.decoding = "async";
+      imgEl.referrerPolicy = "no-referrer";
 
-    // =========================
-    // FILTROS + MEGA MENU
-    // =========================
-    function iconoCategoria(cat) {
-      const c = lower(cat);
-      if (c.includes("beb")) return "🥤";
-      if (c.includes("limp")) return "🧽";
-      if (c.includes("gallet") || c.includes("snack")) return "🍪";
-      if (c.includes("almac")) return "🧺";
-      if (c.includes("perf") || c.includes("hig")) return "🧴";
-      return "📦";
-    }
+      // warm-up del primer candidato (si existe)
+      if (cands[0]) warmCacheImage(cands[0]);
 
-    function buildMegaMenu() {
-      const cats = new Map(); // cat -> {sub:Set, tags:Set}
-      for (const p of catalogo) {
-        const c = norm(p.categoria) || "Sin categoría";
-        const s = norm(p.subcategoria) || "";
-        if (!cats.has(c)) cats.set(c, { sub: new Set(), tags: new Set() });
-        if (s) cats.get(c).sub.add(s);
-        for (const t of (p.tagsArr || [])) cats.get(c).tags.add(t);
+      // elegimos el primero que cargue OK
+      let i = 0;
+      const probar = () => {
+        if (i >= cands.length) return;
+        imgEl.src = cands[i];
+        i++;
+      };
+
+      imgEl.onerror = probar;
+      imgEl.onload = () => warmCacheImage(imgEl.src);
+
+      // precarga paralela suave (no bloquea)
+      for (const u of cands.slice(0, 3)) {
+        const im = new Image();
+        im.decoding = "async";
+        im.referrerPolicy = "no-referrer";
+        im.onload = () => warmCacheImage(u);
+        im.src = u;
       }
 
-      const categorias = [...cats.keys()].sort((a,b)=>a.localeCompare(b,"es"));
-      megaCategorias.innerHTML = `
-        <li class="mega-item ${filtroCategoria==="" ? "mega-item-activo":""}" data-icon="✨" data-cat="">
-          Todas
-        </li>
-        ${categorias.map(c => `
-          <li class="mega-item ${filtroCategoria===c ? "mega-item-activo":""}" data-icon="${iconoCategoria(c)}" data-cat="${escapeHtmlAttr(c)}">
-            ${escapeHtml(c)}
-          </li>
-        `).join("")}
+      probar();
+    }
+
+    function armarWhatsApp(p) {
+      const precioTxt = (p.precio != null)
+        ? `$ ${p.precio.toLocaleString("es-AR", { maximumFractionDigits: 0 })}`
+        : "Consultar";
+
+      const msg = [
+        "Hola! Me interesa este producto:",
+        "",
+        `Código: ${p.codigo}`,
+        `Producto: ${p.nombre}`,
+        `Precio mayorista: ${precioTxt}`,
+        "",
+        "¿Me pasás disponibilidad y cantidades mínimas?"
+      ].join("\n");
+
+      return `https://wa.me/?text=${encodeURIComponent(msg)}`;
+    }
+
+    function renderNav(codigoActual) {
+      if (!navEl) return;
+
+      let catalogo = null;
+      try {
+        const raw = localStorage.getItem(CLAVE_CACHE_CATALOGO);
+        if (raw) {
+          const obj = JSON.parse(raw);
+          if (Array.isArray(obj?.data)) catalogo = obj.data;
+          // si el cache está en formato {ts,data} (como en catalogo.html)
+          if (!catalogo && Array.isArray(obj?.data) === false && Array.isArray(obj?.data) !== true) {
+            // no hacemos nada
+          }
+        }
+      } catch {}
+
+      // soporta ambos formatos:
+      if (!catalogo || !catalogo.length) {
+        // intento formato {ts,data}
+        try {
+          const raw2 = localStorage.getItem(CLAVE_CACHE_CATALOGO);
+          if (raw2) {
+            const obj2 = JSON.parse(raw2);
+            if (Array.isArray(obj2?.data)) catalogo = obj2.data;
+          }
+        } catch {}
+      }
+
+      if (!catalogo || !catalogo.length) {
+        navEl.innerHTML = `
+          <button class="btn-nav" type="button" onclick="window.__dm_back()">Volver al listado</button>
+        `;
+        return;
+      }
+
+      // normalizamos para buscar por codigo
+      const catNorm = catalogo.map(x => (x && typeof x === "object") ? x : {}).map(x => ({
+        ...x,
+        codigo: String(x.codigo ?? x.Codigo ?? x.id ?? "")
+      }));
+
+      const idx = catNorm.findIndex(x => String(x.codigo) === String(codigoActual));
+      if (idx === -1) {
+        navEl.innerHTML = `
+          <button class="btn-nav" type="button" onclick="window.__dm_back()">Volver al listado</button>
+        `;
+        return;
+      }
+
+      const ant = catNorm[(idx - 1 + catNorm.length) % catNorm.length]?.codigo || "";
+      const sig = catNorm[(idx + 1) % catNorm.length]?.codigo || "";
+
+      window.__dm_ir = (c) => location.href = `producto.html?codigo=${encodeURIComponent(c)}`;
+
+      navEl.innerHTML = `
+        <button class="btn-nav" type="button" onclick="window.__dm_ir('${ant}')">← ${ant}</button>
+        <button class="btn-nav" type="button" onclick="window.__dm_back()">Volver al listado</button>
+        <button class="btn-nav" type="button" onclick="window.__dm_ir('${sig}')">${sig} →</button>
+      `;
+    }
+
+    function renderProducto(raw, codigoFallback) {
+      const p = normalizarProducto(raw, codigoFallback);
+
+      setImagenProducto(p);
+      renderNav(p.codigo);
+
+      let stockCls = "producto-stock";
+      if (!isNaN(p.stock)) {
+        if (p.stock === 0) stockCls += " stock-sin";
+        else if (p.stock > 0 && p.stock <= 5) stockCls += " stock-bajo";
+      }
+
+      const categoriaHtml = (p.categoria || p.subcategoria)
+        ? `<p class="producto-categoria">${p.categoria || ""}${(p.categoria && p.subcategoria) ? " · " : ""}${p.subcategoria || ""}</p>`
+        : "";
+
+      const precioHtml = (p.precio != null)
+        ? `<p class="producto-precio">$ ${p.precio.toLocaleString("es-AR", { maximumFractionDigits: 0 })}</p>`
+        : "";
+
+      const descHtml = p.descripcion
+        ? `<p class="producto-descripcion">${escapeHtml(p.descripcion)}</p>`
+        : "";
+
+      infoDiv.innerHTML = `
+        <p class="producto-codigo">${escapeHtml(p.codigo)}</p>
+        <h1 class="producto-titulo">${escapeHtml(p.nombre || "Producto")}</h1>
+        ${categoriaHtml}
+        ${descHtml}
+        ${precioHtml}
+        <p class="${stockCls}">Stock: ${Number.isFinite(p.stock) ? p.stock : 0}</p>
+        <div class="producto-acciones">
+          <button class="btn-secundario" type="button" onclick="window.__dm_back()">← Volver</button>
+          <a class="btn-whatsapp" href="${armarWhatsApp(p)}" target="_blank" rel="noopener">
+            Consultar por WhatsApp
+          </a>
+        </div>
       `;
 
-      function renderSubsTags(cat) {
-        const obj = cats.get(cat) || { sub:new Set(), tags:new Set() };
-        const subs = [...obj.sub].sort((a,b)=>a.localeCompare(b,"es"));
-        const tags = [...obj.tags].sort((a,b)=>a.localeCompare(b,"es"));
-
-        megaSubcategorias.innerHTML = `
-          <li class="mega-subitem ${filtroSubcategoria==="" ? "mega-subitem-activo":""}" data-sub="">
-            Todas
-          </li>
-          ${subs.map(s => `
-            <li class="mega-subitem ${filtroSubcategoria===s ? "mega-subitem-activo":""}" data-sub="${escapeHtmlAttr(s)}">
-              ${escapeHtml(s)}
-            </li>
-          `).join("")}
-        `;
-
-        megaEtiquetas.innerHTML = `
-          <li class="mega-tagitem ${filtroEtiqueta==="" ? "mega-tagitem-activo":""}" data-tag="">
-            Todas
-          </li>
-          ${tags.map(t => `
-            <li class="mega-tagitem ${filtroEtiqueta===t ? "mega-tagitem-activo":""}" data-tag="${escapeHtmlAttr(t)}">
-              #${escapeHtml(t)}
-            </li>
-          `).join("")}
-        `;
-      }
-
-      const catActual = filtroCategoria || categorias[0] || "Sin categoría";
-      renderSubsTags(catActual);
-
-      // listeners
-      megaCategorias.querySelectorAll(".mega-item").forEach(li => {
-        li.addEventListener("click", () => {
-          filtroCategoria = li.getAttribute("data-cat") || "";
-          filtroSubcategoria = "";
-          filtroEtiqueta = "";
-          pagina = 1;
-
-          // label
-          const label = filtroCategoria ? filtroCategoria : "Todas las categorías";
-          megaDropdown.querySelector(".mega-label").textContent = label;
-
-          buildMegaMenu();
-          aplicarFiltros();
-          render();
-        });
-      });
-
-      megaSubcategorias.querySelectorAll(".mega-subitem").forEach(li => {
-        li.addEventListener("click", () => {
-          filtroSubcategoria = li.getAttribute("data-sub") || "";
-          pagina = 1;
-          buildMegaMenu();
-          aplicarFiltros();
-          render();
-        });
-      });
-
-      megaEtiquetas.querySelectorAll(".mega-tagitem").forEach(li => {
-        li.addEventListener("click", () => {
-          filtroEtiqueta = li.getAttribute("data-tag") || "";
-          pagina = 1;
-          buildMegaMenu();
-          aplicarFiltros();
-          render();
-        });
-      });
-
-      megaReset.onclick = () => {
-        filtroCategoria = "";
-        filtroSubcategoria = "";
-        filtroEtiqueta = "";
-        pagina = 1;
-        megaDropdown.querySelector(".mega-label").textContent = "Todas las categorías";
-        buildMegaMenu();
-        aplicarFiltros();
-        render();
-      };
+      visible();
     }
 
-    function aplicarFiltros() {
-      const texto = lower(buscador.value || "");
-
-      filtrados = catalogo.filter(p => {
-        if (texto) {
-          if (!p.productosTexto.includes(texto)) return false;
-        }
-
-        if (filtroCategoria) {
-          const c = norm(p.categoria) || "Sin categoría";
-          if (c !== filtroCategoria) return false;
-        }
-        if (filtroSubcategoria) {
-          const s = norm(p.subcategoria) || "";
-          if (s !== filtroSubcategoria) return false;
-        }
-        if (filtroEtiqueta) {
-          const tags = p.tagsArr || [];
-          if (!tags.includes(filtroEtiqueta)) return false;
-        }
-
-        if (chkSoloDestacados.checked && !p.destacado) return false;
-        if (chkSoloConStock.checked && !(Number(p.stock) > 0)) return false;
-
-        return true;
-      });
-
-      // orden: destacados primero, luego por nombre/código
-      filtrados.sort((a,b) => {
-        const da = a.destacado ? 1 : 0;
-        const dbb = b.destacado ? 1 : 0;
-        if (da !== dbb) return dbb - da;
-        return (a.nombre || a.codigo).localeCompare((b.nombre || b.codigo), "es");
-      });
-    }
-
-    // =========================
-    // CARRITO
-    // =========================
-    function leerCarrito() {
-      try {
-        const raw = localStorage.getItem(CART_KEY);
-        const arr = raw ? JSON.parse(raw) : [];
-        return Array.isArray(arr) ? arr : [];
-      } catch {
-        return [];
-      }
-    }
-
-    function guardarCarrito(arr) {
-      try { localStorage.setItem(CART_KEY, JSON.stringify(arr)); } catch {}
-      actualizarMiniCarrito();
-    }
-
-    function carritoAgregar(p, cantidad) {
-      const qty = Math.max(1, Math.floor(Number(cantidad) || 1));
-      const cart = leerCarrito();
-      const idx = cart.findIndex(x => String(x.codigo) === String(p.codigo));
-      if (idx >= 0) {
-        cart[idx].cantidad = (Number(cart[idx].cantidad) || 0) + qty;
-      } else {
-        cart.push({
-          codigo: p.codigo,
-          nombre: p.nombre,
-          precio: p.precio ?? null,
-          stock: p.stock ?? 0,
-          imagen: p.imagen ?? "",
-          cantidad: qty
-        });
-      }
-      guardarCarrito(cart);
-    }
-
-    function actualizarMiniCarrito() {
-      const cart = leerCarrito();
-      let cant = 0;
-      let total = 0;
-
-      for (const it of cart) {
-        const q = Number(it.cantidad) || 0;
-        cant += q;
-        const pr = Number(it.precio);
-        if (Number.isFinite(pr)) total += pr * q;
-      }
-
-      miniCantidad.textContent = String(cant);
-      miniTotal.textContent = formatoARS(total);
-    }
-
-    window.irAlCarrito = function() {
-      // si tu carrito está en otra ruta, cambiá acá
-      location.href = "carrito.html";
-    };
-
-    // =========================
-    // RENDER
-    // =========================
     function escapeHtml(s) {
       return String(s ?? "")
         .replaceAll("&", "&amp;")
@@ -1061,248 +438,84 @@
         .replaceAll('"', "&quot;")
         .replaceAll("'", "&#039;");
     }
-    function escapeHtmlAttr(s){ return escapeHtml(s).replaceAll("\n"," "); }
 
-    function render() {
-      if (!grid) return;
+    // ====== Firestore ======
+    async function cargarDesdeFirestore(codigo) {
+      // 1) por campo codigo
+      const ref = collection(db, COL_PRODUCTOS);
+      const q = query(ref, where("codigo", "==", codigo), limit(1));
+      const snap = await getDocs(q);
 
-      const total = filtrados.length;
-      const totalPaginas = Math.max(1, Math.ceil(total / ITEMS_POR_PAGINA));
-      pagina = Math.min(Math.max(1, pagina), totalPaginas);
-
-      const desde = (pagina - 1) * ITEMS_POR_PAGINA;
-      const hasta = Math.min(desde + ITEMS_POR_PAGINA, total);
-
-      const pageItems = filtrados.slice(desde, hasta);
-
-      // resumen
-      resumenResultados.textContent =
-        total === 0
-          ? "Sin resultados."
-          : `Mostrando ${desde + 1}–${hasta} de ${total} productos`;
-
-      // paginador
-      btnAnterior.disabled = pagina <= 1;
-      btnSiguiente.disabled = pagina >= totalPaginas;
-
-      paginadorNumeros.innerHTML = "";
-      const maxBtns = 7;
-      const half = Math.floor(maxBtns / 2);
-      let start = Math.max(1, pagina - half);
-      let end = Math.min(totalPaginas, start + maxBtns - 1);
-      start = Math.max(1, end - maxBtns + 1);
-
-      for (let p = start; p <= end; p++) {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = "paginador-numero" + (p === pagina ? " paginador-numero--activo" : "");
-        b.textContent = String(p);
-        b.onclick = () => {
-          pagina = p;
-          render();
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        };
-        paginadorNumeros.appendChild(b);
+      if (!snap.empty) {
+        const d = snap.docs[0];
+        return { id: d.id, ...d.data() };
       }
 
-      btnAnterior.onclick = () => { pagina--; render(); window.scrollTo({ top: 0, behavior: "smooth" }); };
-      btnSiguiente.onclick = () => { pagina++; render(); window.scrollTo({ top: 0, behavior: "smooth" }); };
+      // 2) fallback por doc.id
+      const docRef = doc(db, COL_PRODUCTOS, codigo);
+      const one = await getDoc(docRef);
+      if (one.exists()) return { id: one.id, ...one.data() };
 
-      // cards
-      grid.innerHTML = pageItems.map(p => {
-        const badge = stockBadge(Number(p.stock));
-        const precioTxt = (p.precio != null) ? `$ ${formatoARS(p.precio)}` : "";
-        const chip = p.destacado ? `<span class="chip-destacado">Destacado</span>` : "";
-        const desc = p.descripcion ? escapeHtml(p.descripcion) : "";
-
-        // imagen: ponemos 1er candidato y si falla, reintenta en runtime
-        const imgCands = candidatosImagen(p);
-        const img0 = imgCands[0] || "";
-
-        return `
-          <div class="producto-card" data-codigo="${escapeHtmlAttr(p.codigo)}">
-            <div class="producto-imagen-wrapper">
-              <img class="producto-imagen"
-                data-cands="${escapeHtmlAttr(JSON.stringify(imgCands))}"
-                src="${escapeHtmlAttr(img0)}"
-                alt="${escapeHtmlAttr(p.nombre || p.codigo)}"
-                loading="lazy"
-                decoding="async"
-                referrerpolicy="no-referrer"
-              />
-            </div>
-
-            <div class="producto-titulo" title="${escapeHtmlAttr(p.nombre || "")}">
-              ${escapeHtml(p.nombre || "Producto")} ${chip}
-            </div>
-
-            <div class="producto-descripcion">${desc}</div>
-
-            <div class="producto-precio-row">
-              <div class="producto-precio">${precioTxt}</div>
-              <div class="producto-stock">
-                <span class="badge-stock ${badge.cls}">${badge.txt}</span>
-                ${Number.isFinite(Number(p.stock)) ? ` · ${Number(p.stock)} u` : ""}
-              </div>
-
-              <div class="cantidad-container">
-                <button class="btn-cantidad" type="button" data-act="menos">−</button>
-                <input class="input-cantidad" type="number" min="1" value="1" />
-                <button class="btn-cantidad" type="button" data-act="mas">+</button>
-              </div>
-
-              <button class="btn-agregar-carrito" type="button">
-                🛒 Agregar
-              </button>
-            </div>
-          </div>
-        `;
-      }).join("");
-
-      // handlers por card
-      grid.querySelectorAll(".producto-card").forEach(card => {
-        const codigo = card.getAttribute("data-codigo") || "";
-        const input = card.querySelector(".input-cantidad");
-        const btnMenos = card.querySelector('[data-act="menos"]');
-        const btnMas = card.querySelector('[data-act="mas"]');
-        const btnAgregar = card.querySelector(".btn-agregar-carrito");
-        const img = card.querySelector(".producto-imagen");
-
-        // fallback imagen por lista
-        if (img) {
-          const raw = img.getAttribute("data-cands") || "[]";
-          let cands = [];
-          try { cands = JSON.parse(raw) || []; } catch {}
-          let idx = 0;
-          img.onerror = async () => {
-            idx++;
-            if (idx < cands.length) img.src = cands[idx];
-          };
-        }
-
-        // click a producto
-        card.querySelector(".producto-imagen-wrapper")?.addEventListener("click", () => {
-          location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
-        });
-        card.querySelector(".producto-titulo")?.addEventListener("click", () => {
-          location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
-        });
-
-        btnMenos?.addEventListener("click", () => {
-          const v = Math.max(1, (Number(input.value) || 1) - 1);
-          input.value = String(v);
-        });
-        btnMas?.addEventListener("click", () => {
-          const v = Math.max(1, (Number(input.value) || 1) + 1);
-          input.value = String(v);
-        });
-
-        btnAgregar?.addEventListener("click", () => {
-          const p = catalogo.find(x => String(x.codigo) === String(codigo));
-          if (!p) return;
-          carritoAgregar(p, Number(input.value) || 1);
-
-          btnAgregar.classList.add("btn-agregar-carrito-activo");
-          btnAgregar.textContent = "✅ Agregado";
-          setTimeout(() => {
-            btnAgregar.classList.remove("btn-agregar-carrito-activo");
-            btnAgregar.textContent = "🛒 Agregar";
-          }, 900);
-        });
-      });
-
-      // precarga de imágenes de esta página
-      precargarPagina(pageItems).catch(() => {});
+      return null;
     }
 
-    // =========================
-    // UI EVENTS
-    // =========================
-    categoriaToggle.addEventListener("click", () => {
-      megaDropdown.classList.toggle("open");
-    });
-
-    document.addEventListener("click", (e) => {
-      if (!megaDropdown.contains(e.target)) megaDropdown.classList.remove("open");
-    });
-
-    buscador.addEventListener("input", () => {
-      pagina = 1;
-      aplicarFiltros();
-      render();
-    });
-
-    chkSoloDestacados.addEventListener("change", () => {
-      pagina = 1;
-      aplicarFiltros();
-      render();
-    });
-
-    chkSoloConStock.addEventListener("change", () => {
-      pagina = 1;
-      aplicarFiltros();
-      render();
-    });
-
-    // =========================
-    // INIT
-    // =========================
+    // ====== Init ======
     async function init() {
-      actualizarMiniCarrito();
+      const codigo = getCodigoURL();
 
-      // 1) cache primero (instantáneo)
-      const cached = cacheLeer();
-      if (cached?.length) {
-        catalogo = cached.map(normalizarProducto);
-        aplicarFiltros();
-        buildMegaMenu();
-        render();
+      if (!codigo) {
+        infoDiv.innerHTML = "<h2>Producto no encontrado</h2><p>Falta el código en la URL.</p>";
+        visible();
+        return;
+      }
 
-        // 2) refresh en background (sin romper la UI)
-        cargarCatalogoFirestore()
-          .then(arr => {
-            const normed = arr.map(normalizarProducto);
-            // si cambia cantidad o algo, refrescamos
-            if (normed.length !== catalogo.length) {
-              catalogo = normed;
-              cacheGuardar(arr);
-              aplicarFiltros();
-              buildMegaMenu();
-              render();
-            } else {
-              // igual guardamos y actualizamos (por stock/precios)
-              catalogo = normed;
-              cacheGuardar(arr);
-              aplicarFiltros();
-              buildMegaMenu();
-              render();
+      renderNav(codigo);
+
+      // 1) cache local por producto (instantáneo)
+      const cached = cacheProductoLeer(codigo);
+      if (cached) {
+        renderProducto(cached, codigo);
+
+        // 2) refresh background
+        cargarDesdeFirestore(codigo)
+          .then(prod => {
+            if (prod) {
+              cacheProductoGuardar(codigo, prod);
+              renderProducto(prod, codigo);
             }
           })
           .catch(() => {});
         return;
       }
 
-      // 2) sin cache: Firestore (con loader simple)
-      grid.innerHTML = `
-        <div style="opacity:.85;color:#c9c9ff;padding:8px 2px;">
-          Cargando catálogo...
-        </div>
-      `;
-
+      // 2) Firestore directo
       try {
-        const arr = await cargarCatalogoFirestore();
-        cacheGuardar(arr);
-        catalogo = arr.map(normalizarProducto);
-        aplicarFiltros();
-        buildMegaMenu();
-        render();
+        const prod = await cargarDesdeFirestore(codigo);
+
+        if (!prod) {
+          infoDiv.innerHTML = `
+            <h2>Producto no encontrado</h2>
+            <p>No existe el código <b>${escapeHtml(codigo)}</b> en Firestore.</p>
+            <div class="producto-acciones">
+              <button class="btn-secundario" type="button" onclick="window.__dm_back()">← Volver</button>
+            </div>
+          `;
+          visible();
+          return;
+        }
+
+        cacheProductoGuardar(codigo, prod);
+        renderProducto(prod, codigo);
       } catch (e) {
-        console.error("Error catálogo:", e);
-        grid.innerHTML = `
-          <div style="opacity:.9;color:#ff7a9c;padding:8px 2px;">
-            Error cargando catálogo desde Firestore.
+        console.error("Error producto:", e);
+        infoDiv.innerHTML = `
+          <h2>Error cargando producto</h2>
+          <p>No se pudo obtener el producto desde Firestore.</p>
+          <div class="producto-acciones">
+            <button class="btn-secundario" type="button" onclick="window.__dm_back()">← Volver</button>
           </div>
         `;
+        visible();
       }
     }
 
