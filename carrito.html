@@ -291,6 +291,31 @@
       outline: none;
     }
 
+    .cliente-label{
+      margin-top: 10px;
+      font-size: 13px;
+      color: #c9c9ff;
+      font-weight: 700;
+      display:block;
+    }
+    .cliente-input{
+      width: 100%;
+      border-radius: 12px;
+      border: none;
+      padding: 10px;
+      font-size: 13px;
+      margin-top: 6px;
+      outline: none;
+    }
+    .mini-aviso{
+      margin-top: 10px;
+      font-size: 12px;
+      color: #ffe08a;
+      line-height: 1.35;
+      display:none;
+    }
+    .mini-aviso.show{ display:block; }
+
     /* ===== Sticky resumen mobile ===== */
     .sticky-resumen-mobile { display: none; }
 
@@ -379,6 +404,19 @@
         <button class="btn btn-rojo" id="btn-vaciar">Vaciar carrito</button>
         <button class="btn btn-verde" id="btn-whatsapp">Enviar pedido por WhatsApp</button>
 
+
+        <!-- ✅ Datos del cliente -->
+        <label class="cliente-label" for="cliente-nombre">Nombre / Empresa</label>
+        <input id="cliente-nombre" class="cliente-input" placeholder="Ej: Ferretería López" autocomplete="name" />
+
+        <label class="cliente-label" for="cliente-tel">Teléfono</label>
+        <input id="cliente-tel" class="cliente-input" placeholder="Ej: 11 1234-5678" inputmode="tel" autocomplete="tel" />
+
+        <label class="cliente-label" for="cliente-dir">Dirección (opcional)</label>
+        <input id="cliente-dir" class="cliente-input" placeholder="Ej: Av. Siempre Viva 123" autocomplete="street-address" />
+
+        <div id="aviso-stock-ajuste" class="mini-aviso"></div>
+
         <!-- ✅ Observaciones -->
         <label class="nota-label" for="nota-pedido">Observaciones del pedido</label>
         <textarea
@@ -410,12 +448,14 @@
 
   <script type="module">
     import { db } from "./js/firebase-init.js";
-    import { collection, addDoc, serverTimestamp }
+    import { collection, addDoc, serverTimestamp, runTransaction, doc }
       from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
     // ✅ UNIFICADO con catalogo.html / producto.html
     const CLAVE_CARRITO = "carrito_dm_v1";
     const CLAVE_CACHE_CATALOGO = "dm_catalogo_cache_v2";
+    const CLAVE_CLIENTE = "dm_cliente_v1";
+    const STOCK_COLLECTION = "productos"; // ⬅️ si tu colección se llama distinto, cambialo acá
 
     // ===== DOM =====
     const contenedorItems = document.getElementById("contenedor-items");
@@ -425,6 +465,10 @@
     const btnWhatsapp = document.getElementById("btn-whatsapp");
     const btnSeguir = document.getElementById("btn-seguir");
     const notaPedido = document.getElementById("nota-pedido");
+    const inputNombre = document.getElementById("cliente-nombre");
+    const inputTel = document.getElementById("cliente-tel");
+    const inputDir = document.getElementById("cliente-dir");
+    const avisoAjuste = document.getElementById("aviso-stock-ajuste");
 
     // sticky
     const stickyWrap = document.getElementById("sticky-resumen-mobile");
@@ -504,6 +548,39 @@
       if (cambio) guardarCarrito(carrito);
     }
 
+
+    function ajustarCarritoASstock() {
+      const carrito = leerCarrito();
+      if (!carrito.length) return;
+
+      let cambios = 0;
+      const nuevo = [];
+
+      for (const it of carrito) {
+        const stock = Number(it?.stock);
+        const hasStock = Number.isFinite(stock) && stock >= 0;
+        if (!hasStock) { nuevo.push(it); continue; }
+
+        const qty = Math.max(1, Number(it.cantidad || 1));
+
+        if (stock <= 0) {
+          cambios++;
+          continue; // removemos sin stock
+        }
+
+        if (qty > stock) {
+          it.cantidad = stock;
+          cambios++;
+        }
+        nuevo.push(it);
+      }
+
+      if (cambios) {
+        guardarCarrito(nuevo);
+        mostrarAviso(`⚠️ Ajustamos ${cambios} producto(s) al stock disponible.`);
+      }
+    }
+
     function updateSticky(total, carritoLen){
       const empty = !carritoLen;
       if (stickyTotal) stickyTotal.textContent = String(formatearPrecio(total));
@@ -562,6 +639,31 @@
       }
       return { total, cant };
     }
+
+    function leerCliente() {
+      try {
+        const raw = localStorage.getItem(CLAVE_CLIENTE);
+        return raw ? JSON.parse(raw) : {};
+      } catch { return {}; }
+    }
+
+    function guardarCliente(obj) {
+      try { localStorage.setItem(CLAVE_CLIENTE, JSON.stringify(obj || {})); } catch {}
+    }
+
+    function normalizarTel(t) {
+      return String(t || "").replace(/[^0-9+]/g, "").trim();
+    }
+
+    function mostrarAviso(txt) {
+      if (!avisoAjuste) return;
+      avisoAjuste.textContent = txt || "";
+      if (txt) avisoAjuste.classList.add("show");
+      else avisoAjuste.classList.remove("show");
+      clearTimeout(avisoAjuste.__t);
+      if (txt) avisoAjuste.__t = setTimeout(() => avisoAjuste.classList.remove("show"), 4000);
+    }
+
 
     function renderCarrito() {
       const carrito = leerCarrito();
@@ -674,11 +776,105 @@
     });
 
     btnWhatsapp.addEventListener("click", async () => {
+      // refrescamos stock antes de enviar
+      syncStockDesdeCatalogoCache();
+      ajustarCarritoASstock();
+
       const carrito = leerCarrito();
       if (!carrito.length) return;
 
+      const nombre = (inputNombre?.value || "").trim();
+      const telRaw = (inputTel?.value || "").trim();
+      const tel = normalizarTel(telRaw);
+      const dir = (inputDir?.value || "").trim();
+
+      if (!nombre || !tel) {
+        alert("Por favor completá Nombre/Empresa y Teléfono para enviar el pedido.");
+        return;
+      }
+
+      // guardamos cliente
+      guardarCliente({ nombre, tel: telRaw, dir });
+
+      // ✅ Reserva de stock en Firestore (transacción)
+      // Requiere colección STOCK_COLLECTION (por defecto: "productos") con docs cuyo ID sea el código
+      // y un campo numérico "stock".
+      try {
+        await runTransaction(db, async (tx) => {
+          // 1) Validar stock
+          for (const it of carrito) {
+            const cod = String(it.codigo || "").trim();
+            if (!cod) continue;
+
+            // si no hay stock numérico, no reservamos ese item (evita romper)
+            const qty = Math.max(1, Number(it.cantidad || 1));
+            const stock = Number(it.stock);
+
+            // si tu sistema no maneja stock en Firestore, podés comentar este bloque
+            const ref = doc(db, STOCK_COLLECTION, cod);
+            const snap = await tx.get(ref);
+
+            if (!snap.exists()) {
+              // Si no existe el doc, no bloqueamos (pero avisamos)
+              continue;
+            }
+
+            const stockDB = Number(snap.data()?.stock ?? 0);
+            if (!Number.isFinite(stockDB)) {
+              continue;
+            }
+
+            if (stockDB < qty) {
+              throw new Error(`STOCK_INSUFICIENTE:${cod}:${stockDB}:${qty}`);
+            }
+          }
+
+          // 2) Descontar stock
+          for (const it of carrito) {
+            const cod = String(it.codigo || "").trim();
+            if (!cod) continue;
+
+            const qty = Math.max(1, Number(it.cantidad || 1));
+            const ref = doc(db, STOCK_COLLECTION, cod);
+            const snap = await tx.get(ref);
+
+            if (!snap.exists()) continue;
+
+            const stockDB = Number(snap.data()?.stock ?? 0);
+            if (!Number.isFinite(stockDB)) continue;
+
+            tx.update(ref, { stock: stockDB - qty, updatedAt: serverTimestamp() });
+          }
+        });
+      } catch (e) {
+        const msg = String(e?.message || e);
+        if (msg.startsWith("STOCK_INSUFICIENTE:")) {
+          const parts = msg.split(":");
+          const cod = parts[1] || "";
+          const stockDB = parts[2] || "";
+          const qty = parts[3] || "";
+          alert(`Stock insuficiente para ${cod}. Disponible: ${stockDB}u. Intentaste: ${qty}u.
+Actualizá el carrito y reintentá.`);
+          // resync y ajuste
+          syncStockDesdeCatalogoCache();
+          ajustarCarritoASstock();
+          renderCarrito();
+          return;
+        }
+        alert("No se pudo reservar stock. Reintentá en unos segundos.");
+        console.warn("Reserva de stock falló:", e);
+        return;
+      }
+
+      // ===== construir mensaje WhatsApp =====
       let total = 0;
       let msg = "Hola! Pedido mayorista:%0A%0A";
+
+      // encabezado cliente
+      msg += `👤 Cliente: ${encodeURIComponent(nombre)}%0A`;
+      msg += `📞 Tel: ${encodeURIComponent(telRaw)}%0A`;
+      if (dir) msg += `📍 Dirección: ${encodeURIComponent(dir)}%0A`;
+      msg += `%0A`;
 
       for (const it of carrito) {
         const sub = (Number(it.precio || 0) * Number(it.cantidad || 0));
@@ -687,16 +883,55 @@
       }
       msg += `%0A🔹 Total: $${formatearPrecio(total)}`;
 
-      // guarda en Firestore (ventas)
+      // ✅ Observaciones
+      const nota = (notaPedido?.value || "").trim();
+      if (nota) {
+        msg += `%0A%0A📝 Observaciones:%0A${encodeURIComponent(nota)}`;
+      }
+
+      // guarda pedido en Firestore (ventas)
       try {
         const coleccionVentas = collection(db, "ventas");
         await addDoc(coleccionVentas, {
+          cliente: { nombre, tel: telRaw, dir },
           items: carrito,
           total,
+          nota: nota || "",
           creadoEn: serverTimestamp(),
-          estado: "pendiente",
-          origen: "carrito_web"
+          estado: "reservado",
+          origen: "carrito_web",
+          stockCollection: STOCK_COLLECTION
         });
+      } catch (e) {
+        console.warn("No se pudo guardar en Firestore (ventas):", e);
+
+        // ↩️ rollback: devolvemos stock reservado si no pudimos registrar la venta
+        try {
+          await runTransaction(db, async (tx) => {
+            for (const it of carrito) {
+              const cod = String(it.codigo || "").trim();
+              if (!cod) continue;
+              const qty = Math.max(1, Number(it.cantidad || 1));
+              const ref = doc(db, STOCK_COLLECTION, cod);
+              const snap = await tx.get(ref);
+              if (!snap.exists()) continue;
+              const stockDB = Number(snap.data()?.stock ?? 0);
+              if (!Number.isFinite(stockDB)) continue;
+              tx.update(ref, { stock: stockDB + qty, updatedAt: serverTimestamp() });
+            }
+          });
+        } catch (rb) {
+          console.warn("Rollback de stock falló:", rb);
+        }
+      }
+
+      // abrir WhatsApp
+      window.open(`https://wa.me/?text=${msg}`, "_blank");
+
+      // ✅ opcional: limpiar carrito para evitar doble reserva
+      guardarCarrito([]);
+      renderCarrito();
+    });
       } catch (e) {
         console.warn("No se pudo guardar en Firestore (ventas):", e);
       }
@@ -704,6 +939,26 @@
       // abrir WhatsApp (sin número fijo -> wa.me/?text=)
       window.open(`https://wa.me/?text=${msg}`, "_blank");
     });
+
+
+    // ✅ cargar datos del cliente
+    const cli = leerCliente();
+    if (inputNombre) inputNombre.value = cli.nombre || "";
+    if (inputTel) inputTel.value = cli.tel || "";
+    if (inputDir) inputDir.value = cli.dir || "";
+
+    const saveCli = () => guardarCliente({ 
+      nombre: inputNombre?.value?.trim() || "", 
+      tel: inputTel?.value?.trim() || "", 
+      dir: inputDir?.value?.trim() || "" 
+    });
+    inputNombre?.addEventListener("input", saveCli);
+    inputTel?.addEventListener("input", saveCli);
+    inputDir?.addEventListener("input", saveCli);
+
+    // ✅ sync stock real desde cache y ajusta cantidades
+    syncStockDesdeCatalogoCache();
+    ajustarCarritoASstock();
 
     // Inicio
     renderCarrito();
