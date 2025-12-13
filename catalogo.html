@@ -1354,20 +1354,51 @@ card.querySelector(".producto-titulo")?.addEventListener("click", () => {
           input.value = String(v);
         });
 
-        btnAgregar?.addEventListener("click", () => {
-          const p = catalogo.find(x => String(x.codigo) === String(codigo));
-          if (!p) return;
-          carritoAgregar(p, Number(input.value) || 1);
+btnAgregar?.addEventListener("click", () => {
+  const p = catalogo.find(x => String(x.codigo) === String(codigo));
+  if (!p) return;
 
-          btnAgregar.classList.add("btn-agregar-carrito-activo");
-          btnAgregar.textContent = "✅ Agregado";
-          setTimeout(() => {
-            btnAgregar.classList.remove("btn-agregar-carrito-activo");
-            btnAgregar.textContent = "🛒 Agregar";
-          }, 900);
-        });
-      });
+  const qty = Math.max(1, Number(input.value) || 1);
+
+  // 🛒 carrito
+  carritoAgregar(p, qty);
+
+  // 📉 bajar stock visual
+  const stockBox = card.querySelector(".producto-stock");
+  const stockNum = stockBox?.querySelector(".stock-num");
+
+  if (stockBox && stockNum) {
+    let stockActual = Number(stockBox.getAttribute("data-stock")) || 0;
+    stockActual = Math.max(0, stockActual - qty);
+
+    stockBox.setAttribute("data-stock", stockActual);
+    stockNum.textContent = stockActual;
+
+    // badge dinámico
+    const badge = stockBox.querySelector(".badge-stock");
+    if (badge) {
+      if (stockActual <= 0) {
+        badge.textContent = "Sin stock";
+        badge.className = "badge-stock stock-cero";
+      } else if (stockActual <= 5) {
+        badge.textContent = "Stock bajo";
+        badge.className = "badge-stock stock-bajo";
+      } else {
+        badge.textContent = "En stock";
+        badge.className = "badge-stock stock-ok";
+      }
     }
+  }
+
+  // feedback botón
+  btnAgregar.classList.add("btn-agregar-carrito-activo");
+  btnAgregar.textContent = "✅ Agregado";
+  setTimeout(() => {
+    btnAgregar.classList.remove("btn-agregar-carrito-activo");
+    btnAgregar.textContent = "🛒 Agregar";
+  }, 900);
+});
+
 
     function render() {
       const total = filtrados.length;
