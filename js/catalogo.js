@@ -222,7 +222,6 @@ async function cargarProductos() {
 // -------------------------
 
 function construirMegaMenu() {
-  // Selects ocultos (por compatibilidad)
   if (selectCategoria) {
     selectCategoria.innerHTML = '<option value="">Todas</option>';
     Array.from(categoriasSet)
@@ -247,7 +246,6 @@ function construirMegaMenu() {
       });
   }
 
-  // Categorías mega menú
   if (megaCategorias) {
     megaCategorias.innerHTML = "";
     Array.from(categoriasSet)
@@ -256,7 +254,7 @@ function construirMegaMenu() {
         const li = document.createElement("li");
         li.classList.add("mega-item");
         li.dataset.value = cat;
-        li.dataset.icon = "📦"; // icono genérico
+        li.dataset.icon = "📦";
         li.textContent = cat;
 
         if (cat === categoriaSeleccionada) {
@@ -264,11 +262,7 @@ function construirMegaMenu() {
         }
 
         li.addEventListener("click", () => {
-          if (categoriaSeleccionada === cat) {
-            categoriaSeleccionada = "";
-          } else {
-            categoriaSeleccionada = cat;
-          }
+          categoriaSeleccionada = categoriaSeleccionada === cat ? "" : cat;
           subcategoriaSeleccionada = "";
           etiquetaSeleccionada = "";
           actualizarMegaSeleccion();
@@ -289,7 +283,6 @@ function actualizarMegaSubcategorias() {
   megaSubcategorias.innerHTML = "";
 
   const subcatsFiltradas = new Set();
-
   productos.forEach((p) => {
     if (categoriaSeleccionada && p.categoria !== categoriaSeleccionada) return;
     if (p.subcategoria) subcatsFiltradas.add(p.subcategoria);
@@ -310,11 +303,7 @@ function actualizarMegaSubcategorias() {
     }
 
     li.addEventListener("click", () => {
-      if (subcategoriaSeleccionada === sub) {
-        subcategoriaSeleccionada = "";
-      } else {
-        subcategoriaSeleccionada = sub;
-      }
+      subcategoriaSeleccionada = subcategoriaSeleccionada === sub ? "" : sub;
       etiquetaSeleccionada = "";
       actualizarMegaSeleccion();
       aplicarFiltros();
@@ -329,7 +318,6 @@ function actualizarMegaEtiquetas() {
   megaEtiquetas.innerHTML = "";
 
   const tagsFiltrados = new Set();
-
   productos.forEach((p) => {
     if (categoriaSeleccionada && p.categoria !== categoriaSeleccionada) return;
     if (subcategoriaSeleccionada && p.subcategoria !== subcategoriaSeleccionada)
@@ -355,11 +343,7 @@ function actualizarMegaEtiquetas() {
       }
 
       li.addEventListener("click", () => {
-        if (etiquetaSeleccionada === tag) {
-          etiquetaSeleccionada = "";
-        } else {
-          etiquetaSeleccionada = tag;
-        }
+        etiquetaSeleccionada = etiquetaSeleccionada === tag ? "" : tag;
         actualizarMegaSeleccion();
         aplicarFiltros();
       });
@@ -385,7 +369,6 @@ function actualizarMegaLabel() {
 }
 
 function actualizarMegaSeleccion() {
-  // Marca activa en la lista de categorías
   if (megaCategorias) {
     [...megaCategorias.querySelectorAll(".mega-item")].forEach((el) => {
       el.classList.toggle(
@@ -399,10 +382,8 @@ function actualizarMegaSeleccion() {
   actualizarMegaEtiquetas();
   actualizarMegaLabel();
 
-  // sincronizar selects ocultos
   if (selectCategoria) selectCategoria.value = categoriaSeleccionada || "";
-  if (selectSubcategoria) selectSubcategoria.value =
-    subcategoriaSeleccionada || "";
+  if (selectSubcategoria) selectSubcategoria.value = subcategoriaSeleccionada || "";
 }
 
 function limpiarFiltros() {
@@ -427,26 +408,17 @@ function aplicarFiltros() {
 
   productosFiltrados = productos
     .filter((p) => {
-      // texto
       if (texto) {
-        const hay = [
-          p.codigo,
-          p.nombre,
-          p.descripcion,
-          p.categoria,
-          p.subcategoria,
-        ]
+        const hay = [p.codigo, p.nombre, p.descripcion, p.categoria, p.subcategoria]
           .join(" ")
           .toLowerCase()
           .includes(texto);
         if (!hay) return false;
       }
 
-      // filtros de mega menú
-      if (categoriaSeleccionada && p.categoria !== categoriaSeleccionada)
-        return false;
-      if (subcategoriaSeleccionada && p.subcategoria !== subcategoriaSeleccionada)
-        return false;
+      if (categoriaSeleccionada && p.categoria !== categoriaSeleccionada) return false;
+      if (subcategoriaSeleccionada && p.subcategoria !== subcategoriaSeleccionada) return false;
+
       if (etiquetaSeleccionada) {
         const tags = p.etiquetas || [];
         if (!tags.includes(etiquetaSeleccionada)) return false;
@@ -458,10 +430,8 @@ function aplicarFiltros() {
       return true;
     })
     .sort((a, b) => {
-      // primero destacados
       if (a.destacado && !b.destacado) return -1;
       if (!a.destacado && b.destacado) return 1;
-      // luego nombre
       return (a.nombre || "").localeCompare(b.nombre || "");
     });
 
@@ -485,7 +455,10 @@ function renderizarPagina() {
   if (paginaActual > totalPaginas) paginaActual = totalPaginas;
 
   const inicio = (paginaActual - 1) * ITEMS_POR_PAGINA;
-  const fin = inicio + ITEMS_POR_PAGINA;
+
+  // ✅ FIX IMPORTANTE: que nunca se pase del total
+  const fin = Math.min(inicio + ITEMS_POR_PAGINA, total);
+
   const pagina = productosFiltrados.slice(inicio, fin);
 
   grid.innerHTML = "";
@@ -540,13 +513,9 @@ function crearBadgeStock(stock) {
   span.textContent = valor;
   span.classList.add("badge-stock");
 
-  if (valor <= 0) {
-    span.classList.add("stock-cero");
-  } else if (valor <= 5) {
-    span.classList.add("stock-bajo");
-  } else {
-    span.classList.add("stock-ok");
-  }
+  if (valor <= 0) span.classList.add("stock-cero");
+  else if (valor <= 5) span.classList.add("stock-bajo");
+  else span.classList.add("stock-ok");
 
   return span;
 }
@@ -556,7 +525,6 @@ function crearCardProducto(p) {
   card.classList.add("producto-card");
   card.dataset.codigo = p.codigo;
 
-  // Imagen
   const imgWrap = document.createElement("div");
   imgWrap.classList.add("producto-imagen-wrapper");
 
@@ -579,40 +547,34 @@ function crearCardProducto(p) {
   }
 
   imgWrap.addEventListener("click", () => {
-    window.location.href =
-      "producto.html?codigo=" + encodeURIComponent(p.codigo);
+    window.location.href = "producto.html?codigo=" + encodeURIComponent(p.codigo);
   });
 
-  // Título
   const titulo = document.createElement("div");
   titulo.classList.add("producto-titulo");
   titulo.textContent = p.nombre || "";
   titulo.addEventListener("click", () => {
-    window.location.href =
-      "producto.html?codigo=" + encodeURIComponent(p.codigo);
+    window.location.href = "producto.html?codigo=" + encodeURIComponent(p.codigo);
   });
 
-  // Descripción corta
   const desc = document.createElement("div");
   desc.classList.add("producto-descripcion");
   desc.textContent = p.descripcion || "";
 
-  // Precio
   const precioRow = document.createElement("div");
   precioRow.classList.add("producto-precio-row");
+
   const precioSpan = document.createElement("div");
   precioSpan.classList.add("producto-precio");
   precioSpan.textContent =
     p.precio != null ? `$ ${p.precio.toLocaleString("es-AR")}` : "-";
   precioRow.appendChild(precioSpan);
 
-  // Stock + badges
   const stockDiv = document.createElement("div");
   stockDiv.classList.add("producto-stock");
   stockDiv.textContent = "Stock: ";
   stockDiv.appendChild(crearBadgeStock(p.stock));
 
-  // Cantidad
   const cantidadWrap = document.createElement("div");
   cantidadWrap.classList.add("cantidad-container");
 
@@ -620,7 +582,6 @@ function crearCardProducto(p) {
   btnMenos.type = "button";
   btnMenos.textContent = "−";
   btnMenos.classList.add("btn-cantidad");
-  btnMenos.dataset.accion = "menos";
 
   const inputCant = document.createElement("input");
   inputCant.type = "number";
@@ -632,13 +593,11 @@ function crearCardProducto(p) {
   btnMas.type = "button";
   btnMas.textContent = "+";
   btnMas.classList.add("btn-cantidad");
-  btnMas.dataset.accion = "mas";
 
   cantidadWrap.appendChild(btnMenos);
   cantidadWrap.appendChild(inputCant);
   cantidadWrap.appendChild(btnMas);
 
-  // Botón agregar al carrito
   const btnAgregar = document.createElement("button");
   btnAgregar.type = "button";
   btnAgregar.classList.add("btn-agregar-carrito");
@@ -647,7 +606,6 @@ function crearCardProducto(p) {
   btnAgregar.addEventListener("click", () => {
     const cantidad = Number(inputCant.value) || 1;
 
-    // limitar por stock si se quiere
     const max = Number(p.stock) || 0;
     let cantFinal = cantidad;
     if (max > 0 && cantidad > max) {
@@ -657,12 +615,9 @@ function crearCardProducto(p) {
 
     agregarAlCarrito(p, cantFinal);
     btnAgregar.classList.add("btn-agregar-carrito-activo");
-    setTimeout(() => {
-      btnAgregar.classList.remove("btn-agregar-carrito-activo");
-    }, 600);
+    setTimeout(() => btnAgregar.classList.remove("btn-agregar-carrito-activo"), 600);
   });
 
-  // Eventos cantidad
   btnMenos.addEventListener("click", () => {
     let v = Number(inputCant.value) || 1;
     v = Math.max(1, v - 1);
@@ -672,14 +627,10 @@ function crearCardProducto(p) {
   btnMas.addEventListener("click", () => {
     let v = Number(inputCant.value) || 1;
     v += 1;
-    // límite opcional por stock
-    if (Number(p.stock) > 0) {
-      v = Math.min(v, Number(p.stock));
-    }
+    if (Number(p.stock) > 0) v = Math.min(v, Number(p.stock));
     inputCant.value = String(v);
   });
 
-  // Agregar todo a la card
   card.appendChild(imgWrap);
   card.appendChild(titulo);
   card.appendChild(desc);
@@ -688,7 +639,6 @@ function crearCardProducto(p) {
   card.appendChild(cantidadWrap);
   card.appendChild(btnAgregar);
 
-  // Destacado
   if (p.destacado) {
     const chip = document.createElement("span");
     chip.classList.add("chip-destacado");
@@ -702,40 +652,20 @@ function crearCardProducto(p) {
 // -------------------------
 // Eventos generales
 // -------------------------
+if (buscador) buscador.addEventListener("input", aplicarFiltros);
+if (chkSoloDestacados) chkSoloDestacados.addEventListener("change", aplicarFiltros);
+if (chkSoloConStock) chkSoloConStock.addEventListener("change", aplicarFiltros);
 
-// buscador
-if (buscador) {
-  buscador.addEventListener("input", () => {
-    aplicarFiltros();
-  });
-}
-
-// checkboxes
-if (chkSoloDestacados) {
-  chkSoloDestacados.addEventListener("change", () => {
-    aplicarFiltros();
-  });
-}
-if (chkSoloConStock) {
-  chkSoloConStock.addEventListener("change", () => {
-    aplicarFiltros();
-  });
-}
-
-// Mega toggle
 if (megaToggle && megaDropdown) {
   megaToggle.addEventListener("click", () => {
     megaDropdown.classList.toggle("open");
   });
 
   document.addEventListener("click", (e) => {
-    if (!megaDropdown.contains(e.target)) {
-      megaDropdown.classList.remove("open");
-    }
+    if (!megaDropdown.contains(e.target)) megaDropdown.classList.remove("open");
   });
 }
 
-// Botón reset mega menú
 if (megaResetBtn) {
   megaResetBtn.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -743,7 +673,6 @@ if (megaResetBtn) {
   });
 }
 
-// Paginador anterior / siguiente
 if (btnPrev) {
   btnPrev.addEventListener("click", () => {
     if (paginaActual > 1) {
@@ -752,11 +681,10 @@ if (btnPrev) {
     }
   });
 }
+
 if (btnNext) {
   btnNext.addEventListener("click", () => {
-    const totalPaginas = Math.ceil(
-      productosFiltrados.length / ITEMS_POR_PAGINA
-    );
+    const totalPaginas = Math.ceil(productosFiltrados.length / ITEMS_POR_PAGINA);
     if (paginaActual < totalPaginas) {
       paginaActual++;
       renderizarPagina();
