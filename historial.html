@@ -30,7 +30,7 @@
     *{box-sizing:border-box}
     body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
 
-    /* HEADER FULL ANCHO (como tu 2da foto) */
+    /* HEADER FULL ANCHO */
     header{
       position:sticky; top:0; z-index:50;
       background:linear-gradient(90deg, rgba(255,0,93,.95), rgba(255,164,0,.95));
@@ -61,7 +61,7 @@
 
     main{padding:18px 16px 40px}
 
-    /* ✅ FULL ANCHO REAL (NO centrado) */
+    /* ✅ FULL ANCHO REAL */
     .historial-wrapper{
       width:100%;
       max-width:none !important;
@@ -131,7 +131,7 @@
     }
 
     .toolbar-actions{
-      display:flex; gap:8px; flex-wrap:wrap; justify-content:space-between; align-items:center;
+      display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between; align-items:center;
       margin-top:10px;
     }
     .btn-mini{
@@ -152,6 +152,19 @@
     }
     .muted{color:var(--muted2); font-weight:800; font-size:.84rem}
     .kbd{font-family:ui-monospace; font-size:.8rem; opacity:.9; background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.10); padding:3px 8px; border-radius:10px}
+
+    /* Switch (Ocultar anuladas) */
+    .switch{
+      display:flex; align-items:center; gap:8px;
+      font-size:.85rem; font-weight:1000;
+      cursor:pointer;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.08);
+      padding:8px 10px;
+      border-radius:14px;
+      user-select:none;
+    }
+    .switch input{transform:scale(1.05); cursor:pointer}
 
     /* Resumen */
     .resumen-grid{
@@ -293,6 +306,23 @@
       .pill input{width:52vw}
       .detalle-info{grid-template-columns:1fr}
     }
+
+    /* 🔥 FORZAR ROJO para anuladas (blindado) */
+    .estado-pill.estado-bad,
+    .estado-pill[data-estado="anulada"],
+    .estado-pill.anulada{
+      background: rgba(239, 68, 68, 0.18) !important;
+      color: #fecaca !important;
+      border-color: rgba(239, 68, 68, 0.35) !important;
+    }
+    .estado-pill.estado-bad::before,
+    .estado-pill[data-estado="anulada"]::before,
+    .estado-pill.anulada::before{
+      content:"●";
+      font-size:10px;
+      margin-right:6px;
+      opacity:.95;
+    }
   </style>
 </head>
 
@@ -389,8 +419,16 @@
             <button class="btn-mini" id="btnRefrescar">🔄 Refrescar</button>
           </div>
 
-          <div class="muted">
-            Tips: <span class="kbd">Ctrl</span>+<span class="kbd">K</span> buscar · click en una fila = comprobante
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+            <!-- ✅ SWITCH: Ocultar anuladas -->
+            <label class="switch" title="Oculta ventas anuladas de la tabla (no se borran)">
+              <input type="checkbox" id="toggleOcultarAnuladas" checked />
+              Ocultar anuladas
+            </label>
+
+            <div class="muted">
+              Tips: <span class="kbd">Ctrl</span>+<span class="kbd">K</span> buscar · click en una fila = comprobante
+            </div>
           </div>
         </div>
       </div>
