@@ -58,7 +58,7 @@ let subcategoriaSeleccionada = "";
 let etiquetaSeleccionada = "";
 
 let paginaActual = 1;
-const ITEMS_POR_PAGINA = 24;
+const ITEMS_POR_PAGINA = 28;
 
 // -------------------------
 // Util carrito (localStorage)
