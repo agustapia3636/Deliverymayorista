@@ -67,20 +67,6 @@
       box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
     }
 
-    /* Ordenar */
-    .toolbar-select {
-      padding: 12px 18px;
-      border-radius: 30px;
-      border: none;
-      outline: none;
-      font-size: 15px;
-      background: #ffffff;
-      color: #000;
-      cursor: pointer;
-      min-width: 220px;
-      box-shadow: 0 8px 22px rgba(0,0,0,.18);
-    }
-
     /* ===========================
        MEGA MENÚ CATEGORÍAS
     ============================*/
@@ -601,8 +587,6 @@
         font-size: 14px;
       }
 
-      .toolbar-select { width: 100%; max-width: 520px; }
-
       .mega-dropdown { width: 100%; max-width: 520px; }
       .mega-menu { max-width: 100%; min-width: 100%; }
 
@@ -667,15 +651,6 @@
       Solo con stock
     </label>
 
-    <select id="ordenar" class="toolbar-select" aria-label="Ordenar">
-      <option value="destacados">Orden: Destacados</option>
-      <option value="nombre_az">Orden: Nombre A→Z</option>
-      <option value="nombre_za">Orden: Nombre Z→A</option>
-      <option value="precio_asc">Orden: Precio ↑</option>
-      <option value="precio_desc">Orden: Precio ↓</option>
-      <option value="stock_desc">Orden: Stock ↓</option>
-    </select>
-
     <select id="filtro-categoria"></select>
     <select id="filtro-subcategoria"></select>
   </div>
@@ -722,6 +697,7 @@
     </svg>
   </a>
 
+  <!-- ✅ SCRIPT COMPLETO (Nivel DIOS+) -->
   <script type="module">
     import { db } from "./js/firebase-init.js";
     import { collection, getDocs } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
@@ -731,15 +707,25 @@
     // =========================
     const COL_PRODUCTOS = "productos";
 
-    // ✅ Repo de imágenes (RAW) - ajustalo si cambia tu estructura
+    // ✅ Repo de imágenes (RAW)
     const BASE_IMG = "https://raw.githubusercontent.com/agustapia3636/deliverymayorista-img/main";
 
-    const CACHE_KEY = "cache_catalogo_v2";
-    const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hs
-    const CACHE_IMG_NAME = "dm-img-v1";
+    // Cache de catálogo
+    const CACHE_KEY = "dm_catalogo_cache_v2";
+    const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 horas
+
+    // Cache Storage (imágenes)
+    const CACHE_IMG_NAME = "dm_img_cache_v1";
+
+    // Carrito
     const CART_KEY = "carrito_dm_v1";
 
+    // UI State (Nivel Dios+)
+    const UI_STATE_KEY = "dm_catalogo_ui_state_v2";
+
+    // =========================
     // PAGINACIÓN DINÁMICA
+    // =========================
     function calcularItemsPorPagina() {
       return window.innerWidth >= 1200 ? 28 : 16;
     }
@@ -752,7 +738,6 @@
     const buscador = document.getElementById("buscador");
     const chkSoloDestacados = document.getElementById("chkSoloDestacados");
     const chkSoloConStock = document.getElementById("chkSoloConStock");
-    const ordenar = document.getElementById("ordenar");
 
     const megaDropdown = document.getElementById("megaDropdown");
     const categoriaToggle = document.getElementById("categoriaToggle");
@@ -768,7 +753,51 @@
 
     const miniCantidad = document.getElementById("mini-carrito-cantidad");
     const miniTotal = document.getElementById("mini-carrito-total");
-    const miniBadge = document.getElementById("mini-badge");
+
+    const toolbar = document.querySelector(".toolbar");
+
+    // =========================
+    // ORDEN (inyectable)
+    // =========================
+    let ordenarSelect = document.getElementById("ordenar");
+    if (!ordenarSelect && toolbar) {
+      ordenarSelect = document.createElement("select");
+      ordenarSelect.id = "ordenar";
+      ordenarSelect.className = "toolbar-select";
+      ordenarSelect.innerHTML = `
+        <option value="destacados">Orden: Destacados</option>
+        <option value="nombre_az">Orden: Nombre A→Z</option>
+        <option value="nombre_za">Orden: Nombre Z→A</option>
+        <option value="precio_asc">Orden: Precio ↑</option>
+        <option value="precio_desc">Orden: Precio ↓</option>
+        <option value="stock_desc">Orden: Stock ↓</option>
+      `;
+      const selCat = document.getElementById("filtro-categoria");
+      toolbar.insertBefore(ordenarSelect, selCat || null);
+
+      if (!document.querySelector("style[data-toolbar-select]")) {
+        const st = document.createElement("style");
+        st.setAttribute("data-toolbar-select", "1");
+        st.textContent = `
+          .toolbar-select{
+            padding: 12px 18px;
+            border-radius: 30px;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            background: #ffffff;
+            color: #000;
+            cursor: pointer;
+            min-width: 220px;
+            box-shadow: 0 8px 22px rgba(0,0,0,.18);
+          }
+          @media (max-width: 768px){
+            .toolbar-select{ width:100%; max-width:520px; }
+          }
+        `;
+        document.head.appendChild(st);
+      }
+    }
 
     // =========================
     // STATE
@@ -793,11 +822,33 @@
       if (typeof v === "string") {
         const limpio = v.replace(/\./g, "").replace(",", ".");
         const n = Number(limpio);
-        return isNaN(n) ? null : n;
+        return Number.isFinite(n) ? n : null;
       }
       const n = Number(v);
-      return isNaN(n) ? null : n;
+      return Number.isFinite(n) ? n : null;
     }
+
+    function formatoARS(n) {
+      if (n == null || !Number.isFinite(n)) return "";
+      return n.toLocaleString("es-AR", { maximumFractionDigits: 0 });
+    }
+
+    function stockBadge(stock) {
+      const st = Number(stock);
+      if (!Number.isFinite(st) || st <= 0) return { cls: "stock-cero", txt: "Sin stock" };
+      if (st <= 5) return { cls: "stock-bajo", txt: "Stock bajo" };
+      return { cls: "stock-ok", txt: "En stock" };
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+    function escapeHtmlAttr(s){ return escapeHtml(s).replaceAll("\n"," "); }
 
     function normalizarProducto(raw) {
       const p = raw || {};
@@ -837,27 +888,6 @@
         productosTexto
       };
     }
-
-    function formatoARS(n) {
-      if (n == null || !Number.isFinite(n)) return "";
-      return n.toLocaleString("es-AR", { maximumFractionDigits: 0 });
-    }
-
-    function stockBadge(stock) {
-      if (!Number.isFinite(stock) || stock <= 0) return { cls: "stock-cero", txt: "Sin stock" };
-      if (stock <= 5) return { cls: "stock-bajo", txt: "Stock bajo" };
-      return { cls: "stock-ok", txt: "En stock" };
-    }
-
-    function escapeHtml(s) {
-      return String(s ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
-    function escapeHtmlAttr(s){ return escapeHtml(s).replaceAll("\n"," "); }
 
     // =========================
     // SKELETON
@@ -903,7 +933,6 @@
     function candidatosImagen(p) {
       const codigo = p.codigo || "";
       const directa = p.imagen || "";
-
       const base = [
         directa,
         `${BASE_IMG}/${codigo}.jpg`,
@@ -915,7 +944,6 @@
         `${BASE_IMG}/${codigo}.webp`,
         `${BASE_IMG}/${codigo}.WEBP`,
       ].filter(Boolean);
-
       return [...new Set(base)];
     }
 
@@ -933,7 +961,6 @@
       return new Promise((resolve) => {
         if (!cands?.length) return resolve("");
         let i = 0;
-
         const tryNext = () => {
           if (i >= cands.length) return resolve("");
           const url = cands[i++];
@@ -945,13 +972,11 @@
           img.onerror = tryNext;
           img.src = url;
         };
-
         tryNext();
       });
     }
 
     async function precargarPagina(items) {
-      // precarga suave de imágenes de la página actual (y calienta cache)
       const top = items.slice(0, Math.min(12, items.length));
       for (const p of top) {
         const cands = candidatosImagen(p);
@@ -969,6 +994,100 @@
       const arr = [];
       snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
       return arr;
+    }
+
+    // =========================
+    // UI STATE + URL (Nivel DIOS+)
+    // =========================
+    function uiStateReadLocal() {
+      try {
+        const raw = localStorage.getItem(UI_STATE_KEY);
+        if (!raw) return null;
+        const s = JSON.parse(raw);
+        return s && typeof s === "object" ? s : null;
+      } catch { return null; }
+    }
+
+    function uiStateWriteLocal(s) {
+      try { localStorage.setItem(UI_STATE_KEY, JSON.stringify(s)); } catch {}
+    }
+
+    function uiStateReadURL() {
+      const sp = new URLSearchParams(location.search);
+      const hasAny =
+        ["q","cat","sub","tag","dest","stock","ord","page"].some(k => sp.has(k));
+      if (!hasAny) return null;
+
+      return {
+        q: sp.get("q") ?? "",
+        cat: sp.get("cat") ?? "",
+        sub: sp.get("sub") ?? "",
+        tag: sp.get("tag") ?? "",
+        dest: (sp.get("dest") ?? "0") === "1",
+        stock: (sp.get("stock") ?? "0") === "1",
+        ord: sp.get("ord") ?? "destacados",
+        page: Math.max(1, Number(sp.get("page") || 1))
+      };
+    }
+
+    function uiStateToObject() {
+      return {
+        q: buscador.value || "",
+        cat: filtroCategoria || "",
+        sub: filtroSubcategoria || "",
+        tag: filtroEtiqueta || "",
+        dest: !!chkSoloDestacados.checked,
+        stock: !!chkSoloConStock.checked,
+        ord: ordenarSelect ? (ordenarSelect.value || "destacados") : "destacados",
+        page: pagina || 1,
+        ts: Date.now()
+      };
+    }
+
+    function uiStateApply(s) {
+      if (!s) return;
+      buscador.value = s.q ?? "";
+      chkSoloDestacados.checked = !!s.dest;
+      chkSoloConStock.checked = !!s.stock;
+
+      if (ordenarSelect && s.ord) ordenarSelect.value = s.ord;
+
+      filtroCategoria = s.cat ?? "";
+      filtroSubcategoria = s.sub ?? "";
+      filtroEtiqueta = s.tag ?? "";
+      pagina = Math.max(1, Number(s.page) || 1);
+
+      const label = filtroCategoria ? filtroCategoria : "Todas las categorías";
+      const lb = megaDropdown?.querySelector(".mega-label");
+      if (lb) lb.textContent = label;
+    }
+
+    let uiSaveTimer = null;
+    function uiStateSaveDebounced() {
+      clearTimeout(uiSaveTimer);
+      uiSaveTimer = setTimeout(uiStateSaveNow, 220);
+    }
+
+    function uiStateSaveNow() {
+      const s = uiStateToObject();
+      uiStateWriteLocal(s);
+
+      // URL shareable (sin recargar)
+      const url = new URL(location.href);
+      const sp = url.searchParams;
+
+      ["q","cat","sub","tag","dest","stock","ord","page"].forEach(k => sp.delete(k));
+
+      if (s.q) sp.set("q", s.q);
+      if (s.cat) sp.set("cat", s.cat);
+      if (s.sub) sp.set("sub", s.sub);
+      if (s.tag) sp.set("tag", s.tag);
+      if (s.dest) sp.set("dest", "1");
+      if (s.stock) sp.set("stock", "1");
+      if (s.ord && s.ord !== "destacados") sp.set("ord", s.ord);
+      if (s.page && s.page !== 1) sp.set("page", String(s.page));
+
+      history.replaceState(null, "", url.toString());
     }
 
     // =========================
@@ -1050,6 +1169,7 @@
           buildMegaMenu();
           aplicarFiltros();
           render();
+          uiStateSaveNow();
         });
       });
 
@@ -1060,6 +1180,7 @@
           buildMegaMenu();
           aplicarFiltros();
           render();
+          uiStateSaveNow();
         });
       });
 
@@ -1070,6 +1191,7 @@
           buildMegaMenu();
           aplicarFiltros();
           render();
+          uiStateSaveNow();
         });
       });
 
@@ -1082,6 +1204,7 @@
         buildMegaMenu();
         aplicarFiltros();
         render();
+        uiStateSaveNow();
       };
     }
 
@@ -1113,8 +1236,7 @@
         return true;
       });
 
-      const mode = ordenar.value || "destacados";
-
+      const mode = ordenarSelect ? (ordenarSelect.value || "destacados") : "destacados";
       const getNombre = (x) => (x.nombre || x.codigo || "").toString();
       const getPrecio = (x) => (Number.isFinite(Number(x.precio)) ? Number(x.precio) : Infinity);
       const getStock = (x) => (Number.isFinite(Number(x.stock)) ? Number(x.stock) : -1);
@@ -1136,7 +1258,7 @@
     }
 
     // =========================
-    // CARRITO
+    // CARRITO (mini)
     // =========================
     function leerCarrito() {
       try {
@@ -1155,36 +1277,26 @@
       const qty = Math.max(1, Math.floor(Number(cantidad) || 1));
       const cart = leerCarrito();
       const idx = cart.findIndex(x => String(x.codigo) === String(p.codigo));
-      if (idx >= 0) {
-        cart[idx].cantidad = (Number(cart[idx].cantidad) || 0) + qty;
-      } else {
-        cart.push({
-          codigo: p.codigo,
-          nombre: p.nombre,
-          precio: p.precio ?? null,
-          stock: p.stock ?? 0,
-          imagen: p.imagen ?? "",
-          cantidad: qty
-        });
-      }
+      if (idx >= 0) cart[idx].cantidad = (Number(cart[idx].cantidad) || 0) + qty;
+      else cart.push({ codigo: p.codigo, nombre: p.nombre, precio: p.precio ?? null, stock: p.stock ?? 0, imagen: p.imagen ?? "", cantidad: qty });
       guardarCarrito(cart);
     }
 
     function actualizarMiniCarrito() {
       const cart = leerCarrito();
-      let cant = 0;
-      let total = 0;
-
+      let cant = 0, total = 0;
       for (const it of cart) {
         const q = Number(it.cantidad) || 0;
         cant += q;
         const pr = Number(it.precio);
         if (Number.isFinite(pr)) total += pr * q;
       }
-
       miniCantidad.textContent = String(cant);
-      miniBadge.textContent = String(cant);
       miniTotal.textContent = formatoARS(total);
+
+      // badge si existe en tu HTML
+      const miniBadge = document.getElementById("mini-badge");
+      if (miniBadge) miniBadge.textContent = String(cant);
     }
 
     window.irAlCarrito = function() {
@@ -1203,7 +1315,6 @@
         const btnAgregar = card.querySelector(".btn-agregar-carrito");
         const img = card.querySelector(".producto-imagen");
 
-        // blur-up + fallback por candidatos
         if (img) {
           img.addEventListener("load", () => img.classList.add("is-loaded"), { once: true });
 
@@ -1211,7 +1322,7 @@
           let cands = [];
           try { cands = JSON.parse(raw) || []; } catch {}
           let idx = 0;
-          img.onerror = async () => {
+          img.onerror = () => {
             idx++;
             if (idx < cands.length) {
               img.classList.remove("is-loaded");
@@ -1220,7 +1331,6 @@
           };
         }
 
-        // click a producto
         card.querySelector(".producto-imagen-wrapper")?.addEventListener("click", () => {
           location.href = `producto.html?codigo=${encodeURIComponent(codigo)}`;
         });
@@ -1253,8 +1363,6 @@
     }
 
     function render() {
-      if (!grid) return;
-
       const total = filtrados.length;
       const totalPaginas = Math.max(1, Math.ceil(total / ITEMS_POR_PAGINA));
       pagina = Math.min(Math.max(1, pagina), totalPaginas);
@@ -1265,9 +1373,7 @@
       const pageItems = filtrados.slice(desde, hasta);
 
       resumenResultados.textContent =
-        total === 0
-          ? "Sin resultados."
-          : `Mostrando ${desde + 1}–${hasta} de ${total} productos`;
+        total === 0 ? "Sin resultados." : `Mostrando ${desde + 1}–${hasta} de ${total} productos`;
 
       btnAnterior.disabled = pagina <= 1;
       btnSiguiente.disabled = pagina >= totalPaginas;
@@ -1286,6 +1392,7 @@
         b.textContent = String(p);
         b.onclick = () => {
           pagina = p;
+          uiStateSaveNow();
           renderSkeleton(ITEMS_POR_PAGINA);
           setTimeout(() => {
             render();
@@ -1297,11 +1404,14 @@
 
       btnAnterior.onclick = () => {
         pagina--;
+        uiStateSaveNow();
         renderSkeleton(ITEMS_POR_PAGINA);
         setTimeout(() => { render(); window.scrollTo({ top: 0, behavior: "smooth" }); }, 60);
       };
+
       btnSiguiente.onclick = () => {
         pagina++;
+        uiStateSaveNow();
         renderSkeleton(ITEMS_POR_PAGINA);
         setTimeout(() => { render(); window.scrollTo({ top: 0, behavior: "smooth" }); }, 60);
       };
@@ -1360,7 +1470,7 @@
     }
 
     // =========================
-    // UI EVENTS
+    // EVENTS
     // =========================
     categoriaToggle.addEventListener("click", () => {
       megaDropdown.classList.toggle("open");
@@ -1374,32 +1484,38 @@
       pagina = 1;
       aplicarFiltros();
       render();
+      uiStateSaveDebounced();
     });
 
     chkSoloDestacados.addEventListener("change", () => {
       pagina = 1;
       aplicarFiltros();
       render();
+      uiStateSaveDebounced();
     });
 
     chkSoloConStock.addEventListener("change", () => {
       pagina = 1;
       aplicarFiltros();
       render();
+      uiStateSaveDebounced();
     });
 
-    ordenar.addEventListener("change", () => {
-      pagina = 1;
-      aplicarFiltros();
-      render();
-    });
+    if (ordenarSelect) {
+      ordenarSelect.addEventListener("change", () => {
+        pagina = 1;
+        aplicarFiltros();
+        render();
+        uiStateSaveDebounced();
+      });
+    }
 
-    // RESIZE (28 desktop / 16 mobile)
     window.addEventListener("resize", () => {
       const nuevo = calcularItemsPorPagina();
       if (nuevo !== ITEMS_POR_PAGINA) {
         ITEMS_POR_PAGINA = nuevo;
         pagina = 1;
+        uiStateSaveNow();
         renderSkeleton(ITEMS_POR_PAGINA);
         setTimeout(() => render(), 60);
       }
@@ -1410,33 +1526,37 @@
     // =========================
     async function init() {
       actualizarMiniCarrito();
-
-      // Loader inicial
       renderSkeleton(ITEMS_POR_PAGINA);
 
-      // 1) cache primero
+      // 1) aplicar UI desde URL (prioridad) o local
+      const sUrl = uiStateReadURL();
+      const sLocal = uiStateReadLocal();
+      uiStateApply(sUrl || sLocal);
+
+      // 2) cache primero
       const cached = cacheLeer();
       if (cached?.length) {
         catalogo = cached.map(normalizarProducto);
         aplicarFiltros();
         buildMegaMenu();
         render();
+        uiStateSaveNow();
 
         // refresh background
         cargarCatalogoFirestore()
           .then(arr => {
-            const normed = arr.map(normalizarProducto);
-            catalogo = normed;
             cacheGuardar(arr);
+            catalogo = arr.map(normalizarProducto);
             aplicarFiltros();
             buildMegaMenu();
             render();
+            uiStateSaveNow();
           })
           .catch(() => {});
         return;
       }
 
-      // 2) Firestore
+      // 3) Firestore
       try {
         const arr = await cargarCatalogoFirestore();
         cacheGuardar(arr);
@@ -1444,6 +1564,7 @@
         aplicarFiltros();
         buildMegaMenu();
         render();
+        uiStateSaveNow();
       } catch (e) {
         console.error("Error catálogo:", e);
         grid.innerHTML = `
