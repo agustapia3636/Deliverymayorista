@@ -225,6 +225,43 @@
       padding: 24px 10px 30px;
       font-size: 12px;
     }
+
+    /* Sticky resumen mobile */
+    .sticky-resumen-mobile {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .sticky-resumen-mobile {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(90deg, #00c853, #00e676);
+        color: #01210e;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 16px;
+        font-weight: 900;
+        z-index: 999;
+        box-shadow: 0 -10px 30px rgba(0,0,0,.35);
+      }
+
+      .sticky-resumen-mobile button {
+        border-radius: 999px;
+        border: none;
+        padding: 10px 16px;
+        background: #01210e;
+        color: #00e676;
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      body {
+        padding-bottom: 80px; /* evita que tape contenido */
+      }
+    }
   </style>
 </head>
 
@@ -259,12 +296,35 @@
         <button class="btn btn-rojo" id="btn-vaciar">Vaciar carrito</button>
         <button class="btn btn-verde" id="btn-whatsapp">Enviar pedido por WhatsApp</button>
 
+        <label style="font-size:13px; color:#c9c9ff; margin-top:8px;">Observaciones del pedido</label>
+        <textarea
+          id="nota-pedido"
+          placeholder="Ej: entregar martes, factura A, revisar stock…"
+          style="
+            width:100%;
+            min-height:70px;
+            border-radius:12px;
+            border:none;
+            padding:10px;
+            font-size:13px;
+            margin-top:4px;
+          "
+        ></textarea>
+
         <div class="nota" style="margin-top:12px">
           Se enviará un detalle con <b>código</b>, <b>nombre</b>, <b>cantidad</b> y <b>total</b> directamente a tu WhatsApp.
           <br /><br />
           <b>IMPORTANTE:</b> este pedido también se guarda en tu Firestore (colección "ventas") para que puedas llevar el control de pedidos desde el panel Admin.
         </div>
       </aside>
+    </div>
+
+    <!-- Sticky resumen mobile -->
+    <div id="sticky-resumen-mobile" class="sticky-resumen-mobile">
+      <span>
+        Total: $<b id="sticky-total">0</b>
+      </span>
+      <button id="sticky-enviar">Enviar pedido</button>
     </div>
   </main>
 
@@ -275,16 +335,16 @@
     import { collection, addDoc, serverTimestamp }
       from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
 
-    // ✅ UNIFICADO con catalogo.html / producto.html
     const CLAVE_CARRITO = "carrito_dm_v1";
 
-    // ===== DOM =====
     const contenedorItems = document.getElementById("contenedor-items");
     const spanCantidad = document.getElementById("cantidad-total");
     const spanTotal = document.getElementById("total-carrito");
     const btnVaciar = document.getElementById("btn-vaciar");
     const btnWhatsapp = document.getElementById("btn-whatsapp");
     const btnSeguir = document.getElementById("btn-seguir");
+    const stickyTotal = document.getElementById("sticky-total");
+    const stickyEnviar = document.getElementById("sticky-enviar");
 
     function leerCarrito() {
       try {
@@ -303,7 +363,6 @@
         console.error("Error guardando carrito", e);
       }
 
-      // 🔔 avisamos a catálogo/producto que cambió el carrito (stock visual vuelve)
       window.dispatchEvent(new CustomEvent("dm-carrito-update", { detail: carrito }));
     }
 
@@ -386,6 +445,8 @@
       spanCantidad.textContent = String(cant);
       spanTotal.textContent = formatearPrecio(total);
 
+      if (stickyTotal) stickyTotal.textContent = total.toLocaleString("es-AR");
+
       // listeners qty
       contenedorItems.querySelectorAll(".btn-cant").forEach((b) => {
         b.addEventListener("click", () => {
@@ -413,6 +474,9 @@
       });
     }
 
+    // Sticky resumen mobile
+    stickyEnviar?.addEventListener("click", () => btnWhatsapp.click());
+
     btnSeguir.addEventListener("click", () => {
       location.href = "catalogo.html";
     });
@@ -433,30 +497,4 @@
       for (const it of carrito) {
         const sub = (Number(it.precio || 0) * Number(it.cantidad || 0));
         total += sub;
-        msg += `• ${it.codigo} - ${it.nombre} x ${it.cantidad}u = $${formatearPrecio(sub)}%0A`;
-      }
-      msg += `%0A🔹 Total: $${formatearPrecio(total)}`;
-
-      // guarda en Firestore (ventas)
-      try {
-        const coleccionVentas = collection(db, "ventas");
-        await addDoc(coleccionVentas, {
-          items: carrito,
-          total,
-          creadoEn: serverTimestamp(),
-          estado: "pendiente",
-          origen: "carrito_web"
-        });
-      } catch (e) {
-        console.warn("No se pudo guardar en Firestore (ventas):", e);
-      }
-
-      // abrir WhatsApp (sin número fijo -> wa.me/?text=)
-      window.open(`https://wa.me/?text=${msg}`, "_blank");
-    });
-
-    // Inicio
-    renderCarrito();
-  </script>
-</body>
-</html>
+        msg += `• ${it.codigo} - ${it.nombre} x ${it.cantidad}u = $${formatearPrecio(sub)}
