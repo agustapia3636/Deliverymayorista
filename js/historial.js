@@ -568,13 +568,155 @@ btnCerrarModal?.addEventListener("click", cerrarModal);
 modalDetalle?.addEventListener("click", (e) => {
   if (e.target === modalDetalle) cerrarModal();
 });
+// --------------------
+// Imprimir comprobante lindo (SIN abrir pestaña)
+// --------------------
+function imprimirHTMLSinNuevaPestana(html) {
+  const iframe = document.createElement("iframe");
+  iframe.style.position = "fixed";
+  iframe.style.right = "0";
+  iframe.style.bottom = "0";
+  iframe.style.width = "0";
+  iframe.style.height = "0";
+  iframe.style.border = "0";
+  iframe.style.opacity = "0";
+  iframe.setAttribute("aria-hidden", "true");
 
-/* =========================
-   Imprimir
-========================= */
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentDocument || iframe.contentWindow.document;
+  doc.open();
+  doc.write(html);
+  doc.close();
+
+  // Esperar a que renderice y recién imprimir
+  setTimeout(() => {
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+
+    // limpiar iframe
+    setTimeout(() => {
+      iframe.remove();
+    }, 800);
+  }, 250);
+}
+
 btnImprimir?.addEventListener("click", () => {
   if (!ventaActualDetalle) return;
-  window.print();
+
+  const v = ventaActualDetalle;
+
+  const fechaTexto = formatearFecha(v.fecha);
+  const numeroInterno = v.numeroInterno || "-";
+  const cliente = v.clienteNombre || "-";
+  const estado = v.estado || "-";
+  const totalTexto = "$" + (v.total || 0).toLocaleString("es-AR");
+
+  // filas de productos
+  let filasProductos = "";
+
+  if (Array.isArray(v.productos) && v.productos.length > 0) {
+    v.productos.forEach((p) => {
+      const infoProd = productosCatalogo.find((c) => c.codigo === p.codigo);
+      const nombre = infoProd?.nombre || p.codigo || "-";
+      const precio = p.precio || 0;
+      const cant = p.cantidad || 0;
+      const subtotal = precio * cant;
+
+      filasProductos += `
+        <tr>
+          <td>${p.codigo || "-"}</td>
+          <td>${nombre}</td>
+          <td class="num">${cant}</td>
+          <td class="num">$${precio.toLocaleString("es-AR")}</td>
+          <td class="num">$${subtotal.toLocaleString("es-AR")}</td>
+        </tr>
+      `;
+    });
+  } else {
+    filasProductos = `
+      <tr>
+        <td colspan="5">Sin productos.</td>
+      </tr>
+    `;
+  }
+
+  const notasHtml = v.notas ? `<p><strong>Notas:</strong> ${v.notas}</p>` : "";
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+      <meta charset="UTF-8" />
+      <title>Comprobante de Venta</title>
+      <style>
+        * { box-sizing: border-box; }
+        body {
+          font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+          margin: 0;
+          padding: 18px;
+          color: #111;
+        }
+        h1 { font-size: 18px; margin: 0 0 4px 0; }
+        .subtitulo { font-size: 11px; color: #6b7280; margin: 0 0 16px 0; }
+        .header {
+          display: grid;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 4px 32px;
+          font-size: 13px;
+          margin-bottom: 12px;
+        }
+        .header div span { font-weight: 700; }
+        .box { border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+        th, td { border-bottom: 1px solid #e5e7eb; padding: 6px 8px; text-align: left; }
+        th { background: #f9fafb; font-weight: 700; }
+        td.num { text-align: right; white-space: nowrap; }
+        .totales { margin-top: 10px; text-align: right; font-size: 14px; font-weight: 800; }
+        .footer { margin-top: 24px; font-size: 11px; color: #6b7280; text-align: center; }
+
+        @media print {
+          body { margin: 14mm; }
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Comprobante de Venta</h1>
+      <p class="subtitulo">Documento no fiscal · Uso interno</p>
+
+      <div class="box">
+        <div class="header">
+          <div><span>Fecha:</span> ${fechaTexto}</div>
+          <div><span>N° Interno:</span> ${numeroInterno}</div>
+          <div><span>Cliente:</span> ${cliente}</div>
+          <div><span>Estado:</span> ${estado}</div>
+        </div>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Producto</th>
+              <th class="num">Cant.</th>
+              <th class="num">Precio</th>
+              <th class="num">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filasProductos}
+          </tbody>
+        </table>
+
+        <div class="totales">Total: ${totalTexto}</div>
+        ${notasHtml}
+      </div>
+
+      <div class="footer">Delivery Mayorista · Comprobante interno de venta</div>
+    </body>
+    </html>
+  `;
+
+  imprimirHTMLSinNuevaPestana(html);
 });
 
 /* =========================
