@@ -1380,31 +1380,32 @@ if (stockBox && stockNum) {
 
   // badge dinámico
   const badge = stockBox.querySelector('.badge-stock');
-  if (badge) {
-    if (stockActual <= 0) {
-      badge.textContent = 'Sin stock';
-      badge.className = 'badge-stock stock-cero';
-      btnAgregar.disabled = true;
-      btnAgregar.textContent = 'Sin stock';
-    } else if (stockActual <= 5) {
-      badge.textContent = 'Stock bajo';
-      badge.className = 'badge-stock stock-bajo';
-    } else {
-      badge.textContent = 'En stock';
-      badge.className = 'badge-stock stock-ok';
-    }
+if (badge) {
+  if (stockActual <= 0) {
+    badge.textContent = 'Sin stock';
+    badge.className = 'badge-stock stock-cero';
+    btnAgregar.disabled = true;
+    btnAgregar.textContent = 'Sin stock';
+  } else if (stockActual <= 5) {
+    badge.textContent = 'Stock bajo';
+    badge.className = 'badge-stock stock-bajo';
+    btnAgregar.disabled = false;
+  } else {
+    badge.textContent = 'En stock';
+    badge.className = 'badge-stock stock-ok';
+    btnAgregar.disabled = false;
   }
 }
 
   // feedback botón
+ if (!btnAgregar.disabled) {
   btnAgregar.classList.add("btn-agregar-carrito-activo");
   btnAgregar.textContent = "✅ Agregado";
   setTimeout(() => {
     btnAgregar.classList.remove("btn-agregar-carrito-activo");
     btnAgregar.textContent = "🛒 Agregar";
   }, 900);
-});
-
+}
 
     function render() {
       const total = filtrados.length;
