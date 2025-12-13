@@ -46,7 +46,6 @@
 
     /* ===========================
        MEGA MENÚ CATEGORÍAS
-       (3 columnas: Cat / Subcat / Etiquetas)
     ============================*/
 
     .mega-dropdown {
@@ -155,7 +154,7 @@
     /* Iconos en la columna de categorías */
     .mega-item {
       position: relative;
-      padding-left: 30px; /* espacio para el icono */
+      padding-left: 30px;
     }
 
     .mega-item::before {
@@ -168,7 +167,7 @@
       opacity: 0.95;
     }
 
-    /* Botón premium reset filtros */
+    /* Botón reset filtros */
     .mega-reset-btn {
       position: absolute;
       right: 14px;
@@ -185,9 +184,7 @@
       gap: 6px;
     }
 
-    .mega-reset-btn span {
-      font-size: 12px;
-    }
+    .mega-reset-btn span { font-size: 12px; }
 
     .mega-reset-btn:hover {
       background: #ffa400;
@@ -217,7 +214,7 @@
       gap: 25px;
       padding: 25px;
 
-      /* FIX: estirar items para misma altura por fila */
+      /* FIX: mismas alturas por fila */
       align-items: stretch;
       grid-auto-rows: 1fr;
     }
@@ -230,11 +227,10 @@
       text-align: center;
       min-height: 260px;
 
-      /* FIX: que ocupe toda la altura de la fila */
+      /* FIX: ocupar toda la altura */
       height: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: flex-start;
 
       box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.25);
       text-decoration: none;
@@ -278,7 +274,7 @@
       line-height: 1.15;
       cursor: pointer;
 
-      /* ayuda a que títulos "corten" parejo */
+      /* títulos parejos */
       min-height: 34px;
       display: flex;
       align-items: center;
@@ -292,7 +288,7 @@
       margin-top: 6px;
       line-height: 1.25;
 
-      /* FIX: limitar altura para que no rompa la grilla */
+      /* FIX: limitar a 3 líneas */
       min-height: 48px;
       display: -webkit-box;
       -webkit-line-clamp: 3;
@@ -300,10 +296,9 @@
       overflow: hidden;
     }
 
-    /* FIX: empuja el bloque de precio/stock/controles hacia abajo
-       (mantiene todo alineado entre cards) */
+    /* FIX: empuja el bloque de abajo */
     .producto-precio-row {
-      margin-top: auto;
+      margin-top: auto; /* FIX */
       padding-top: 10px;
     }
 
@@ -320,19 +315,22 @@
       margin-top: 4px;
     }
 
+    /* FIX: +/- centrados */
     .cantidad-container {
       margin-top: 8px;
-      display: inline-flex;
+      display: flex;
       align-items: center;
-      gap: 6px;
+      justify-content: center; /* FIX */
+      gap: 8px;
+      width: 100%;
     }
 
     .btn-cantidad {
       border-radius: 999px;
       border: none;
-      width: 24px;
-      height: 24px;
-      font-size: 16px;
+      width: 28px;
+      height: 28px;
+      font-size: 18px;
       cursor: pointer;
       background: #202432;
       color: #fff;
@@ -343,12 +341,12 @@
     }
 
     .input-cantidad {
-      width: 50px;
+      width: 54px;
       text-align: center;
       border-radius: 999px;
       border: none;
       padding: 4px 6px;
-      font-size: 13px;
+      font-size: 14px;
       outline: none;
     }
 
@@ -369,8 +367,6 @@
     .btn-agregar-carrito-activo {
       background: #1ebe57;
     }
-
-    /* BADGES DE STOCK Y DESTACADO */
 
     .badge-stock {
       display: inline-block;
@@ -404,44 +400,7 @@
       margin-left: 0.5rem;
     }
 
-    /* BOTÓN FLOTANTE WHATSAPP EN CATÁLOGO (simple, link fijo) */
-    .btn-wa-flotante {
-      position: fixed;
-      right: 18px;
-      bottom: 18px;
-      background: #25d366;
-      padding: 12px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      text-decoration: none;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.45);
-      z-index: 999;
-      transition: transform 0.1s ease, filter 0.1s ease;
-    }
-    .btn-wa-flotante:hover {
-      filter: brightness(1.06);
-      transform: translateY(-1px);
-    }
-
-    @media (max-width: 480px) {
-      .btn-wa-flotante {
-        bottom: 90px !important;
-      }
-    }
-
-    /* contorno circular premium */
-    .btn-wa-flotante:focus,
-    .btn-wa-flotante:active,
-    .btn-wa-flotante:visited {
-      outline: none;
-      border-radius: 50% !important;
-      box-shadow: 0 0 0 3px #25d36688;
-    }
-
-    /* MINI CARRITO FLOTANTE */
+    /* MINI CARRITO */
     .mini-carrito {
       position: fixed;
       right: 16px;
@@ -459,9 +418,7 @@
       color: #000;
     }
 
-    .mini-carrito-icono {
-      font-size: 18px;
-    }
+    .mini-carrito-icono { font-size: 18px; }
 
     .mini-carrito-texto {
       display: flex;
@@ -474,9 +431,7 @@
       font-weight: 500;
     }
 
-    /* ===========================
-       PAGINADOR CATÁLOGO
-    ============================*/
+    /* PAGINADOR */
     .paginador-contenedor {
       padding: 0 25px 24px;
       display: flex;
@@ -544,7 +499,7 @@
       justify-content: center;
     }
 
-    /* SOLO EN CELULAR */
+    /* MOBILE */
     @media (max-width: 768px) {
       header {
         text-align: center;
@@ -578,49 +533,8 @@
         padding: 16px 12px 12px;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 18px;
-
-        /* FIX también en mobile */
         align-items: stretch;
         grid-auto-rows: 1fr;
-      }
-
-      .producto-card {
-        padding: 14px 12px 14px;
-        border-radius: 18px;
-      }
-
-      .producto-imagen-wrapper {
-        height: 150px;
-      }
-
-      .producto-titulo {
-        font-size: 14px;
-        min-height: 32px;
-      }
-
-      .producto-descripcion {
-        font-size: 12px;
-        min-height: 42px;
-        -webkit-line-clamp: 3;
-      }
-
-      .producto-precio {
-        font-size: 14px;
-      }
-
-      #mini-carrito {
-        bottom: 150px !important;
-      }
-
-      .btn-wa-flotante {
-        bottom: 80px;
-        right: 12px;
-        font-size: 13px;
-        padding: 9px 14px;
-      }
-
-      .paginador-contenedor {
-        padding: 4px 12px 20px;
       }
     }
 
@@ -628,29 +542,8 @@
       .grid {
         grid-template-columns: 1fr;
         gap: 22px;
-      }
-
-      .producto-card {
-        padding: 16px 14px 16px;
-      }
-
-      .producto-imagen-wrapper {
-        height: 150px;
-      }
-
-      .producto-titulo {
-        font-size: 16px;
-        min-height: 34px;
-      }
-
-      .producto-descripcion {
-        font-size: 13px;
-        min-height: 46px;
-        -webkit-line-clamp: 3;
-      }
-
-      .producto-precio {
-        font-size: 16px;
+        align-items: stretch;
+        grid-auto-rows: 1fr;
       }
     }
   </style>
@@ -662,7 +555,6 @@
   <div class="toolbar">
     <input id="buscador" type="text" placeholder="Buscar por código o descripción" />
 
-    <!-- MEGA DROPDOWN DE CATEGORÍAS -->
     <div class="mega-dropdown" id="megaDropdown">
       <button id="categoriaToggle" class="mega-toggle">
         <span class="mega-label">Todas las categorías</span>
@@ -683,14 +575,12 @@
           <ul id="megaEtiquetas"></ul>
         </div>
 
-        <!-- Botón premium reset filtros -->
         <button id="megaReset" class="mega-reset-btn">
           <span>🔄</span> Limpiar filtros
         </button>
       </div>
     </div>
 
-    <!-- filtros extra: solo destacados / solo con stock -->
     <label class="chk-catalogo">
       <input type="checkbox" id="chkSoloDestacados" />
       Solo destacados
@@ -701,48 +591,22 @@
       Solo con stock
     </label>
 
-    <!-- selects ocultos para la lógica de filtros -->
     <select id="filtro-categoria"></select>
     <select id="filtro-subcategoria"></select>
   </div>
 
-  <!-- GRID DEL CATÁLOGO (JS genera las cards) -->
   <div id="catalogoGrid" class="grid"></div>
 
-  <!-- PAGINADOR + RESUMEN -->
   <div class="paginador-contenedor">
-    <div id="resumen-resultados" class="paginador-resumen">
-      <!-- Se completa desde catalogo.js -->
-    </div>
+    <div id="resumen-resultados" class="paginador-resumen"></div>
+
     <div id="paginador" class="paginador">
-      <button id="btn-pagina-anterior" class="paginador-btn" type="button" disabled>
-        ‹
-      </button>
-
-      <div id="paginador-numeros" class="paginador-numeros">
-        <!-- Botones de página generados por JS -->
-      </div>
-
-      <button id="btn-pagina-siguiente" class="paginador-btn" type="button" disabled>
-        ›
-      </button>
+      <button id="btn-pagina-anterior" class="paginador-btn" type="button" disabled>‹</button>
+      <div id="paginador-numeros" class="paginador-numeros"></div>
+      <button id="btn-pagina-siguiente" class="paginador-btn" type="button" disabled>›</button>
     </div>
   </div>
 
-  <!-- Botón flotante de WhatsApp (mensaje simple genérico) -->
-  <a
-    id="wa-flotante"
-    class="btn-wa-flotante"
-    href="https://wa.me/?text=Hola%20%21%20Quiero%20consultar%20por%20el%20cat%C3%A1logo%20mayorista."
-    target="_blank"
-    aria-label="WhatsApp"
-  >
-    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="#ffffff" viewBox="0 0 32 32">
-      <path d="M16.019 2.594c-7.453 0-13.438 6.063-13.438 13.531 0 2.375.625 4.656 1.844 6.719l-1.969 7.219 7.453-1.969c1.969 1.063 4.219 1.625 6.375 1.625h.031c7.438 0 13.438-6.063 13.438-13.531 0-3.594-1.406-6.938-3.969-9.469-2.531-2.531-5.906-4.125-9.656-4.125zm0 24.844h-.031c-1.938 0-3.813-.5-5.469-1.406l-.406-.219-4.438 1.188 1.188-4.344-.25-.406c-1.188-1.906-1.813-4.094-1.813-6.375 0-6.563 5.344-11.906 11.906-11.906 3.188 0 6.156 1.25 8.406 3.5 2.25 2.25 3.5 5.219 3.5 8.406-.031 6.531-5.375 11.875-11.906 11.875zm6.344-8.531c-.344-.188-2.031-1-2.344-1.094-.313-.094-.531-.156-.75.188-.219.344-.875 1.094-1.063 1.313-.188.188-.375.219-.719.031-.344-.188-1.438-.531-2.75-1.656-1-.875-1.656-1.938-1.844-2.281-.188-.344-.016-.531.156-.719.156-.156.344-.406.5-.594.156-.188.219-.313.344-.531.094-.219.031-.406-.031-.594-.063-.188-.75-1.844-1.031-2.5-.281-.656-.563-.563-.75-.563h-.656c-.219 0-.594.094-.906.438-.313.344-1.188 1.156-1.188 2.813s1.219 3.25 1.406 3.469c.188.219 2.406 3.656 5.844 5 3.438 1.344 3.438.875 4.063.813.625-.063 2.031-.813 2.313-1.594.281-.781.281-1.438.219-1.594-.063-.156-.281-.25-.625-.438z"/>
-    </svg>
-  </a>
-
-  <!-- MINI CARRITO GLOBAL -->
   <div id="mini-carrito" class="mini-carrito" onclick="irAlCarrito()">
     <div class="mini-carrito-icono">🛒</div>
     <div class="mini-carrito-texto">
@@ -755,7 +619,6 @@
     </div>
   </div>
 
-  <!-- SCRIPT DEL CATÁLOGO + CARRITO (FIRESTORE) -->
-  <script type="module" src="js/catalogo.js?v=fire1"></script>
+  <script type="module" src="js/catalogo.js?v=fix1"></script>
 </body>
 </html>
