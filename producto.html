@@ -127,35 +127,35 @@
       .producto-acciones a,.producto-acciones button{ width:100%; }
       .producto-titulo{ font-size:28px; }
     }
+
     /* Acción secundaria del header */
-.topbar-link {
-  padding: 6px 14px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.15);
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
+    .topbar-link {
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.15);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
 
-.topbar-link:hover {
-  background: rgba(255,255,255,0.28);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.25);
-}
-
+    .topbar-link:hover {
+      background: rgba(255,255,255,0.28);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.25);
+    }
   </style>
 </head>
 
 <body>
   <header class="topbar">
-  <div class="topbar-inner">
-    <span class="logo-link">Delivery Mayorista</span>
-    <a href="catalogo.html" class="topbar-link">Ver catálogo</a>
-  </div>
-</header>
+    <div class="topbar-inner">
+      <span class="logo-link">Delivery Mayorista</span>
+      <a id="linkCatalogo" href="catalogo.html" class="topbar-link">Ver catálogo</a>
+    </div>
+  </header>
 
   <main class="producto-pagina contenedor">
     <div id="producto-loading">Cargando producto...</div>
@@ -187,6 +187,70 @@
     const CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6h
     const CACHE_IMG_NAME = "dm-img-v1";
 
+    // ====== BACK / VOLVER (con filtros) ======
+    const linkCatalogo = document.getElementById("linkCatalogo");
+
+    function getParam(name){
+      return new URLSearchParams(location.search).get(name);
+    }
+
+    function sanitizeBackUrl(raw){
+      if (!raw) return null;
+
+      let v = String(raw).trim();
+      if (!v) return null;
+
+      // decode seguro
+      try { v = decodeURIComponent(v); } catch {}
+
+      // bloqueo protocolos / javascript / etc.
+      const low = v.toLowerCase();
+      if (low.startsWith("javascript:")) return null;
+      if (low.includes("://")) return null;          // http(s)://, etc.
+      if (low.startsWith("//")) return null;
+
+      // permitimos solo rutas relativas y preferimos que apunten al catálogo
+      // (así evitamos open-redirect y mantenemos "volver con filtros")
+      const ok =
+        low.startsWith("catalogo.html") ||
+        low.startsWith("./catalogo.html") ||
+        low.startsWith("/catalogo.html");
+
+      if (!ok) return null;
+
+      return v;
+    }
+
+    const backRaw = getParam("back") || getParam("backUrl");
+    const backSafe = sanitizeBackUrl(backRaw);
+    const CATALOGO_FALLBACK = "catalogo.html";
+    const CATALOGO_TARGET = backSafe || CATALOGO_FALLBACK;
+
+    // aplica al botón "Ver catálogo" del header
+    if (linkCatalogo) linkCatalogo.href = CATALOGO_TARGET;
+
+    function volverAlCatalogo(){
+      // 1) Si viene back, volvemos EXACTO a ese catálogo (con filtros/paginación/etc.)
+      if (backSafe) {
+        location.href = backSafe;
+        return;
+      }
+      // 2) Si venís desde el catálogo, history.back() mantiene estado (cuando aplica)
+      const ref = document.referrer || "";
+      if (ref.includes("catalogo.html")) {
+        history.back();
+        return;
+      }
+      // 3) Fallback duro
+      location.href = CATALOGO_FALLBACK;
+    }
+    window.__dm_back = volverAlCatalogo;
+
+    function buildProductoUrl(codigo){
+      const base = `producto.html?codigo=${encodeURIComponent(codigo)}`;
+      return backSafe ? `${base}&back=${encodeURIComponent(backSafe)}` : base;
+    }
+
     // cache por producto
     const cacheProdKey = (codigo) => `cache_producto_${String(codigo || "").trim()}_v1`;
 
@@ -213,13 +277,6 @@
     function getCodigoURL() {
       return new URLSearchParams(location.search).get("codigo");
     }
-
-    function volverAlCatalogo() {
-      const ref = document.referrer || "";
-      if (ref.includes("catalogo.html")) history.back();
-      else location.href = "catalogo.html";
-    }
-    window.__dm_back = volverAlCatalogo;
 
     function parsearPrecio(v) {
       if (typeof v === "number") return v;
@@ -302,10 +359,8 @@
       imgEl.decoding = "async";
       imgEl.referrerPolicy = "no-referrer";
 
-      // warm-up del primer candidato (si existe)
       if (cands[0]) warmCacheImage(cands[0]);
 
-      // elegimos el primero que cargue OK
       let i = 0;
       const probar = () => {
         if (i >= cands.length) return;
@@ -316,7 +371,6 @@
       imgEl.onerror = probar;
       imgEl.onload = () => warmCacheImage(imgEl.src);
 
-      // precarga paralela suave (no bloquea)
       for (const u of cands.slice(0, 3)) {
         const im = new Image();
         im.decoding = "async";
@@ -355,24 +409,8 @@
         if (raw) {
           const obj = JSON.parse(raw);
           if (Array.isArray(obj?.data)) catalogo = obj.data;
-          // si el cache está en formato {ts,data} (como en catalogo.html)
-          if (!catalogo && Array.isArray(obj?.data) === false && Array.isArray(obj?.data) !== true) {
-            // no hacemos nada
-          }
         }
       } catch {}
-
-      // soporta ambos formatos:
-      if (!catalogo || !catalogo.length) {
-        // intento formato {ts,data}
-        try {
-          const raw2 = localStorage.getItem(CLAVE_CACHE_CATALOGO);
-          if (raw2) {
-            const obj2 = JSON.parse(raw2);
-            if (Array.isArray(obj2?.data)) catalogo = obj2.data;
-          }
-        } catch {}
-      }
 
       if (!catalogo || !catalogo.length) {
         navEl.innerHTML = `
@@ -381,11 +419,9 @@
         return;
       }
 
-      // normalizamos para buscar por codigo
-      const catNorm = catalogo.map(x => (x && typeof x === "object") ? x : {}).map(x => ({
-        ...x,
-        codigo: String(x.codigo ?? x.Codigo ?? x.id ?? "")
-      }));
+      const catNorm = catalogo
+        .map(x => (x && typeof x === "object") ? x : {})
+        .map(x => ({ ...x, codigo: String(x.codigo ?? x.Codigo ?? x.id ?? "") }));
 
       const idx = catNorm.findIndex(x => String(x.codigo) === String(codigoActual));
       if (idx === -1) {
@@ -398,7 +434,7 @@
       const ant = catNorm[(idx - 1 + catNorm.length) % catNorm.length]?.codigo || "";
       const sig = catNorm[(idx + 1) % catNorm.length]?.codigo || "";
 
-      window.__dm_ir = (c) => location.href = `producto.html?codigo=${encodeURIComponent(c)}`;
+      window.__dm_ir = (c) => location.href = buildProductoUrl(c);
 
       navEl.innerHTML = `
         <button class="btn-nav" type="button" onclick="window.__dm_ir('${ant}')">← ${ant}</button>
@@ -460,7 +496,6 @@
 
     // ====== Firestore ======
     async function cargarDesdeFirestore(codigo) {
-      // 1) por campo codigo
       const ref = collection(db, COL_PRODUCTOS);
       const q = query(ref, where("codigo", "==", codigo), limit(1));
       const snap = await getDocs(q);
@@ -470,7 +505,6 @@
         return { id: d.id, ...d.data() };
       }
 
-      // 2) fallback por doc.id
       const docRef = doc(db, COL_PRODUCTOS, codigo);
       const one = await getDoc(docRef);
       if (one.exists()) return { id: one.id, ...one.data() };
@@ -490,12 +524,10 @@
 
       renderNav(codigo);
 
-      // 1) cache local por producto (instantáneo)
       const cached = cacheProductoLeer(codigo);
       if (cached) {
         renderProducto(cached, codigo);
 
-        // 2) refresh background
         cargarDesdeFirestore(codigo)
           .then(prod => {
             if (prod) {
@@ -507,7 +539,6 @@
         return;
       }
 
-      // 2) Firestore directo
       try {
         const prod = await cargarDesdeFirestore(codigo);
 
@@ -517,6 +548,7 @@
             <p>No existe el código <b>${escapeHtml(codigo)}</b> en Firestore.</p>
             <div class="producto-acciones">
               <button class="btn-secundario" type="button" onclick="window.__dm_back()">← Volver</button>
+              <a class="btn-secundario" href="${CATALOGO_TARGET}">Ver catálogo</a>
             </div>
           `;
           visible();
@@ -532,6 +564,7 @@
           <p>No se pudo obtener el producto desde Firestore.</p>
           <div class="producto-acciones">
             <button class="btn-secundario" type="button" onclick="window.__dm_back()">← Volver</button>
+            <a class="btn-secundario" href="${CATALOGO_TARGET}">Ver catálogo</a>
           </div>
         `;
         visible();
