@@ -127,36 +127,6 @@
     .item-nombre { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 2px; }
     .item-codigo { opacity: .9; }
 
-    .stock-line{
-      margin-top: 6px;
-      font-size: 12px;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 4px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: rgba(255,255,255,.06);
-      color: rgba(255,255,255,.85);
-      width: fit-content;
-    }
-    .stock-line.stock-ok { color: #9dffd1; border-color: rgba(0,200,83,.25); }
-    .stock-line.stock-bajo { color: #ffe08a; border-color: rgba(255,152,0,.25); }
-    .stock-line.stock-sin { color: #ff9aa6; border-color: rgba(255,82,82,.25); }
-
-    .stock-flash{
-      margin-left: 2px;
-      color: #fff;
-      font-weight: 900;
-      opacity: 0;
-      transform: translateY(2px);
-      transition: opacity .18s ease, transform .18s ease;
-    }
-    .stock-flash.show{
-      opacity: 1;
-      transform: translateY(0);
-    }
-
     .item-row {
       margin-top: 10px;
       display: flex;
@@ -189,10 +159,9 @@
       align-items: center;
       justify-content: center;
       box-shadow: 0 12px 22px rgba(0,0,0,.2);
-      transition: transform .08s ease, filter .08s ease, opacity .12s ease;
+      transition: transform .08s ease, filter .08s ease;
     }
     .btn-cant:hover { filter: brightness(1.06); transform: translateY(-1px); }
-    .btn-cant:disabled { opacity: .45; cursor: not-allowed; transform: none; filter: none; }
 
     .cant-num {
       min-width: 36px;
@@ -250,6 +219,60 @@
     }
     .nota b { color: #fff; }
 
+    footer {
+      text-align: center;
+      color: rgba(255,255,255,.55);
+      padding: 24px 10px 30px;
+      font-size: 12px;
+    }
+  
+    /* ===== Stock en carrito ===== */
+    .stock-line{
+      margin-top: 6px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.06);
+      color: rgba(255,255,255,.85);
+      width: fit-content;
+      position: relative;
+    }
+    .stock-line.stock-ok { color: #9dffd1; border-color: rgba(0,200,83,.25); }
+    .stock-line.stock-bajo { color: #ffe08a; border-color: rgba(255,152,0,.25); }
+    .stock-line.stock-sin { color: #ff9aa6; border-color: rgba(255,82,82,.25); }
+
+    /* Feedback stock PRO: "Sin stock" 1s */
+    .stock-flash-text{
+      position: absolute;
+      right: -6px;
+      top: -10px;
+      font-size: 11px;
+      font-weight: 900;
+      background: #ff5252;
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 999px;
+      opacity: 0;
+      transform: translateY(4px) scale(.95);
+      transition: opacity .18s ease, transform .18s ease;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .stock-flash-text.show{
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .btn-cant.stock-bloqueado{
+      opacity: .45;
+      cursor: not-allowed;
+      filter: grayscale(.2);
+    }
+
+    /* ===== Observaciones ===== */
     .nota-label{
       margin-top: 10px;
       font-size: 13px;
@@ -268,14 +291,7 @@
       outline: none;
     }
 
-    footer {
-      text-align: center;
-      color: rgba(255,255,255,.55);
-      padding: 24px 10px 30px;
-      font-size: 12px;
-    }
-
-    /* ✅ Sticky resumen mobile */
+    /* ===== Sticky resumen mobile ===== */
     .sticky-resumen-mobile { display: none; }
 
     @media (max-width: 768px) {
@@ -328,6 +344,7 @@
         cursor:not-allowed;
       }
     }
+
   </style>
 </head>
 
@@ -379,6 +396,7 @@
     </div>
   </main>
 
+
   <!-- ✅ Sticky resumen mobile -->
   <div id="sticky-resumen-mobile" class="sticky-resumen-mobile" aria-hidden="true">
     <div class="sticky-left">
@@ -397,6 +415,7 @@
 
     // ✅ UNIFICADO con catalogo.html / producto.html
     const CLAVE_CARRITO = "carrito_dm_v1";
+    const CLAVE_CACHE_CATALOGO = "dm_catalogo_cache_v2";
 
     // ===== DOM =====
     const contenedorItems = document.getElementById("contenedor-items");
@@ -433,20 +452,66 @@
       window.dispatchEvent(new CustomEvent("dm-carrito-update", { detail: carrito }));
     }
 
-    function formatearPrecio(valor) {
-      return Number(valor || 0).toLocaleString("es-AR");
+    function leerCatalogoCache() {
+      try {
+        const raw = localStorage.getItem(CLAVE_CACHE_CATALOGO);
+        if (!raw) return [];
+        const obj = JSON.parse(raw);
+        return Array.isArray(obj?.data) ? obj.data : [];
+      } catch { return []; }
     }
 
-    function totalizar(carrito) {
-      let total = 0;
-      let cant = 0;
-      for (const it of carrito) {
-        const q = Number(it.cantidad || 0);
-        const p = Number(it.precio || 0);
-        cant += q;
-        total += p * q;
+    function normalizarCodigo(x){
+      return String(x?.codigo ?? x?.Codigo ?? x?.id ?? "").trim();
+    }
+
+    function syncStockDesdeCatalogoCache() {
+      const cat = leerCatalogoCache();
+      if (!cat.length) return;
+
+      const stockMap = new Map();
+      for (const p of cat) {
+        const cod = normalizarCodigo(p);
+        if (!cod) continue;
+        const s = Number(p?.stock ?? p?.Stock ?? 0);
+        if (Number.isFinite(s)) stockMap.set(cod, s);
       }
-      return { total, cant };
+
+      const carrito = leerCarrito();
+      let cambio = false;
+
+      for (const it of carrito) {
+        const cod = String(it?.codigo ?? "").trim();
+        if (!cod) continue;
+        if (!stockMap.has(cod)) continue;
+
+        const nuevoStock = stockMap.get(cod);
+        if (Number(it.stock) !== Number(nuevoStock)) {
+          it.stock = nuevoStock;
+          cambio = true;
+        }
+        // si la cantidad supera el stock, la bajamos
+        if (Number.isFinite(Number(it.stock))) {
+          const st = Number(it.stock);
+          const q = Math.max(1, Number(it.cantidad || 1));
+          if (st >= 0 && q > st) {
+            it.cantidad = Math.max(1, st);
+            cambio = true;
+          }
+        }
+      }
+
+      if (cambio) guardarCarrito(carrito);
+    }
+
+    function updateSticky(total, carritoLen){
+      const empty = !carritoLen;
+      if (stickyTotal) stickyTotal.textContent = String(formatearPrecio(total));
+      if (stickyWrap){
+        stickyWrap.style.display = (window.matchMedia("(max-width: 768px)").matches && !empty) ? "flex" : "none";
+        stickyWrap.setAttribute("aria-hidden", String(empty));
+      }
+      if (stickyEnviar) stickyEnviar.disabled = empty;
     }
 
     function hasFiniteStock(it){
@@ -457,7 +522,7 @@
     function stockInfo(it){
       if (!hasFiniteStock(it)) return null;
       const stock = Number(it.stock);
-      const qty = Number(it.cantidad || 0);
+      const qty = Math.max(1, Number(it.cantidad || 1));
       const restante = Math.max(0, stock - qty);
 
       let cls = "stock-ok";
@@ -474,26 +539,28 @@
       return { stock, qty, restante, cls, txt };
     }
 
-    function flashStock(el){
+    function flashSinStock(itemEl){
+      const el = itemEl?.querySelector("[data-stock-flash]");
       if (!el) return;
       el.classList.add("show");
       clearTimeout(el.__t);
-      el.__t = setTimeout(() => el.classList.remove("show"), 650);
+      el.__t = setTimeout(() => el.classList.remove("show"), 900);
     }
 
-    function updateSticky(total, carritoLen){
-      const empty = !carritoLen;
+    function formatearPrecio(valor) {
+      return Number(valor || 0).toLocaleString("es-AR");
+    }
 
-      if (stickyTotal) stickyTotal.textContent = String(formatearPrecio(total));
-
-      if (stickyWrap){
-        stickyWrap.style.display = (window.matchMedia("(max-width: 768px)").matches && !empty) ? "flex" : "none";
-        stickyWrap.setAttribute("aria-hidden", String(empty));
+    function totalizar(carrito) {
+      let total = 0;
+      let cant = 0;
+      for (const it of carrito) {
+        const q = Number(it.cantidad || 0);
+        const p = Number(it.precio || 0);
+        cant += q;
+        total += p * q;
       }
-
-      if (stickyEnviar){
-        stickyEnviar.disabled = empty;
-      }
+      return { total, cant };
     }
 
     function renderCarrito() {
@@ -506,7 +573,6 @@
         spanTotal.textContent = "0";
         btnVaciar.disabled = true;
         btnWhatsapp.disabled = true;
-        updateSticky(0, 0);
         return;
       }
 
@@ -519,11 +585,17 @@
         const it = carrito[i];
 
         const precio = Number(it.precio || 0);
-        const qty = Number(it.cantidad || 1);
+        const qty = Math.max(1, Number(it.cantidad || 1));
         const sub = precio * qty;
 
         const info = stockInfo(it);
         const plusDisabled = info ? (info.qty >= info.stock || info.restante <= 0) : false;
+        const stockHtml = info ? `
+              <div class="stock-line ${info.cls}">
+                ${info.txt}
+                <span class="stock-flash-text" data-stock-flash>Sin stock</span>
+              </div>
+            ` : ``;
 
         const div = document.createElement("div");
         div.className = "item";
@@ -531,13 +603,6 @@
         const imgHtml = it.imagen
           ? `<img src="${it.imagen}" alt="${(it.nombre || it.codigo || "Producto")}" referrerpolicy="no-referrer" loading="lazy" decoding="async" />`
           : "";
-
-        const stockHtml = info ? `
-          <div class="stock-line ${info.cls}">
-            ${info.txt}
-            <span class="stock-flash" data-flash>⚠</span>
-          </div>
-        ` : "";
 
         div.innerHTML = `
           <div class="item-img">${imgHtml}</div>
@@ -570,7 +635,6 @@
       const { total, cant } = totalizar(carrito);
       spanCantidad.textContent = String(cant);
       spanTotal.textContent = formatearPrecio(total);
-      updateSticky(total, carrito.length);
 
       // listeners qty
       contenedorItems.querySelectorAll(".btn-cant").forEach((b) => {
@@ -581,24 +645,7 @@
           const c = leerCarrito();
           if (!c[i]) return;
 
-          const current = Math.max(1, Number(c[i].cantidad || 1));
-          const next = Math.max(1, current + d);
-
-          // ✅ límite por stock si existe
-          if (d > 0 && hasFiniteStock(c[i])) {
-            const stock = Number(c[i].stock);
-            if (current >= stock) {
-              // flash visual (si existe línea de stock)
-              const itemEl = b.closest(".item");
-              const flashEl = itemEl?.querySelector("[data-flash]");
-              flashStock(flashEl);
-              return;
-            }
-            c[i].cantidad = Math.min(next, stock);
-          } else {
-            c[i].cantidad = next;
-          }
-
+          c[i].cantidad = Math.max(1, (Number(c[i].cantidad || 1) + d));
           guardarCarrito(c);
           renderCarrito();
         });
@@ -615,15 +662,6 @@
         });
       });
     }
-
-    // Sticky enviar -> dispara el mismo envío
-    stickyEnviar?.addEventListener("click", () => btnWhatsapp.click());
-
-    // Si cambia el viewport (rotación etc) recalcula sticky
-    window.addEventListener("resize", () => {
-      const { total } = totalizar(leerCarrito());
-      updateSticky(total, leerCarrito().length);
-    });
 
     btnSeguir.addEventListener("click", () => {
       location.href = "catalogo.html";
@@ -649,19 +687,12 @@
       }
       msg += `%0A🔹 Total: $${formatearPrecio(total)}`;
 
-      // ✅ Observaciones
-      const nota = (notaPedido?.value || "").trim();
-      if (nota) {
-        msg += `%0A%0A📝 Observaciones:%0A${encodeURIComponent(nota)}`;
-      }
-
       // guarda en Firestore (ventas)
       try {
         const coleccionVentas = collection(db, "ventas");
         await addDoc(coleccionVentas, {
           items: carrito,
           total,
-          nota: nota || "",
           creadoEn: serverTimestamp(),
           estado: "pendiente",
           origen: "carrito_web"
